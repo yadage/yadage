@@ -8,7 +8,7 @@ import workflow_loader
 import visualize
 log = logging.getLogger(__name__)
 
-def run_workflow(workdir,analysis,context,loadtoplevel,loginterval,schemadir):
+def run_workflow(workdir,analysis,initdata, loadtoplevel,loginterval,schemadir):
     """
     Main entry point to run a Yadage workflo
     """
@@ -19,26 +19,27 @@ def run_workflow(workdir,analysis,context,loadtoplevel,loginterval,schemadir):
     
     backend = adage.backends.MultiProcBackend(2)
     
-    context.update(workdir = workdir)
-    for k,v in context.iteritems():
+    initdata.update(workdir = workdir)
+    for k,v in initdata.iteritems():
         candpath = '{}/inputs/{}'.format(workdir,v)
         if os.path.exists(candpath):
-            context[k] = '/workdir/inputs/{}'.format(v)
+            initdata[k] = '/workdir/inputs/{}'.format(v)
             
     workflow_json = workflow_loader.workflow(analysis, toplevel = loadtoplevel, schemadir = schemadir)
 
-    workflow = yadagemodels.workflow.fromJSON(workflow_json,context)
-    visualize.write_stage_graph(workdir,workflow)
-
+    context = {
+        workdir: '/workdir'
+    }
     
-    adageobj = adage.adageobject()
-    adageobj.rules = workflow.stages.values()
-    adage.rundag(adageobj,
+    workflow = yadagemodels.YadageWorkflow.fromJSON(workflow_json['stages'], initdata, context)
+    # visualize.write_stage_graph(workdir,workflow)
+
+    adage.rundag(workflow,
                  track = True,
                  backend = backend,
                  trackevery = loginterval,
                  workdir = workdir
                 )
     
-    visualize.write_prov_graph(workdir,adageobj.dag,workflow)
+    # visualize.write_prov_graph(workdir,adageobj.dag,workflow)
     log.info('finished yadage workflow %s',analysis)

@@ -1,0 +1,32 @@
+- name: prepare
+  dependencies: ['init']
+  scheduler:
+    scheduler_type: dummy
+
+- name: grid
+  dependencies: ['prepare']
+  scheduler:
+    scheduler_type: dummy
+
+- name: subflowA
+  dependencies: ['grid']
+  scheduler:
+    scheduler_type: subworkflow
+    file: mcprodflow/subchain.yml
+
+- name: subflowB
+  dependencies: ['grid']
+  scheduler:
+    scheduler_type: subworkflow
+    file: mcprodflow/subchain.yml
+
+- name: subflowC
+  dependencies: ['grid']
+  scheduler:
+    scheduler_type: subworkflow
+    file: mcprodflow/subchain.yml
+
+- name: merge
+  dependencies: ['*.analysis']
+  scheduler:
+    scheduler_type: dummy

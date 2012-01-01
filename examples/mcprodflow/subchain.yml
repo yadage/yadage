@@ -1,0 +1,19 @@
+- name: madevent
+  dependencies: ['init']
+  scheduler:
+    scheduler_type: dummy
+
+- name: pythia
+  dependencies: ['madevent']
+  scheduler:
+    scheduler_type: dummy
+
+- name: delphes
+  dependencies: ['pythia']
+  scheduler:
+    scheduler_type: dummy
+
+- name: analysis
+  dependencies: ['delphes']
+  scheduler:
+    scheduler_type: dummy

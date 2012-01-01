@@ -1,0 +1,36 @@
+digraph G {
+subgraph cluster_prepare {
+label=prepare;
+labeljust=l;
+"d2f35091-b604-41ab-9f16-1db46e3a75d7" [color=red, label="prepare\n______\npar1: 0.5\npar2: 0.3\nparam_card: /workdir/param_card.dat\n", shape=box];
+"output_d2f35091-b604-41ab-9f16-1db46e3a75d7_param_card" [color=blue, label="param_card:  /workdir/param_card.dat"];
+"d2f35091-b604-41ab-9f16-1db46e3a75d7" -> "output_d2f35091-b604-41ab-9f16-1db46e3a75d7_param_card";
+}
+
+subgraph cluster_grid {
+label=grid;
+labeljust=l;
+"d641fa26-e337-498c-a969-7a589bf3a65d" [color=red, label="grid\n______\ngridpack: /workdir/grid.tar.gz\nparam_card: None\n", shape=box];
+"output_d641fa26-e337-498c-a969-7a589bf3a65d_gridpack" [color=blue, label="gridpack:  /workdir/grid.tar.gz"];
+"d641fa26-e337-498c-a969-7a589bf3a65d" -> "output_d641fa26-e337-498c-a969-7a589bf3a65d_gridpack";
+}
+
+"output_d2f35091-b604-41ab-9f16-1db46e3a75d7_param_card" -> "d641fa26-e337-498c-a969-7a589bf3a65d";
+subgraph cluster_madgraph {
+label=madgraph;
+labeljust=l;
+"ecf9af41-b42c-46b8-a3dd-221898c27d09" [color=red, label="madgraph 0\n______\ngridpack: None\nlhefile: /workdir/output_0.lhe\nnevents: 1000\nseed: 1\n", shape=box];
+"output_ecf9af41-b42c-46b8-a3dd-221898c27d09_lhefile" [color=blue, label="lhefile:  /workdir/output_0.lhe"];
+"ecf9af41-b42c-46b8-a3dd-221898c27d09" -> "output_ecf9af41-b42c-46b8-a3dd-221898c27d09_lhefile";
+"f1f54b90-1cb0-4722-8a79-8e15f86dade5" [color=red, label="madgraph 1\n______\ngridpack: None\nlhefile: /workdir/output_1.lhe\nnevents: 1000\nseed: 2\n", shape=box];
+"output_f1f54b90-1cb0-4722-8a79-8e15f86dade5_lhefile" [color=blue, label="lhefile:  /workdir/output_1.lhe"];
+"f1f54b90-1cb0-4722-8a79-8e15f86dade5" -> "output_f1f54b90-1cb0-4722-8a79-8e15f86dade5_lhefile";
+"029ec405-29f4-47ab-a9ce-8608cd8de2e2" [color=red, label="madgraph 2\n______\ngridpack: None\nlhefile: /workdir/output_2.lhe\nnevents: 1000\nseed: 3\n", shape=box];
+"output_029ec405-29f4-47ab-a9ce-8608cd8de2e2_lhefile" [color=blue, label="lhefile:  /workdir/output_2.lhe"];
+"029ec405-29f4-47ab-a9ce-8608cd8de2e2" -> "output_029ec405-29f4-47ab-a9ce-8608cd8de2e2_lhefile";
+}
+
+"output_d641fa26-e337-498c-a969-7a589bf3a65d_gridpack" -> "ecf9af41-b42c-46b8-a3dd-221898c27d09";
+"output_d641fa26-e337-498c-a969-7a589bf3a65d_gridpack" -> "f1f54b90-1cb0-4722-8a79-8e15f86dade5";
+"output_d641fa26-e337-498c-a969-7a589bf3a65d_gridpack" -> "029ec405-29f4-47ab-a9ce-8608cd8de2e2";
+}

@@ -1,0 +1,17 @@
+========== ADAGE LOG BEGIN at 2016-04-26T15:53:13.482795 ==========
+---------- snapshot at 2016-04-26T15:53:13.483034
+---------- snapshot at 2016-04-26T15:53:13.541411
+name: init root obj: <Node name: init root id: 42767ab4-5cc3-4baa-be11-98d6011d81f7 state: RUNNING> submitted: True
+---------- snapshot at 2016-04-26T15:54:41.989625
+name: init root obj: <Node name: init root id: 42767ab4-5cc3-4baa-be11-98d6011d81f7 state: SUCCESS> submitted: True
+name: B1 obj: <Node name: B1 id: db9a7492-dea6-4d8d-b4d0-922503aed766 state: SUCCESS> submitted: True
+name: A2 obj: <Node name: A2 id: c847f8af-1b66-478c-a09f-fe3f804a33f5 state: SUCCESS> submitted: True
+name: B2 obj: <Node name: B2 id: 2ce717aa-dc20-4815-a887-9f9f62161e39 state: SUCCESS> submitted: True
+name: A1 obj: <Node name: A1 id: 5beb0259-eaa6-4bc3-b633-aa7ba5288532 state: SUCCESS> submitted: True
+---------- snapshot at 2016-04-26T15:54:44.075882
+name: init root obj: <Node name: init root id: 42767ab4-5cc3-4baa-be11-98d6011d81f7 state: SUCCESS> submitted: True
+name: B1 obj: <Node name: B1 id: db9a7492-dea6-4d8d-b4d0-922503aed766 state: SUCCESS> submitted: True
+name: A2 obj: <Node name: A2 id: c847f8af-1b66-478c-a09f-fe3f804a33f5 state: SUCCESS> submitted: True
+name: B2 obj: <Node name: B2 id: 2ce717aa-dc20-4815-a887-9f9f62161e39 state: SUCCESS> submitted: True
+name: A1 obj: <Node name: A1 id: 5beb0259-eaa6-4bc3-b633-aa7ba5288532 state: SUCCESS> submitted: True
+========== ADAGE LOG END at 2016-04-26T15:54:44.076304 ==========

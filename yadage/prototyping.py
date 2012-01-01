@@ -9,10 +9,17 @@ class stage(stage_base):
         return self._scheduler(self)
     
     @classmethod
-    def fromfunc(cls,workflow,after = None, name = None):
+    def fromfunc(cls,rules,after = None, name = None):
         def decorator(func):
             instance = cls(name or func.func_name, workflow, after or [],func)
-            workflow.addStage(instance)
+            rules += [instance]
             return instance
         return decorator
             
+class adageview(object):
+    def __init__(self,adageobj):
+        self.adageobj = adageobj
+    
+    def stage(name):
+        match = [x for x in self.adageobj if x.name == name]
+        assert len(match==1)

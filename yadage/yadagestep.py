@@ -1,17 +1,12 @@
 from packtivity import packtivity
 
-class yadagestep(object):
-    def __init__(self,name,spec,context):
+class stepbase(object):
+    def __init__(self,name):
         self.name = name
-        self.spec = spec
-        self.context = context
-        self.attributes = {}
         self.used_inputs = {}
         self._result = {}
+        self.attributes = {}
         
-    def __repr__(self):
-        return '<yadagestep name: {}>'.format(self.name)
-
     def used_input(self,stepid,output,index):
         if stepid not in self.used_inputs:
             self.used_inputs[stepid] = []
@@ -30,7 +25,27 @@ class yadagestep(object):
     @property
     def result(self):
         return self._result
+
+class initstep(stepbase):
+    def __init__(self,name, initdata = None):
+        super(initstep,self).__init__(name)
+        if initdata:
+            self.attributes = initdata
     
+    def __call__(self):
+        self._result = self.attributes
+        return self._result
+
+    def s(self,**attributes):
+        self.attributes = attributes
+        return self
+        
+class yadagestep(stepbase):
+    def __init__(self,name,spec,context):
+        super(yadagestep,self).__init__(name)
+        self.spec = spec
+        self.context = context
+        
     def __call__(self,**attributes):
         self.attributes.update(**attributes)
         self._result = packtivity(self.name,self.spec,self.attributes,self.context)

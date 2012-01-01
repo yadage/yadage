@@ -1,0 +1,76 @@
+prepare:
+  process:
+    process_type: 'string-interpolated-cmd'
+    cmd: './paramfromyaml.py --madgraph HC_UFO -i "{{kHzz: {par1}, kAzz: {par1}, kHww: {par2}, kAww: {par2}}}" {param_card}'
+  publisher:
+    publisher_type: 'frompar-pub'
+    outputmap:
+      param_card: param_card
+  environment:
+    environment_type: 'noop-env'
+
+grid:
+  process:
+    process_type: 'string-interpolated-cmd'
+    cmd: './scripts/setupgrid.sh {param_card} {gridpack}'
+  publisher:
+    publisher_type: 'frompar-pub'
+    outputmap:
+      gridpack: gridpack
+  environment:
+    environment_type: 'noop-env'
+
+madgraph:
+  process:
+    process_type: 'string-interpolated-cmd'
+    cmd: './scripts/rungrid.sh {gridpack} {nevents} {seed} {lhefile}'
+  publisher:
+    publisher_type: 'frompar-pub'
+    outputmap:
+      lhefile: lhefile
+  environment:
+    environment_type: 'noop-env'
+
+pythia:
+  process:
+    process_type: 'string-interpolated-cmd'
+    cmd: '/analysis/pythia_main/example_main {settings_file} {hepmcfile} {lhefile}'
+  publisher:
+    publisher_type: 'frompar-pub'
+    outputmap:
+      hepmcfile: hepmcfile
+  environment:
+    environment_type: 'noop-env'
+
+delphes:
+  process:
+    process_type: 'string-interpolated-cmd'
+    cmd: 'DelphesHepMC {detector_card} {outputfile} {inputfile}'
+  publisher:
+    publisher_type: 'frompar-pub'
+    outputmap:
+      delphesoutput: outputfile
+  environment:
+    environment_type: 'noop-env'
+
+analysis:
+  process:
+    process_type: 'string-interpolated-cmd'
+    cmd: './scripts/runpost.sh {fromdelphes} {analysis_output}'
+  publisher:
+    publisher_type: 'frompar-pub'
+    outputmap:
+      analysis_output: analysis_output
+  environment:
+    environment_type: 'noop-env'
+
+rootmerge:
+  process:
+    process_type: 'string-interpolated-cmd'
+    cmd: 'hadd {mergedfile} {inputfiles}'
+  publisher:
+    publisher_type: 'frompar-pub'
+    outputmap:
+      mergedfile: mergedfile
+  environment:
+    environment_type: 'noop-env'

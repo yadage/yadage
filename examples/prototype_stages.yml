@@ -1,0 +1,30 @@
+- name: fromrootA
+  dependencies: []
+  scheduler:
+    type: dummy
+  
+- name: fromrootB
+  dependencies: ['fromrootA']
+  scheduler:
+    type: dummy
+
+- name: fromrootC
+  dependencies: ['fromrootA','fromrootB']
+  scheduler:
+    type: dummy
+    
+- name: subWorkflow
+  dependencies: []
+  scheduler:
+    type: subworkflow
+    file: prototype_substages.yml
+    
+- name: fromSubA
+  dependencies: ['subWorkflow.substageA', 'fromrootC']
+  scheduler:
+    type: dummy
+    
+- name: fromSubB
+  dependencies: ['subWorkflow.substageB', 'fromSubA']
+  scheduler:
+    type: dummy

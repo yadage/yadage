@@ -1,0 +1,12 @@
+- name: stagename
+  dependencies: ['[setupA,setupB]']
+  scheduler:
+    scheduler_type: simple-stage
+    parameters:
+      paramone: constant
+      paramtwo: 
+        stages: setupA
+        output: outputA
+      paramthree: 
+        stages: 'setupB'
+        output: outputB
