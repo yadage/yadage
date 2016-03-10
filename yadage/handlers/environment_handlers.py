@@ -4,8 +4,31 @@ import sys
 import time
 import psutil
 import utils
+import socket
 
 handlers,environment = utils.handler_decorator()
+
+def prepare_docker(nametag,workdir,global_work,do_cvmfs,do_grid):
+    docker_mod = ''
+    if not 'YADAYE_WITHIN_DOCKER' in os.environ:
+        docker_mod += '-v {}:/workdir'.format(os.path.abspath(global_work))
+    else:
+        docker_mod += '--volumes-from {}'.format(socket.gethostname())
+        
+    if do_cvmfs:
+        if not 'YADAGE_CVMFS_LOCATION' in os.environ:
+            docker_mod+=' -v /cvmfs:/cvmfs'
+        else:
+            docker_mod+=' -v {}:/cvmfs'.format(os.environ['YADAGE_CVMFS_LOCATION'])
+    if do_grid:
+        if not 'YADAGE_AUTH_LOCATION' in os.environ:
+            docker_mod+=' -v /home/recast/recast_auth:/recast_auth'
+        else:
+            docker_mod+=' -v {}:/recast_auth'.format(os.environ['YADAGE_AUTH_LOCATION'])
+
+    docker_mod += ' --cidfile {}/{}.cid'.format(workdir,nametag)
+
+    return docker_mod
 
 @environment('docker-encapsulated')
 class docker_enc_handler(object):
@@ -45,25 +68,12 @@ resources: {resources}
 
         in_docker_cmd = '{envmodifier} {command}'.format(envmodifier = envmod, command = command)
 
-        docker_mod = '-v {}:/workdir'.format(os.path.abspath(self.global_work))
-        if do_cvmfs:
-            if not 'RECAST_CVMFS_LOCATION' in os.environ:
-                docker_mod+=' -v /cvmfs:/cvmfs'
-            else:
-                docker_mod+=' -v {}:/cvmfs'.format(os.environ['RECAST_CVMFS_LOCATION'])
-        if do_grid:
-            if not 'RECAST_AUTH_LOCATION' in os.environ:
-                docker_mod+=' -v /home/recast/recast_auth:/recast_auth'
-            else:
-                docker_mod+=' -v {}:/recast_auth'.format(os.environ['RECAST_AUTH_LOCATION'])
+        docker_mod = prepare_docker(self.nametag,self.workdir,self.global_work,do_cvmfs,do_grid)
 
-        in_docker_host = 'echo $(hostname) > /workdir/{nodename}.hostname && {cmd}'.format(nodename = self.nametag, cmd = in_docker_cmd)
-
-        fullest_command = 'docker run --rm {docker_mod} {container} sh -c \'{in_dock}\''.format(docker_mod = docker_mod, container = container, in_dock = in_docker_host)
+        fullest_command = 'docker run --rm {docker_mod} {container} sh -c \'{in_dock}\''.format(docker_mod = docker_mod, container = container, in_dock = in_docker_cmd)
         if do_cvmfs:
             fullest_command = 'cvmfs_config probe && {}'.format(fullest_command)
           # fullest_command = 'eval $(docker-machine env default) && echo cvmfs_config probe && {}'.format(fullest_command)
-
 
 
         docker_pull_cmd = 'docker pull {container}'.format(container = container)

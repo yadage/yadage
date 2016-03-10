@@ -33,19 +33,32 @@ DefaultValidatingDraft4Validator = extend_with_default(Draft4Validator)
 def loader(base_uri):
     def yamlloader(uri):
         try:
-            return yaml.load(requests.get(uri).content)
+            log.info('trying to get uri {}'.format(uri))
+            data = requests.get(uri).content
+            log.info('got data\n{}'.format(data))
+            return yaml.load(data)
         except:
             try:
-                return yaml.load(urllib2.urlopen(uri).read())
+                data = urllib2.urlopen(uri).read()
+                return yaml.load(data)
             except:
                 log.exception('loading error: cannot find URI {}'.format(uri))
                 raise RuntimeError
     def load(uri):
-        return jsonref.load_uri('{}/{}'.format(base_uri,uri), base_uri = base_uri, loader = yamlloader)
+        full_uri = '{}/{}'.format(base_uri,uri)
+        log.info('trying to load uri: {}'.format(full_uri))
+        return jsonref.load_uri(full_uri, base_uri = base_uri, loader = yamlloader)
     return load
 
 def workflow_loader(workflowyml,toplevel):
-    workflow_base_uri = 'file://' + os.path.abspath(toplevel) + '/'
+    workflow_base_uri = None
+    print 'WAAAA {}'.format(toplevel)
+    if toplevel == 'from-github':
+        workflow_base_uri = 'https://raw.githubusercontent.com/lukasheinrich/yadage-workflows/master/'
+    else:
+        workflow_base_uri = 'file://' + os.path.abspath(toplevel) + '/'
+
+    log.info('loading from base uri: {}'.format(workflow_base_uri))
     refloader = loader(workflow_base_uri)
     workflow = refloader(workflowyml)
     return workflow

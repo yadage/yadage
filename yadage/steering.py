@@ -14,7 +14,6 @@ log = logging.getLogger(__name__)
 @click.argument('analysis')
 @click.argument('global_context')
 def main(workdir,globalwork,analysis,global_context,toplevel):
-    toplevel = os.path.abspath(toplevel)
     steering_api.run_workflow(workdir,globalwork if globalwork else workdir,analysis,global_context,toplevel)
 
 if __name__ == '__main__':

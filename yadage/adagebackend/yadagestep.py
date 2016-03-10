@@ -7,11 +7,11 @@ def publish(step,context):
     publisher = pub_handlers[pubtype]
     return publisher(step,context)
 
-def build_command(step):
-    proc_type =  step['step_spec']['process']['process-type']
+def build_command(process,attributes):
+    proc_type =  process['process-type']
     from yadage.handlers.process_handlers import handlers as proc_handlers
     handler = proc_handlers[proc_type]
-    command = handler(step['step_spec']['process'],step['attributes'])
+    command = handler(process,attributes)
     return command
 
 def run_in_env(environment,cmd,context,log,nametag):
@@ -30,7 +30,7 @@ def runstep(step,global_context):
     
     log.info('starting log for step: %s'.format(step['name']))
     
-    command = build_command(step)
+    command = build_command(step['step_spec']['process'],step['attributes'])
 
     environment = step['step_spec']['environment']
     run_in_env(environment,command,global_context,log,step['name'])
