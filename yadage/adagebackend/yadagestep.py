@@ -33,7 +33,7 @@ def runstep(step,global_context):
     command = build_command(step)
 
     environment = step['step_spec']['environment']
-    runresult   = run_in_env(environment,command,global_context,log,step['name'])
+    run_in_env(environment,command,global_context,log,step['name'])
     output      = publish(step,global_context)
     return output
 
