@@ -40,7 +40,7 @@ def write_prov_graph(workdir,adagegraph):
           provgraph.add_edge(pre,x)
 
 
-      for k,v in adagegraph.getNode(x).result_of()['yadage_metadata']['outputs'].iteritems():
+      for k,v in adagegraph.getNode(x).result_of().iteritems():
         for i,y in enumerate(v):
           name = 'output_{}_{}_{}'.format(adagegraph.getNode(x).task.step['name'],k,i)
           provgraph.add_node(name,{'label':'{}_{}: {}'.format(k,i,y),'color':'blue'})

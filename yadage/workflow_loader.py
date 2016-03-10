@@ -50,8 +50,7 @@ def workflow_loader(workflowyml,toplevel):
     workflow = refloader(workflowyml)
     return workflow
 
-def validator(schemadir):
-    schema_name = 'workflow-schema'
+def validator(schema_name,schemadir):
     relpath     = '{}/{}.json'.format(schemadir,schema_name)
     abspath = os.path.abspath(relpath)
     absbase = os.path.dirname(abspath)
@@ -63,7 +62,7 @@ def validator(schemadir):
 def validate_workflow(workflowyml, toplevel, schemadir):
     workflow = workflow_loader(workflowyml,toplevel)
     try:
-        validator(schemadir).validate(workflow)
+        validator('workflow-schema',schemadir).validate(workflow)
     except jsonschema.RefResolutionError as e:
         raise RuntimeError('could not resolve reference {}'.format(e))
     return True, workflow

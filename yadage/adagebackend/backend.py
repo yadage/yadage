@@ -1,22 +1,19 @@
 import adage.backends
 import logging
+import yadagestep
 log = logging.getLogger(__name__)
 
 class yadage_task(object):
-    def __init__(self,func):
-        self.func = func
-        self.step = None
-        self.context = None
+    def __init__(self,step,context):
+        self.func = yadagestep.runstep
+        self.step = step
+        self.context = context
 
     def __repr__(self):
         return '<yadage task name: {}>'.format(self.step['name'])
 
     def __call__(self):
         return self.func(self.step,self.context)
-  
-    def set(self,step,context):
-        self.step = step
-        self.context = context
 
 class yadage_rule(object):
     def __init__(self,stageinfo,workflow,allrules,global_context):
@@ -64,21 +61,10 @@ class yadage_result(object):
             log.exception("taskresult retrieval failed")
             raise
         
-        result = {
-            'yadage_metadata':{
-                'outputs':self.publish(self.task.step,self.task.context)
-            },
-            'taskresult':taskresult
-        }
-        self.result = result
+        #cache the result
+        self.result = taskresult
         return self.result
 
-    def publish(self,step,context):
-        pubtype =  step['step_spec']['publisher']['publisher-type']
-        from yadage.handlers.publisher_handlers import handlers as pub_handlers
-        publisher = pub_handlers[pubtype]
-        return publisher(step,context)
-  
 class yadage_backend(adage.backends.MultiProcBackend):
     def submit(self,task):
         return yadage_result(super(yadage_backend,self).submit(task),task)

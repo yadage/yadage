@@ -9,18 +9,18 @@ handlers,environment = utils.handler_decorator()
 
 @environment('docker-encapsulated')
 class docker_enc_handler(object):
-    def __init__(self,nametag,context,cmd,environment_spec,log):
+    def __init__(self,nametag,log):
         self.nametag  = nametag
-        self.command  = cmd
-        self.spec = environment_spec
         self.log  = log
-        self.context = context
-    def handle(self):
-        environment = self.spec
+
+    def __call__(self,environment,context,command):
         log = self.log
-        workdir = self.context['workdir']
-        container = self.spec['image']
-  
+        log.info('context: \n {}'.format(context))
+        self.workdir = context['workdir']
+        self.global_work = context.get('global_workdir',self.workdir)
+
+
+        container = environment['image']
   
         report = '''\n\
 --------------
@@ -30,7 +30,7 @@ command: {command}
 resources: {resources}
 --------------
       '''.format( container = container,
-                  command = self.command,
+                  command = command,
                   env = environment['envscript'] if environment['envscript'] else 'default env',
                   resources = environment['resources']
                 )
@@ -43,9 +43,9 @@ resources: {resources}
 
         envmod = 'source {} &&'.format(environment['envscript']) if environment['envscript'] else ''
 
-        in_docker_cmd = '{envmodifier} {command}'.format(envmodifier = envmod, command = self.command)
+        in_docker_cmd = '{envmodifier} {command}'.format(envmodifier = envmod, command = command)
 
-        docker_mod = '-v {}:/workdir'.format(os.path.abspath(self.context['global_workdir']))
+        docker_mod = '-v {}:/workdir'.format(os.path.abspath(self.global_work))
         if do_cvmfs:
             if not 'RECAST_CVMFS_LOCATION' in os.environ:
                 docker_mod+=' -v /cvmfs:/cvmfs'
@@ -65,7 +65,6 @@ resources: {resources}
           # fullest_command = 'eval $(docker-machine env default) && echo cvmfs_config probe && {}'.format(fullest_command)
 
 
-        log.info('context: \n {}'.format(self.context))
 
         docker_pull_cmd = 'docker pull {container}'.format(container = container)
 
@@ -73,7 +72,7 @@ resources: {resources}
         log.info('docker run  command: \n  {}'.format(fullest_command))
 
         try:
-          with open('{}/{}.pull.log'.format(workdir,self.nametag),'w') as logfile:
+          with open('{}/{}.pull.log'.format(self.workdir,self.nametag),'w') as logfile:
             proc = subprocess.Popen(docker_pull_cmd,shell = True, stderr = subprocess.STDOUT, stdout = logfile)
             log.info('started pull subprocess with pid {}. now wait to finish'.format(proc.pid))
             time.sleep(0.5)
@@ -97,7 +96,7 @@ resources: {resources}
           log.info('finally for pull')
 
         try:
-            with open('{}/{}.run.log'.format(workdir,self.nametag),'w') as logfile:
+            with open('{}/{}.run.log'.format(self.workdir,self.nametag),'w') as logfile:
                 proc = subprocess.Popen(fullest_command,shell = True, stderr = subprocess.STDOUT, stdout = logfile)
                 log.info('started run subprocess with pid {}. now wait to finish'.format(proc.pid))
                 time.sleep(0.5)
