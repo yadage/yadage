@@ -30,7 +30,13 @@ def extend_with_default(validator_class):
 
 DefaultValidatingDraft4Validator = extend_with_default(Draft4Validator)
 
-def loader(base_uri):
+def loader(toplevel):
+    base_uri = None
+    if toplevel == 'from-github':
+        base_uri = 'https://raw.githubusercontent.com/lukasheinrich/yadage-workflows/master/'
+    else:
+        base_uri = 'file://' + os.path.abspath(toplevel) + '/'
+    
     def yamlloader(uri):
         try:
             log.info('trying to get uri {}'.format(uri))
@@ -51,15 +57,9 @@ def loader(base_uri):
     return load
 
 def workflow_loader(workflowyml,toplevel):
-    workflow_base_uri = None
-    print 'WAAAA {}'.format(toplevel)
-    if toplevel == 'from-github':
-        workflow_base_uri = 'https://raw.githubusercontent.com/lukasheinrich/yadage-workflows/master/'
-    else:
-        workflow_base_uri = 'file://' + os.path.abspath(toplevel) + '/'
 
     log.info('loading from base uri: {}'.format(workflow_base_uri))
-    refloader = loader(workflow_base_uri)
+    refloader = loader(toplevel)
     workflow = refloader(workflowyml)
     return workflow
 
