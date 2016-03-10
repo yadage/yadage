@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "dependencies": {
+      "type": "array",
+      "default":[]
+    },
+    "parameters": {
+      "type": "object",
+      "properties": {}
+    },
+    "scheduler": {
+      "type": "object",
+      "oneOf":[
+        {"$ref":"nodemap-scheduler-schema.json#"}
+      ]
+    }
+  },
+  "required": [
+    "name",
+    "scheduler"
+  ]
+}

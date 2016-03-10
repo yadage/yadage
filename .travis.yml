@@ -1,0 +1,17 @@
+sudo: required
+
+services:
+  - docker
+
+language: python
+python:
+  - '2.7'
+
+install:
+  - "pip install git+git://github.com/lukasheinrich/adage.git@master"
+  - "pip install ."
+  - sudo apt-get install -y graphviz
+  - sudo apt-get install -y imagemagick
+
+script:
+  - pyflakes .

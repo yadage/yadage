@@ -1,0 +1,32 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+        "process": {
+            "type": "object",
+            "oneOf":[
+              {"$ref": "stringinterp-schema.json#"}
+            ]
+        },
+        "publisher": {
+            "type": "object",
+            "oneOf":[
+              {"$ref": "fromattr-pub-schema.json#"},
+              {"$ref": "fromyaml-pub-schema.json#"},
+              {"$ref": "dummy-pub-schema.json#"}
+            ]
+        },
+        "environment": {
+            "type": "object",
+            "oneOf":[
+              {"$ref": "docker-enc-schema.json#"}
+            ]
+        }
+    },
+    "required":[
+      "process",
+      "publisher",
+      "environment"
+    ]
+}
