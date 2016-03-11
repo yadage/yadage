@@ -70,7 +70,7 @@ def prepare_adage(workflow,global_context):
     return g,rules
 
 def run_workflow(workdir,analysis,context,loadtoplevel):
-    log.info('running yadage workflow {}'.format(analysis))
+    log.info('running yadage workflow %s',analysis)
     
     backend = adagebackend.backend.yadage_backend(2)
     
@@ -94,4 +94,4 @@ def run_workflow(workdir,analysis,context,loadtoplevel):
                 )
 
     write_prov_graph(workdir,g)
-    log.info('finished yadage workflow {}'.format(analysis))
+    log.info('finished yadage workflow %s',analysis)
