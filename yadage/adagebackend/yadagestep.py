@@ -40,7 +40,7 @@ def runstep(step,global_context):
 class yadagestep(object):
     def __init__(self,name,spec,context):
         self.step_info = {}
-        self.name = name
+        self.step_info['name'] = name
         self.step_info['step_spec'] = spec
         self.step_info['attributes'] = {}
         self.step_info['used_inputs'] = {}
