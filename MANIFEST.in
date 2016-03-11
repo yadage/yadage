@@ -1,2 +1,2 @@
-recursive-include yadage/capdata *
+recursive-include yadage/schema/spec *
 
