@@ -15,9 +15,9 @@ def extend_with_default(validator_class):
     validate_properties = validator_class.VALIDATORS["properties"]
 
     def set_defaults(validator, properties, instance, schema):
-        for property, subschema in properties.iteritems():
+        for prop, subschema in properties.iteritems():
             if "default" in subschema:
-                instance.setdefault(property, subschema["default"])
+                instance.setdefault(prop, subschema["default"])
 
         for error in validate_properties(
             validator, properties, instance, schema,
@@ -39,7 +39,7 @@ def loader(toplevel):
     
     def yamlloader(uri):
         try:
-            log.debug('trying to get uri {}'.format(uri))
+            log.debug('trying to get uri %s',uri)
             data = requests.get(uri).content
             return yaml.load(data)
         except:
@@ -47,16 +47,16 @@ def loader(toplevel):
                 data = urllib2.urlopen(uri).read()
                 return yaml.load(data)
             except:
-                log.exception('loading error: cannot find URI {}'.format(uri))
+                log.exception('loading error: cannot find URI %s',uri)
                 raise RuntimeError
     def load(uri):
         full_uri = '{}/{}'.format(base_uri,uri)
-        log.debug('trying to load uri: {}'.format(full_uri))
+        log.debug('trying to load uri: %s',full_uri)
         return jsonref.load_uri(full_uri, base_uri = base_uri, loader = yamlloader)
     return load
 
 def workflow_loader(workflowyml,toplevel):
-    log.debug('loading from toplevel: {}'.format(toplevel))
+    log.debug('loading from toplevel: %s',toplevel)
     refloader = loader(toplevel)
     workflow = refloader(workflowyml)
     return workflow
