@@ -1,19 +1,6 @@
 import adage.backends
 import logging
-import yadagestep
 log = logging.getLogger(__name__)
-
-class yadage_task(object):
-    def __init__(self,step,context):
-        self.func = yadagestep.runstep
-        self.step = step
-        self.context = context
-
-    def __repr__(self):
-        return '<yadage task name: {}>'.format(self.step['name'])
-
-    def __call__(self):
-        return self.func(self.step,self.context)
 
 class yadage_rule(object):
     def __init__(self,stageinfo,workflow,allrules,global_context):

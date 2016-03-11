@@ -14,7 +14,7 @@ setup(
     'adage',
     'click',
     'psutil',
-    'requests',
+    'requests[security]',
     'pyyaml',
     'jsonref',
     'jsonschema'

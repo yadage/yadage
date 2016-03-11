@@ -27,9 +27,9 @@ def runstep(step,global_context):
     fh  = logging.FileHandler(steplog)
     fh.setLevel(logging.DEBUG)
     log.addHandler(fh)
-    
-    log.info('starting log for step: %s'.format(step['name']))
-    
+
+    log.debug('starting log for step: %s',step['name'])
+
     command = build_command(step['step_spec']['process'],step['attributes'])
 
     environment = step['step_spec']['environment']
@@ -37,12 +37,40 @@ def runstep(step,global_context):
     output      = publish(step,global_context)
     return output
 
-class step(object):
+class yadagestep(object):
     def __init__(self,name,spec,context):
         self.step_info = {}
         self.step_info['name'] = name
         self.step_info['step_spec'] = spec
+        self.step_info['attributes'] = {}
+        self.step_info['used_inputs'] = {}
         self.context = context
-    def __call__(self,**attributes):
+
+    def __repr__(self):
+        return '<yadagestep name: {}>'.format(self.step_info['name'])
+
+    @property
+    def step(self):
+        return self.step_info
+
+    @property
+    def name(self):
+        return self.step_info['name']
+    
+    @property
+    def inputs(self):
+        return self.step_info['used_inputs']
+    
+    def attr(self,key,value):
+        self.step_info['attributes'][key] = value
+    def s(self,**attributes):
         self.step_info['attributes'] = attributes
+        return self
+    def used_input(self,step,output,index):
+        if not step in self.step_info['used_inputs']:
+            self.step_info['used_inputs'][step] = []
+        self.step_info['used_inputs'][step].append((output,index))
+        
+    def __call__(self,**attributes):
+        self.step_info['attributes'].update(**attributes)
         return runstep(self.step_info,global_context = self.context)

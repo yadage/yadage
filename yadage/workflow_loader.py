@@ -39,9 +39,8 @@ def loader(toplevel):
     
     def yamlloader(uri):
         try:
-            log.info('trying to get uri {}'.format(uri))
+            log.debug('trying to get uri {}'.format(uri))
             data = requests.get(uri).content
-            log.info('got data\n{}'.format(data))
             return yaml.load(data)
         except:
             try:
@@ -52,12 +51,12 @@ def loader(toplevel):
                 raise RuntimeError
     def load(uri):
         full_uri = '{}/{}'.format(base_uri,uri)
-        log.info('trying to load uri: {}'.format(full_uri))
+        log.debug('trying to load uri: {}'.format(full_uri))
         return jsonref.load_uri(full_uri, base_uri = base_uri, loader = yamlloader)
     return load
 
 def workflow_loader(workflowyml,toplevel):
-    log.info('loading from toplevel: {}'.format(toplevel))
+    log.debug('loading from toplevel: {}'.format(toplevel))
     refloader = loader(toplevel)
     workflow = refloader(workflowyml)
     return workflow

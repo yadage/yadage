@@ -3,7 +3,7 @@ import yaml
 import re
 import logging
 import utils
-from yadage.adagebackend.backend import yadage_task
+from yadage.adagebackend.yadagestep import yadagestep
 log = logging.getLogger(__name__)
 
 handlers,scheduler = utils.handler_decorator()
@@ -19,22 +19,23 @@ handlers,scheduler = utils.handler_decorator()
 def single_step_from_context(workflow,stage,dag,context,sched_spec):
     log.info('scheduling via single_step_from_context')
     stepname = '{}_single'.format(stage['name'])
-    step = {
-        'name':stepname,
-        'attributes': {k:v.format(**context) for k,v in stage['parameters'].iteritems()},
-        'step_spec':sched_spec['steps']['single']
-    }
-    
-    step = adage.mknode(dag,task = yadage_task(step,context), nodename = stepname)
-    stage['scheduled_steps'] = [step]
+
+    step = yadagestep(stepname,sched_spec['steps']['single'],context)
+
+    attributes = {k:v.format(**context) for k,v in stage['parameters'].iteritems()}
+    node = adage.mknode(dag,task = step.s(**attributes), nodename = stepname)
+    stage['scheduled_steps'] = [node]
 
 @scheduler('zip-from-dep-output')
 def zip_from_dep_output(workflow,stage,dag,context,sched_spec):
     log.info('scheduling via zip_from_dep_output')
 
-    used_inputs = {}
     used_nodes = []
     zipped_maps = []
+
+
+    stepname = '{}_zipped'.format(stage['name'])
+    step     = yadagestep(stepname,sched_spec['steps']['single'],context)
 
     ### we loop each zip pattern
     for zipconfig in sched_spec['zip']:
@@ -42,10 +43,8 @@ def zip_from_dep_output(workflow,stage,dag,context,sched_spec):
 
         ### for each dependent stage we loop through its steps
         dependencies = [s for s in workflow['stages'] if s['name'] in zipconfig['from_stages']]
-        for x in [step for d in dependencies for step in d['scheduled_steps']]:
+        for x in [s for d in dependencies for s in d['scheduled_steps']]:
             result = x.result_of()
-            if not x.task.step['name'] in used_inputs:
-                used_inputs[x.task.step['name']] = []
 
             outputkey_regex = re.compile(zipconfig['outputs'])
             matching_outputkeys = [k for k in result.keys() if outputkey_regex.match(k)]
@@ -55,14 +54,14 @@ def zip_from_dep_output(workflow,stage,dag,context,sched_spec):
                 try:
                     for i,y in enumerate(result[outputkey]):
                         new_inputs += [y]
-                        used_inputs[x.task.step['name']] += [(outputkey,i)]
+                        step.used_input(x.task.name,outputkey,i)
                         used_nodes += [x]
                 except KeyError:
-                    log.exception('could not fine output {} in metadata {}'.format(outputkey,result))
+                    log.exception('could not fine output %s in metadata %s',outputkey,result)
 
         zipwith = zipconfig['zip_with']
         newmap = dict(zip(zipwith,new_inputs))
-        log.info('zipped map {}'.format(newmap))
+        log.debug('zipped map %s',newmap)
         zipped_maps += [newmap]
             
 
@@ -70,18 +69,10 @@ def zip_from_dep_output(workflow,stage,dag,context,sched_spec):
     for zipped in zipped_maps:
         attributes.update(**zipped)
     
-    stepname = '{}_zipped'.format(stage['name'])
-    step = {
-        'name':stepname,
-        'attributes':attributes,
-        'step_spec':sched_spec['steps']['single'],
-        'used_inputs':used_inputs
-    }
-
-    step = adage.mknode(dag,yadage_task(step,context), nodename = stepname)
-    stage['scheduled_steps'] = [step]
+    node = adage.mknode(dag,step.s(**attributes), nodename = stepname)
+    stage['scheduled_steps'] = [node]
     for x in used_nodes:
-        dag.addEdge(x,step)
+        dag.addEdge(x,node)
     
 @scheduler('reduce-from-dep-output')
 def reduce_from_dep_output(workflow,stage,dag,context,sched_spec):
@@ -89,42 +80,37 @@ def reduce_from_dep_output(workflow,stage,dag,context,sched_spec):
     dependencies = [s for s in workflow['stages'] if s['name'] in sched_spec['from_stages']]
 
     new_inputs = []
-    used_inputs = {}
 
-    for x in [step for d in dependencies for step in d['scheduled_steps']]:
-        used_inputs[x.task.step['name']] = []
+    stepname = '{}_reduce'.format(stage['name'])
+    step = yadagestep(stepname,sched_spec['steps']['reduce'],context)
 
+    for x in [stp for d in dependencies for stp in d['scheduled_steps']]:
+        
         outputkey_regex = re.compile(sched_spec['take_outputs'])
 
         result = x.result_of()
-        log.info('reduce_from_dep_output: matching {} to regex: {}'.format(result.keys(),sched_spec['take_outputs']))
+        log.debug('reduce_from_dep_output: matching %s to regex: %s',result.keys(),sched_spec['take_outputs'])
         matching_outputkeys = [k for k in result.keys() if outputkey_regex.match(k)]
-        log.info('reduce_from_dep_output: matching output keys {}'.format(matching_outputkeys))
+        log.debug('reduce_from_dep_output: matching output keys %s',matching_outputkeys)
         for outputkey in matching_outputkeys:
             try:
                 result = x.result_of()
                 for i,y in enumerate(result[outputkey]):
                     new_inputs += [y]
-                    used_inputs[x.task.step['name']] += [(outputkey,i)]
+                    step.used_input(x.task.name,outputkey,i)
             except KeyError:
-                log.exception('could not fine output {} in metadata {}'.format(outputkey,result))
+                log.exception('could not fine output %s in metadata %s',outputkey,result)
 
     to_input = sched_spec['to_input']
     attributes = {k:str(v).format(**context) for k,v in stage['parameters'].iteritems()}
     attributes[to_input] = new_inputs
     
-    stepname = '{}_reduce'.format(stage['name'])
-    step = {
-        'name':stepname,
-        'attributes':attributes,
-        'step_spec':sched_spec['steps']['reduce'],
-        'used_inputs':used_inputs
-    }
-
-    step = adage.mknode(dag,yadage_task(step,context), nodename = stepname)
-    stage['scheduled_steps'] = [step]
+    
+    node = adage.mknode(dag,step.s(**attributes), nodename = stepname)
+    stage['scheduled_steps'] = [node]
+    
     for x in [s for d in dependencies for s in d['scheduled_steps']]:
-        dag.addEdge(x,step)
+        dag.addEdge(x,node)
 
 @scheduler('map-from-dep-output')
 def map_from_dep_output(workflow,stage,dag,context,sched_spec):
@@ -150,20 +136,14 @@ def map_from_dep_output(workflow,stage,dag,context,sched_spec):
         
         attributes = {k:str(v).format(**withindex) for k,v in stage['parameters'].iteritems()}
         attributes[to_input] = y
-        
-        used_inputs = {x.task.step['name'] :[(outputkey,this_index)]}
 
-        step = {
-          'name': stepname_template.format(index = index),
-          'attributes': attributes,
-          'step_spec':sched_spec['steps']['map'],
-          'used_inputs':used_inputs
-        }
-        stepobj = adage.mknode(dag,task = yadage_task(step,context), nodename = step['name'])
-        dag.addEdge(x,stepobj)
-        stage['scheduled_steps'] += [stepobj]
+        step = yadagestep(stepname_template.format(index = index),sched_spec['steps']['map'],context)
+        step.used_input(x.task.name,outputkey,this_index)
+
+        node = adage.mknode(dag,task = step.s(**attributes), nodename = step.name)
+        dag.addEdge(x,node)
+        stage['scheduled_steps'] += [node]
         index += 1
-
 
 @scheduler('map-from-context')
 def map_step_from_context(workflow,stage,dag,context,sched_spec):
@@ -186,10 +166,8 @@ def map_step_from_context(workflow,stage,dag,context,sched_spec):
         
         attributes = {k:str(v).format(**withindex) for k,v in parswithoutmap.iteritems()}
         attributes[to_input] = p
-        step = {
-          'name': stepname_template.format(index = index),
-          'attributes': attributes,
-          'step_spec':sched_spec['steps']['map'],
-        }
-        stepobj = adage.mknode(dag,task = yadage_task(step,context), nodename = step['name'])
-        stage['scheduled_steps'] += [stepobj]
+
+        step = yadagestep(stepname_template.format(index = index),sched_spec['steps']['map'],context)
+        node = adage.mknode(dag,task = step.s(**attributes), nodename = step.name)
+        stage['scheduled_steps'] += [node]
+    

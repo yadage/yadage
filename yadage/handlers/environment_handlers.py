@@ -8,10 +8,10 @@ import socket
 
 handlers,environment = utils.handler_decorator()
 
-def prepare_docker(nametag,workdir,global_work,do_cvmfs,do_grid):
+def prepare_docker(nametag,workdir,do_cvmfs,do_grid):
     docker_mod = ''
     if not 'YADAYE_WITHIN_DOCKER' in os.environ:
-        docker_mod += '-v {}:/workdir'.format(os.path.abspath(global_work))
+        docker_mod += '-v {}:/workdir'.format(os.path.abspath(workdir))
     else:
         docker_mod += '--volumes-from {}'.format(socket.gethostname())
         
@@ -38,9 +38,8 @@ class docker_enc_handler(object):
 
     def __call__(self,environment,context,command):
         log = self.log
-        log.info('context: \n {}'.format(context))
+        log.debug('context: \n {}'.format(context))
         self.workdir = context['workdir']
-        self.global_work = context.get('global_workdir',self.workdir)
 
 
         container = environment['image']
@@ -61,14 +60,14 @@ resources: {resources}
         do_cvmfs = 'CVMFS' in environment['resources']
         do_grid  = 'GRIDProxy'  in environment['resources']
   
-        log.info(report)
-        log.info('dogrid: {} do_cvmfs: {}'.format(do_grid,do_cvmfs))
+        log.debug(report)
+        log.debug('dogrid: {} do_cvmfs: {}'.format(do_grid,do_cvmfs))
 
         envmod = 'source {} &&'.format(environment['envscript']) if environment['envscript'] else ''
 
         in_docker_cmd = '{envmodifier} {command}'.format(envmodifier = envmod, command = command)
 
-        docker_mod = prepare_docker(self.nametag,self.workdir,self.global_work,do_cvmfs,do_grid)
+        docker_mod = prepare_docker(self.nametag,self.workdir,do_cvmfs,do_grid)
 
         fullest_command = 'docker run --rm {docker_mod} {container} sh -c \'{in_dock}\''.format(docker_mod = docker_mod, container = container, in_dock = in_docker_cmd)
         if do_cvmfs:
@@ -78,51 +77,51 @@ resources: {resources}
 
         docker_pull_cmd = 'docker pull {container}'.format(container = container)
 
-        log.info('docker pull command: \n  {}'.format(docker_pull_cmd))
-        log.info('docker run  command: \n  {}'.format(fullest_command))
+        log.debug('docker pull command: \n  {}'.format(docker_pull_cmd))
+        log.debug('docker run  command: \n  {}'.format(fullest_command))
 
         try:
           with open('{}/{}.pull.log'.format(self.workdir,self.nametag),'w') as logfile:
             proc = subprocess.Popen(docker_pull_cmd,shell = True, stderr = subprocess.STDOUT, stdout = logfile)
-            log.info('started pull subprocess with pid {}. now wait to finish'.format(proc.pid))
+            log.debug('started pull subprocess with pid {}. now wait to finish'.format(proc.pid))
             time.sleep(0.5)
-            log.info('process children: {}'.format([x for x in psutil.Process(proc.pid).children(recursive = True)]))
+            log.debug('process children: {}'.format([x for x in psutil.Process(proc.pid).children(recursive = True)]))
             proc.communicate()
-            log.info('pull subprocess finished. return code: {}'.format(proc.returncode))
+            log.debug('pull subprocess finished. return code: {}'.format(proc.returncode))
             if proc.returncode:
               log.error('non-zero return code raising exception')
               raise subprocess.CalledProcessError(returncode =  proc.returncode, cmd = docker_pull_cmd)
-            log.info('moving on from pull')
+            log.debug('moving on from pull')
         except RuntimeError as e:
-          log.info('caught RuntimeError')
+          log.exception('caught RuntimeError')
           raise e
         except subprocess.CalledProcessError as exc:
-          log.error('subprocess failed. code: {},  command {}'.format(exc.returncode,exc.cmd))
+          log.exception('subprocess failed. code: {},  command {}'.format(exc.returncode,exc.cmd))
           raise RuntimeError('failed docker subprocess in runStep.')
         except:
-          log.info("Unexpected error: {}".format(sys.exc_info()))
+          log.exception("Unexpected error: {}".format(sys.exc_info()))
           raise
         finally:
-          log.info('finally for pull')
+          log.debug('finally for pull')
 
         try:
             with open('{}/{}.run.log'.format(self.workdir,self.nametag),'w') as logfile:
                 proc = subprocess.Popen(fullest_command,shell = True, stderr = subprocess.STDOUT, stdout = logfile)
-                log.info('started run subprocess with pid {}. now wait to finish'.format(proc.pid))
+                log.debug('started run subprocess with pid {}. now wait to finish'.format(proc.pid))
                 time.sleep(0.5)
-                log.info('process children: {}'.format([x for x in psutil.Process(proc.pid).children(recursive = True)]))
+                log.debug('process children: {}'.format([x for x in psutil.Process(proc.pid).children(recursive = True)]))
                 proc.communicate()
-                log.info('pull subprocess finished. return code: {}'.format(proc.returncode))
+                log.debug('pull subprocess finished. return code: {}'.format(proc.returncode))
                 if proc.returncode:
                     log.error('non-zero return code raising exception')
                     raise subprocess.CalledProcessError(returncode =  proc.returncode, cmd = fullest_command)
-                log.info('moving on from run')
+                log.debug('moving on from run')
         except subprocess.CalledProcessError as exc:
-            log.error('subprocess failed. code: {},  command {}'.format(exc.returncode,exc.cmd))
+            log.exception('subprocess failed. code: {},  command {}'.format(exc.returncode,exc.cmd))
             raise RuntimeError('failed docker subprocess in runStep.')
         except:
-            log.error("Unexpected error: {}".format(sys.exc_info()))
+            log.exception("Unexpected error: {}".format(sys.exc_info()))
             raise
         finally:
-            log.info('finally for run')
-        log.info('reached return for runStep')
+            log.debug('finally for run')
+        log.debug('reached return for runStep')
