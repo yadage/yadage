@@ -46,7 +46,7 @@ def write_prov_graph(workdir,adagegraph):
         #add outputs circles
         for k,v in adagegraph.getNode(x).result_of().iteritems():
             for i,y in enumerate(v):
-                name = 'output_{}_{}_{}'.format(adagegraph.getNode(x).task.step['name'],k,i)
+                name = 'output_{}_{}_{}'.format(adagegraph.getNode(x).task.name,k,i)
                 provgraph.add_node(name,{'label':'{}_{}: {}'.format(k,i,y),'color':'blue'})
                 provgraph.add_edge(x,name)
         
