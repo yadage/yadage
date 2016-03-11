@@ -7,7 +7,6 @@ import logging
 import subprocess
 import os
 import workflow_loader
-import yaml
 import shlex
 
 log = logging.getLogger(__name__)
