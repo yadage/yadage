@@ -57,8 +57,7 @@ def loader(toplevel):
     return load
 
 def workflow_loader(workflowyml,toplevel):
-
-    log.info('loading from base uri: {}'.format(workflow_base_uri))
+    log.info('loading from toplevel: {}'.format(toplevel))
     refloader = loader(toplevel)
     workflow = refloader(workflowyml)
     return workflow
