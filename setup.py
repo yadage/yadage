@@ -12,6 +12,7 @@ setup(
   install_requires = [
     'functools32',
     'adage',
+    'packtivity',
     'click',
     'psutil',
     'requests[security]',
