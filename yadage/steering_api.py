@@ -2,6 +2,7 @@
 import networkx as nx
 from networkx.drawing.nx_pydot import write_dot
 import adage
+import adage.backends
 from yadagerule import yadage_rule
 import logging
 import subprocess
@@ -69,7 +70,6 @@ def prepare_adage(workflow,global_context):
     g = adage.mk_dag()
     return g,rules
 
-import adage.backends
 def run_workflow(workdir,analysis,context,loadtoplevel):
     log.info('running yadage workflow %s',analysis)
     
