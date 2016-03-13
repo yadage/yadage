@@ -3,7 +3,7 @@ import yaml
 import re
 import logging
 import utils
-from yadage.adagebackend.yadagestep import yadagestep
+from yadage.yadagestep import yadagestep
 
 log = logging.getLogger(__name__)
 

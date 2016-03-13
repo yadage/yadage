@@ -29,36 +29,3 @@ class yadage_rule(object):
         scheduler = sched_handlers[sched_spec['scheduler-type']]
         scheduler(self.workflow,self.stageinfo,dag,self.global_context,sched_spec)
     
-class yadage_result(object):
-    def __init__(self,resultobj,task):
-        self.resultobj = resultobj
-        self.task = task
-        self.result = None
-    
-    def ready(self):
-        return self.resultobj.ready()
-    def successful(self):
-        return self.resultobj.successful()
-    def get(self):
-        if self.result:
-            return self.result
-        try:
-            taskresult = self.resultobj.get()
-        except:
-            log.exception("taskresult retrieval failed")
-            raise
-        
-        #cache the result
-        self.result = taskresult
-        return self.result
-
-class yadage_backend(adage.backends.MultiProcBackend):
-    def submit(self,task):
-        return yadage_result(super(yadage_backend,self).submit(task),task)
-
-    def ready(self,result):
-        ready =  super(yadage_backend,self).ready(result)
-        return ready
-    
-    def result_of(self,result):
-        return result.get()

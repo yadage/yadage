@@ -2,7 +2,7 @@
 import networkx as nx
 from networkx.drawing.nx_pydot import write_dot
 import adage
-import adagebackend.backend
+from yadagerule import yadage_rule
 import logging
 import subprocess
 import os
@@ -63,16 +63,17 @@ def prepare_adage(workflow,global_context):
     rules = {}
     for stagename in nx.topological_sort(stages_graph):
         stageinfo = stages_graph.node[stagename]
-        rule = adagebackend.backend.yadage_rule(stageinfo,workflow,rules,global_context)
+        rule = yadage_rule(stageinfo,workflow,rules,global_context)
         rules[stagename] = rule
     
     g = adage.mk_dag()
     return g,rules
 
+import adage.backends
 def run_workflow(workdir,analysis,context,loadtoplevel):
     log.info('running yadage workflow %s',analysis)
     
-    backend = adagebackend.backend.yadage_backend(2)
+    backend = adage.backends.MultiProcBackend(2)
     
     context.update(workdir = workdir)
     
