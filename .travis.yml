@@ -16,3 +16,6 @@ install:
 
 script:
   - pyflakes yadage
+  - pip install -e .
+  - docker build -t lukasheinrich/yadage .
+  - ls -lrt /var/run
