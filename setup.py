@@ -18,7 +18,9 @@ setup(
     'requests[security]',
     'pyyaml',
     'jsonref',
-    'jsonschema'
+    'jsonschema',
+    'packtivity',
+    'adage'
   ],
   entry_points = {
       'console_scripts': [
@@ -27,5 +29,7 @@ setup(
       ],
   },
   dependency_links = [
+      'https://github.com/lukasheinrich/adage/tarball/master#egg=adage-0.0.1',
+      'https://github.com/lukasheinrich/packtivity/tarball/master#egg=adage-0.0.1'
   ]
 )
