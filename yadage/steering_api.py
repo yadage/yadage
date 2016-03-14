@@ -70,7 +70,7 @@ def prepare_adage(workflow,global_context):
     g = adage.mk_dag()
     return g,rules
 
-def run_workflow(workdir,analysis,context,loadtoplevel):
+def run_workflow(workdir,analysis,context,loadtoplevel,loginterval):
     log.info('running yadage workflow %s',analysis)
     
     backend = adage.backends.MultiProcBackend(2)
@@ -90,7 +90,7 @@ def run_workflow(workdir,analysis,context,loadtoplevel):
     adage.rundag(g, rules.values(),
                  track = True,
                  backend = backend,
-                 trackevery = 5,
+                 trackevery = loginterval,
                  workdir = workdir
                 )
 
