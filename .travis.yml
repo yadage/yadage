@@ -10,13 +10,12 @@ python:
 install:
   - pip install pyflakes
   - "pip install git+git://github.com/lukasheinrich/adage.git@master"
-  - "pip install ."
+  - "pip install . --process-dependency-links"
   - sudo apt-get install -y graphviz
   - sudo apt-get install -y imagemagick
 
 script:
   - pyflakes yadage
-  - pip install -e .
   - docker build -t lukasheinrich/yadage .
   - "echo 'events: 100' > ctx.yml"
   - mkdir workdir
