@@ -86,7 +86,6 @@ def reduce_from_dep_output(workflow,stage,dag,context,sched_spec):
     step = yadagestep(stepname,sched_spec['steps']['reduce'],context)
 
     for x in [stp for d in dependencies for stp in d['scheduled_steps']]:
-        
         outputkey_regex = re.compile(sched_spec['take_outputs'])
 
         result = x.result_of()
@@ -127,24 +126,24 @@ def map_from_dep_output(workflow,stage,dag,context,sched_spec):
     outputkey_regex = re.compile(outputkey)
     
     for x in [step for d in dependencies for step in d['scheduled_steps']]:
-      result = x.result_of()
-      matching_outputs = [v for k,v in result.iteritems() if outputkey_regex.match(k)]
-      
-      for this_index,y in enumerate(out for thisout in matching_outputs for out in thisout):
-        withindex = context.copy()
-        withindex.update(index = index)
-
+        result = x.result_of()
+        matching_outputs = [v for k,v in result.iteritems() if outputkey_regex.match(k)]
         
-        attributes = {k:str(v).format(**withindex) for k,v in stage['parameters'].iteritems()}
-        attributes[to_input] = y
-
-        step = yadagestep(stepname_template.format(index = index),sched_spec['steps']['map'],context)
-        step.used_input(x.task.name,outputkey,this_index)
-
-        node = adage.mknode(dag,task = step.s(**attributes), nodename = step.name)
-        dag.addEdge(x,node)
-        stage['scheduled_steps'] += [node]
-        index += 1
+        for this_index,y in enumerate(out for thisout in matching_outputs for out in thisout):
+            withindex = context.copy()
+            withindex.update(index = index)
+            
+            
+            attributes = {k:str(v).format(**withindex) for k,v in stage['parameters'].iteritems()}
+            attributes[to_input] = y
+            
+            step = yadagestep(stepname_template.format(index = index),sched_spec['steps']['map'],context)
+            step.used_input(x.task.name,outputkey,this_index)
+            
+            node = adage.mknode(dag,task = step.s(**attributes), nodename = step.name)
+            dag.addEdge(x,node)
+            stage['scheduled_steps'] += [node]
+            index += 1
 
 @scheduler('map-from-context')
 def map_step_from_context(workflow,stage,dag,context,sched_spec):
