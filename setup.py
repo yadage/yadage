@@ -11,11 +11,11 @@ setup(
   include_package_data = True,
   install_requires = [
     'functools32',
-    'adage',
-    'packtivity',
+    'adage>0.2.0',
+    'packtivity>0.0.1',
     'click',
     'psutil',
-    'requests[security]',
+    'requests[security]>=2.9',
     'pyyaml',
     'jsonref',
     'jsonschema',
@@ -29,7 +29,7 @@ setup(
       ],
   },
   dependency_links = [
-      'https://github.com/lukasheinrich/adage/tarball/master#egg=adage-0.0.1',
-      'https://github.com/lukasheinrich/packtivity/tarball/master#egg=adage-0.0.1'
+      'https://github.com/lukasheinrich/adage/tarball/master#egg=adage-0.3.0',
+      'https://github.com/lukasheinrich/packtivity/tarball/master#egg=packtivity-0.0.2'
   ]
 )
