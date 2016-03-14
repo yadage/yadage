@@ -5,7 +5,6 @@ import steering_api
 import logging
 import yaml
 
-
 log = logging.getLogger(__name__)
 
 @click.command()
