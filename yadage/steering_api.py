@@ -57,9 +57,9 @@ def write_prov_graph(workdir,adagegraph):
 def prepare_adage(workflow,global_context):
     stages_graph = nx.DiGraph()
     for stage in workflow['stages']:
-      stages_graph.add_node(stage['name'],stage)
-      for x in stage['dependencies']:
-        stages_graph.add_edge(x,stage['name'])
+        stages_graph.add_node(stage['name'],stage)
+        for x in stage['dependencies']:
+            stages_graph.add_edge(x,stage['name'])
     
     rules = {}
     for stagename in nx.topological_sort(stages_graph):
