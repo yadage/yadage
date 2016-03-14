@@ -24,7 +24,7 @@ def single_step_from_context(workflow,stage,dag,context,sched_spec):
     step = yadagestep(stepname,sched_spec['steps']['single'],context)
 
     attributes = {k:v.format(**context) for k,v in stage['parameters'].iteritems()}
-    node = adage.mknode(dag,task = step.s(**attributes), nodename = stepname)
+    node = dag.addTask(task = step.s(**attributes), nodename = stepname)
     stage['scheduled_steps'] = [node]
 
 @scheduler('zip-from-dep-output')
@@ -70,7 +70,7 @@ def zip_from_dep_output(workflow,stage,dag,context,sched_spec):
     for zipped in zipped_maps:
         attributes.update(**zipped)
     
-    node = adage.mknode(dag,step.s(**attributes), nodename = stepname)
+    node = dag.addTask(step.s(**attributes), nodename = stepname)
     stage['scheduled_steps'] = [node]
     for x in used_nodes:
         dag.addEdge(x,node)
@@ -106,7 +106,7 @@ def reduce_from_dep_output(workflow,stage,dag,context,sched_spec):
     attributes[to_input] = new_inputs
     
     
-    node = adage.mknode(dag,step.s(**attributes), nodename = stepname)
+    node = dag.addTask(step.s(**attributes), nodename = stepname)
     stage['scheduled_steps'] = [node]
     
     for x in [s for d in dependencies for s in d['scheduled_steps']]:
@@ -140,7 +140,7 @@ def map_from_dep_output(workflow,stage,dag,context,sched_spec):
             step = yadagestep(stepname_template.format(index = index),sched_spec['steps']['map'],context)
             step.used_input(x.task.name,outputkey,this_index)
             
-            node = adage.mknode(dag,task = step.s(**attributes), nodename = step.name)
+            node = dag.addTask(task = step.s(**attributes), nodename = step.name)
             dag.addEdge(x,node)
             stage['scheduled_steps'] += [node]
             index += 1
@@ -168,6 +168,6 @@ def map_step_from_context(workflow,stage,dag,context,sched_spec):
         attributes[to_input] = p
 
         step = yadagestep(stepname_template.format(index = index),sched_spec['steps']['map'],context)
-        node = adage.mknode(dag,task = step.s(**attributes), nodename = step.name)
+        node = dag.addTask(task = step.s(**attributes), nodename = step.name)
         stage['scheduled_steps'] += [node]
     
