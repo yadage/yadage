@@ -20,5 +20,5 @@ def main(workdir,analysis,global_context,toplevel,verbosity,loginterval):
     steering_api.run_workflow(workdir,analysis,context,toplevel,loginterval)
 
 if __name__ == '__main__':
-  main()
+    main()
 

@@ -15,10 +15,10 @@ log = logging.getLogger(__name__)
 def write_stage_graph(workdir,workflow):
     stages_graph_simple = nx.DiGraph()
     for stage in workflow['stages']:
-      stages_graph_simple.add_node(stage['name'])
-      for x in stage['dependencies']:
-        stages_graph_simple.add_edge(x,stage['name'])
-
+        stages_graph_simple.add_node(stage['name'])
+        for x in stage['dependencies']:
+            stages_graph_simple.add_edge(x,stage['name'])
+            
     write_dot(stages_graph_simple,'{}/adage_stages.dot'.format(workdir))
     subprocess.call(['dot','-Tpdf','{}/adage_stages.dot'.format(workdir)], stdout = open('{}/adage_stages.pdf'.format(workdir),'w'))
     

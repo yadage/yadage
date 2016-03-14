@@ -12,7 +12,7 @@ class yadage_rule(object):
         depstats = []
         for x in self.stageinfo['dependencies']:
             deprule = self.allrules[x]
-            if not 'scheduled_steps' in deprule.stageinfo:
+            if 'scheduled_steps' not in deprule.stageinfo:
                 depstats += [False]
             else:
                 depstats += [all([x.successful() for x in deprule.stageinfo['scheduled_steps']])]

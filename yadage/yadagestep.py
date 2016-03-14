@@ -12,7 +12,7 @@ class yadagestep():
         return '<yadagestep name: {}>'.format(self.name)
 
     def used_input(self,step,output,index):
-        if not step in self.used_inputs:
+        if step not in self.used_inputs:
             self.used_inputs[step] = []
         self.used_inputs[step].append((output,index))
     
