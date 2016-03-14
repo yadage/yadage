@@ -1,6 +1,6 @@
 from packtivity import packtivity
 
-class yadagestep():
+class yadagestep(object):
     def __init__(self,name,spec,context):
         self.name = name
         self.spec = spec
