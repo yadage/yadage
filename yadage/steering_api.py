@@ -26,7 +26,24 @@ def write_prov_graph(workdir,adagegraph):
     provgraph = nx.DiGraph()
     for x in nx.topological_sort(adagegraph):
         attr = adagegraph.node[x].copy()
-        attr.update(color = 'red',label = adagegraph.getNode(x).name, shape = 'box')
+        # attr.update(color = 'red',label = adagegraph.getNode(x).name, shape = 'box')
+
+
+        pars = adagegraph.getNode(x).task.attributes.copy()
+
+        # print pars
+        parstrings =  [':'.join((k,str(pars[k]))) for k in sorted(pars.keys())]
+        
+        step_report = '''\
+{name}
+-----
+{pars}
+'''
+
+        rep = step_report.format(name = adagegraph.getNode(x).name,
+                                 pars = '\n'.join(parstrings))
+
+        attr.update(color = 'red',label = rep, shape = 'box')
         provgraph.add_node(x,attr)
         nodeinfo =  adagegraph.getNode(x).task
         
@@ -45,7 +62,7 @@ def write_prov_graph(workdir,adagegraph):
         
         #add outputs circles
         for k,v in adagegraph.getNode(x).result_of().iteritems():
-            for i,y in enumerate(v):
+            for i,y in enumerate(v if type(v)==list else [v]):
                 name = 'output_{}_{}_{}'.format(adagegraph.getNode(x).task.name,k,i)
                 provgraph.add_node(name,{'label':'{}_{}: {}'.format(k,i,y),'color':'blue'})
                 provgraph.add_edge(x,name)
@@ -82,7 +99,8 @@ def run_workflow(workdir,analysis,context,loadtoplevel,loginterval):
         if os.path.exists(candpath):
             context[k] = '/workdir/inputs/{}'.format(v)
             
-    workflow = workflow_loader.workflow(analysis, toplevel = loadtoplevel)
+    workflow = workflow_loader.workflow(analysis, toplevel = loadtoplevel, schemadir = 'from-github')
+
     write_stage_graph(workdir,workflow)
 
     g, rules = prepare_adage(workflow,context)

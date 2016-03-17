@@ -25,6 +25,6 @@ class yadage_rule(object):
     def schedule(self,dag):
         from yadage.handlers.scheduler_handlers import handlers as sched_handlers
         sched_spec = self.stageinfo['scheduler']
-        scheduler = sched_handlers[sched_spec['scheduler-type']]
+        scheduler = sched_handlers[sched_spec['scheduler_type']]
         scheduler(self.workflow,self.stageinfo,dag,self.global_context,sched_spec)
     

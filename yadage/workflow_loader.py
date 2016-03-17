@@ -1,4 +1,3 @@
-import pkg_resources
 import json
 import os
 import jsonschema
@@ -8,6 +7,7 @@ import yaml
 import urllib2
 from jsonschema import Draft4Validator, validators
 import logging
+import packtivity
 
 log = logging.getLogger(__name__)
 
@@ -51,37 +51,39 @@ def loader(toplevel):
                 raise RuntimeError
     def load(uri):
         full_uri = '{}/{}'.format(base_uri,uri)
+        # print full_uri
         log.debug('trying to load uri: %s',full_uri)
         return jsonref.load_uri(full_uri, base_uri = base_uri, loader = yamlloader)
     return load
 
-def workflow_loader(workflowyml,toplevel):
-    log.debug('loading from toplevel: %s',toplevel)
-    refloader = loader(toplevel)
-    workflow = refloader(workflowyml)
-    return workflow
-
 def validator(schema_name,schemadir):
-    relpath     = '{}/{}.json'.format(schemadir,schema_name)
-    abspath = os.path.abspath(relpath)
-    absbase = os.path.dirname(abspath)
-    schema_base_uri = 'file://' + absbase + '/'
-    schema   = json.load(open(relpath))
-    resolver = jsonschema.RefResolver(schema_base_uri, schema)
+    schemabase = None
+    if schemadir == 'from-github':
+        schemabase = 'https://raw.githubusercontent.com/lukasheinrich/cap-schemas/master/schemas'
+    else:
+        schemabase = 'file://'+os.path.abspath(schemadir)
+
+    abspath = '{}/{}.json'.format(schemabase,schema_name)
+    this_base_uri = abspath.rsplit('/',1)[0]+'/'
+
+    # print abspath
+    schema   = json.loads(urllib2.urlopen(abspath).read())
+    resolver = jsonschema.RefResolver(this_base_uri, schema)
     return DefaultValidatingDraft4Validator(schema, resolver = resolver)
 
-def validate_workflow(workflowyml, toplevel, schemadir):
-    workflow = workflow_loader(workflowyml,toplevel)
-    try:
-        validator('workflow-schema',schemadir).validate(workflow)
-    except jsonschema.RefResolutionError as e:
-        raise RuntimeError('could not resolve reference {}'.format(e))
-    return True, workflow
+def load_and_validate(source, toplevel, schema_name = 'step-schema', schemadir = None):
+    if not schemadir:
+        schemadir = packtivity.schemadir
+    load = loader(toplevel)
+    data = load(source)
+    validator(schema_name,schemadir).validate(data)
+    return data
     
-def workflow(name,toplevel):
-    schemas  = pkg_resources.resource_filename('yadage','schema/spec')
-    ok, workflow =  validate_workflow(name,toplevel,schemas)
-    if ok:
-        return workflow
-    else:
-        raise RuntimeError('Schema is not validating')
+    
+def workflow(source, toplevel, schema_name = 'yadage/workflow-schema', schemadir = None):
+    if not schemadir:
+        schemadir = packtivity.schemadir
+    load = loader(toplevel)
+    data = load(source)
+    validator(schema_name,schemadir).validate(data)
+    return data
