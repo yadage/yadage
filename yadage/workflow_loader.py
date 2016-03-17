@@ -71,7 +71,7 @@ def validator(schema_name,schemadir):
     resolver = jsonschema.RefResolver(this_base_uri, schema)
     return DefaultValidatingDraft4Validator(schema, resolver = resolver)
 
-def load_and_validate(source, toplevel, schema_name = 'step-schema', schemadir = None):
+def load_and_validate(source, toplevel, schema_name, schemadir = None):
     if not schemadir:
         schemadir = packtivity.schemadir
     load = loader(toplevel)
