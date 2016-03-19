@@ -1,8 +1,6 @@
-import yaml
 import re
 import logging
 import utils
-import json
 from yadage.yadagestep import yadagestep
 
 log = logging.getLogger(__name__)
@@ -151,7 +149,7 @@ def map_step_from_context(workflow,stage,dag,context,sched_spec):
     stepname_template   = stage['name']+'_{index}'
     
     allpars = utils.evaluate_parameters(stage['parameters'],context)
-    parswithoutmap = stagepars.copy()
+    parswithoutmap = allpars.copy()
     parswithoutmap.pop(mappar)
     
     stage['scheduled_steps'] = []

@@ -1,3 +1,5 @@
+import json
+
 def handler_decorator():
     handlers = {}
     def decorator(name):
