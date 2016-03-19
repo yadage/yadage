@@ -16,7 +16,6 @@ handlers,scheduler = utils.handler_decorator()
 ###     - the step attributes are determined using the scheduler spec and context
 ###     - a list of used inputs (in the form of [stepname,outputkey,index])
 
-
 @scheduler('single-from-ctx')
 def single_step_from_context(workflow,stage,dag,context,sched_spec):
     log.info('scheduling via single_step_from_context')
