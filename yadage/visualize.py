@@ -73,7 +73,7 @@ def write_prov_graph(workdir,adagegraph,workflow):
     stagedict = {stage['name']:stage for stage in workflow['stages']}
     for stage in nx.topological_sort(simple_stage_graph(workflow)):
 
-        for x,step in [(step.identifier,step) for step in stagedict[stage]['scheduled_steps']]:
+        for step in stagedict[stage]['scheduled_steps']:
 
             stagecluster = pydotplus.graphviz.Cluster(graph_name = stage, label = stage)
             provgraph.add_subgraph(stagecluster)
