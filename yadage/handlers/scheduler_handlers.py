@@ -20,9 +20,7 @@ def single_step_from_context(workflow,stage,dag,context,sched_spec):
     stepname = '{}'.format(stage['name'])
 
     step = yadagestep(stepname,sched_spec['step'],context)
-
     attributes = utils.evaluate_parameters(stage['parameters'],context)
-    print attributes
 
     node = dag.addTask(task = step.s(**attributes), nodename = stepname)
     stage['scheduled_steps'] = [node]
@@ -53,7 +51,8 @@ def zip_from_dep_output(workflow,stage,dag,context,sched_spec):
             ## for each step we loop through matching outputs
             for outputkey in matching_outputkeys:
                 try:
-                    for i,y in enumerate(result[outputkey]):
+                    restype = type(result[outputkey])
+                    for i,y in enumerate(result[outputkey] if restype==list else [result[outputkey]]):
                         new_inputs += [y]
                         step.used_input(x.task.name,outputkey,i)
                         used_nodes += [x]
@@ -92,7 +91,8 @@ def reduce_from_dep_output(workflow,stage,dag,context,sched_spec):
         log.debug('reduce_from_dep_output: matching output keys %s',matching_outputkeys)
         for outputkey in matching_outputkeys:
             try:
-                for i,y in enumerate(result[outputkey]):
+                restype = type(result[outputkey])
+                for i,y in enumerate(result[outputkey] if restype==list else [result[outputkey]]):
                     new_inputs += [y]
                     step.used_input(x.task.name,outputkey,i)
             except KeyError:

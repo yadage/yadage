@@ -25,7 +25,7 @@ def prepare_adage(workflow,global_context):
     g = adage.mk_dag()
     return g,rules
 
-def run_workflow(workdir,analysis,context,loadtoplevel,loginterval):
+def run_workflow(workdir,analysis,context,loadtoplevel,loginterval,schemadir):
     log.info('running yadage workflow %s',analysis)
     if not os.path.exists(workdir):
         raise RuntimeError('workdir %s does not exist',workdir)
@@ -38,7 +38,7 @@ def run_workflow(workdir,analysis,context,loadtoplevel,loginterval):
         if os.path.exists(candpath):
             context[k] = '/workdir/inputs/{}'.format(v)
             
-    workflow = workflow_loader.workflow(analysis, toplevel = loadtoplevel, schemadir = 'from-github')
+    workflow = workflow_loader.workflow(analysis, toplevel = loadtoplevel, schemadir = schemadir)
     visualize.write_stage_graph(workdir,workflow)
 
     g, rules = prepare_adage(workflow,context)
