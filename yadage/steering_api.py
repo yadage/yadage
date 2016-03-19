@@ -26,6 +26,10 @@ def prepare_adage(workflow,global_context):
     return g,rules
 
 def run_workflow(workdir,analysis,context,loadtoplevel,loginterval,schemadir):
+    """
+    Main entry point to run a Yadage workflo
+    """
+
     log.info('running yadage workflow %s',analysis)
     if not os.path.exists(workdir):
         raise RuntimeError('workdir %s does not exist',workdir)

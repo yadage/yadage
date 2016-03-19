@@ -1,6 +1,10 @@
 import json
 
 def handler_decorator():
+    """
+    create a pair of handler storage dictionary
+    and decorator to declare a function a handler
+    """
     handlers = {}
     def decorator(name):
         def wrap(func):

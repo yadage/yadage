@@ -16,7 +16,7 @@ def simple_stage_graph(workflow):
 
 def write_stage_graph(workdir,workflow):
     graph = simple_stage_graph(workflow)
-    write_dot(graph,'{}/adage_stages.dot'.format(workdir))
+    write_dot(graph,'{}/yadage_stages.dot'.format(workdir))
     subprocess.call(shlex.split('dot -Tpdf {}/yadage_stages.dot'.format(workdir)),
                     stdout = open('{}/yadage_stages.pdf'.format(workdir),'w'))
 
