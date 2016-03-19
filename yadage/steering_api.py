@@ -6,14 +6,9 @@ from yadagerule import yadage_rule
 import logging
 import os
 import workflow_loader
-
-
+import visualize
 log = logging.getLogger(__name__)
 
-import visualize
-
-
-    
 def prepare_adage(workflow,global_context):
     stages_graph = nx.DiGraph()
     for stage in workflow['stages']:
@@ -38,18 +33,15 @@ def run_workflow(workdir,analysis,context,loadtoplevel,loginterval):
     backend = adage.backends.MultiProcBackend(2)
     
     context.update(workdir = workdir)
-    
     for k,v in context.iteritems():
         candpath = '{}/inputs/{}'.format(workdir,v)
         if os.path.exists(candpath):
             context[k] = '/workdir/inputs/{}'.format(v)
             
     workflow = workflow_loader.workflow(analysis, toplevel = loadtoplevel, schemadir = 'from-github')
-
     visualize.write_stage_graph(workdir,workflow)
 
     g, rules = prepare_adage(workflow,context)
-    
     adage.rundag(g, rules.values(),
                  track = True,
                  backend = backend,
