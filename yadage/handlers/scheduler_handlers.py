@@ -16,20 +16,6 @@ handlers,scheduler = utils.handler_decorator()
 ###     - the step attributes are determined using the scheduler spec and context
 ###     - a list of used inputs (in the form of [stepname,outputkey,index])
 
-def evaluate_parameters(parameters,context):
-    """
-    values of in context are converted to strings via json.dump,
-    parameters then interpolated, and finally reloaded as json
-    """
-    dumped_context = {k:json.dumps(v) for k,v in context.iteritems()}
-    evaluated = {}
-    for k,v in parameters.iteritems():
-        eval_val = v.format(**dumped_context)
-        try:
-            evaluated[k] = json.loads(eval_val)
-        except ValueError:
-            evaluated[k] = eval_val
-    return evaluated
 
 @scheduler('single-from-ctx')
 def single_step_from_context(workflow,stage,dag,context,sched_spec):
@@ -38,7 +24,7 @@ def single_step_from_context(workflow,stage,dag,context,sched_spec):
 
     step = yadagestep(stepname,sched_spec['step'],context)
 
-    attributes = evaluate_parameters(stage['parameters'],context)
+    attributes = utils.evaluate_parameters(stage['parameters'],context)
     print attributes
 
     node = dag.addTask(task = step.s(**attributes), nodename = stepname)
@@ -82,7 +68,7 @@ def zip_from_dep_output(workflow,stage,dag,context,sched_spec):
         log.debug('zipped map %s',newmap)
         zipped_maps += [newmap]
             
-    attributes = evaluate_parameters(stage['parameters'],context)
+    attributes = utils.evaluate_parameters(stage['parameters'],context)
     for zipped in zipped_maps:
         attributes.update(**zipped)
     
@@ -116,7 +102,7 @@ def reduce_from_dep_output(workflow,stage,dag,context,sched_spec):
                 log.exception('could not fine output %s in metadata %s',outputkey,result)
     
     to_input = sched_spec['to_input']
-    attributes = evaluate_parameters(stage['parameters'],context)
+    attributes = utils.evaluate_parameters(stage['parameters'],context)
     attributes[to_input] = new_inputs
     
     node = dag.addTask(step.s(**attributes), nodename = stepname)
@@ -146,7 +132,7 @@ def map_from_dep_output(workflow,stage,dag,context,sched_spec):
         for this_index,y in enumerate(out for thisout in matching_outputs for out in thisout):
             withindex = context.copy()
             withindex.update(index = index)
-            attributes = evaluate_parameters(stage['parameters'],withindex)
+            attributes = utils.evaluate_parameters(stage['parameters'],withindex)
             attributes[to_input] = y
             
             step = yadagestep(stepname_template.format(index = index),sched_spec['step'],context)
@@ -165,7 +151,7 @@ def map_step_from_context(workflow,stage,dag,context,sched_spec):
     to_input = sched_spec['to_input']
     stepname_template   = stage['name']+'_{index}'
     
-    allpars = evaluate_parameters(stage['parameters'],context)
+    allpars = utils.evaluate_parameters(stage['parameters'],context)
     parswithoutmap = stagepars.copy()
     parswithoutmap.pop(mappar)
     
