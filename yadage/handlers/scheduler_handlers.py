@@ -18,7 +18,7 @@ handlers,scheduler = utils.handler_decorator()
 @scheduler('single-from-ctx')
 def single_step_from_context(workflow,stage,dag,context,sched_spec):
     log.info('scheduling via single_step_from_context')
-    stepname = '{}_single'.format(stage['name'])
+    stepname = '{}'.format(stage['name'])
 
     step = yadagestep(stepname,sched_spec['step'],context)
 
@@ -34,7 +34,7 @@ def zip_from_dep_output(workflow,stage,dag,context,sched_spec):
     zipped_maps = []
 
 
-    stepname = '{}_zipped'.format(stage['name'])
+    stepname = '{}'.format(stage['name'])
     step     = yadagestep(stepname,sched_spec['step'],context)
 
     ### we loop each zip pattern
@@ -81,7 +81,7 @@ def reduce_from_dep_output(workflow,stage,dag,context,sched_spec):
 
     new_inputs = []
 
-    stepname = '{}_reduce'.format(stage['name'])
+    stepname = '{}'.format(stage['name'])
     step = yadagestep(stepname,sched_spec['step'],context)
 
     for x in [stp for d in dependencies for stp in d['scheduled_steps']]:
@@ -114,11 +114,12 @@ def reduce_from_dep_output(workflow,stage,dag,context,sched_spec):
 @scheduler('map-from-dep')
 def map_from_dep_output(workflow,stage,dag,context,sched_spec):
     log.info('scheduling via map_from_dep_output')
+
     dependencies = [s for s in workflow['stages'] if s['name'] in sched_spec['from_stages']]
     
     outputkey           = sched_spec['outputs']
     to_input            = sched_spec['to_input']
-    stepname_template   = stage['name']+'_map_{index}'
+    stepname_template   = stage['name']+'_{index}'
     stage['scheduled_steps'] = []
     index = 0
 
@@ -148,10 +149,9 @@ def map_from_dep_output(workflow,stage,dag,context,sched_spec):
 def map_step_from_context(workflow,stage,dag,context,sched_spec):
     log.info('map_step_from_context')
 
-    print context
     mappar = sched_spec['map_parameter']
     to_input = sched_spec['to_input']
-    stepname_template   = stage['name']+'_map_{index}'
+    stepname_template   = stage['name']+'_{index}'
     stagepars = stage['parameters']
 
     #for the one parameter pointed to by mappar, we interpret the string as a serialized yaml list

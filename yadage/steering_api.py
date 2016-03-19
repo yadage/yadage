@@ -1,75 +1,18 @@
 #!/usr/bin/env python
 import networkx as nx
-from networkx.drawing.nx_pydot import write_dot
 import adage
 import adage.backends
 from yadagerule import yadage_rule
 import logging
-import subprocess
 import os
 import workflow_loader
-import shlex
+
 
 log = logging.getLogger(__name__)
 
-def write_stage_graph(workdir,workflow):
-    stages_graph_simple = nx.DiGraph()
-    for stage in workflow['stages']:
-        stages_graph_simple.add_node(stage['name'])
-        for x in stage['dependencies']:
-            stages_graph_simple.add_edge(x,stage['name'])
-            
-    write_dot(stages_graph_simple,'{}/adage_stages.dot'.format(workdir))
-    subprocess.call(['dot','-Tpdf','{}/adage_stages.dot'.format(workdir)], stdout = open('{}/adage_stages.pdf'.format(workdir),'w'))
-    
-def write_prov_graph(workdir,adagegraph):
-    provgraph = nx.DiGraph()
-    for x in nx.topological_sort(adagegraph):
-        attr = adagegraph.node[x].copy()
-        # attr.update(color = 'red',label = adagegraph.getNode(x).name, shape = 'box')
+import visualize
 
 
-        pars = adagegraph.getNode(x).task.attributes.copy()
-
-        # print pars
-        parstrings =  [':'.join((k,str(pars[k]))) for k in sorted(pars.keys())]
-        
-        step_report = '''\
-{name}
------
-{pars}
-'''
-
-        rep = step_report.format(name = adagegraph.getNode(x).name,
-                                 pars = '\n'.join(parstrings))
-
-        attr.update(color = 'red',label = rep, shape = 'box')
-        provgraph.add_node(x,attr)
-        nodeinfo =  adagegraph.getNode(x).task
-        
-        #connect node to outputs
-        #if input information is there, add edge to input
-        if nodeinfo.inputs:
-            for k,inputs_from_node in nodeinfo.inputs.iteritems():
-                for one in inputs_from_node:
-                    depname = 'output_{}_{}_{}'.format(k,one[0],one[1])
-                    provgraph.add_edge(depname,x)
-
-        #if not, we'll just add to the dependent node directly
-        else:
-            for pre in adagegraph.predecessors(x):
-                provgraph.add_edge(pre,x)
-        
-        #add outputs circles
-        for k,v in adagegraph.getNode(x).result_of().iteritems():
-            for i,y in enumerate(v if type(v)==list else [v]):
-                name = 'output_{}_{}_{}'.format(adagegraph.getNode(x).task.name,k,i)
-                provgraph.add_node(name,{'label':'{}_{}: {}'.format(k,i,y),'color':'blue'})
-                provgraph.add_edge(x,name)
-        
-    write_dot(provgraph,'{}/adage_workflow_instance.dot'.format(workdir))
-    subprocess.call(shlex.split('dot -Tpdf {}/adage_workflow_instance.dot'.format(workdir)),
-                    stdout = open('{}/adage_workflow_instance.pdf'.format(workdir),'w'))
     
 def prepare_adage(workflow,global_context):
     stages_graph = nx.DiGraph()
@@ -89,6 +32,8 @@ def prepare_adage(workflow,global_context):
 
 def run_workflow(workdir,analysis,context,loadtoplevel,loginterval):
     log.info('running yadage workflow %s',analysis)
+    if not os.path.exists(workdir):
+        raise RuntimeError('workdir %s does not exist',workdir)
     
     backend = adage.backends.MultiProcBackend(2)
     
@@ -101,7 +46,7 @@ def run_workflow(workdir,analysis,context,loadtoplevel,loginterval):
             
     workflow = workflow_loader.workflow(analysis, toplevel = loadtoplevel, schemadir = 'from-github')
 
-    write_stage_graph(workdir,workflow)
+    visualize.write_stage_graph(workdir,workflow)
 
     g, rules = prepare_adage(workflow,context)
     
@@ -112,5 +57,5 @@ def run_workflow(workdir,analysis,context,loadtoplevel,loginterval):
                  workdir = workdir
                 )
 
-    write_prov_graph(workdir,g)
+    visualize.write_prov_graph(workdir,g,workflow)
     log.info('finished yadage workflow %s',analysis)

@@ -13,10 +13,10 @@ log = logging.getLogger(__name__)
 @click.option('-v','--verbosity', default = 'INFO')
 @click.option('-i','--loginterval', default = 30)
 @click.argument('analysis')
-@click.argument('global_context')
+@click.argument('global_context', default = {})
 def main(workdir,analysis,global_context,toplevel,verbosity,loginterval):
     logging.basicConfig(level = getattr(logging,verbosity))
-    context = yaml.load(open(global_context))
+    context = yaml.load(open(global_context)) if global_context else {}
     steering_api.run_workflow(workdir,analysis,context,toplevel,loginterval)
 
 if __name__ == '__main__':
