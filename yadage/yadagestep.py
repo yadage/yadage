@@ -21,7 +21,14 @@ class yadagestep(object):
         return self.used_inputs
     
     def __call__(self,**attributes):
-        return packtivity(self.name,self.spec,self.attributes,self.context)
+        print 'call with attributes'
+        print attributes
+        print self.attributes
+        result = packtivity(self.name,self.spec,self.attributes,self.context)
+        print 'got result'
+        print result
+        return result
+    
     
     def s(self,**attributes):
         self.attributes = attributes

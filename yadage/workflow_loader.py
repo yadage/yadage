@@ -8,7 +8,6 @@ import urllib2
 from jsonschema import Draft4Validator, validators
 import logging
 import packtivity
-
 log = logging.getLogger(__name__)
 
 def extend_with_default(validator_class):
