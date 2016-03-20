@@ -1,4 +1,5 @@
 import json
+import re
 
 def handler_decorator():
     """
@@ -26,3 +27,28 @@ def evaluate_parameters(parameters,context):
         except ValueError:
             evaluated[k] = eval_val
     return evaluated
+    
+def regex_match_outputs(stages,regex_list):
+    """
+    A generator returning tuples of 
+    (step, outputkey, index)
+    for outputs of steps that are part of the stages
+    and match a regular expression.
+    For single-value outputs the index is None
+    """
+    for x in [step for stage in stages for step in stage['scheduled_steps']]:
+        result = x.result_of()
+        for regex in [re.compile(pattern) for pattern in regex_list]:
+            matching_outputkeys = [k for k in result.keys() if regex.match(k)]
+        
+            for outputkey in matching_outputkeys:
+                try:
+                    output = result[outputkey]                
+                except KeyError:
+                    log.exception('could not fine output %s in metadata %s',outputkey,result)
+                
+                if type(output) is not list:
+                    yield (x,outputkey,None)
+                else:
+                    for i,y in enumerate(output):
+                        yield (x,outputkey,i)

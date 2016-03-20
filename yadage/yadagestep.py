@@ -25,7 +25,6 @@ class yadagestep(object):
         result = packtivity(self.name,self.spec,self.attributes,self.context)
         return result
     
-    
     def s(self,**attributes):
         self.attributes = attributes
         return self

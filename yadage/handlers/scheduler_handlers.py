@@ -29,38 +29,29 @@ def single_step_from_context(workflow,stage,dag,context,sched_spec):
 def zip_from_dep_output(workflow,stage,dag,context,sched_spec):
     log.info('scheduling via zip_from_dep_output')
 
-    used_nodes = []
+    used_steps = []
     zipped_maps = []
-
 
     stepname = '{}'.format(stage['name'])
     step     = yadagestep(stepname,sched_spec['step'],context)
     
     ### we loop each zip pattern
     for zipconfig in sched_spec['zip']:
-        new_inputs = []
         
         ### for each dependent stage we loop through its steps
         dependencies = [s for s in workflow['stages'] if s['name'] in zipconfig['from_stages']]
-        for x in [s for d in dependencies for s in d['scheduled_steps']]:
-            result = x.result_of()
-            
-            outputkey_regex = re.compile(zipconfig['outputs'])
-            matching_outputkeys = [k for k in result.keys() if outputkey_regex.match(k)]
-            
-            ## for each step we loop through matching outputs
-            for outputkey in matching_outputkeys:
-                try:
-                    restype = type(result[outputkey])
-                    for i,y in enumerate(result[outputkey] if restype==list else [result[outputkey]]):
-                        new_inputs += [y]
-                        step.used_input(x.task.name,outputkey,i)
-                        used_nodes += [x]
-                except KeyError:
-                    log.exception('could not fine output %s in metadata %s',outputkey,result)
-        
+        outputs = zipconfig['outputs']
+
+        collected_inputs = []
+        used_steps = []
+        for depstep,outputkey,output_index in utils.regex_match_outputs(dependencies,[outputs]):
+            output = depstep.result_of()[outputkey]
+            collected_inputs += [output if not output_index else output[output_index]]
+            step.used_input(depstep.task.name,outputkey,output_index)
+            used_steps += [depstep]
+                    
         zipwith = zipconfig['zip_with']
-        newmap = dict(zip(zipwith,new_inputs))
+        newmap = dict(zip(zipwith,collected_inputs))
         log.debug('zipped map %s',newmap)
         zipped_maps += [newmap]
             
@@ -70,7 +61,7 @@ def zip_from_dep_output(workflow,stage,dag,context,sched_spec):
     
     node = dag.addTask(step.s(**attributes), nodename = stepname)
     stage['scheduled_steps'] = [node]
-    for x in used_nodes:
+    for x in used_steps:
         dag.addEdge(x,node)
     
 @scheduler('reduce-from-dep')
@@ -78,34 +69,27 @@ def reduce_from_dep_output(workflow,stage,dag,context,sched_spec):
     log.info('scheduling via reduce_from_dep_output')
     dependencies = [s for s in workflow['stages'] if s['name'] in sched_spec['from_stages']]
     
-    new_inputs = []
     stepname = '{}'.format(stage['name'])
     step = yadagestep(stepname,sched_spec['step'],context)
 
-    outputkey_regex = re.compile(sched_spec['outputs'])
+    outputs = sched_spec['outputs']
 
-    for x in [stp for d in dependencies for stp in d['scheduled_steps']]:
-        result = x.result_of()
-        log.debug('reduce_from_dep_output: matching %s to regex: %s',result.keys(),sched_spec['outputs'])
-        matching_outputkeys = [k for k in result.keys() if outputkey_regex.match(k)]
-        log.debug('reduce_from_dep_output: matching output keys %s',matching_outputkeys)
-        for outputkey in matching_outputkeys:
-            try:
-                restype = type(result[outputkey])
-                for i,y in enumerate(result[outputkey] if restype==list else [result[outputkey]]):
-                    new_inputs += [y]
-                    step.used_input(x.task.name,outputkey,i)
-            except KeyError:
-                log.exception('could not fine output %s in metadata %s',outputkey,result)
-    
+    collected_inputs = []
+    used_steps = []
+    for depstep,outputkey,output_index in utils.regex_match_outputs(dependencies,[outputs]):
+        output = depstep.result_of()[outputkey]
+        collected_inputs += [output if not output_index else output[output_index]]
+        step.used_input(depstep.task.name,outputkey,output_index)
+        used_steps += [depstep]
+
     to_input = sched_spec['to_input']
     attributes = utils.evaluate_parameters(stage['parameters'],context)
-    attributes[to_input] = new_inputs
+    attributes[to_input] = collected_inputs
     
     node = dag.addTask(step.s(**attributes), nodename = stepname)
     stage['scheduled_steps'] = [node]
     
-    for x in [s for d in dependencies for s in d['scheduled_steps']]:
+    for x in used_steps:
         dag.addEdge(x,node)
     
 @scheduler('map-from-dep')
@@ -114,31 +98,28 @@ def map_from_dep_output(workflow,stage,dag,context,sched_spec):
     
     dependencies = [s for s in workflow['stages'] if s['name'] in sched_spec['from_stages']]
     
-    outputkey           = sched_spec['outputs']
-    to_input            = sched_spec['to_input']
-    stepname_template   = stage['name']+'_{index}'
+    outputs           = sched_spec['outputs']
+    to_input          = sched_spec['to_input']
+    stepname_template = stage['name']+'_{index}'
     stage['scheduled_steps'] = []
-    index = 0
-    
-    outputkey_regex = re.compile(outputkey)
-    
-    for x in [step for d in dependencies for step in d['scheduled_steps']]:
-        result = x.result_of()
-        matching_outputs = [v for k,v in result.iteritems() if outputkey_regex.match(k)]
+
+    for index,(depstep,outputkey,output_index) in enumerate(utils.regex_match_outputs(dependencies,[outputs])):
+        withindex = context.copy()
+        withindex.update(index = index)
+        attributes = utils.evaluate_parameters(stage['parameters'],withindex)
+
+        output = depstep.result_of()[outputkey]
+        attributes[to_input] = output if not output_index else output[output_index]
+
+        step = yadagestep(stepname_template.format(index = index),sched_spec['step'],context)
+        step.used_input(depstep.task.name,outputkey,output_index)
+            
+        node = dag.addTask(task = step.s(**attributes), nodename = step.name)
         
-        for this_index,y in enumerate(out for thisout in matching_outputs for out in thisout):
-            withindex = context.copy()
-            withindex.update(index = index)
-            attributes = utils.evaluate_parameters(stage['parameters'],withindex)
-            attributes[to_input] = y
-            
-            step = yadagestep(stepname_template.format(index = index),sched_spec['step'],context)
-            step.used_input(x.task.name,outputkey,this_index)
-            
-            node = dag.addTask(task = step.s(**attributes), nodename = step.name)
-            dag.addEdge(x,node)
-            stage['scheduled_steps'] += [node]
-            index += 1
+        #adding an edge is idempotent, so we don't care if we add it twice (if multiple inputs from on depstep)
+        dag.addEdge(depstep,node)
+        stage['scheduled_steps'] += [node]
+
 
 @scheduler('map-from-ctx')
 def map_step_from_context(workflow,stage,dag,context,sched_spec):

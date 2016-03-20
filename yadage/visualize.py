@@ -21,14 +21,19 @@ def write_stage_graph(workdir,workflow):
                     stdout = open('{}/yadage_stages.pdf'.format(workdir),'w'))
 
 def output_id(stepname,outputkey,index):
-    return 'output_{}_{}_{}'.format(stepname,outputkey,index)
+    identifier = 'output_{}_{}'.format(stepname,outputkey)
+    if index is not None:
+        identifier += '_{}'.format(index)
+    return identifier
 
 def add_outputs_to_cluster(step,cluster):
     #add outputs circles
     for k,v in step.result_of().iteritems():
-        for i,y in enumerate(v if type(v)==list else [v]):
+        for i,y in (enumerate(v) if type(v)==list else [(None,v)]):
             name = output_id(step.task.name,k,i)
-            cluster.add_node(pydotplus.graphviz.Node(name, label = '{}_{}: {}'.format(k,i,y), color = 'blue'))
+            label = '{}[{}]: '.format(k,i) if i is not None else '{}: '.format(k)
+            label += ' {}'.format(v)
+            cluster.add_node(pydotplus.graphviz.Node(name, label = label, color = 'blue'))
             cluster.add_edge(pydotplus.graphviz.Edge(step.identifier,name))
     
 def add_step_to_cluster(step,adagegraph,cluster,fullgraph):
