@@ -1,5 +1,7 @@
 import json
 import re
+import logging
+log = logging.getLogger(__name__)
 
 def handler_decorator():
     """

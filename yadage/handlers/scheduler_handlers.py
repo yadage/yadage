@@ -1,4 +1,3 @@
-import re
 import logging
 import utils
 from yadage.yadagestep import yadagestep
