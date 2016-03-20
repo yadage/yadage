@@ -32,7 +32,7 @@ def add_outputs_to_cluster(step,cluster):
         for i,y in (enumerate(v) if type(v)==list else [(None,v)]):
             name = output_id(step.task.name,k,i)
             label = '{}[{}]: '.format(k,i) if i is not None else '{}: '.format(k)
-            label += ' {}'.format(v)
+            label += ' {}'.format(y)
             cluster.add_node(pydotplus.graphviz.Node(name, label = label, color = 'blue'))
             cluster.add_edge(pydotplus.graphviz.Edge(step.identifier,name))
     
@@ -40,7 +40,6 @@ def add_step_to_cluster(step,adagegraph,cluster,fullgraph):
     stepid = step.identifier
 
     pars = step.task.attributes.copy()
-    # print pars
     parstrings =  [': '.join((k,str(pars[k]))) for k in sorted(pars.keys())]
 
     step_report = u'''\

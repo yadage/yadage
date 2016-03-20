@@ -44,7 +44,7 @@ def zip_from_dep_output(workflow,stage,dag,context,sched_spec):
         collected_inputs = []
         for depstep,outputkey,output_index in utils.regex_match_outputs(dependencies,[outputs]):
             output = depstep.result_of()[outputkey]
-            collected_inputs += [output if not output_index else output[output_index]]
+            collected_inputs += [output if output_index is None else output[output_index]]
             step.used_input(depstep.task.name,outputkey,output_index)
             used_steps += [depstep]
             
@@ -76,7 +76,7 @@ def reduce_from_dep_output(workflow,stage,dag,context,sched_spec):
     used_steps = []
     for depstep,outputkey,output_index in utils.regex_match_outputs(dependencies,[outputs]):
         output = depstep.result_of()[outputkey]
-        collected_inputs += [output if not output_index else output[output_index]]
+        collected_inputs += [output if output_index is None else output[output_index]]
         step.used_input(depstep.task.name,outputkey,output_index)
         used_steps += [depstep]
 
@@ -107,7 +107,7 @@ def map_from_dep_output(workflow,stage,dag,context,sched_spec):
         attributes = utils.evaluate_parameters(stage['parameters'],withindex)
 
         output = depstep.result_of()[outputkey]
-        attributes[to_input] = output if not output_index else output[output_index]
+        attributes[to_input] = output if output_index is None else output[output_index]
 
         step = yadagestep(stepname_template.format(index = index),sched_spec['step'],context)
         step.used_input(depstep.task.name,outputkey,output_index)
@@ -138,8 +138,7 @@ def map_step_from_context(workflow,stage,dag,context,sched_spec):
         
         attributes = parswithoutmap
         attributes[to_input] = p
-
+        
         step = yadagestep(stepname_template.format(index = index),sched_spec['step'],context)
         node = dag.addTask(task = step.s(**attributes), nodename = step.name)
         stage['scheduled_steps'] += [node]
-    
