@@ -42,13 +42,12 @@ def zip_from_dep_output(workflow,stage,dag,context,sched_spec):
         outputs = zipconfig['outputs']
 
         collected_inputs = []
-        used_steps = []
         for depstep,outputkey,output_index in utils.regex_match_outputs(dependencies,[outputs]):
             output = depstep.result_of()[outputkey]
             collected_inputs += [output if not output_index else output[output_index]]
             step.used_input(depstep.task.name,outputkey,output_index)
             used_steps += [depstep]
-                    
+            
         zipwith = zipconfig['zip_with']
         newmap = dict(zip(zipwith,collected_inputs))
         log.debug('zipped map %s',newmap)
@@ -126,7 +125,7 @@ def map_step_from_context(workflow,stage,dag,context,sched_spec):
     
     mappar = sched_spec['map_parameter']
     to_input = sched_spec['to_input']
-    stepname_template   = stage['name']+'_{index}'
+    stepname_template = stage['name']+'_{index}'
     
     allpars = utils.evaluate_parameters(stage['parameters'],context)
     parswithoutmap = allpars.copy()
