@@ -44,7 +44,7 @@ def run_workflow(workdir,analysis,context,loadtoplevel,loginterval,schemadir):
             
     workflow = workflow_loader.workflow(analysis, toplevel = loadtoplevel, schemadir = schemadir)
     visualize.write_stage_graph(workdir,workflow)
-
+    
     g, rules = prepare_adage(workflow,context)
     adage.rundag(g, rules.values(),
                  track = True,
@@ -52,6 +52,6 @@ def run_workflow(workdir,analysis,context,loadtoplevel,loginterval,schemadir):
                  trackevery = loginterval,
                  workdir = workdir
                 )
-
+    
     visualize.write_prov_graph(workdir,g,workflow)
     log.info('finished yadage workflow %s',analysis)

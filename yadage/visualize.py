@@ -49,13 +49,13 @@ ______
 '''
 
     rep = step_report.format(name = step.name, pars = '\n'.join(parstrings))
-
     cluster.add_node(pydotplus.graphviz.Node(
-                name = stepid,
-                obj_dict = None,
-                color = 'red',
-                label = rep,
-                shape = 'box')
+            name = stepid,
+            obj_dict = None,
+            color = 'red',
+            label = rep,
+            shape = 'box'
+        )
     )
     add_outputs_to_cluster(step,cluster)
 
@@ -83,6 +83,6 @@ def write_prov_graph(workdir,adagegraph,workflow):
             
     with open('{}/yadage_workflow_instance.dot'.format(workdir),'w') as dotfile:
         dotfile.write(provgraph.to_string())
-
+    
     subprocess.call(shlex.split('dot -Tpdf {}/yadage_workflow_instance.dot'.format(workdir)),
                     stdout = open('{}/yadage_workflow_instance.pdf'.format(workdir),'w'))
