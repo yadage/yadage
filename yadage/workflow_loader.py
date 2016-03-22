@@ -86,3 +86,7 @@ def workflow(source, toplevel, schema_name = 'yadage/workflow-schema', schemadir
     data = load(source)
     validator(schema_name,schemadir).validate(data)
     return data
+
+def load_cap_workflow(record_id, workflow_name):
+    analysis_workflows = {v['name']:v['workflow'] for v in requests.get('http://137.138.171.10/api/records/{}'.format(record_id)).json()['metadata']['workflows']}
+    return analysis_workflows[workflow_name]

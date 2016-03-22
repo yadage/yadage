@@ -42,7 +42,11 @@ def run_workflow(workdir,analysis,context,loadtoplevel,loginterval,schemadir):
         if os.path.exists(candpath):
             context[k] = '/workdir/inputs/{}'.format(v)
             
-    workflow = workflow_loader.workflow(analysis, toplevel = loadtoplevel, schemadir = schemadir)
+    #workflow = workflow_loader.workflow(analysis, toplevel = loadtoplevel, schemadir = schemadir)
+    
+    workflow = workflow_loader.load_cap_workflow(*analysis.split('/'))
+    #print workflow
+    #return
     visualize.write_stage_graph(workdir,workflow)
 
     g, rules = prepare_adage(workflow,context)
