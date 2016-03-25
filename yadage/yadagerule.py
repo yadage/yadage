@@ -30,7 +30,6 @@ class yadage_rule(object):
                 depstats += [False]
             else:
                 depstats += [all([x.successful() for x in deprule.stageinfo['scheduled_steps']])]
-                
         return all(depstats)
 
     def apply(self,dag):

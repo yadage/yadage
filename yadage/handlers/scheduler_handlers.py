@@ -28,9 +28,8 @@ def zip_from_dep_output(workflow,stage,dag,context,sched_spec):
         outputs = zipconfig['outputs']
 
         collected_inputs = []
-        for output,reference in utils.regex_match_outputs(dependencies,[outputs]):
-            collected_inputs += [output]
-            task.used_input(reference)
+        for reference in utils.regex_match_outputs(dependencies,[outputs]):
+            collected_inputs += [utils.read_input(dag,task,reference)]
             
         zipwith = zipconfig['zip_with']
         newmap = dict(zip(zipwith,collected_inputs))
@@ -55,10 +54,9 @@ def reduce_from_dep_output(workflow,stage,dag,context,sched_spec):
     outputs = sched_spec['outputs']
 
     collected_inputs = []
-    for output,reference in utils.regex_match_outputs(dependencies,[outputs]):
-        collected_inputs += [output]
-        task.used_input(reference)
-
+    for reference in utils.regex_match_outputs(dependencies,[outputs]):
+        collected_inputs += [utils.read_input(dag,task,reference)]
+    
     to_input = sched_spec['to_input']
     attributes = utils.evaluate_parameters(stage['parameters'],context)
     attributes[to_input] = collected_inputs
@@ -77,13 +75,14 @@ def map_from_dep_output(workflow,stage,dag,context,sched_spec):
     stepname_template = stage['name']+' {index}'
     stage['scheduled_steps'] = []
 
-    for index,(output,reference) in enumerate(utils.regex_match_outputs(dependencies,[outputs])):
+    for index,reference in enumerate(utils.regex_match_outputs(dependencies,[outputs])):
         withindex = context.copy()
         withindex.update(index = index)
-        attributes = utils.evaluate_parameters(stage['parameters'],withindex)
-        attributes[to_input] = output
 
         task = yadagestep(stepname_template.format(index = index),sched_spec['step'],context)
-        task.used_input(reference)
+
+        attributes = utils.evaluate_parameters(stage['parameters'],withindex)
+        attributes[to_input] = utils.read_input(dag,task,reference)
+
         node = utils.addTask(dag,task.s(**attributes))
         stage['scheduled_steps'] += [node]

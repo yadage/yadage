@@ -39,7 +39,6 @@ def add_init_stage(workflow):
     }
     workflow['stages'] = [initstage]+workflow['stages']
 
-
 def run_workflow(workdir,analysis,context,loadtoplevel,loginterval,schemadir):
     """
     Main entry point to run a Yadage workflo

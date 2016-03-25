@@ -88,3 +88,4 @@ def write_prov_graph(workdir,adagegraph,workflow):
     
     subprocess.call(shlex.split('dot -Tpdf {}/yadage_workflow_instance.dot'.format(workdir)),
                     stdout = open('{}/yadage_workflow_instance.pdf'.format(workdir),'w'))
+    

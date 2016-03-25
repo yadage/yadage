@@ -56,11 +56,22 @@ def regex_match_outputs(stages,regex_list):
                     log.exception('could not fine output %s in metadata %s',outputkey,result)
                     raise
                 if type(output) is not list:
-                    yield output,(stepid,outputkey,None)
+                    yield (stepid,outputkey,None)
                 else:
-                    for i,y in enumerate(output):
-                        yield y,(stepid,outputkey,i)
-                        
+                    for i in range(len(output)):
+                        yield (stepid,outputkey,i)
+
+def read_input(dag,step,reference):
+    """
+    reads in the value of the reference and notes
+    that is has been used by this step
+    """
+    stepid,outputkey,index = reference
+    output = dag.getNode(stepid).result_of()[outputkey]
+    value = output if index is None else output[index] 
+    step.used_input(reference)
+    return value
+
 def addTask(dag,task):
     """
     Adds the task to the DAG and sets the dependencies of it based on the used inputs
