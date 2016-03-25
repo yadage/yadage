@@ -39,8 +39,7 @@ def zip_from_dep_output(workflow,stage,dag,context,sched_spec):
     for zipped in zipped_maps:
         attributes.update(**zipped)
     
-    node = utils.addTask(dag,task.s(**attributes))
-    stage['scheduled_steps'] = [node]
+    stage['scheduled_steps'] = [utils.addTask(dag,task.s(**attributes))]
     
 @scheduler('reduce-from-dep')
 def reduce_from_dep_output(workflow,stage,dag,context,sched_spec):
@@ -59,8 +58,7 @@ def reduce_from_dep_output(workflow,stage,dag,context,sched_spec):
     attributes = utils.evaluate_parameters(stage['parameters'],context)
     attributes[to_input] = collected_inputs
 
-    node = utils.addTask(dag,task.s(**attributes))
-    stage['scheduled_steps'] = [node]
+    stage['scheduled_steps'] = [utils.addTask(dag,task.s(**attributes))]
     
 @scheduler('map-from-dep')
 def map_from_dep_output(workflow,stage,dag,context,sched_spec):
@@ -72,15 +70,14 @@ def map_from_dep_output(workflow,stage,dag,context,sched_spec):
     to_input          = sched_spec['to_input']
     stepname_template = stage['name']+' {index}'
     stage['scheduled_steps'] = []
-
+    
     for index,reference in enumerate(utils.regex_match_outputs(dependencies,[outputs])):
         withindex = context.copy()
         withindex.update(index = index)
-
+        
         task = yadagestep(stepname_template.format(index = index),sched_spec['step'],context)
-
+        
         attributes = utils.evaluate_parameters(stage['parameters'],withindex)
         attributes[to_input] = utils.read_input(dag,task,reference)
-
-        node = utils.addTask(dag,task.s(**attributes))
-        stage['scheduled_steps'] += [node]
+        
+        stage['scheduled_steps'] += [utils.addTask(dag,task.s(**attributes))]
