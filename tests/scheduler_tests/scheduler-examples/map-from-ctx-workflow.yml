@@ -5,7 +5,6 @@ stages:
       - init
     parameters:
       one: one_val
-      two: '{list_context}'
     scheduler:
       scheduler_type: 'map-from-dep'
       step: {$ref: singleout.yml}

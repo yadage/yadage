@@ -74,8 +74,5 @@ def run_workflow(workdir,analysis,context,loadtoplevel,loginterval,schemadir):
                  workdir = workdir
                 )
 
-    for stage in workflow['stages']:
-        print stage.keys()
-    
     visualize.write_prov_graph(workdir,g,workflow)
     log.info('finished yadage workflow %s',analysis)

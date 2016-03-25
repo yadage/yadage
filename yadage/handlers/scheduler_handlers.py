@@ -87,37 +87,3 @@ def map_from_dep_output(workflow,stage,dag,context,sched_spec):
         task.used_input(reference)
         node = utils.addTask(dag,task.s(**attributes))
         stage['scheduled_steps'] += [node]
-
-@scheduler('single-from-ctx')
-def single_step_from_context(workflow,stage,dag,context,sched_spec):
-    log.info('scheduling via single_step_from_context')
-    stepname = '{}'.format(stage['name'])
-
-    task = yadagestep(stepname,sched_spec['step'],context)
-    attributes = utils.evaluate_parameters(stage['parameters'],context)
-
-    node = utils.addTask(dag,task.s(**attributes))
-    stage['scheduled_steps'] = [node]
-
-@scheduler('map-from-ctx')
-def map_step_from_context(workflow,stage,dag,context,sched_spec):
-    log.info('map_step_from_context')
-    
-    mappar = sched_spec['map_parameter']
-    to_input = sched_spec['to_input']
-    stepname_template = stage['name']+' {index}'
-    
-    allpars = utils.evaluate_parameters(stage['parameters'],context)
-    parswithoutmap = allpars.copy()
-    parswithoutmap.pop(mappar)
-    
-    stage['scheduled_steps'] = []
-    for index,p in enumerate(allpars[mappar]):
-        withindex = context.copy()
-        withindex.update(index = index)
-        attributes = parswithoutmap
-        attributes[to_input] = p
-        
-        task = yadagestep(stepname_template.format(index = index),sched_spec['step'],context)
-        step = utils.addTask(dag,task.s(**attributes))
-        stage['scheduled_steps'] += [step]

@@ -24,7 +24,6 @@ class yadage_rule(object):
   
     def applicable(self,dag):
         depstats = []
-        print self.stageinfo
         for x in self.stageinfo['dependencies']:
             deprule = self.allrules[x]
             if 'scheduled_steps' not in deprule.stageinfo:

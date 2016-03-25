@@ -1,22 +1,14 @@
 context: {}
 stages:
-  - name: first
-    dependencies: []
-    parameters:
-      one: one_val
-      two: one_val
-    scheduler:
-      scheduler_type: single-from-ctx
-      step: {$ref: dummystep.yml}
-  - name: second
+  - name: mystage
     dependencies:
-      - first
+      - init
     parameters:
       one: one_val
     scheduler:
       scheduler_type: reduce-from-dep
       step: {$ref: singleout.yml}
       from_stages:
-        - first
+        - init
       outputs: multiple
       to_input: two

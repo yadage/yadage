@@ -34,8 +34,6 @@ def evaluate_parameters(parameters,context):
     return evaluated
     
 def stage_results(stage):
-    print stage
-
     for step in stage['scheduled_steps']:
         result = step.result_of()
         yield step.identifier,result
