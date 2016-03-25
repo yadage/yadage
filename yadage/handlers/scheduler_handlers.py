@@ -27,10 +27,9 @@ def zip_from_dep_output(workflow,stage,dag,context,sched_spec):
         dependencies = [s for s in workflow['stages'] if s['name'] in zipconfig['from_stages']]
         outputs = zipconfig['outputs']
 
-        collected_inputs = []
-        for reference in utils.regex_match_outputs(dependencies,[outputs]):
-            collected_inputs += [utils.read_input(dag,task,reference)]
-            
+        refgen = utils.regex_match_outputs(dependencies,[outputs])
+        collected_inputs = [utils.read_input(dag,task,reference) for reference in refgen]
+                    
         zipwith = zipconfig['zip_with']
         newmap = dict(zip(zipwith,collected_inputs))
         log.debug('zipped map %s',newmap)
@@ -53,9 +52,8 @@ def reduce_from_dep_output(workflow,stage,dag,context,sched_spec):
 
     outputs = sched_spec['outputs']
 
-    collected_inputs = []
-    for reference in utils.regex_match_outputs(dependencies,[outputs]):
-        collected_inputs += [utils.read_input(dag,task,reference)]
+    refgen = utils.regex_match_outputs(dependencies,[outputs])
+    collected_inputs = [utils.read_input(dag,task,reference) for reference in refgen]
     
     to_input = sched_spec['to_input']
     attributes = utils.evaluate_parameters(stage['parameters'],context)
