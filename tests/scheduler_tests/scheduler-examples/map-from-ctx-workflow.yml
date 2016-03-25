@@ -1,12 +1,15 @@
 context: {}
 stages:
   - name: astep
-    dependencies: []
+    dependencies:
+      - init
     parameters:
       one: one_val
       two: '{list_context}'
     scheduler:
-      scheduler_type: 'map-from-ctx'
+      scheduler_type: 'map-from-dep'
       step: {$ref: singleout.yml}
-      map_parameter: two
+      from_stages:
+        - init
+      outputs: list_context
       to_input: two

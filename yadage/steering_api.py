@@ -2,7 +2,8 @@
 import networkx as nx
 import adage
 import adage.backends
-from yadagerule import yadage_rule
+import yadagestep
+from yadagerule import yadage_rule, init_rule
 import logging
 import os
 import workflow_loader
@@ -17,13 +18,30 @@ def prepare_adage(workflow,global_context):
             stages_graph.add_edge(x,stage['name'])
     
     rules = {}
+
+
     for stagename in nx.topological_sort(stages_graph):
         stageinfo = stages_graph.node[stagename]
-        rule = yadage_rule(stageinfo,workflow,rules,global_context)
-        rules[stagename] = rule
+        if stagename=='init':
+            rules[stagename] = init_rule(stageinfo,global_context)
+        else:
+            rules[stagename] = yadage_rule(stageinfo,workflow,rules,global_context)
+
     
     g = adage.mk_dag()
     return g,rules
+
+def init_workflow(workflow):
+    """
+    we add the context's init data as initial outputs
+    """
+    initstage = {
+        'name':'init',
+        'dependencies':[],
+        'scheduler':None
+    }
+    workflow['stages'] = [initstage]+workflow['stages']
+
 
 def run_workflow(workdir,analysis,context,loadtoplevel,loginterval,schemadir):
     """
@@ -43,15 +61,21 @@ def run_workflow(workdir,analysis,context,loadtoplevel,loginterval,schemadir):
             context[k] = '/workdir/inputs/{}'.format(v)
             
     workflow = workflow_loader.workflow(analysis, toplevel = loadtoplevel, schemadir = schemadir)
+    init_workflow(workflow)
+
     visualize.write_stage_graph(workdir,workflow)
     
     g, rules = prepare_adage(workflow,context)
+
     adage.rundag(g, rules.values(),
                  track = True,
                  backend = backend,
                  trackevery = loginterval,
                  workdir = workdir
                 )
+
+    for stage in workflow['stages']:
+        print stage.keys()
     
     visualize.write_prov_graph(workdir,g,workflow)
     log.info('finished yadage workflow %s',analysis)

@@ -34,7 +34,8 @@ def add_outputs_to_cluster(step,cluster):
             label = '{}[{}]: '.format(k,i) if i is not None else '{}: '.format(k)
             label += ' {}'.format(y)
             cluster.add_node(pydotplus.graphviz.Node(name, label = label, color = 'blue'))
-            cluster.add_edge(pydotplus.graphviz.Edge(step.identifier,name))
+            if not step.name=='init':
+                cluster.add_edge(pydotplus.graphviz.Edge(step.identifier,name))
     
 def add_step_to_cluster(step,adagegraph,cluster,fullgraph):
     stepid = step.identifier
@@ -49,14 +50,15 @@ ______
 '''
 
     rep = step_report.format(name = step.name, pars = '\n'.join(parstrings))
-    cluster.add_node(pydotplus.graphviz.Node(
-            name = stepid,
-            obj_dict = None,
-            color = 'red',
-            label = rep,
-            shape = 'box'
+    if not step.name=='init':
+        cluster.add_node(pydotplus.graphviz.Node(
+                name = stepid,
+                obj_dict = None,
+                color = 'red',
+                label = rep,
+                shape = 'box'
+            )
         )
-    )
     add_outputs_to_cluster(step,cluster)
 
     #connect node to outputs

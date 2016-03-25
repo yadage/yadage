@@ -7,11 +7,10 @@ log = logging.getLogger(__name__)
 handlers,scheduler = utils.handler_decorator()
 
 ### A scheduler does the following things:
-###   - attached new nodes to the DAG
-###   - for each added step
-###     - the step is given a name
-###     - the step attributes are determined using the scheduler spec and context
-###     - a list of used inputs (in the form of [stepname,outputkey,index])
+###   - creates new tasks (yadagesteps)
+###   - figures out attributs to call the task with
+###   - keeps track of used inputs
+###   - attaches the nodes for this task to the DAG
 
 @scheduler('zip-from-dep')
 def zip_from_dep_output(workflow,stage,dag,context,sched_spec):
@@ -31,7 +30,7 @@ def zip_from_dep_output(workflow,stage,dag,context,sched_spec):
         collected_inputs = []
         for output,reference in utils.regex_match_outputs(dependencies,[outputs]):
             collected_inputs += [output]
-            task.used_input(*reference)
+            task.used_input(reference)
             
         zipwith = zipconfig['zip_with']
         newmap = dict(zip(zipwith,collected_inputs))
@@ -58,7 +57,7 @@ def reduce_from_dep_output(workflow,stage,dag,context,sched_spec):
     collected_inputs = []
     for output,reference in utils.regex_match_outputs(dependencies,[outputs]):
         collected_inputs += [output]
-        task.used_input(*reference)
+        task.used_input(reference)
 
     to_input = sched_spec['to_input']
     attributes = utils.evaluate_parameters(stage['parameters'],context)
@@ -85,7 +84,7 @@ def map_from_dep_output(workflow,stage,dag,context,sched_spec):
         attributes[to_input] = output
 
         task = yadagestep(stepname_template.format(index = index),sched_spec['step'],context)
-        task.used_input(*reference)
+        task.used_input(reference)
         node = utils.addTask(dag,task.s(**attributes))
         stage['scheduled_steps'] += [node]
 
