@@ -4,8 +4,8 @@ import yadagestep
 log = logging.getLogger(__name__)
 
 class init_rule(object):
-    def __init__(self,stageinfo,global_context):
-        self.initdata = global_context['init']
+    def __init__(self,stageinfo,initdata):
+        self.initdata = initdata
         self.stageinfo = stageinfo
         
     def apply(self,dag):
@@ -16,9 +16,9 @@ class init_rule(object):
         return True
 
 class yadage_rule(object):
-    def __init__(self,stageinfo,workflow,allrules,global_context):
+    def __init__(self,stageinfo,workflow,allrules,context):
         self.stageinfo = stageinfo
-        self.global_context = global_context
+        self.context = context
         self.workflow = workflow
         self.allrules = allrules
   
@@ -40,5 +40,5 @@ class yadage_rule(object):
         from yadage.handlers.scheduler_handlers import handlers as sched_handlers
         sched_spec = self.stageinfo['scheduler']
         scheduler = sched_handlers[sched_spec['scheduler_type']]
-        scheduler(self.workflow,self.stageinfo,dag,self.global_context,sched_spec)
+        scheduler(self.workflow,self.stageinfo,dag,self.context,sched_spec)
     
