@@ -1,5 +1,0 @@
-strict digraph "" {
-second;
-first;
-first -> second;
-}
