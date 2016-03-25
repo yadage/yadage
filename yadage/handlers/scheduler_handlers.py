@@ -45,9 +45,7 @@ def reduce_from_dep_output(workflow,stage,dag,context,sched_spec):
     stepname = '{}'.format(stage['name'])
     task = yadagestep(stepname,sched_spec['step'],context)
 
-    outputs = sched_spec['outputs']
-
-    refgen = utils.regex_match_outputs(dependencies,[outputs])
+    refgen = utils.regex_match_outputs(dependencies,[sched_spec['outputs']])
     collected_inputs = [utils.read_input(dag,task,reference) for reference in refgen]
     
     to_input = sched_spec['to_input']
@@ -62,12 +60,11 @@ def map_from_dep_output(workflow,stage,dag,context,sched_spec):
     
     dependencies = [s for s in workflow['stages'] if s['name'] in sched_spec['from_stages']]
     
-    outputs           = sched_spec['outputs']
     to_input          = sched_spec['to_input']
     stepname_template = stage['name']+' {index}'
     stage['scheduled_steps'] = []
     
-    for index,reference in enumerate(utils.regex_match_outputs(dependencies,[outputs])):
+    for index,reference in enumerate(utils.regex_match_outputs(dependencies,[sched_spec['outputs']])):
         withindex = context.copy()
         withindex.update(index = index)
         
