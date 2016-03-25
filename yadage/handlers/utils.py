@@ -32,11 +32,11 @@ def evaluate_parameters(parameters,context):
         except:
             evaluated[k] = eval_val
     return evaluated
-
+    
 def stage_results(stage):
     for step in stage['scheduled_steps']:
         result = step.result_of()
-        yield step,result
+        yield step.identifier,result
     
 def regex_match_outputs(stages,regex_list):
     """
@@ -46,7 +46,7 @@ def regex_match_outputs(stages,regex_list):
     and match a regular expression.
     List-outputs are flattened and elements yielded separately
     """
-    for step,result in itertools.chain(*[stage_results(stage) for stage in stages]):
+    for stepid,result in itertools.chain(*[stage_results(stage) for stage in stages]):
         for regex in map(re.compile,regex_list):
             matching_outputkeys = filter(regex.match,result.keys())
             for outputkey in matching_outputkeys:
@@ -56,10 +56,10 @@ def regex_match_outputs(stages,regex_list):
                     log.exception('could not fine output %s in metadata %s',outputkey,result)
                     raise
                 if type(output) is not list:
-                    yield output,(step.identifier,outputkey,None)
+                    yield output,(stepid,outputkey,None)
                 else:
                     for i,y in enumerate(output):
-                        yield y,(step.identifier,outputkey,i)
+                        yield y,(stepid,outputkey,i)
                         
 def addTask(dag,task):
     """
