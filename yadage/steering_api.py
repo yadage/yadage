@@ -23,7 +23,7 @@ def prepare_adage(workflow,global_context):
         if stagename=='init':
             rules[stagename] = init_rule(stageinfo,global_context)
         else:
-            rules[stagename] = yadage_rule(stageinfo,workflow,rules,global_context)
+            rules[stagename] = yadage_rule(stageinfo,workflow,rules,global_context['yadage_ctx'])
 
     g = adage.mk_dag()
     return g,rules
@@ -48,19 +48,25 @@ def run_workflow(workdir,analysis,context,loadtoplevel,loginterval,schemadir):
     if not os.path.exists(workdir):
         raise RuntimeError('workdir %s does not exist',workdir)
     
-    
-    context.update(workdir = workdir)
     for k,v in context.iteritems():
         candpath = '{}/inputs/{}'.format(workdir,v)
         if os.path.exists(candpath):
             context[k] = '/workdir/inputs/{}'.format(v)
+
+
+    context = {
+        'init':context,
+        'yadage_ctx':{
+            'workdir':workdir
+        }
+    }
             
     workflow = workflow_loader.workflow(analysis, toplevel = loadtoplevel, schemadir = schemadir)
     run_adage(workflow,loginterval,context)
     log.info('finished yadage workflow %s',analysis)
 
 def run_adage(workflow,loginterval,context):
-    workdir = context['workdir']
+    workdir = context['yadage_ctx']['workdir']
     add_init_stage(workflow)
     
     visualize.write_stage_graph(workdir,workflow)
