@@ -1,0 +1,11 @@
+context:
+  somepar: ~
+stages:
+  - name: astep
+    dependencies: []
+    parameters:
+      one: '{somepar}'
+      two: another_val
+    scheduler:
+      scheduler_type: single-from-ctx
+      step: {$ref: dummystep.yml}

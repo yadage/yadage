@@ -1,0 +1,5 @@
+yadage-run -t scheduler-examples workdir map-from-ctx-workflow.yml mapctx.yml
+yadage-run -t scheduler-examples workdir map-from-dep-workflow.yml
+yadage-run -t scheduler-examples workdir reduce-from-dep-workflow.yml
+yadage-run -t scheduler-examples workdir single-from-ctx-workflow.yml singlefromctx.yml
+yadage-run -t scheduler-examples workdir zip-from-dep-workflow.yml

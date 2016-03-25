@@ -1,0 +1,8 @@
+========== ADAGE LOG BEGIN at 2016-03-25T12:02:53.068803 ==========
+---------- snapshot at 2016-03-25T12:02:53.069006
+---------- snapshot at 2016-03-25T12:02:53.080095
+name: first obj: <Node name: first id: 07e51aa8-f2a3-11e5-b030-98fe944a88e0 state: RUNNING> submitted: 1458921773.08
+---------- snapshot at 2016-03-25T12:02:56.468924
+name: first obj: <Node name: first id: 07e51aa8-f2a3-11e5-b030-98fe944a88e0 state: SUCCESS> submitted: 1458921773.08
+name: second obj: <Node name: second id: 087faee1-f2a3-11e5-a3bb-98fe944a88e0 state: SUCCESS> submitted: 1458921774.08
+========== ADAGE LOG END at 2016-03-25T12:02:56.469185 ==========

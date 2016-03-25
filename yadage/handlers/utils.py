@@ -1,6 +1,8 @@
 import json
 import re
 import logging
+import itertools
+
 log = logging.getLogger(__name__)
 
 def handler_decorator():
@@ -22,6 +24,7 @@ def evaluate_parameters(parameters,context):
     """
     dumped_context = {k:json.dumps(v) for k,v in context.iteritems()}
     evaluated = {}
+
     for k,v in parameters.iteritems():
         eval_val = v.format(**dumped_context) if type(v)==unicode or type(v)==str else v
         try:
@@ -29,28 +32,31 @@ def evaluate_parameters(parameters,context):
         except:
             evaluated[k] = eval_val
     return evaluated
+
+def stage_results(stage):
+    for step in stage['scheduled_steps']:
+        result = step.result_of()
+        yield step,result
     
 def regex_match_outputs(stages,regex_list):
     """
     A generator returning tuples of 
-    (step, outputkey, index)
+    (step, output, output reference)
     for outputs of steps that are part of the stages
     and match a regular expression.
-    For single-value outputs the index is None
+    List-outputs are flattened and elements yielded separately
     """
-    for x in [step for stage in stages for step in stage['scheduled_steps']]:
-        result = x.result_of()
-        for regex in [re.compile(pattern) for pattern in regex_list]:
-            matching_outputkeys = [k for k in result.keys() if regex.match(k)]
-        
+    for step,result in itertools.chain(*[stage_results(stage) for stage in stages]):
+        for regex in map(re.compile,regex_list):
+            matching_outputkeys = filter(regex.match,result.keys())
             for outputkey in matching_outputkeys:
                 try:
                     output = result[outputkey]                
                 except KeyError:
                     log.exception('could not fine output %s in metadata %s',outputkey,result)
-                
+                    raise
                 if type(output) is not list:
-                    yield (x,outputkey,None)
+                    yield step,output,(step.identifier,outputkey,None)
                 else:
                     for i,y in enumerate(output):
-                        yield (x,outputkey,i)
+                        yield step,y,(step.identifier,outputkey,i)

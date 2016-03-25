@@ -1,0 +1,10 @@
+process:
+  process_type: 'string-interpolated-cmd'
+  cmd: 'echo {one} {two}'
+publisher:
+  publisher_type: 'constant-pub'
+  publish:
+    outputA: 'valA'
+    outputB: 'valB'
+environment:
+  environment_type: 'noop-env'

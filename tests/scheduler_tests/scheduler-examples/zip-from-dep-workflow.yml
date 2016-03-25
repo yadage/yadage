@@ -1,0 +1,27 @@
+context: {}
+stages:
+  - name: first
+    dependencies: []
+    parameters:
+      one: one_val
+      two: another_val
+    scheduler:
+      scheduler_type: single-from-ctx
+      step: {$ref: twoout.yml}
+  - name: second
+    dependencies:
+      - first
+    parameters:
+      one: one_val
+    scheduler:
+      scheduler_type: zip-from-dep
+      step: {$ref: singleout.yml}
+      zip:
+        - from_stages:
+            - first
+          outputs: outputA
+          zip_with: ['one']
+        - from_stages:
+            - first
+          outputs: outputB
+          zip_with: ['two']

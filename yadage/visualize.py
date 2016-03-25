@@ -20,8 +20,8 @@ def write_stage_graph(workdir,workflow):
     subprocess.call(shlex.split('dot -Tpdf {}/yadage_stages.dot'.format(workdir)),
                     stdout = open('{}/yadage_stages.pdf'.format(workdir),'w'))
 
-def output_id(stepname,outputkey,index):
-    identifier = 'output_{}_{}'.format(stepname,outputkey)
+def output_id(stepid,outputkey,index):
+    identifier = 'output_{}_{}'.format(stepid,outputkey)
     if index is not None:
         identifier += '_{}'.format(index)
     return identifier
@@ -30,7 +30,7 @@ def add_outputs_to_cluster(step,cluster):
     #add outputs circles
     for k,v in step.result_of().iteritems():
         for i,y in (enumerate(v) if type(v)==list else [(None,v)]):
-            name = output_id(step.task.name,k,i)
+            name = output_id(step.identifier,k,i)
             label = '{}[{}]: '.format(k,i) if i is not None else '{}: '.format(k)
             label += ' {}'.format(y)
             cluster.add_node(pydotplus.graphviz.Node(name, label = label, color = 'blue'))
