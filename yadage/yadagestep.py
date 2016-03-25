@@ -19,6 +19,12 @@ class yadagestep(object):
     
     @property
     def inputs(self):
+        """
+        returns inputs as a dictionary with the
+        dependent's step identifier as key
+        and a list of (output,index) tuples
+        as value
+        """
         return self.used_inputs
     
     @property

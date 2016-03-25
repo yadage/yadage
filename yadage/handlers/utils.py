@@ -41,7 +41,7 @@ def stage_results(stage):
 def regex_match_outputs(stages,regex_list):
     """
     A generator returning tuples of 
-    (step, output, output reference)
+    (output, output reference)
     for outputs of steps that are part of the stages
     and match a regular expression.
     List-outputs are flattened and elements yielded separately
@@ -56,7 +56,15 @@ def regex_match_outputs(stages,regex_list):
                     log.exception('could not fine output %s in metadata %s',outputkey,result)
                     raise
                 if type(output) is not list:
-                    yield step,output,(step.identifier,outputkey,None)
+                    yield output,(step.identifier,outputkey,None)
                 else:
                     for i,y in enumerate(output):
-                        yield step,y,(step.identifier,outputkey,i)
+                        yield y,(step.identifier,outputkey,i)
+                        
+def addTask(dag,task):
+    """
+    Adds the task to the DAG and sets the dependencies of it based on the used inputs
+    """
+    dependencies = [dag.getNode(k) for k in task.inputs.keys()]
+    node = dag.addTask(task, nodename = task.name, depends_on = dependencies)
+    return node

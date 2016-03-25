@@ -16,8 +16,11 @@ install:
 
 script:
   - pyflakes yadage
-  - docker build -t lukasheinrich/yadage .
   - "echo 'events: 100' > ctx.yml"
-  - mkdir workdir
-  - yadage-run -t from-github workdir pheno_workflows/madgraph_delphes.yml ctx.yml -i 60
-  - ls -lrt workdir
+  - cd tests/scheduler_tests
+  - ./runtests.sh
+  - cd ../../
+  - mkdir workdir_pheno
+  - yadage-run -t from-github workdir_pheno pheno_workflows/madgraph_delphes.yml ctx.yml -i 60
+  - ls -lrt workdir_pheno
+  - docker build -t lukasheinrich/yadage .
