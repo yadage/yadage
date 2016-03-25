@@ -18,8 +18,6 @@ def prepare_adage(workflow,global_context):
             stages_graph.add_edge(x,stage['name'])
     
     rules = {}
-
-
     for stagename in nx.topological_sort(stages_graph):
         stageinfo = stages_graph.node[stagename]
         if stagename=='init':
@@ -27,13 +25,12 @@ def prepare_adage(workflow,global_context):
         else:
             rules[stagename] = yadage_rule(stageinfo,workflow,rules,global_context)
 
-    
     g = adage.mk_dag()
     return g,rules
 
-def init_workflow(workflow):
+def add_init_stage(workflow):
     """
-    we add the context's init data as initial outputs
+    we add and initialization stage to the workflow
     """
     initstage = {
         'name':'init',
@@ -47,12 +44,10 @@ def run_workflow(workdir,analysis,context,loadtoplevel,loginterval,schemadir):
     """
     Main entry point to run a Yadage workflo
     """
-
     log.info('running yadage workflow %s',analysis)
     if not os.path.exists(workdir):
         raise RuntimeError('workdir %s does not exist',workdir)
     
-    backend = adage.backends.MultiProcBackend(2)
     
     context.update(workdir = workdir)
     for k,v in context.iteritems():
@@ -61,18 +56,23 @@ def run_workflow(workdir,analysis,context,loadtoplevel,loginterval,schemadir):
             context[k] = '/workdir/inputs/{}'.format(v)
             
     workflow = workflow_loader.workflow(analysis, toplevel = loadtoplevel, schemadir = schemadir)
-    init_workflow(workflow)
+    run_adage(workflow,loginterval,context)
+    log.info('finished yadage workflow %s',analysis)
 
-    visualize.write_stage_graph(workdir,workflow)
+def run_adage(workflow,loginterval,context):
+    workdir = context['workdir']
+    add_init_stage(workflow)
     
+    visualize.write_stage_graph(workdir,workflow)
     g, rules = prepare_adage(workflow,context)
-
+    
+    backend = adage.backends.MultiProcBackend(2)
+    
     adage.rundag(g, rules.values(),
                  track = True,
                  backend = backend,
                  trackevery = loginterval,
                  workdir = workdir
                 )
-
+    
     visualize.write_prov_graph(workdir,g,workflow)
-    log.info('finished yadage workflow %s',analysis)
