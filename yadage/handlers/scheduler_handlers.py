@@ -15,23 +15,19 @@ handlers,scheduler = utils.handler_decorator()
 @scheduler('zip-from-dep')
 def zip_from_dep_output(workflow,stage,dag,context,sched_spec):
     log.info('scheduling via zip_from_dep_output')
-
+    
     zipped_maps = []
-
-    stepname = '{}'.format(stage['name'])
-    task     = yadagestep(stepname,sched_spec['step'],context)
+    task = yadagestep(stage['name'],sched_spec['step'],context)
     
     ### we loop each zip pattern
     for zipconfig in sched_spec['zip']:
         ### for each dependent stage we loop through its steps
         dependencies = [s for s in workflow['stages'] if s['name'] in zipconfig['from_stages']]
-        outputs = zipconfig['outputs']
-
-        refgen = utils.regex_match_outputs(dependencies,[outputs])
+        
+        refgen = utils.regex_match_outputs(dependencies,[zipconfig['outputs']])
         collected_inputs = [utils.read_input(dag,task,reference) for reference in refgen]
                     
-        zipwith = zipconfig['zip_with']
-        newmap = dict(zip(zipwith,collected_inputs))
+        newmap = dict(zip(zipconfig['zip_with'],collected_inputs))
         log.debug('zipped map %s',newmap)
         zipped_maps += [newmap]
             
