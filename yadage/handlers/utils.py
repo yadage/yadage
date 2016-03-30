@@ -96,7 +96,7 @@ def addTask(dag,task):
     return node
     
 def addStep(stage,dag,task):
-    if not 'scheduled_steps' in stage:
+    if 'scheduled_steps' not in stage:
         stage['scheduled_steps'] = []
     node = addTask(dag,task)
     stage['scheduled_steps'] += [node]
