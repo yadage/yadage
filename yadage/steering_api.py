@@ -2,7 +2,6 @@
 import networkx as nx
 import adage
 import adage.backends
-import yadagestep
 from yadagerule import yadage_rule, init_rule
 import logging
 import os
@@ -52,8 +51,6 @@ def run_workflow(workdir,analysis,context,loadtoplevel,loginterval,schemadir):
         if os.path.exists(candpath):
             context[k] = '/workdir/inputs/{}'.format(v)
 
-
-            
     workflow = workflow_loader.workflow(analysis, toplevel = loadtoplevel, schemadir = schemadir)
     run_adage(workdir,workflow,context,loginterval)
     log.info('finished yadage workflow %s',analysis)

@@ -42,8 +42,7 @@ def reduce_from_dep_output(workflow,stage,dag,context,sched_spec):
     log.info('scheduling via reduce_from_dep_output')
     dependencies = [s for s in workflow['stages'] if s['name'] in sched_spec['from_stages']]
     
-    stepname = '{}'.format(stage['name'])
-    task = yadagestep(stepname,sched_spec['step'],context)
+    task = yadagestep(stage['name'],sched_spec['step'],context)
     
     refgen = utils.regex_match_outputs(dependencies,[sched_spec['outputs']])
     collected_inputs = [utils.read_input(dag,task,reference) for reference in refgen]
