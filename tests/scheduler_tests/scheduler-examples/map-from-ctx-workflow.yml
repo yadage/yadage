@@ -4,7 +4,7 @@ stages:
     dependencies:
       - init
     parameters:
-      one: one_val
+      one: '{workdir}'
     scheduler:
       scheduler_type: 'map-from-dep'
       step: {$ref: singleout.yml}

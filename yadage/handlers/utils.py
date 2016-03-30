@@ -16,7 +16,14 @@ def handler_decorator():
             handlers[name] = func
         return wrap
     return handlers,decorator
-    
+
+
+# class JSONPointerFormatter(string.Formatter):
+#     def get_value(self,key,args,kwargs):
+#         return jsonpointer.resolve_pointer(args[0],key)
+#
+# PointerFormatter = JSONPointerFormatter()
+            
 def evaluate_parameters(parameters,context):
     """
     values of in context are converted to strings via json.dump,
@@ -25,8 +32,12 @@ def evaluate_parameters(parameters,context):
     dumped_context = {k:json.dumps(v) for k,v in context.iteritems()}
     evaluated = {}
 
+    
+
     for k,v in parameters.iteritems():
         eval_val = v.format(**dumped_context) if type(v)==unicode or type(v)==str else v
+
+        
         try:
             evaluated[k] = json.loads(eval_val)
         except:
@@ -37,6 +48,10 @@ def stage_results(stage):
     for step in stage['scheduled_steps']:
         result = step.result_of()
         yield step.identifier,result
+
+def match_steps(stages):
+    for stepid,result in itertools.chain(*[stage_results(stage) for stage in stages]):
+        yield stepid,result
     
 def regex_match_outputs(stages,regex_list):
     """
@@ -79,3 +94,9 @@ def addTask(dag,task):
     dependencies = [dag.getNode(k) for k in task.inputs.keys()]
     node = dag.addTask(task, nodename = task.name, depends_on = dependencies)
     return node
+    
+def addStep(stage,dag,task):
+    if not 'scheduled_steps' in stage:
+        stage['scheduled_steps'] = []
+    node = addTask(dag,task)
+    stage['scheduled_steps'] += [node]
