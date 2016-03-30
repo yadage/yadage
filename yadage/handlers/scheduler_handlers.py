@@ -27,9 +27,8 @@ def zip_from_dep_output(workflow,stage,dag,context,sched_spec):
         refgen = utils.regex_match_outputs(dependencies,[zipconfig['outputs']])
         collected_inputs = [utils.read_input(dag,task,reference) for reference in refgen]
                     
-        newmap = dict(zip(zipconfig['zip_with'],collected_inputs))
-        log.info('zipped map %s',newmap)
-        zipped_maps += [newmap]
+        zipped_maps += [dict(zip(zipconfig['zip_with'],collected_inputs))]
+        log.info('last zipped map %s',zipped_maps[-1])
             
     attributes = utils.evaluate_parameters(stage['parameters'],context)
     for zipped in zipped_maps:
