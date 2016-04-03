@@ -73,18 +73,22 @@ ______
             log.warning('really no inputs to this node but predecessors?: %s',step)
             fullgraph.add_edge(pydotplus.graphviz.Edge(pre,stepid))
 
-def write_prov_graph(workdir,adagegraph,workflow):
+def write_prov_graph(workdir,adagegraph):
     provgraph = pydotplus.graphviz.Graph()
     
-    stagedict = {stage['name']:stage for stage in workflow['stages']}
-    for stage in nx.topological_sort(simple_stage_graph(workflow)):
-        if stage=='init':
-            stagecluster = provgraph
-        else:
-            stagecluster = pydotplus.graphviz.Cluster(graph_name = stage, label = stage, labeljust = 'l', style = 'dotted')
-            provgraph.add_subgraph(stagecluster)
-        for step in stagedict[stage]['scheduled_steps']:
-            add_step_to_cluster(step,adagegraph,stagecluster,provgraph)
+    # stagedict = {stage['name']:stage for stage in workflow['stages']}
+
+    for step in [adagegraph.getNode(x) for x in nx.topological_sort(adagegraph)]:
+        stagecluster = provgraph
+        
+    # for stage in nx.topological_sort(simple_stage_graph(workflow)):
+    #     if stage=='init':
+    #         stagecluster = provgraph
+    #     else:
+    #         stagecluster = pydotplus.graphviz.Cluster(graph_name = stage, label = stage, labeljust = 'l', style = 'dotted')
+    #         provgraph.add_subgraph(stagecluster)
+        # for step in stagedict[stage]['scheduled_steps']:
+        add_step_to_cluster(step,adagegraph,stagecluster,provgraph)
             
     with open('{}/yadage_workflow_instance.dot'.format(workdir),'w') as dotfile:
         dotfile.write(provgraph.to_string())

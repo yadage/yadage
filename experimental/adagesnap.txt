@@ -1,0 +1,74 @@
+========== ADAGE LOG BEGIN at 2016-04-03T03:27:16.542313 ==========
+---------- snapshot at 2016-04-03T03:27:16.542550
+---------- snapshot at 2016-04-03T03:27:16.551807
+name: init obj: <Node name: init id: 7e015899-f96d-11e5-a722-98fe944a88e0 state: RUNNING> submitted: 1459668436.55
+---------- snapshot at 2016-04-03T03:27:17.560280
+name: init obj: <Node name: init id: 7e015899-f96d-11e5-a722-98fe944a88e0 state: SUCCESS> submitted: 1459668436.55
+name: prepare obj: <Node name: prepare id: 7e9c36f5-f96d-11e5-94bc-98fe944a88e0 state: RUNNING> submitted: 1459668437.56
+---------- snapshot at 2016-04-03T03:27:18.568095
+name: init obj: <Node name: init id: 7e015899-f96d-11e5-a722-98fe944a88e0 state: SUCCESS> submitted: 1459668436.55
+name: prepare obj: <Node name: prepare id: 7e9c36f5-f96d-11e5-94bc-98fe944a88e0 state: SUCCESS> submitted: 1459668437.56
+name: grid obj: <Node name: grid id: 7f35f323-f96d-11e5-b645-98fe944a88e0 state: RUNNING> submitted: 1459668438.57
+---------- snapshot at 2016-04-03T03:27:19.579093
+name: init obj: <Node name: init id: 7e015899-f96d-11e5-a722-98fe944a88e0 state: SUCCESS> submitted: 1459668436.55
+name: prepare obj: <Node name: prepare id: 7e9c36f5-f96d-11e5-94bc-98fe944a88e0 state: SUCCESS> submitted: 1459668437.56
+name: grid obj: <Node name: grid id: 7f35f323-f96d-11e5-b645-98fe944a88e0 state: SUCCESS> submitted: 1459668438.57
+name: madgraph 0 obj: <Node name: madgraph 0 id: 7fcff4fd-f96d-11e5-892d-98fe944a88e0 state: RUNNING> submitted: 1459668439.58
+name: madgraph 1 obj: <Node name: madgraph 1 id: 7fcffb8f-f96d-11e5-8cdd-98fe944a88e0 state: RUNNING> submitted: 1459668439.58
+---------- snapshot at 2016-04-03T03:27:20.590372
+name: init obj: <Node name: init id: 7e015899-f96d-11e5-a722-98fe944a88e0 state: SUCCESS> submitted: 1459668436.55
+name: prepare obj: <Node name: prepare id: 7e9c36f5-f96d-11e5-94bc-98fe944a88e0 state: SUCCESS> submitted: 1459668437.56
+name: grid obj: <Node name: grid id: 7f35f323-f96d-11e5-b645-98fe944a88e0 state: SUCCESS> submitted: 1459668438.57
+name: madgraph 0 obj: <Node name: madgraph 0 id: 7fcff4fd-f96d-11e5-892d-98fe944a88e0 state: SUCCESS> submitted: 1459668439.58
+name: pythia 0 obj: <Node name: pythia 0 id: 806a506b-f96d-11e5-bf77-98fe944a88e0 state: SUCCESS> submitted: 1459668440.59
+name: madgraph 1 obj: <Node name: madgraph 1 id: 7fcffb8f-f96d-11e5-8cdd-98fe944a88e0 state: SUCCESS> submitted: 1459668439.58
+name: pythia 1 obj: <Node name: pythia 1 id: 806a5787-f96d-11e5-84a0-98fe944a88e0 state: RUNNING> submitted: 1459668440.59
+---------- snapshot at 2016-04-03T03:27:21.600813
+name: init obj: <Node name: init id: 7e015899-f96d-11e5-a722-98fe944a88e0 state: SUCCESS> submitted: 1459668436.55
+name: prepare obj: <Node name: prepare id: 7e9c36f5-f96d-11e5-94bc-98fe944a88e0 state: SUCCESS> submitted: 1459668437.56
+name: grid obj: <Node name: grid id: 7f35f323-f96d-11e5-b645-98fe944a88e0 state: SUCCESS> submitted: 1459668438.57
+name: madgraph 0 obj: <Node name: madgraph 0 id: 7fcff4fd-f96d-11e5-892d-98fe944a88e0 state: SUCCESS> submitted: 1459668439.58
+name: pythia 0 obj: <Node name: pythia 0 id: 806a506b-f96d-11e5-bf77-98fe944a88e0 state: SUCCESS> submitted: 1459668440.59
+name: delphes 0 obj: <Node name: delphes 0 id: 810458e1-f96d-11e5-9a81-98fe944a88e0 state: SUCCESS> submitted: 1459668441.6
+name: madgraph 1 obj: <Node name: madgraph 1 id: 7fcffb8f-f96d-11e5-8cdd-98fe944a88e0 state: SUCCESS> submitted: 1459668439.58
+name: pythia 1 obj: <Node name: pythia 1 id: 806a5787-f96d-11e5-84a0-98fe944a88e0 state: SUCCESS> submitted: 1459668440.59
+name: delphes 1 obj: <Node name: delphes 1 id: 8104606b-f96d-11e5-b037-98fe944a88e0 state: SUCCESS> submitted: 1459668441.6
+---------- snapshot at 2016-04-03T03:27:22.613047
+name: init obj: <Node name: init id: 7e015899-f96d-11e5-a722-98fe944a88e0 state: SUCCESS> submitted: 1459668436.55
+name: prepare obj: <Node name: prepare id: 7e9c36f5-f96d-11e5-94bc-98fe944a88e0 state: SUCCESS> submitted: 1459668437.56
+name: grid obj: <Node name: grid id: 7f35f323-f96d-11e5-b645-98fe944a88e0 state: SUCCESS> submitted: 1459668438.57
+name: madgraph 0 obj: <Node name: madgraph 0 id: 7fcff4fd-f96d-11e5-892d-98fe944a88e0 state: SUCCESS> submitted: 1459668439.58
+name: pythia 0 obj: <Node name: pythia 0 id: 806a506b-f96d-11e5-bf77-98fe944a88e0 state: SUCCESS> submitted: 1459668440.59
+name: delphes 0 obj: <Node name: delphes 0 id: 810458e1-f96d-11e5-9a81-98fe944a88e0 state: SUCCESS> submitted: 1459668441.6
+name: analysis 0 obj: <Node name: analysis 0 id: 819ec4ae-f96d-11e5-bbc9-98fe944a88e0 state: RUNNING> submitted: 1459668442.61
+name: madgraph 1 obj: <Node name: madgraph 1 id: 7fcffb8f-f96d-11e5-8cdd-98fe944a88e0 state: SUCCESS> submitted: 1459668439.58
+name: pythia 1 obj: <Node name: pythia 1 id: 806a5787-f96d-11e5-84a0-98fe944a88e0 state: SUCCESS> submitted: 1459668440.59
+name: delphes 1 obj: <Node name: delphes 1 id: 8104606b-f96d-11e5-b037-98fe944a88e0 state: SUCCESS> submitted: 1459668441.6
+name: analysis 1 obj: <Node name: analysis 1 id: 819ecd11-f96d-11e5-b841-98fe944a88e0 state: RUNNING> submitted: 1459668442.61
+---------- snapshot at 2016-04-03T03:27:23.626324
+name: init obj: <Node name: init id: 7e015899-f96d-11e5-a722-98fe944a88e0 state: SUCCESS> submitted: 1459668436.55
+name: prepare obj: <Node name: prepare id: 7e9c36f5-f96d-11e5-94bc-98fe944a88e0 state: SUCCESS> submitted: 1459668437.56
+name: grid obj: <Node name: grid id: 7f35f323-f96d-11e5-b645-98fe944a88e0 state: SUCCESS> submitted: 1459668438.57
+name: madgraph 0 obj: <Node name: madgraph 0 id: 7fcff4fd-f96d-11e5-892d-98fe944a88e0 state: SUCCESS> submitted: 1459668439.58
+name: pythia 0 obj: <Node name: pythia 0 id: 806a506b-f96d-11e5-bf77-98fe944a88e0 state: SUCCESS> submitted: 1459668440.59
+name: delphes 0 obj: <Node name: delphes 0 id: 810458e1-f96d-11e5-9a81-98fe944a88e0 state: SUCCESS> submitted: 1459668441.6
+name: analysis 0 obj: <Node name: analysis 0 id: 819ec4ae-f96d-11e5-bbc9-98fe944a88e0 state: SUCCESS> submitted: 1459668442.61
+name: madgraph 1 obj: <Node name: madgraph 1 id: 7fcffb8f-f96d-11e5-8cdd-98fe944a88e0 state: SUCCESS> submitted: 1459668439.58
+name: pythia 1 obj: <Node name: pythia 1 id: 806a5787-f96d-11e5-84a0-98fe944a88e0 state: SUCCESS> submitted: 1459668440.59
+name: delphes 1 obj: <Node name: delphes 1 id: 8104606b-f96d-11e5-b037-98fe944a88e0 state: SUCCESS> submitted: 1459668441.6
+name: analysis 1 obj: <Node name: analysis 1 id: 819ecd11-f96d-11e5-b841-98fe944a88e0 state: SUCCESS> submitted: 1459668442.61
+name: merge obj: <Node name: merge id: 82397b66-f96d-11e5-8191-98fe944a88e0 state: RUNNING> submitted: 1459668443.62
+---------- snapshot at 2016-04-03T03:27:30.890271
+name: init obj: <Node name: init id: 7e015899-f96d-11e5-a722-98fe944a88e0 state: SUCCESS> submitted: 1459668436.55
+name: prepare obj: <Node name: prepare id: 7e9c36f5-f96d-11e5-94bc-98fe944a88e0 state: SUCCESS> submitted: 1459668437.56
+name: grid obj: <Node name: grid id: 7f35f323-f96d-11e5-b645-98fe944a88e0 state: SUCCESS> submitted: 1459668438.57
+name: madgraph 0 obj: <Node name: madgraph 0 id: 7fcff4fd-f96d-11e5-892d-98fe944a88e0 state: SUCCESS> submitted: 1459668439.58
+name: pythia 0 obj: <Node name: pythia 0 id: 806a506b-f96d-11e5-bf77-98fe944a88e0 state: SUCCESS> submitted: 1459668440.59
+name: delphes 0 obj: <Node name: delphes 0 id: 810458e1-f96d-11e5-9a81-98fe944a88e0 state: SUCCESS> submitted: 1459668441.6
+name: analysis 0 obj: <Node name: analysis 0 id: 819ec4ae-f96d-11e5-bbc9-98fe944a88e0 state: SUCCESS> submitted: 1459668442.61
+name: madgraph 1 obj: <Node name: madgraph 1 id: 7fcffb8f-f96d-11e5-8cdd-98fe944a88e0 state: SUCCESS> submitted: 1459668439.58
+name: pythia 1 obj: <Node name: pythia 1 id: 806a5787-f96d-11e5-84a0-98fe944a88e0 state: SUCCESS> submitted: 1459668440.59
+name: delphes 1 obj: <Node name: delphes 1 id: 8104606b-f96d-11e5-b037-98fe944a88e0 state: SUCCESS> submitted: 1459668441.6
+name: analysis 1 obj: <Node name: analysis 1 id: 819ecd11-f96d-11e5-b841-98fe944a88e0 state: SUCCESS> submitted: 1459668442.61
+name: merge obj: <Node name: merge id: 82397b66-f96d-11e5-8191-98fe944a88e0 state: SUCCESS> submitted: 1459668443.62
+========== ADAGE LOG END at 2016-04-03T03:27:30.890785 ==========

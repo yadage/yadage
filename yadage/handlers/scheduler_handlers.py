@@ -52,7 +52,7 @@ def reduce_from_dep_output(workflow,stage,dag,context,sched_spec):
     
     utils.addStep(stage,dag,task.s(**attributes))
     
-@scheduler('map-from-dep')
+@scheduler('    ')
 def map_from_dep_output(workflow,stage,dag,context,sched_spec):
     log.info('scheduling via map_from_dep_output')
     

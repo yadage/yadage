@@ -17,13 +17,6 @@ def handler_decorator():
         return wrap
     return handlers,decorator
 
-
-# class JSONPointerFormatter(string.Formatter):
-#     def get_value(self,key,args,kwargs):
-#         return jsonpointer.resolve_pointer(args[0],key)
-#
-# PointerFormatter = JSONPointerFormatter()
-            
 def evaluate_parameters(parameters,context):
     """
     values of in context are converted to strings via json.dump,
@@ -45,7 +38,7 @@ def evaluate_parameters(parameters,context):
     return evaluated
     
 def stage_results(stage):
-    for step in stage['scheduled_steps']:
+    for step in stage.steps:
         result = step.result_of()
         yield step.identifier,result
     
@@ -82,17 +75,3 @@ def read_input(dag,step,reference):
     value = output if index is None else output[index] 
     step.used_input(reference)
     return value
-
-def addTask(dag,task):
-    """
-    Adds the task to the DAG and sets the dependencies of it based on the used inputs
-    """
-    dependencies = [dag.getNode(k) for k in task.inputs.keys()]
-    node = dag.addTask(task, nodename = task.name, depends_on = dependencies)
-    return node
-    
-def addStep(stage,dag,task):
-    if 'scheduled_steps' not in stage:
-        stage['scheduled_steps'] = []
-    node = addTask(dag,task)
-    stage['scheduled_steps'] += [node]
