@@ -2,7 +2,7 @@ import logging
 log = logging.getLogger(__name__)
 
 class workflow(object):
-    def __init__(self,context):
+    def __init__(self,context = None):
         self.context = context
         self.stages = {}
     
@@ -18,18 +18,21 @@ class workflow(object):
     def fromJSON(cls,json,context):
         instance = cls(context)
         for stagejson in json['stages']:
-            stage = jsonstage(stagejson,instance,context)
+            stage = jsonstage(stagejson,instance)
             instance.addStage(stage)
         return instance
 
 class stage_base(object):
-    def __init__(self,name,workflow,context,dependencies):
+    def __init__(self,name,workflow,dependencies):
         self.name = name
-        self.context = context
         self.workflow = workflow
         self.dependencies = dependencies
         self.scheduled_steps = []
-        
+
+    @property
+    def context(self):
+        return self.workflow.context
+
     def applicable(self,dag):
         for x in self.dependencies:
             deprule = self.workflow.stage(x)
@@ -49,9 +52,9 @@ class stage_base(object):
         self.schedule()
     
 class jsonstage(stage_base):
-    def __init__(self,json,workflow,context):
+    def __init__(self,json,workflow):
         self.stageinfo = json
-        super(jsonstage,self).__init__(json['name'],workflow,context,json['dependencies'])
+        super(jsonstage,self).__init__(json['name'],workflow,json['dependencies'])
 
     def schedule(self):
         from yadage.handlers.scheduler_handlers import handlers as sched_handlers
