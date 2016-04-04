@@ -75,7 +75,7 @@ def map_from_dep_output(workflow,stage,dag,context,sched_spec):
     
     outputs           = sched_spec['outputs']
     to_input          = sched_spec['to_input']
-    stepname_template = stage['name']+' {index}'
+    stepname_template = stage['name']+'_{index}'
     stage['scheduled_steps'] = []
 
     for index,(output,reference) in enumerate(utils.regex_match_outputs(dependencies,[outputs])):
@@ -106,7 +106,7 @@ def map_step_from_context(workflow,stage,dag,context,sched_spec):
     
     mappar = sched_spec['map_parameter']
     to_input = sched_spec['to_input']
-    stepname_template = stage['name']+' {index}'
+    stepname_template = stage['name']+'_{index}'
     
     allpars = utils.evaluate_parameters(stage['parameters'],context)
     parswithoutmap = allpars.copy()
