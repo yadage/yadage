@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-import networkx as nx
 import adage
 import adage.backends
 import yadagemodels
