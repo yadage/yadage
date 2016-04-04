@@ -2,28 +2,12 @@
 import networkx as nx
 import adage
 import adage.backends
-from yadagerule import yadage_rule
+import yadagemodels
 import logging
 import os
 import workflow_loader
 import visualize
 log = logging.getLogger(__name__)
-
-def prepare_adage(workflow,global_context):
-    stages_graph = nx.DiGraph()
-    for stage in workflow['stages']:
-        stages_graph.add_node(stage['name'],stage)
-        for x in stage['dependencies']:
-            stages_graph.add_edge(x,stage['name'])
-    
-    rules = {}
-    for stagename in nx.topological_sort(stages_graph):
-        stageinfo = stages_graph.node[stagename]
-        rule = yadage_rule(stageinfo,workflow,rules,global_context)
-        rules[stagename] = rule
-    
-    g = adage.mk_dag()
-    return g,rules
 
 def run_workflow(workdir,analysis,context,loadtoplevel,loginterval,schemadir):
     """
@@ -42,16 +26,19 @@ def run_workflow(workdir,analysis,context,loadtoplevel,loginterval,schemadir):
         if os.path.exists(candpath):
             context[k] = '/workdir/inputs/{}'.format(v)
             
-    workflow = workflow_loader.workflow(analysis, toplevel = loadtoplevel, schemadir = schemadir)
+    workflow_json = workflow_loader.workflow(analysis, toplevel = loadtoplevel, schemadir = schemadir)
+
+    workflow = yadagemodels.workflow.fromJSON(workflow_json,context)
     visualize.write_stage_graph(workdir,workflow)
+
     
-    g, rules = prepare_adage(workflow,context)
-    adage.rundag(g, rules.values(),
+    dag = adage.mk_dag()
+    adage.rundag(dag, workflow.stages.values(),
                  track = True,
                  backend = backend,
                  trackevery = loginterval,
                  workdir = workdir
                 )
     
-    visualize.write_prov_graph(workdir,g,workflow)
+    visualize.write_prov_graph(workdir,dag,workflow)
     log.info('finished yadage workflow %s',analysis)

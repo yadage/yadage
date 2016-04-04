@@ -34,7 +34,7 @@ def evaluate_parameters(parameters,context):
     return evaluated
     
 def stage_results(stage):
-    for step in stage['scheduled_steps']:
+    for step in stage.scheduled_steps:
         result = step.result_of()
         yield step.identifier,result
     
@@ -60,11 +60,4 @@ def regex_match_outputs(stages,regex_list):
                 else:
                     for i,y in enumerate(output):
                         yield y,(stepid,outputkey,i)
-                        
-def addTask(dag,task):
-    """
-    Adds the task to the DAG and sets the dependencies of it based on the used inputs
-    """
-    dependencies = [dag.getNode(k) for k in task.inputs.keys()]
-    node = dag.addTask(task, nodename = task.name, depends_on = dependencies)
-    return node
+

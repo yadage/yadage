@@ -14,18 +14,18 @@ handlers,scheduler = utils.handler_decorator()
 ###     - a list of used inputs (in the form of [stepname,outputkey,index])
 
 @scheduler('zip-from-dep')
-def zip_from_dep_output(workflow,stage,dag,context,sched_spec):
+def zip_from_dep_output(stage,spec):
     log.info('scheduling via zip_from_dep_output')
 
     zipped_maps = []
 
-    stepname = '{}'.format(stage['name'])
-    task     = yadagestep(stepname,sched_spec['step'],context)
+    stepname = stage.name
+    task     = yadagestep(stepname,spec['step'],stage.context)
     
     ### we loop each zip pattern
-    for zipconfig in sched_spec['zip']:
+    for zipconfig in spec['zip']:
         ### for each dependent stage we loop through its steps
-        dependencies = [s for s in workflow['stages'] if s['name'] in zipconfig['from_stages']]
+        dependencies = [stage.workflow.stage(name) for name in zipconfig['from_stages']]
         outputs = zipconfig['outputs']
 
         collected_inputs = []
@@ -38,87 +38,82 @@ def zip_from_dep_output(workflow,stage,dag,context,sched_spec):
         log.debug('zipped map %s',newmap)
         zipped_maps += [newmap]
             
-    attributes = utils.evaluate_parameters(stage['parameters'],context)
+    attributes = utils.evaluate_parameters(stage.stageinfo['parameters'],stage.context)
     for zipped in zipped_maps:
         attributes.update(**zipped)
     
-    node = utils.addTask(dag,task.s(**attributes))
-    stage['scheduled_steps'] = [node]
+    stage.addStep(task.s(**attributes))
+    
     
 @scheduler('reduce-from-dep')
-def reduce_from_dep_output(workflow,stage,dag,context,sched_spec):
+def reduce_from_dep_output(stage,spec):
     log.info('scheduling via reduce_from_dep_output')
-    dependencies = [s for s in workflow['stages'] if s['name'] in sched_spec['from_stages']]
-    
-    stepname = '{}'.format(stage['name'])
-    task = yadagestep(stepname,sched_spec['step'],context)
+    dependencies = [stage.workflow.stage(name) for name in spec['from_stages']]
+        
+    stepname = stage.name
+    task = yadagestep(stepname,spec['step'],stage.context)
 
-    outputs = sched_spec['outputs']
+    outputs = spec['outputs']
 
     collected_inputs = []
     for output,reference in utils.regex_match_outputs(dependencies,[outputs]):
         collected_inputs += [output]
         task.used_input(*reference)
 
-    to_input = sched_spec['to_input']
-    attributes = utils.evaluate_parameters(stage['parameters'],context)
+    to_input = spec['to_input']
+    attributes = utils.evaluate_parameters(stage.stageinfo['parameters'],stage.context)
     attributes[to_input] = collected_inputs
 
-    node = utils.addTask(dag,task.s(**attributes))
-    stage['scheduled_steps'] = [node]
+    stage.addStep(task.s(**attributes))
     
+
 @scheduler('map-from-dep')
-def map_from_dep_output(workflow,stage,dag,context,sched_spec):
+def map_from_dep_output(stage,spec):
     log.info('scheduling via map_from_dep_output')
     
-    dependencies = [s for s in workflow['stages'] if s['name'] in sched_spec['from_stages']]
+    dependencies = [stage.workflow.stage(name) for name in spec['from_stages']]
     
-    outputs           = sched_spec['outputs']
-    to_input          = sched_spec['to_input']
-    stepname_template = stage['name']+'_{index}'
-    stage['scheduled_steps'] = []
+    outputs           = spec['outputs']
+    to_input          = spec['to_input']
+    stepname_template = stage.name+'_{index}'
 
     for index,(output,reference) in enumerate(utils.regex_match_outputs(dependencies,[outputs])):
-        withindex = context.copy()
+        withindex = stage.context.copy()
         withindex.update(index = index)
-        attributes = utils.evaluate_parameters(stage['parameters'],withindex)
+        attributes = utils.evaluate_parameters(stage.stageinfo['parameters'],withindex)
         attributes[to_input] = output
 
-        task = yadagestep(stepname_template.format(index = index),sched_spec['step'],context)
+        task = yadagestep(stepname_template.format(index = index),spec['step'],stage.context)
         task.used_input(*reference)
-        node = utils.addTask(dag,task.s(**attributes))
-        stage['scheduled_steps'] += [node]
-
+        stage.addStep(task.s(**attributes))
+        
 @scheduler('single-from-ctx')
-def single_step_from_context(workflow,stage,dag,context,sched_spec):
+def single_step_from_context(stage,spec):
     log.info('scheduling via single_step_from_context')
-    stepname = '{}'.format(stage['name'])
+    stepname = stage.name
 
-    task = yadagestep(stepname,sched_spec['step'],context)
-    attributes = utils.evaluate_parameters(stage['parameters'],context)
+    task = yadagestep(stepname,spec['step'],stage.context)
+    attributes = utils.evaluate_parameters(stage.stageinfo['parameters'],stage.context)
 
-    node = utils.addTask(dag,task.s(**attributes))
-    stage['scheduled_steps'] = [node]
+    stage.addStep(task.s(**attributes))
 
 @scheduler('map-from-ctx')
-def map_step_from_context(workflow,stage,dag,context,sched_spec):
+def map_step_from_context(stage,spec):
     log.info('map_step_from_context')
     
-    mappar = sched_spec['map_parameter']
-    to_input = sched_spec['to_input']
-    stepname_template = stage['name']+'_{index}'
+    mappar   = spec['map_parameter']
+    to_input = spec['to_input']
+    stepname_template = stage.name+'_{index}'
     
-    allpars = utils.evaluate_parameters(stage['parameters'],context)
+    allpars = utils.evaluate_parameters(stage.stageinfo['parameters'],stage.context)
     parswithoutmap = allpars.copy()
     parswithoutmap.pop(mappar)
     
-    stage['scheduled_steps'] = []
     for index,p in enumerate(allpars[mappar]):
-        withindex = context.copy()
+        withindex = stage.context.copy()
         withindex.update(index = index)
         attributes = parswithoutmap
         attributes[to_input] = p
         
-        task = yadagestep(stepname_template.format(index = index),sched_spec['step'],context)
-        step = utils.addTask(dag,task.s(**attributes))
-        stage['scheduled_steps'] += [step]
+        task = yadagestep(stepname_template.format(index = index),spec['step'],stage.context)
+        stage.addStep(task.s(**attributes))

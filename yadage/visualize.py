@@ -8,10 +8,10 @@ log = logging.getLogger(__name__)
 
 def simple_stage_graph(workflow):
     graph = nx.DiGraph()
-    for stage in workflow['stages']:
-        graph.add_node(stage['name'])
-        for x in stage['dependencies']:
-            graph.add_edge(x,stage['name'])
+    for stage in workflow.stages.values():
+        graph.add_node(stage.stageinfo['name'])
+        for x in stage.dependencies:
+            graph.add_edge(x,stage.stageinfo['name'])
     return graph
 
 def write_stage_graph(workdir,workflow):
@@ -74,11 +74,10 @@ ______
 def write_prov_graph(workdir,adagegraph,workflow):
     provgraph = pydotplus.graphviz.Graph()
     
-    stagedict = {stage['name']:stage for stage in workflow['stages']}
     for stage in nx.topological_sort(simple_stage_graph(workflow)):
         stagecluster = pydotplus.graphviz.Cluster(graph_name = stage, label = stage, labeljust = 'l')
         provgraph.add_subgraph(stagecluster)
-        for step in stagedict[stage]['scheduled_steps']:
+        for step in workflow.stage(stage).scheduled_steps:
             add_step_to_cluster(step,adagegraph,stagecluster,provgraph)
             
     with open('{}/yadage_workflow_instance.dot'.format(workdir),'w') as dotfile:

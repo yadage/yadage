@@ -9,17 +9,22 @@ class workflow(object):
     def stage(self,name):
         return self.stages[name]
     
+    def addStage(self,stage):
+        if stage.name in self.stages:
+            raise RuntimeError('duplicate stage with name %s', stage.name)
+        self.stages[stage.name] = stage
+    
     @classmethod
     def fromJSON(cls,json,context):
         instance = cls(context)
-        stages = {}
         for stagejson in json['stages']:
-            stages[stagejson['name']] = stage(stagejson,instance,context)
-        instance.stages = stages
+            stage = jsonstage(stagejson,instance,context)
+            instance.addStage(stage)
         return instance
 
 class stage_base(object):
-    def __init__(self,workflow,context,dependencies):
+    def __init__(self,name,workflow,context,dependencies):
+        self.name = name
         self.context = context
         self.workflow = workflow
         self.dependencies = dependencies
@@ -43,13 +48,13 @@ class stage_base(object):
         self.dag = dag
         self.schedule()
     
-class stage(stage_base):
-    def __init__(self,stageinfo,workflow,context):
-        self.stageinfo = stageinfo
-        super(stage,self).__init__(workflow,context,stageinfo['dependencies'])
+class jsonstage(stage_base):
+    def __init__(self,json,workflow,context):
+        self.stageinfo = json
+        super(jsonstage,self).__init__(json['name'],workflow,context,json['dependencies'])
 
     def schedule(self):
         from yadage.handlers.scheduler_handlers import handlers as sched_handlers
         sched_spec = self.stageinfo['scheduler']
         scheduler = sched_handlers[sched_spec['scheduler_type']]
-        scheduler(self,sched_spec)    
+        scheduler(self,sched_spec)
