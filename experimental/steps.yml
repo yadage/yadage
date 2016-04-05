@@ -1,13 +1,19 @@
 prepare:
   process:
     process_type: 'string-interpolated-cmd'
-    cmd: './paramfromyaml.py --madgraph HC_UFO -i "{{kHzz: {par1}, kAzz: {par1}, kHww: {par2}, kAww: {par2}}}" {param_card}'
+    cmd: './paramfromtemplate.py inputs/template_paramcard.dat {param_card} -i "{{kHzz: {par1}, kAzz: {par1}, kHww: {par2}, kAww: {par2}}}"'
   publisher:
     publisher_type: 'frompar-pub'
     outputmap:
       param_card: param_card
   environment:
-    environment_type: 'noop-env'
+  environment:
+    environment_type: 'docker-encapsulated'
+    envscript: /resources/fitenv.sh
+    image: lukasheinrich/higgs-mc-studies
+    imagetag: latest
+    envscript: ''
+    resources: []
 
 grid:
   process:
@@ -18,7 +24,13 @@ grid:
     outputmap:
       gridpack: gridpack
   environment:
-    environment_type: 'noop-env'
+  environment:
+    environment_type: 'docker-encapsulated'
+    envscript: /resources/fitenv.sh
+    image: lukasheinrich/higgs-mc-studies
+    imagetag: latest
+    envscript: ''
+    resources: []
 
 madgraph:
   process:
@@ -29,7 +41,13 @@ madgraph:
     outputmap:
       lhefile: lhefile
   environment:
-    environment_type: 'noop-env'
+  environment:
+    environment_type: 'docker-encapsulated'
+    envscript: /resources/fitenv.sh
+    image: lukasheinrich/higgs-mc-studies
+    imagetag: latest
+    envscript: ''
+    resources: []
 
 pythia:
   process:
@@ -40,7 +58,12 @@ pythia:
     outputmap:
       hepmcfile: hepmcfile
   environment:
-    environment_type: 'noop-env'
+    environment_type: 'docker-encapsulated'
+    envscript: /resources/fitenv.sh
+    image: lukasheinrich/higgs-mc-studies
+    imagetag: latest
+    envscript: ''
+    resources: []
 
 delphes:
   process:
@@ -51,7 +74,28 @@ delphes:
     outputmap:
       delphesoutput: outputfile
   environment:
-    environment_type: 'noop-env'
+    environment_type: 'docker-encapsulated'
+    envscript: /resources/fitenv.sh
+    image: lukasheinrich/higgs-mc-studies
+    imagetag: latest
+    envscript: ''
+    resources: []
+
+pythia_delphes:
+  process:
+    process_type: 'string-interpolated-cmd'
+    cmd: './combined_pythia_delphes.py {lhefile} {pythia_card} {detector_card} {outputroot}'
+  publisher:
+    publisher_type: 'frompar-pub'
+    outputmap:
+      delphesoutput: outputroot
+  environment:
+    environment_type: 'docker-encapsulated'
+    envscript: /resources/fitenv.sh
+    image: lukasheinrich/higgs-mc-studies
+    imagetag: latest
+    envscript: ''
+    resources: []
 
 analysis:
   process:
@@ -62,7 +106,12 @@ analysis:
     outputmap:
       analysis_output: analysis_output
   environment:
-    environment_type: 'noop-env'
+    environment_type: 'docker-encapsulated'
+    envscript: /resources/fitenv.sh
+    image: lukasheinrich/higgs-mc-studies
+    imagetag: latest
+    envscript: ''
+    resources: []
 
 rootmerge:
   process:
@@ -73,4 +122,9 @@ rootmerge:
     outputmap:
       mergedfile: mergedfile
   environment:
-    environment_type: 'noop-env'
+    environment_type: 'docker-encapsulated'
+    envscript: /resources/fitenv.sh
+    image: lukasheinrich/higgs-mc-studies
+    imagetag: latest
+    envscript: ''
+    resources: []

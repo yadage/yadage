@@ -3,6 +3,7 @@ import utils
 import logging
 import yaml
 import adage
+import adage.backends
 import os
 from yadage.visualize import write_prov_graph
 from newsetup import workflow, stage
@@ -50,40 +51,28 @@ def madgraph(self):
     gridpack_ref = (self.workflow.element('grid').steps[0].identifier,'gridpack',None)
     for index,seed_ref in enumerate(utils.regex_match_outputs([self.workflow.element('init')],['seeds'])):
 
-        mad      = yadagestep('madgraph {}'.format(index),steps['madgraph'],self.context)
+        mad      = yadagestep('madgraph_{}'.format(index),steps['madgraph'],self.context)
         gridpack = utils.read_input(self.dag,mad,gridpack_ref)
         seed     = utils.read_input(self.dag,mad,seed_ref)
 
         arguments = dict(
             gridpack = gridpack,
-            nevents = 1000,
+            nevents = 25000,
             seed = seed,
             lhefile = '/workdir/output_{}.lhe'.format(index)
         )
         self.addStep(mad.s(**arguments))
 
-@stage.fromfunc(wflow, name = 'pythia', after = 'madgraph')
-def pythia(self):
-    for index,lhefile in enumerate(utils.regex_match_outputs([self.workflow.element('madgraph')],['lhefile'])):
-        pythia = yadagestep('pythia {}'.format(index),steps['pythia'],self.context)
-        inputname = utils.read_input(self.dag,pythia,lhefile)
-        arguments = dict(
-            settings_file = '/analysis/mainPythiaMLM.cmnd',
-            hepmcfile = '/workdir/output_{}.hepmc'.format(index),
-            lhefile = inputname
-        )
-
-        self.addStep(pythia.s(**arguments))
-
-@stage.fromfunc(wflow, name = 'delphes', after = 'pythia')
-def delphes(self):
-    for index,hepmcfile in enumerate(utils.regex_match_outputs([self.workflow.element('pythia')],['hepmcfile'])):
-        delphes = yadagestep('delphes {}'.format(index),steps['delphes'],self.context)
+@stage.fromfunc(wflow, name = 'delphes', after = 'madgraph')
+def pythia_delphes(self):
+    for index,hepmcfile in enumerate(utils.regex_match_outputs([self.workflow.element('madgraph')],['lhefile'])):
+        delphes = yadagestep('pythiadelphes_{}'.format(index),steps['pythia_delphes'],self.context)
         inputname = utils.read_input(self.dag,delphes,hepmcfile)
         arguments = dict(
+            pythia_card = '/analysis/mainPythiaMLM.cmnd',
             detector_card = '/analysis/template_cards/modified_delphes_card_ATLAS.tcl',
-            inputfile = inputname,
-            outputfile = '/workdir/delphesout_{}.root'.format(index)
+            lhefile = inputname,
+            outputroot = '/workdir/delphesout_{}.root'.format(index)
         )
         self.addStep(delphes.s(**arguments))
 
@@ -91,7 +80,7 @@ def delphes(self):
 def post(self):
     for index,rootfile in enumerate(utils.regex_match_outputs([self.workflow.element('delphes')],['delphesoutput'])):
 
-        analysis = yadagestep('analysis {}'.format(index),steps['analysis'],self.context)
+        analysis = yadagestep('analysis_{}'.format(index),steps['analysis'],self.context)
         inputname = utils.read_input(self.dag,analysis,rootfile)
         arguments = dict(
             fromdelphes = inputname,
@@ -112,10 +101,12 @@ def merge(self):
     )
     self.addStep(merge.s(**arguments))
 
+
+workdir = '/workdir'
 wflow.context = {
-    'workdir':'/workdir',
+    'workdir':workdir,
     'init':{
-        'seeds':[12,34],
+        'seeds':[1234,5678,2345,6789],
         'couplingA':0.5,
         'couplingB':0.3
     }
@@ -123,5 +114,5 @@ wflow.context = {
 
 the_dag = adage.mk_dag()
 allstages = [s for s in  wflow.walk(recurse = True)]
-adage.rundag(the_dag, rules = allstages, track = True)
-write_prov_graph(os.getcwd(),the_dag)
+adage.rundag(the_dag, backend = adage.backends.MultiProcBackend(10), rules = allstages, track = True)
+write_prov_graph(workdir,the_dag)

@@ -1,0 +1,22 @@
+version: '2' 
+services:
+  yadage:
+    image: expyadage
+    command: bash
+    stdin_open: true
+    tty: true
+    environment:
+      - DOCKER_HOST=$DOCKER_HOST
+      - DOCKER_TLS_VERIFY=1
+      - DOCKER_CERT_PATH=/secrets/cert
+      - PACKTIVITY_WITHIN_DOCKER=true
+      - PACKTIVITY_WORKDIR_LOCATION=$YADAGEWORK
+      - PACKTIVITY_DOCKER_NOPULL=true 
+    volumes:
+      - secrets:/secrets
+      - yadageworkdir:/workdir
+volumes:
+  yadageworkdir:
+    external: true
+  secrets:
+    external: true
