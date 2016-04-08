@@ -35,7 +35,7 @@ def evaluate_parameters(parameters,context):
     
 def stage_results(stage):
     for step in stage.scheduled_steps:
-        result = step.result_of()
+        result = step.result
         yield step.identifier,result
     
 def regex_match_outputs(stages,regex_list):

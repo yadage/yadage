@@ -33,7 +33,7 @@ class stage_base(object):
     def context(self):
         return self.workflow.context
 
-    def applicable(self,dag):
+    def applicable(self,adageobj):
         for x in self.dependencies:
             deprule = self.workflow.stage(x)
             if not deprule.scheduled_steps:
@@ -43,12 +43,12 @@ class stage_base(object):
         return True
     
     def addStep(self,task):
-        dependencies = [self.dag.getNode(k) for k in task.inputs.keys()]
-        node = self.dag.addTask(task, nodename = task.name, depends_on = dependencies)
+        dependencies = [self.adageobj.dag.getNode(k) for k in task.inputs.keys()]
+        node = self.adageobj.dag.addTask(task, nodename = task.name, depends_on = dependencies)
         self.scheduled_steps += [node]
     
-    def apply(self,dag):
-        self.dag = dag
+    def apply(self,adageobj):
+        self.adageobj = adageobj
         self.schedule()
     
 class jsonstage(stage_base):

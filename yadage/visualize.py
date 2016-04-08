@@ -9,9 +9,9 @@ log = logging.getLogger(__name__)
 def simple_stage_graph(workflow):
     graph = nx.DiGraph()
     for stage in workflow.stages.values():
-        graph.add_node(stage.stageinfo['name'])
+        graph.add_node(stage.name)
         for x in stage.dependencies:
-            graph.add_edge(x,stage.stageinfo['name'])
+            graph.add_edge(x,stage.name)
     return graph
 
 def write_stage_graph(workdir,workflow):
@@ -28,7 +28,7 @@ def output_id(stepid,outputkey,index):
 
 def add_outputs_to_cluster(step,cluster):
     #add outputs circles
-    for k,v in step.result_of().iteritems():
+    for k,v in step.result.iteritems():
         for i,y in (enumerate(v) if type(v)==list else [(None,v)]):
             name = output_id(step.identifier,k,i)
             label = '{}[{}]: '.format(k,i) if i is not None else '{}: '.format(k)

@@ -31,13 +31,14 @@ def run_workflow(workdir,analysis,context,loadtoplevel,loginterval,schemadir):
     visualize.write_stage_graph(workdir,workflow)
 
     
-    dag = adage.mk_dag()
-    adage.rundag(dag, workflow.stages.values(),
+    adageobj = adage.adageobject()
+    adageobj.rules = workflow.stages.values()
+    adage.rundag(adageobj,
                  track = True,
                  backend = backend,
                  trackevery = loginterval,
                  workdir = workdir
                 )
     
-    visualize.write_prov_graph(workdir,dag,workflow)
+    visualize.write_prov_graph(workdir,adageobj.dag,workflow)
     log.info('finished yadage workflow %s',analysis)
