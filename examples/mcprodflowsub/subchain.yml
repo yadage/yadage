@@ -1,0 +1,39 @@
+- name: madevent
+  dependencies: ['init']
+  scheduler:
+    scheduler_type: singlestep-stage
+    step: {$ref: 'steps.yml#/madgraph'}
+    parameters:
+      gridpack: {stages: init, output: gridpack}
+      nevents: {stages: init, output: nevents}
+      seed: {stages: init, output: seed}
+      lhefile: '{workdir}/lhefile.lhe'
+    
+- name: pythia
+  dependencies: ['madevent']
+  scheduler:
+    scheduler_type: singlestep-stage
+    step: {$ref: 'steps.yml#/pythia'}
+    parameters:
+      settings_file: /analysis/pythia_main/example_main /analysis/mainPythiaMLM.cmnd
+      hepmcfile: '{workdir}/outputfile.hepmc'
+      lhefile: {stages: madevent, output: lhefile}
+
+- name: delphes
+  dependencies: ['pythia']
+  scheduler:
+    scheduler_type: singlestep-stage
+    step: {$ref: 'steps.yml#/delphes'}
+    parameters:
+      detector_card: /analysis/template_cards/modified_delphes_card_ATLAS.tcl
+      outputfile: '{workdir}/outputfile.root'
+      inputfile: {stages: pythia, output: hepmcfile}
+
+- name: analysis
+  dependencies: ['delphes']
+  scheduler:
+    scheduler_type: singlestep-stage
+    step: {$ref: 'steps.yml#/analysis'}
+    parameters:
+      fromdelphes: {stages: delphes, output: delphesoutput}
+      analysis_output: '{workdir}/anaout.root'

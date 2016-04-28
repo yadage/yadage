@@ -1,32 +1,79 @@
 - name: prepare
   dependencies: ['init']
   scheduler:
-    scheduler_type: dummy
+    scheduler_type: singlestep-stage
+    step: {$ref: 'steps.yml#/prepare'}
+    parameters:
+      par1: {stages: init, output: par1}
+      par2: {stages: init, output: par2}
+      param_card: '{workdir}/param.dat'
 
 - name: grid
   dependencies: ['prepare']
   scheduler:
-    scheduler_type: dummy
+    scheduler_type: singlestep-stage
+    step: {$ref: 'steps.yml#/grid'}
+    parameters:
+      param_card: {stages: prepare, output: param_card}
+      gridpack: '{workdir}/grid.tar.gz'
 
-- name: subflowA
+- name: madevent
   dependencies: ['grid']
   scheduler:
-    scheduler_type: subworkflow
-    file: mcprodflow/subchain.yml
+    scheduler_type: multistep-stage
+    step: {$ref: 'steps.yml#/madgraph'}
+    parameters:
+      gridpack: {stages: grid, output: gridpack}
+      nevents: {stages: init, output: nevents}
+      seed: {stages: init, output: seeds, flatten: true}
+      lhefile: '{workdir}/lhefile_{index}.lhe'
+    scatter:
+      method: zip
+      parameters: ['seed']
 
-- name: subflowB
-  dependencies: ['grid']
+- name: pythia
+  dependencies: ['madevent']
   scheduler:
-    scheduler_type: subworkflow
-    file: mcprodflow/subchain.yml
+    scheduler_type: multistep-stage
+    step: {$ref: 'steps.yml#/pythia'}
+    parameters:
+      settings_file: /analysis/pythia_main/example_main /analysis/mainPythiaMLM.cmnd
+      hepmcfile: '{workdir}/outputfile_{index}.hepmc'
+      lhefile: {stages: madevent, output: lhefile}
+    scatter:
+      method: zip
+      parameters: ['lhefile']
 
-- name: subflowC
-  dependencies: ['grid']
+- name: delphes
+  dependencies: ['pythia']
   scheduler:
-    scheduler_type: subworkflow
-    file: mcprodflow/subchain.yml
+    scheduler_type: multistep-stage
+    step: {$ref: 'steps.yml#/delphes'}
+    parameters:
+      detector_card: /analysis/template_cards/modified_delphes_card_ATLAS.tcl
+      outputfile: '{workdir}/outputfile_{index}.root'
+      inputfile: {stages: pythia, output: hepmcfile}
+    scatter:
+      method: zip
+      parameters: ['inputfile']
 
-- name: merge
-  dependencies: ['*.analysis']
+- name: analysis
+  dependencies: ['delphes']
   scheduler:
-    scheduler_type: dummy
+    scheduler_type: multistep-stage
+    step: {$ref: 'steps.yml#/analysis'}
+    parameters:
+      fromdelphes: {stages: delphes, output: delphesoutput}
+      analysis_output: '{workdir}/anaout_{index}.root'
+    scatter:
+      method: zip
+      parameters: ['fromdelphes']
+
+- name: rootmerge
+  dependencies: ['analysis']
+  scheduler:
+    scheduler_type: singlestep-stage
+    step: {$ref: 'steps.yml#/rootmerge'}
+    parameters:
+      mergedfile: 'anamerged.root'
+      inputfiles: {stages: analysis, output: analysis_output}

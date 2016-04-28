@@ -1,0 +1,10 @@
+teststep:
+  process:
+    process_type: 'string-interpolated-cmd'
+    cmd: '{parone} {partwo} {parthree}'
+  publisher:
+    publisher_type: 'constant-pub'
+    publish:
+      hello: world
+  environment:
+    environment_type: 'noop-env'

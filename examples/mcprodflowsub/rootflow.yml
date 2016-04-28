@@ -1,0 +1,40 @@
+- name: prepare
+  dependencies: ['init']
+  scheduler:
+    scheduler_type: singlestep-stage
+    step: {$ref: 'steps.yml#/prepare'}
+    parameters:
+      par1: {stages: init, output: par1, type: str}
+      par2: {stages: init, output: par2, type: str}
+      param_card: '{workdir}/param.dat'
+
+- name: grid
+  dependencies: ['prepare']
+  scheduler:
+    scheduler_type: singlestep-stage
+    step: {$ref: 'steps.yml#/grid'}
+    parameters:
+      param_card: {stages: prepare, output: param_card}
+      gridpack: '{workdir}/grid.tar.gz'
+
+- name: madevent
+  dependencies: ['grid']
+  scheduler:
+    scheduler_type: multistep-stage
+    workflow: {$ref: 'subchain.yml'}
+    parameters:
+      gridpack: {stages: grid, output: gridpack, unwrap: true}
+      nevents: {stages: init, output: nevents, unwrap: true}
+      seed: {stages: init, output: seeds, flatten: true}
+    scatter:
+      method: zip
+      parameters: ['seed']
+
+- name: rootmerge
+  dependencies: ['*.analysis']
+  scheduler:
+    scheduler_type: singlestep-stage
+    step: {$ref: 'steps.yml#/rootmerge'}
+    parameters:
+      mergedfile: 'anamerged.root'
+      inputfiles: {stages: '*.analysis', output: analysis_output}

@@ -1,17 +1,42 @@
-========== ADAGE LOG BEGIN at 2016-04-26T15:53:13.482795 ==========
----------- snapshot at 2016-04-26T15:53:13.483034
----------- snapshot at 2016-04-26T15:53:13.541411
-name: init root obj: <Node name: init root id: 42767ab4-5cc3-4baa-be11-98d6011d81f7 state: RUNNING> submitted: True
----------- snapshot at 2016-04-26T15:54:41.989625
-name: init root obj: <Node name: init root id: 42767ab4-5cc3-4baa-be11-98d6011d81f7 state: SUCCESS> submitted: True
-name: B1 obj: <Node name: B1 id: db9a7492-dea6-4d8d-b4d0-922503aed766 state: SUCCESS> submitted: True
-name: A2 obj: <Node name: A2 id: c847f8af-1b66-478c-a09f-fe3f804a33f5 state: SUCCESS> submitted: True
-name: B2 obj: <Node name: B2 id: 2ce717aa-dc20-4815-a887-9f9f62161e39 state: SUCCESS> submitted: True
-name: A1 obj: <Node name: A1 id: 5beb0259-eaa6-4bc3-b633-aa7ba5288532 state: SUCCESS> submitted: True
----------- snapshot at 2016-04-26T15:54:44.075882
-name: init root obj: <Node name: init root id: 42767ab4-5cc3-4baa-be11-98d6011d81f7 state: SUCCESS> submitted: True
-name: B1 obj: <Node name: B1 id: db9a7492-dea6-4d8d-b4d0-922503aed766 state: SUCCESS> submitted: True
-name: A2 obj: <Node name: A2 id: c847f8af-1b66-478c-a09f-fe3f804a33f5 state: SUCCESS> submitted: True
-name: B2 obj: <Node name: B2 id: 2ce717aa-dc20-4815-a887-9f9f62161e39 state: SUCCESS> submitted: True
-name: A1 obj: <Node name: A1 id: 5beb0259-eaa6-4bc3-b633-aa7ba5288532 state: SUCCESS> submitted: True
-========== ADAGE LOG END at 2016-04-26T15:54:44.076304 ==========
+========== ADAGE LOG BEGIN at 2016-04-28T04:19:26.384768 ==========
+---------- snapshot at 2016-04-28T04:19:26.385018
+---------- snapshot at 2016-04-28T04:19:26.455019
+name: init root obj: <Node name: init root id: 8e8ac46c-26cd-4e26-988c-e9803efe454f state: RUNNING> submitted: True
+---------- snapshot at 2016-04-28T04:19:27.624268
+name: init root obj: <Node name: init root id: 8e8ac46c-26cd-4e26-988c-e9803efe454f state: SUCCESS> submitted: True
+name: prepare obj: <Node name: prepare id: d684341b-b2df-424c-9627-27df90668b9c state: SUCCESS> submitted: True
+name: grid obj: <Node name: grid id: a175e263-7904-4c5a-b7f7-4fbbb0e8a9ab state: SUCCESS> submitted: True
+name: init madevent_3 obj: <Node name: init madevent_3 id: cdd847ad-122e-400d-8775-fbe9d927a528 state: SUCCESS> submitted: True
+name: madevent obj: <Node name: madevent id: 38e239a8-16cf-4ef8-8676-dfa9305e3a6e state: SUCCESS> submitted: True
+name: init madevent_1 obj: <Node name: init madevent_1 id: 49141978-aefd-484c-a807-0ae2943d56d7 state: SUCCESS> submitted: True
+name: madevent obj: <Node name: madevent id: 0e79877e-f62d-4359-8f8d-1beff4872d30 state: SUCCESS> submitted: True
+name: init madevent_2 obj: <Node name: init madevent_2 id: 425e7f89-d4b2-4712-9da1-a0fbb8110304 state: SUCCESS> submitted: True
+name: madevent obj: <Node name: madevent id: 87ba0384-dced-4962-8fa1-6bce732fa2e4 state: SUCCESS> submitted: True
+name: init madevent_0 obj: <Node name: init madevent_0 id: 24051167-8cef-4b90-a624-aa72192f5b36 state: SUCCESS> submitted: True
+name: madevent obj: <Node name: madevent id: 97565951-90ab-4fe2-bffc-463547074a7e state: RUNNING> submitted: True
+---------- snapshot at 2016-04-28T04:19:39.949091
+name: init root obj: <Node name: init root id: 8e8ac46c-26cd-4e26-988c-e9803efe454f state: SUCCESS> submitted: True
+name: prepare obj: <Node name: prepare id: d684341b-b2df-424c-9627-27df90668b9c state: SUCCESS> submitted: True
+name: grid obj: <Node name: grid id: a175e263-7904-4c5a-b7f7-4fbbb0e8a9ab state: SUCCESS> submitted: True
+name: init madevent_3 obj: <Node name: init madevent_3 id: cdd847ad-122e-400d-8775-fbe9d927a528 state: SUCCESS> submitted: True
+name: madevent obj: <Node name: madevent id: 38e239a8-16cf-4ef8-8676-dfa9305e3a6e state: SUCCESS> submitted: True
+name: pythia obj: <Node name: pythia id: 53df8bfe-432b-4456-afae-2553fdbda59e state: SUCCESS> submitted: True
+name: init madevent_1 obj: <Node name: init madevent_1 id: 49141978-aefd-484c-a807-0ae2943d56d7 state: SUCCESS> submitted: True
+name: madevent obj: <Node name: madevent id: 0e79877e-f62d-4359-8f8d-1beff4872d30 state: SUCCESS> submitted: True
+name: pythia obj: <Node name: pythia id: 2d3746e4-13e8-428c-a609-21404812314a state: SUCCESS> submitted: True
+name: delphes obj: <Node name: delphes id: 21fa470d-6cfe-496b-8f3b-664dac958a4d state: SUCCESS> submitted: True
+name: analysis obj: <Node name: analysis id: 46af5c2e-469c-4bf1-acbe-e4a29d49bdb2 state: SUCCESS> submitted: True
+name: init madevent_2 obj: <Node name: init madevent_2 id: 425e7f89-d4b2-4712-9da1-a0fbb8110304 state: SUCCESS> submitted: True
+name: madevent obj: <Node name: madevent id: 87ba0384-dced-4962-8fa1-6bce732fa2e4 state: SUCCESS> submitted: True
+name: pythia obj: <Node name: pythia id: 0c630b40-6669-4f59-9a6f-6a8564cd2aee state: SUCCESS> submitted: True
+name: init madevent_0 obj: <Node name: init madevent_0 id: 24051167-8cef-4b90-a624-aa72192f5b36 state: SUCCESS> submitted: True
+name: madevent obj: <Node name: madevent id: 97565951-90ab-4fe2-bffc-463547074a7e state: SUCCESS> submitted: True
+name: pythia obj: <Node name: pythia id: 35361827-89e4-4dc9-a1b9-89d94a22d47d state: SUCCESS> submitted: True
+name: delphes obj: <Node name: delphes id: 46523080-d7de-41e1-88cb-549eb8e40a49 state: SUCCESS> submitted: True
+name: analysis obj: <Node name: analysis id: cc2249fd-740d-4c79-8377-b8aee9831f61 state: SUCCESS> submitted: True
+name: delphes obj: <Node name: delphes id: 6b0a4c5d-860e-47c9-b2d0-8a6db809ed7f state: SUCCESS> submitted: True
+name: analysis obj: <Node name: analysis id: e6015587-d26a-4829-ab64-59cac34a0736 state: SUCCESS> submitted: True
+name: delphes obj: <Node name: delphes id: 800c1d4a-3d5b-40fd-98e9-70decb152728 state: SUCCESS> submitted: True
+name: analysis obj: <Node name: analysis id: 3a518fde-31ba-42b1-ae0b-7eeb7c27ad04 state: SUCCESS> submitted: True
+name: rootmerge obj: <Node name: rootmerge id: c2bf6a8b-1332-4229-a97c-8ece98577a5e state: SUCCESS> submitted: True
+========== ADAGE LOG END at 2016-04-28T04:19:39.949923 ==========

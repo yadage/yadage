@@ -27,7 +27,7 @@ class stage_base(object):
         self.schedule()
     
     def addStep(self,step):
-        dependencies = [self.flowview.dag.getNode(k) for k in step.inputs.keys()]
+        dependencies = [self.flowview.dag.getNode(k.stepid) for k in step.inputs]
         self.flowview.addStep(step, stage = self.name , depends_on = dependencies)
 
     def addWorkflow(self,rules, initstep, offset):
@@ -43,13 +43,13 @@ class initStage(stage_base):
     
 class jsonstage(stage_base):
     def __init__(self,json,context):
-        self.stageinfo = json
+        self.stageinfo = json['scheduler']
         super(jsonstage,self).__init__(json['name'],context,json['dependencies'])
         
     def schedule(self):
         from yadage.handlers.scheduler_handlers import handlers as sched_handlers
-        scheduler = sched_handlers[self.stageinfo['scheduler']['scheduler_type']]
-        scheduler(self,self.stageinfo['scheduler'])
+        scheduler = sched_handlers[self.stageinfo['scheduler_type']]
+        scheduler(self,self.stageinfo)
         
 class YadageWorkflow(adage.adageobject):
     def __init__(self):

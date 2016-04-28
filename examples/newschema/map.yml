@@ -1,0 +1,71 @@
+- name: stageOne
+  dependencies: ['[setupA]']
+  scheduler:
+    scheduler_type: singlestep-stage
+    parameters:
+      parone: 
+        stages: setupA
+        output: outputA
+      partwo: two
+      parthree: three
+    step: {
+      $ref: 'steps.yml#/teststep'
+    }
+# - name: stageTwo
+#   dependencies: ['[setupB]']
+#   scheduler:
+#     scheduler_type: multistep-stage
+#     step: {
+#       $ref: 'steps.yml#/teststep'
+#     }
+#     parameters:
+#       parone:
+#         stages: setupB
+#         output: outputB
+#       partwo:
+#         stages: setupB
+#         output: outputB
+#       parthree: three
+#     scatter:
+#       method: zip
+#       parameters: ['parone','partwo']
+# - name: stageTwo
+#   dependencies: ['[setupB]']
+#   scheduler:
+#     scheduler_type: multistep-stage
+#     step: {
+#       $ref: 'steps.yml#/teststep'
+#     }
+#     parameters:
+#       parone:
+#         stages: setupB
+#         output: outputB
+#       partwo:
+#         stages: setupB
+#         output: outputB
+#       parthree: three
+#     scatter:
+#       method: cartesian
+#       parameters: ['parone','partwo']
+#       keys: ['parone','partwo']
+# - name: stageTwo
+#   dependencies: ['[setupB]']
+#   scheduler:
+#     scheduler_type: multistep-stage
+#     step: {
+#       $ref: 'steps.yml#/teststep'
+#     }
+#     parameters:
+#       parone:
+#         stages: setupB
+#         output: outputB
+#       partwo:
+#         stages: setupB
+#         output: outputB
+#       parthree: three
+#     scatter:
+#       method: cartesian
+#       parameters: ['parone','partwo']
+#       keys: ['parone','partwo']
+
+    

@@ -1,0 +1,188 @@
+INFO:adage:extending graph.
+INFO:adage:submitting <Node name: init root id: 8e8ac46c-26cd-4e26-988c-e9803efe454f state: DEFINED> job
+INFO:adage:successful: 0 | failed: 0 | running: 1| notrun: 0 | total: 1 | rules: 4
+INFO:adage.node:node finished <Node name: init root id: 8e8ac46c-26cd-4e26-988c-e9803efe454f state: SUCCESS> finished
+INFO:adage:extending graph.
+INFO:adage:submitting <Node name: prepare id: d684341b-b2df-424c-9627-27df90668b9c state: DEFINED> job
+INFO:step_logger_prepare:context is: {'workdir': '/basework'}
+INFO:step_logger_prepare:would be running this command: ./paramfromyaml.py --madgraph HC_UFO -i "{kHzz: 0.1, kAzz: 0.1, kHww: 0.3, kAww: 0.3}" /basework/param.dat
+INFO:adage:extending graph.
+INFO:adage.node:node finished <Node name: prepare id: d684341b-b2df-424c-9627-27df90668b9c state: SUCCESS> finished
+INFO:adage:submitting <Node name: grid id: a175e263-7904-4c5a-b7f7-4fbbb0e8a9ab state: DEFINED> job
+INFO:step_logger_grid:context is: {'workdir': '/basework'}
+INFO:step_logger_grid:would be running this command: ./scripts/setupgrid.sh /basework/param.dat /basework/grid.tar.gz
+INFO:adage:extending graph.
+INFO:adage.node:node finished <Node name: grid id: a175e263-7904-4c5a-b7f7-4fbbb0e8a9ab state: SUCCESS> finished
+INFO:adage:extending graph.
+INFO:adage:extending graph.
+INFO:adage:extending graph.
+INFO:adage:extending graph.
+INFO:adage:submitting <Node name: init madevent_3 id: cdd847ad-122e-400d-8775-fbe9d927a528 state: DEFINED> job
+INFO:adage:submitting <Node name: init madevent_1 id: 49141978-aefd-484c-a807-0ae2943d56d7 state: DEFINED> job
+INFO:adage:submitting <Node name: init madevent_2 id: 425e7f89-d4b2-4712-9da1-a0fbb8110304 state: DEFINED> job
+INFO:adage:submitting <Node name: init madevent_0 id: 24051167-8cef-4b90-a624-aa72192f5b36 state: DEFINED> job
+INFO:adage.node:node finished <Node name: init madevent_3 id: cdd847ad-122e-400d-8775-fbe9d927a528 state: SUCCESS> finished
+INFO:adage.node:node finished <Node name: init madevent_2 id: 425e7f89-d4b2-4712-9da1-a0fbb8110304 state: SUCCESS> finished
+INFO:adage.node:node finished <Node name: init madevent_1 id: 49141978-aefd-484c-a807-0ae2943d56d7 state: SUCCESS> finished
+INFO:adage.node:node finished <Node name: init madevent_0 id: 24051167-8cef-4b90-a624-aa72192f5b36 state: SUCCESS> finished
+INFO:adage:extending graph.
+INFO:adage:extending graph.
+INFO:adage:extending graph.
+INFO:adage:extending graph.
+INFO:adage:submitting <Node name: madevent id: 38e239a8-16cf-4ef8-8676-dfa9305e3a6e state: DEFINED> job
+INFO:adage:submitting <Node name: madevent id: 0e79877e-f62d-4359-8f8d-1beff4872d30 state: DEFINED> job
+INFO:adage:submitting <Node name: madevent id: 87ba0384-dced-4962-8fa1-6bce732fa2e4 state: DEFINED> job
+INFO:step_logger_madevent:context is: {'workdir': '/basework/madevent_3'}
+INFO:step_logger_madevent:would be running this command: ./scripts/rungrid.sh /basework/grid.tar.gz 10000 4 /basework/madevent_3/lhefile.lhe
+INFO:adage:submitting <Node name: madevent id: 97565951-90ab-4fe2-bffc-463547074a7e state: DEFINED> job
+INFO:step_logger_madevent:context is: {'workdir': '/basework/madevent_1'}
+INFO:step_logger_madevent:would be running this command: ./scripts/rungrid.sh /basework/grid.tar.gz 10000 2 /basework/madevent_1/lhefile.lhe
+INFO:adage.node:node finished <Node name: madevent id: 38e239a8-16cf-4ef8-8676-dfa9305e3a6e state: SUCCESS> finished
+INFO:adage:successful: 8 | failed: 0 | running: 3| notrun: 0 | total: 11 | rules: 13
+INFO:step_logger_madevent:context is: {'workdir': '/basework/madevent_2'}
+INFO:step_logger_madevent:would be running this command: ./scripts/rungrid.sh /basework/grid.tar.gz 10000 3 /basework/madevent_2/lhefile.lhe
+INFO:step_logger_madevent:context is: {'workdir': '/basework/madevent_0'}
+INFO:step_logger_madevent:would be running this command: ./scripts/rungrid.sh /basework/grid.tar.gz 10000 1 /basework/madevent_0/lhefile.lhe
+INFO:adage.node:node finished <Node name: madevent id: 0e79877e-f62d-4359-8f8d-1beff4872d30 state: SUCCESS> finished
+INFO:adage.node:node finished <Node name: madevent id: 87ba0384-dced-4962-8fa1-6bce732fa2e4 state: SUCCESS> finished
+INFO:adage.node:node finished <Node name: madevent id: 97565951-90ab-4fe2-bffc-463547074a7e state: SUCCESS> finished
+INFO:adage:extending graph.
+INFO:adage:extending graph.
+INFO:adage:extending graph.
+INFO:adage:extending graph.
+INFO:adage:submitting <Node name: pythia id: 53df8bfe-432b-4456-afae-2553fdbda59e state: DEFINED> job
+INFO:adage:submitting <Node name: pythia id: 2d3746e4-13e8-428c-a609-21404812314a state: DEFINED> job
+INFO:step_logger_pythia:context is: {'workdir': '/basework/madevent_3'}
+INFO:step_logger_pythia:would be running this command: /analysis/pythia_main/example_main /analysis/pythia_main/example_main /analysis/mainPythiaMLM.cmnd /basework/madevent_3/outputfile.hepmc /basework/madevent_3/lhefile.lhe
+INFO:adage:submitting <Node name: pythia id: 0c630b40-6669-4f59-9a6f-6a8564cd2aee state: DEFINED> job
+INFO:adage:submitting <Node name: pythia id: 35361827-89e4-4dc9-a1b9-89d94a22d47d state: DEFINED> job
+INFO:step_logger_pythia:context is: {'workdir': '/basework/madevent_1'}
+INFO:step_logger_pythia:would be running this command: /analysis/pythia_main/example_main /analysis/pythia_main/example_main /analysis/mainPythiaMLM.cmnd /basework/madevent_1/outputfile.hepmc /basework/madevent_1/lhefile.lhe
+INFO:step_logger_pythia:context is: {'workdir': '/basework/madevent_2'}
+INFO:step_logger_pythia:would be running this command: /analysis/pythia_main/example_main /analysis/pythia_main/example_main /analysis/mainPythiaMLM.cmnd /basework/madevent_2/outputfile.hepmc /basework/madevent_2/lhefile.lhe
+INFO:step_logger_pythia:context is: {'workdir': '/basework/madevent_0'}
+INFO:step_logger_pythia:would be running this command: /analysis/pythia_main/example_main /analysis/pythia_main/example_main /analysis/mainPythiaMLM.cmnd /basework/madevent_0/outputfile.hepmc /basework/madevent_0/lhefile.lhe
+INFO:adage.node:node finished <Node name: pythia id: 35361827-89e4-4dc9-a1b9-89d94a22d47d state: SUCCESS> finished
+INFO:adage.node:node finished <Node name: pythia id: 2d3746e4-13e8-428c-a609-21404812314a state: SUCCESS> finished
+INFO:adage.node:node finished <Node name: pythia id: 53df8bfe-432b-4456-afae-2553fdbda59e state: SUCCESS> finished
+INFO:adage.node:node finished <Node name: pythia id: 0c630b40-6669-4f59-9a6f-6a8564cd2aee state: SUCCESS> finished
+INFO:adage:extending graph.
+INFO:adage:extending graph.
+INFO:adage:extending graph.
+INFO:adage:extending graph.
+INFO:adage:submitting <Node name: delphes id: 6b0a4c5d-860e-47c9-b2d0-8a6db809ed7f state: DEFINED> job
+INFO:adage:submitting <Node name: delphes id: 21fa470d-6cfe-496b-8f3b-664dac958a4d state: DEFINED> job
+INFO:adage:submitting <Node name: delphes id: 800c1d4a-3d5b-40fd-98e9-70decb152728 state: DEFINED> job
+INFO:adage:submitting <Node name: delphes id: 46523080-d7de-41e1-88cb-549eb8e40a49 state: DEFINED> job
+INFO:step_logger_delphes:context is: {'workdir': '/basework/madevent_3'}
+INFO:step_logger_delphes:would be running this command: DelphesHepMC /analysis/template_cards/modified_delphes_card_ATLAS.tcl /basework/madevent_3/outputfile.root /basework/madevent_3/outputfile.hepmc
+INFO:step_logger_delphes:context is: {'workdir': '/basework/madevent_1'}
+INFO:step_logger_delphes:context is: {'workdir': '/basework/madevent_2'}
+INFO:step_logger_delphes:would be running this command: DelphesHepMC /analysis/template_cards/modified_delphes_card_ATLAS.tcl /basework/madevent_1/outputfile.root /basework/madevent_1/outputfile.hepmc
+INFO:step_logger_delphes:would be running this command: DelphesHepMC /analysis/template_cards/modified_delphes_card_ATLAS.tcl /basework/madevent_2/outputfile.root /basework/madevent_2/outputfile.hepmc
+INFO:step_logger_delphes:context is: {'workdir': '/basework/madevent_0'}
+INFO:step_logger_delphes:would be running this command: DelphesHepMC /analysis/template_cards/modified_delphes_card_ATLAS.tcl /basework/madevent_0/outputfile.root /basework/madevent_0/outputfile.hepmc
+INFO:adage.node:node finished <Node name: delphes id: 46523080-d7de-41e1-88cb-549eb8e40a49 state: SUCCESS> finished
+INFO:adage.node:node finished <Node name: delphes id: 6b0a4c5d-860e-47c9-b2d0-8a6db809ed7f state: SUCCESS> finished
+INFO:adage.node:node finished <Node name: delphes id: 21fa470d-6cfe-496b-8f3b-664dac958a4d state: SUCCESS> finished
+INFO:adage.node:node finished <Node name: delphes id: 800c1d4a-3d5b-40fd-98e9-70decb152728 state: SUCCESS> finished
+INFO:adage:extending graph.
+INFO:adage:extending graph.
+INFO:adage:extending graph.
+INFO:adage:extending graph.
+INFO:adage:submitting <Node name: analysis id: 46af5c2e-469c-4bf1-acbe-e4a29d49bdb2 state: DEFINED> job
+INFO:step_logger_analysis:context is: {'workdir': '/basework/madevent_1'}
+INFO:step_logger_analysis:would be running this command: ./scripts/runpost.sh /basework/madevent_1/outputfile.root /basework/madevent_1/anaout.root
+INFO:adage:submitting <Node name: analysis id: cc2249fd-740d-4c79-8377-b8aee9831f61 state: DEFINED> job
+INFO:step_logger_analysis:context is: {'workdir': '/basework/madevent_0'}
+INFO:step_logger_analysis:would be running this command: ./scripts/runpost.sh /basework/madevent_0/outputfile.root /basework/madevent_0/anaout.root
+INFO:adage:submitting <Node name: analysis id: e6015587-d26a-4829-ab64-59cac34a0736 state: DEFINED> job
+INFO:adage:submitting <Node name: analysis id: 3a518fde-31ba-42b1-ae0b-7eeb7c27ad04 state: DEFINED> job
+INFO:step_logger_analysis:context is: {'workdir': '/basework/madevent_3'}
+INFO:step_logger_analysis:would be running this command: ./scripts/runpost.sh /basework/madevent_3/outputfile.root /basework/madevent_3/anaout.root
+INFO:step_logger_analysis:context is: {'workdir': '/basework/madevent_2'}
+INFO:step_logger_analysis:would be running this command: ./scripts/runpost.sh /basework/madevent_2/outputfile.root /basework/madevent_2/anaout.root
+INFO:adage.node:node finished <Node name: analysis id: 3a518fde-31ba-42b1-ae0b-7eeb7c27ad04 state: SUCCESS> finished
+INFO:adage.node:node finished <Node name: analysis id: cc2249fd-740d-4c79-8377-b8aee9831f61 state: SUCCESS> finished
+INFO:adage.node:node finished <Node name: analysis id: e6015587-d26a-4829-ab64-59cac34a0736 state: SUCCESS> finished
+INFO:adage.node:node finished <Node name: analysis id: 46af5c2e-469c-4bf1-acbe-e4a29d49bdb2 state: SUCCESS> finished
+INFO:adage:extending graph.
+INFO:adage:submitting <Node name: rootmerge id: c2bf6a8b-1332-4229-a97c-8ece98577a5e state: DEFINED> job
+INFO:step_logger_rootmerge:context is: {'workdir': '/basework'}
+INFO:step_logger_rootmerge:would be running this command: hadd anamerged.root /basework/madevent_1/anaout.root /basework/madevent_0/anaout.root /basework/madevent_3/anaout.root /basework/madevent_2/anaout.root
+INFO:adage.node:node finished <Node name: rootmerge id: c2bf6a8b-1332-4229-a97c-8ece98577a5e state: SUCCESS> finished
+INFO:adage:no nodes can be run anymore
+INFO:adage:all running jobs are finished.
+INFO:adage:track last time
+INFO:adage:successful: 24 | failed: 0 | running: 0| notrun: 0 | total: 24 | rules: 0
+INFO:adage:validating execution
+INFO:adage:execution valid. (in terms of execution order)
+==========
+{'param_card': '/basework/param.dat', 'par2': [0.3], 'par1': [0.1]}
+==========
+==========
+{'param_card': ['/basework/param.dat'], 'gridpack': '/basework/grid.tar.gz'}
+==========
+==========
+{'nevents': 10000, 'gridpack': '/basework/grid.tar.gz', 'seed': 1}
+==========
+==========
+{'nevents': 10000, 'gridpack': '/basework/grid.tar.gz', 'seed': 2}
+==========
+==========
+{'nevents': 10000, 'gridpack': '/basework/grid.tar.gz', 'seed': 3}
+==========
+==========
+{'nevents': 10000, 'gridpack': '/basework/grid.tar.gz', 'seed': 4}
+==========
+==========
+{'lhefile': '/basework/madevent_3/lhefile.lhe', 'nevents': [10000], 'gridpack': ['/basework/grid.tar.gz'], 'seed': [4]}
+==========
+==========
+{'lhefile': '/basework/madevent_2/lhefile.lhe', 'nevents': [10000], 'gridpack': ['/basework/grid.tar.gz'], 'seed': [3]}
+==========
+==========
+{'lhefile': '/basework/madevent_1/lhefile.lhe', 'nevents': [10000], 'gridpack': ['/basework/grid.tar.gz'], 'seed': [2]}
+==========
+==========
+{'lhefile': '/basework/madevent_0/lhefile.lhe', 'nevents': [10000], 'gridpack': ['/basework/grid.tar.gz'], 'seed': [1]}
+==========
+==========
+{'lhefile': ['/basework/madevent_3/lhefile.lhe'], 'hepmcfile': '/basework/madevent_3/outputfile.hepmc', 'settings_file': '/analysis/pythia_main/example_main /analysis/mainPythiaMLM.cmnd'}
+==========
+==========
+{'lhefile': ['/basework/madevent_2/lhefile.lhe'], 'hepmcfile': '/basework/madevent_2/outputfile.hepmc', 'settings_file': '/analysis/pythia_main/example_main /analysis/mainPythiaMLM.cmnd'}
+==========
+==========
+{'lhefile': ['/basework/madevent_1/lhefile.lhe'], 'hepmcfile': '/basework/madevent_1/outputfile.hepmc', 'settings_file': '/analysis/pythia_main/example_main /analysis/mainPythiaMLM.cmnd'}
+==========
+==========
+{'lhefile': ['/basework/madevent_0/lhefile.lhe'], 'hepmcfile': '/basework/madevent_0/outputfile.hepmc', 'settings_file': '/analysis/pythia_main/example_main /analysis/mainPythiaMLM.cmnd'}
+==========
+==========
+{'detector_card': '/analysis/template_cards/modified_delphes_card_ATLAS.tcl', 'outputfile': '/basework/madevent_3/outputfile.root', 'inputfile': ['/basework/madevent_3/outputfile.hepmc']}
+==========
+==========
+{'detector_card': '/analysis/template_cards/modified_delphes_card_ATLAS.tcl', 'outputfile': '/basework/madevent_2/outputfile.root', 'inputfile': ['/basework/madevent_2/outputfile.hepmc']}
+==========
+==========
+{'detector_card': '/analysis/template_cards/modified_delphes_card_ATLAS.tcl', 'outputfile': '/basework/madevent_1/outputfile.root', 'inputfile': ['/basework/madevent_1/outputfile.hepmc']}
+==========
+==========
+{'detector_card': '/analysis/template_cards/modified_delphes_card_ATLAS.tcl', 'outputfile': '/basework/madevent_0/outputfile.root', 'inputfile': ['/basework/madevent_0/outputfile.hepmc']}
+==========
+==========
+{'fromdelphes': ['/basework/madevent_3/outputfile.root'], 'analysis_output': '/basework/madevent_3/anaout.root'}
+==========
+==========
+{'fromdelphes': ['/basework/madevent_2/outputfile.root'], 'analysis_output': '/basework/madevent_2/anaout.root'}
+==========
+==========
+{'fromdelphes': ['/basework/madevent_1/outputfile.root'], 'analysis_output': '/basework/madevent_1/anaout.root'}
+==========
+==========
+{'fromdelphes': ['/basework/madevent_0/outputfile.root'], 'analysis_output': '/basework/madevent_0/anaout.root'}
+==========
+==========
+{'mergedfile': 'anamerged.root', 'inputfiles': ['/basework/madevent_1/anaout.root', '/basework/madevent_0/anaout.root', '/basework/madevent_3/anaout.root', '/basework/madevent_2/anaout.root']}
+==========

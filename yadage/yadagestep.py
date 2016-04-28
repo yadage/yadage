@@ -1,16 +1,19 @@
 from packtivity import packtivity
 
+class outputReference(object):
+    def __init__(self,stepid,pointer):
+        self.stepid = stepid
+        self.pointer = pointer
+
 class stepbase(object):
     def __init__(self,name):
         self.name = name
-        self.used_inputs = {}
+        self.used_inputs = []
         self._result = {}
         self.attributes = {}
         
-    def used_input(self,stepid,output,index):
-        if stepid not in self.used_inputs:
-            self.used_inputs[stepid] = []
-        self.used_inputs[stepid].append((output,index))
+    def used_input(self,reference):
+        self.used_inputs += [reference]
     
     @property
     def inputs(self):
