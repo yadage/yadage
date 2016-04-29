@@ -1,22 +1,24 @@
 import logging
 import yaml
+import json
 import adage
-from yadage.yadagestep  import yadagestep, initstep, outputReference
-from yadage.yadagemodels import stage_base, jsonstage, YadageWorkflow, WorkflowView, STAGESEP
-from yadage.workflow_loader import loader
-
-
+from yadage.yadagestep      import yadagestep, initstep, outputReference
+from yadage.yadagemodels    import stage_base, jsonstage, YadageWorkflow, WorkflowView, STAGESEP
+from yadage.workflow_loader import loader, load_and_validate
+import yadage
 logging.basicConfig(level = logging.INFO)
 
+schemadir = '/Users/lukas/Code/yadagedev/cap-schemas/schemas'
+loadtoplevel = 'mcprodflowsub'
+
+
+flowyaml = yadage.workflow_loader.workflow('rootflow.yml', toplevel = loadtoplevel, schemadir = schemadir)
 rootcontext = {'workdir':'/basework'}
+flow = YadageWorkflow.fromJSON(flowyaml,rootcontext)
 
-ld = loader('mcprodflowsub')
 
-initdata = {'par1': 0.1, 'par2': 0.3, 'nevents': 10000, 'seeds': [1,2,3,4]}
-stageyaml = ld('rootflow.yml')
-
-rules = [jsonstage(yml,rootcontext) for yml in stageyaml]
-flow = YadageWorkflow()
-rootview = WorkflowView(flow)
-rootview.addWorkflow(rules, initstep = initstep('init root', initdata))
+flow.view().init({'par1': 0.1, 'par2': 0.3, 'nevents': 10000, 'seeds': [1,2,3]})
 adage.rundag(flow, track = True)
+
+with open('yadage.json','w') as dumpfile:
+    json.dump(flow.stepsbystage,dumpfile)

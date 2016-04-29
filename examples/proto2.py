@@ -13,7 +13,7 @@ class setup_stage(stage_base):
         self.yml = yml
     def schedule(self):
         stepdata = self.yml['setup_steps']
-        init = self.flowview.getSteps('init')
+        init = self.view.getSteps('init')
         for step in stepdata:
             s = initstep(step['name'],step['output'])
             for x in init:

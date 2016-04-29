@@ -1,9 +1,0 @@
-- name: delphes
-  dependencies: ['init']
-  scheduler:
-    scheduler_type: dummy
-
-- name: analysis
-  dependencies: ['delphes']
-  scheduler:
-    scheduler_type: dummy

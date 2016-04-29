@@ -14,6 +14,7 @@ def extend_with_default(validator_class):
     validate_properties = validator_class.VALIDATORS["properties"]
 
     def set_defaults(validator, properties, instance, schema):
+
         for prop, subschema in properties.iteritems():
             if "default" in subschema:
                 instance.setdefault(prop, subschema["default"])
@@ -78,11 +79,15 @@ def load_and_validate(source, toplevel, schema_name, schemadir = None):
     validator(schema_name,schemadir).validate(data)
     return data
     
-    
-def workflow(source, toplevel, schema_name = 'yadage/workflow-schema', schemadir = None):
+def workflow(source, toplevel, schema_name = 'yadage/workflow-schema', schemadir = None, validate = True):
     if not schemadir:
         schemadir = packtivity.schemadir
     load = loader(toplevel)
     data = load(source)
-    validator(schema_name,schemadir).validate(data)
+    if validate:
+        try:
+            validator(schema_name,schemadir).validate(data)
+        except jsonschema.exceptions.ValidationError:
+            log.exception('workflow does not validate against schemas')
+            raise RuntimeError('workflow does not validate against schemas')
     return data

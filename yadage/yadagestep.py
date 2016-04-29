@@ -1,4 +1,6 @@
 from packtivity import packtivity
+import logging
+log = logging.getLogger(__name__)
 
 class outputReference(object):
     def __init__(self,stepid,pointer):
@@ -52,6 +54,7 @@ class yadagestep(stepbase):
     def __call__(self,**attributes):
         self.attributes.update(**attributes)
         self._result = packtivity(self.name,self.spec,self.attributes,self.context)
+        log.debug('packtivity result is: {}'.format(self._result))
         return self._result
     
     def s(self,**attributes):

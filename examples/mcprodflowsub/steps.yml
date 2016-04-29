@@ -7,7 +7,8 @@ prepare:
     outputmap:
       param_card: param_card
   environment:
-    environment_type: 'noop-env'
+    environment_type: 'docker-encapsulated'
+    image: 'lukasheinrich/higgs-mc-studies'
 
 grid:
   process:
@@ -18,7 +19,8 @@ grid:
     outputmap:
       gridpack: gridpack
   environment:
-    environment_type: 'noop-env'
+    environment_type: 'docker-encapsulated'
+    image: 'lukasheinrich/higgs-mc-studies'
 
 madgraph:
   process:
@@ -29,7 +31,8 @@ madgraph:
     outputmap:
       lhefile: lhefile
   environment:
-    environment_type: 'noop-env'
+    environment_type: 'docker-encapsulated'
+    image: 'lukasheinrich/higgs-mc-studies'
 
 pythia:
   process:
@@ -40,7 +43,8 @@ pythia:
     outputmap:
       hepmcfile: hepmcfile
   environment:
-    environment_type: 'noop-env'
+    environment_type: 'docker-encapsulated'
+    image: 'lukasheinrich/higgs-mc-studies'
 
 delphes:
   process:
@@ -51,7 +55,8 @@ delphes:
     outputmap:
       delphesoutput: outputfile
   environment:
-    environment_type: 'noop-env'
+    environment_type: 'docker-encapsulated'
+    image: 'lukasheinrich/higgs-mc-studies'
 
 analysis:
   process:
@@ -62,7 +67,8 @@ analysis:
     outputmap:
       analysis_output: analysis_output
   environment:
-    environment_type: 'noop-env'
+    environment_type: 'docker-encapsulated'
+    image: 'lukasheinrich/higgs-mc-studies'
 
 rootmerge:
   process:
@@ -73,4 +79,5 @@ rootmerge:
     outputmap:
       mergedfile: mergedfile
   environment:
-    environment_type: 'noop-env'
+    environment_type: 'docker-encapsulated'
+    image: 'lukasheinrich/higgs-mc-studies'

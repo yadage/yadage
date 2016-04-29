@@ -1,0 +1,4 @@
+par1: 0.1
+par2: 0.3
+nevents: 10000
+seeds: [1]

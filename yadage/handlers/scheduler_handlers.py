@@ -2,6 +2,7 @@ import logging
 import utils
 import jsonpointer
 import itertools
+import os
 
 from yadage.yadagestep import yadagestep, initstep, outputReference
 from yadage.yadagemodels import jsonstage
@@ -37,7 +38,7 @@ def combine_outputs(outputs,flatten,unwrapsingle):
     return combined
 
 def select_steps(stage,query):
-    return stage.flowview.getSteps(query)
+    return stage.view.getSteps(query)
 
 def select_outputs(steps,selection,flatten,unwrapsingle):
     return combine_outputs(map(lambda s: resolve_output(s,selection),steps),flatten,unwrapsingle)
@@ -61,7 +62,7 @@ def select_parameter(stage,parameter):
 def finalize_value(stage,step,value,context):
     if type(value)==outputReference:
         step.used_input(value)
-        v = value.pointer.resolve(stage.flowview.dag.getNode(value.stepid).result)
+        v = value.pointer.resolve(stage.view.dag.getNode(value.stepid).result)
         return finalize_value(stage,step,v,context)
     if type(value)==list:
         return [finalize_value(stage,step,v,context) for v in value]
@@ -76,9 +77,6 @@ def finalize_input(stage,step,json,context):
             result[k] = finalize_value(stage,step,v,context)
         else:
             result[k] = [finalize_value(stage,step,element,context) for element in v]
-    print '=========='
-    print result
-    print '=========='
     return result
 
 def step_or_init(name,spec,context):
@@ -90,7 +88,8 @@ def step_or_init(name,spec,context):
 def addStepOrWorkflow(name,stage,step,spec):
     if type(step)==initstep:
         newcontext = {'workdir':'{}/{}'.format(stage.context['workdir'],name)}
-        subrules = [jsonstage(yml,newcontext) for yml in spec['workflow']]
+        os.makedirs(newcontext['workdir'])
+        subrules = [jsonstage(yml,newcontext) for yml in spec['workflow']['stages']]
         stage.addWorkflow(subrules, initstep = step, offset = name)
     else:
         stage.addStep(step)

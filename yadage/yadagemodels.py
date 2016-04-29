@@ -23,15 +23,15 @@ class stage_base(object):
         return True
 
     def apply(self,flowview):
-        self.flowview = flowview
+        self.view = flowview
         self.schedule()
     
     def addStep(self,step):
-        dependencies = [self.flowview.dag.getNode(k.stepid) for k in step.inputs]
-        self.flowview.addStep(step, stage = self.name , depends_on = dependencies)
+        dependencies = [self.view.dag.getNode(k.stepid) for k in step.inputs]
+        self.view.addStep(step, stage = self.name , depends_on = dependencies)
 
     def addWorkflow(self,rules, initstep, offset):
-        self.flowview.addWorkflow(rules, initstep = initstep, offset = offset)
+        self.view.addWorkflow(rules, initstep = initstep, offset = offset)
  
 class initStage(stage_base):
     def __init__(self, step, context, dependencies):
@@ -55,12 +55,16 @@ class YadageWorkflow(adage.adageobject):
     def __init__(self):
         super(YadageWorkflow,self).__init__()
         self.stepsbystage = {}
+
+    def view(self,offset = None):
+        return WorkflowView(self,offset)
+
     @classmethod
-    def fromJSON(cls,jsondata,initdata,context):
+    def fromJSON(cls,jsondata,context):
         instance = cls()
-        rules = [jsonstage(stagedata,context) for stagedata in jsondata]
+        rules = [jsonstage(yml,context) for yml in jsondata['stages']]
         rootview = WorkflowView(instance)
-        rootview.addWorkflow(rules, initstep = initstep('init root', initdata))
+        rootview.addWorkflow(rules)
         return instance
 
 class offsetRule(object):
@@ -77,13 +81,9 @@ class offsetRule(object):
 def offsetdict(base,offset = None):
     if not offset:
         return base
-    split = offset.rsplit(STAGESEP,1)
-    if len(split)==2:
-        parent,this = split
-        return offsetdict(base,parent)[this]
-    else:
-        this = split[0]
-        return offsetdict(base)[this] 
+    matches = jsonpath_rw.parse(offset).find(base)
+    assert len(matches)==1
+    return matches[0].value
 
 class WorkflowView(object):
     def __init__(self,workflowobj,offset = None):
@@ -93,22 +93,26 @@ class WorkflowView(object):
         self.rules  = workflowobj.rules
 
     def getSteps(self,query):
-        return [step for match in jsonpath_rw.parse(query).find(self.steps) for step in match.value]
+        return [self.dag.getNode(step) for match in jsonpath_rw.parse(query).find(self.steps) for step in match.value]
         
     def addStep(self,step, stage, depends_on = None):
         node = self.dag.addTask(step, nodename = step.name, depends_on = depends_on)
         if stage in self.steps:
-            self.steps[stage] += [node]
+            self.steps[stage] += [node.identifier]
         else:
-            self.steps[stage]  = [node]
-
+            self.steps[stage]  = [node.identifier]
+    
+    def init(self, initdata, name = 'init'):
+        step = initstep(name,initdata)
+        self.addRule(initStage(step,{},[]),self.offset)
+            
     def addRule(self,rule,offset = None):
         if offset:
             self.steps[offset] = {}
         fulloffset = offset if not self.offset else STAGESEP.join([self.offset,offset])
         self.rules += [offsetRule(rule,fulloffset)]
     
-    def addWorkflow(self,rules, initstep, offset = None):
+    def addWorkflow(self,rules, initstep = None, offset = None):
         if initstep:
             self.addRule(initStage(initstep,{},[]),offset)
         for rule in rules:
