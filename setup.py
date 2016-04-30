@@ -22,7 +22,8 @@ setup(
     'jsonpointer',
     'jsonpath_rw',
     'packtivity',
-    'adage'
+    'adage',
+    'cap-schema'
   ],
   entry_points = {
       'console_scripts': [
@@ -32,6 +33,7 @@ setup(
   },
   dependency_links = [
       'https://github.com/lukasheinrich/adage/tarball/master#egg=adage-0.3.0',
-      'https://github.com/lukasheinrich/packtivity/tarball/master#egg=packtivity-0.0.2'
+      'https://github.com/lukasheinrich/packtivity/tarball/subworkflow#egg=packtivity-0.0.2'
+      'https://github.com/lukasheinrich/cap-schemas/tarball/schemav3#egg=cap-schema-0.0.1'
   ]
 )
