@@ -88,6 +88,8 @@ def step_or_init(name,spec,context):
 def addStepOrWorkflow(name,stage,step,spec):
     if type(step)==initstep:
         newcontext = {'workdir':'{}/{}'.format(stage.context['workdir'],name)}
+        newcontext['readonly'] = stage.context['readonly'] if 'readonly' in stage.context else stage.context['workdir']
+
         os.makedirs(newcontext['workdir'])
         subrules = [jsonstage(yml,newcontext) for yml in spec['workflow']['stages']]
         stage.addWorkflow(subrules, initstep = step, offset = name)
