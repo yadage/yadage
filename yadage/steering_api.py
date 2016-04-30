@@ -43,7 +43,7 @@ def run_workflow(workdir,analysis, initdata, loadtoplevel, loginterval, schemadi
                  track = True,
                  backend = backend,
                  trackevery = loginterval,
-                 workdir = workdir
+                 workdir = '{}/_adage'.format(workdir)
                 )
     
     log.info('finished yadage workflow %s',analysis)

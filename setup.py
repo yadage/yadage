@@ -19,6 +19,8 @@ setup(
     'pyyaml',
     'jsonref',
     'jsonschema',
+    'jsonpointer',
+    'jsonpath_rw',
     'packtivity',
     'adage'
   ],
