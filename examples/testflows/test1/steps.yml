@@ -1,0 +1,22 @@
+source:
+  process:
+    process_type: 'string-interpolated-cmd'
+    cmd: 'source.sh {content} {outputfile}'
+  publisher:
+    publisher_type: 'frompar-pub'
+    outputmap:
+      output: outputfile
+  environment:
+    environment_type: 'docker-encapsulated'
+    image: 'test1'
+filter:
+  process:
+    process_type: 'string-interpolated-cmd'
+    cmd: 'filter.sh {inputfile} {outputfile}'
+  publisher:
+    publisher_type: 'frompar-pub'
+    outputmap:
+      output: outputfile
+  environment:
+    environment_type: 'docker-encapsulated'
+    image: 'test1'

@@ -1,0 +1,9 @@
+stages:
+  - name: hello_sub
+    dependencies: ['init']
+    scheduler:
+      scheduler_type: singlestep-stage
+      parameters:
+        inputfile: {stages: init, output: inputfile, unwrap: true}
+        outputfile: '{workdir}/sub.txt'
+      step: {$ref: 'steps.yml#/filter'}

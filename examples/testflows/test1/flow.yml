@@ -1,0 +1,16 @@
+stages:
+  - name: hello_one
+    dependencies: ['init']
+    scheduler:
+      scheduler_type: singlestep-stage
+      parameters:
+        content: {stages: init, output: indata, unwrap: true}
+        outputfile: '{workdir}/out1.txt'
+      step: {$ref: 'steps.yml#/source'}
+  - name: hello_two
+    dependencies: ['hello_one']
+    scheduler:
+      scheduler_type: singlestep-stage
+      parameters:
+        inputfile: {stages: hello_one, output: output, unwrap: true}
+      workflow: {$ref: 'subflow.yml'}
