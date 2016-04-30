@@ -1,16 +1,16 @@
 INFO:yadage.steering_api:running yadage workflow rootflow.yml
 INFO:adage:extending graph.
-INFO:adage:submitting <Node name: init id: 1834ed2f-f70f-4d3f-a62f-43a6222547c1 state: DEFINED> job
+INFO:adage:submitting <Node name: init id: 2c20923f-14a5-4bce-b6b7-bcfd54672cd1 state: DEFINED> job
 INFO:adage:successful: 0 | failed: 0 | running: 1| notrun: 0 | total: 1 | rules: 4
-INFO:adage.node:node finished <Node name: init id: 1834ed2f-f70f-4d3f-a62f-43a6222547c1 state: SUCCESS> finished
+INFO:adage.node:node finished <Node name: init id: 2c20923f-14a5-4bce-b6b7-bcfd54672cd1 state: SUCCESS> finished
 INFO:adage:extending graph.
-INFO:adage:submitting <Node name: prepare id: c37cca1b-9fe6-4b1e-81d1-70fbc591de85 state: DEFINED> job
+INFO:adage:submitting <Node name: prepare id: 87c52bd8-0501-440c-ad40-8f3dd1f73c2c state: DEFINED> job
 DEBUG:step_logger_prepare:starting log for step: prepare
 DEBUG:step_logger_prepare:context: 
- {'workdir': u'/Users/lukas/Code/yadagedev/yadage/examples/workdir4'}
+ {'metadir': '/root/yadagedev/yadage/examples/workdir4/_packtivity', 'workdir': u'/root/yadagedev/yadage/examples/workdir4'}
 DEBUG:step_logger_prepare:docker pull command: 
   docker pull lukasheinrich/higgs-mc-studies:latest
-DEBUG:step_logger_prepare:started pull subprocess with pid 88815. now wait to finish
+DEBUG:step_logger_prepare:started pull subprocess with pid 29259. now wait to finish
 DEBUG:step_logger_prepare:process children: []
 DEBUG:step_logger_prepare:pull subprocess finished. return code: 0
 DEBUG:step_logger_prepare:moving on from pull
@@ -19,29 +19,30 @@ DEBUG:step_logger_prepare:
 --------------
 run in docker container: lukasheinrich/higgs-mc-studies
 with env: default env
-command: ./paramfromyaml.py --madgraph HC_UFO -i "{kHzz: 0.1, kAzz: 0.1, kHww: 0.3, kAww: 0.3}" /Users/lukas/Code/yadagedev/yadage/examples/workdir4/param.dat
+command: ./paramfromyaml.py --madgraph HC_UFO -i "{kHzz: 0.1, kAzz: 0.1, kHww: 0.3, kAww: 0.3}" /root/yadagedev/yadage/examples/workdir4/param.dat
 resources: []
 --------------
     
 DEBUG:step_logger_prepare:dogrid: False do_cvmfs: False
 DEBUG:step_logger_prepare:docker run  command: 
-docker run --rm -v /var/lib/docker/volumes/testworkdir/_data:/Users/lukas/Code/yadagedev/yadage/examples/workdir4 --cidfile /Users/lukas/Code/yadagedev/yadage/examples/workdir4/prepare.cid lukasheinrich/higgs-mc-studies sh -c ' ./paramfromyaml.py --madgraph HC_UFO -i "{kHzz: 0.1, kAzz: 0.1, kHww: 0.3, kAww: 0.3}" /Users/lukas/Code/yadagedev/yadage/examples/workdir4/param.dat'
-DEBUG:step_logger_prepare:started run subprocess with pid 88816. now wait to finish
+docker run --rm -v /root/yadagedev/yadage/examples/workdir4:/root/yadagedev/yadage/examples/workdir4:rw --cidfile /root/yadagedev/yadage/examples/workdir4/_packtivity/prepare.cid lukasheinrich/higgs-mc-studies sh -c ' ./paramfromyaml.py --madgraph HC_UFO -i "{kHzz: 0.1, kAzz: 0.1, kHww: 0.3, kAww: 0.3}" /root/yadagedev/yadage/examples/workdir4/param.dat'
+DEBUG:step_logger_prepare:started run subprocess with pid 29266. now wait to finish
 DEBUG:step_logger_prepare:process children: []
+INFO:adage:successful: 1 | failed: 0 | running: 1| notrun: 0 | total: 2 | rules: 3
 DEBUG:step_logger_prepare:docker run subprocess finished. return code: 0
 DEBUG:step_logger_prepare:moving on from run
 DEBUG:step_logger_prepare:finally for run
 DEBUG:step_logger_prepare:reached return for docker_enc_handler
-DEBUG:step_logger_prepare:prepare result: {'param_card': '/Users/lukas/Code/yadagedev/yadage/examples/workdir4/param.dat'}
+DEBUG:step_logger_prepare:prepare result: {'param_card': '/root/yadagedev/yadage/examples/workdir4/param.dat'}
+INFO:adage.node:node finished <Node name: prepare id: 87c52bd8-0501-440c-ad40-8f3dd1f73c2c state: SUCCESS> finished
 INFO:adage:extending graph.
-INFO:adage.node:node finished <Node name: prepare id: c37cca1b-9fe6-4b1e-81d1-70fbc591de85 state: SUCCESS> finished
-INFO:adage:submitting <Node name: grid id: bed87c9c-011e-4b1a-a865-3e9ab242f3f8 state: DEFINED> job
+INFO:adage:submitting <Node name: grid id: 0dcf83a9-1ef8-42c2-b3b6-846bdda301ac state: DEFINED> job
 DEBUG:step_logger_grid:starting log for step: grid
 DEBUG:step_logger_grid:context: 
- {'workdir': u'/Users/lukas/Code/yadagedev/yadage/examples/workdir4'}
+ {'metadir': '/root/yadagedev/yadage/examples/workdir4/_packtivity', 'workdir': u'/root/yadagedev/yadage/examples/workdir4'}
 DEBUG:step_logger_grid:docker pull command: 
   docker pull lukasheinrich/higgs-mc-studies:latest
-DEBUG:step_logger_grid:started pull subprocess with pid 88817. now wait to finish
+DEBUG:step_logger_grid:started pull subprocess with pid 29458. now wait to finish
 DEBUG:step_logger_grid:process children: []
 DEBUG:step_logger_grid:pull subprocess finished. return code: 0
 DEBUG:step_logger_grid:moving on from pull
@@ -50,14 +51,14 @@ DEBUG:step_logger_grid:
 --------------
 run in docker container: lukasheinrich/higgs-mc-studies
 with env: default env
-command: ./scripts/setupgrid.sh /Users/lukas/Code/yadagedev/yadage/examples/workdir4/param.dat /Users/lukas/Code/yadagedev/yadage/examples/workdir4/grid.tar.gz
+command: ./scripts/setupgrid.sh /root/yadagedev/yadage/examples/workdir4/param.dat /root/yadagedev/yadage/examples/workdir4/grid.tar.gz
 resources: []
 --------------
     
 DEBUG:step_logger_grid:dogrid: False do_cvmfs: False
 DEBUG:step_logger_grid:docker run  command: 
-docker run --rm -v /var/lib/docker/volumes/testworkdir/_data:/Users/lukas/Code/yadagedev/yadage/examples/workdir4 --cidfile /Users/lukas/Code/yadagedev/yadage/examples/workdir4/grid.cid lukasheinrich/higgs-mc-studies sh -c ' ./scripts/setupgrid.sh /Users/lukas/Code/yadagedev/yadage/examples/workdir4/param.dat /Users/lukas/Code/yadagedev/yadage/examples/workdir4/grid.tar.gz'
-DEBUG:step_logger_grid:started run subprocess with pid 88917. now wait to finish
+docker run --rm -v /root/yadagedev/yadage/examples/workdir4:/root/yadagedev/yadage/examples/workdir4:rw --cidfile /root/yadagedev/yadage/examples/workdir4/_packtivity/grid.cid lukasheinrich/higgs-mc-studies sh -c ' ./scripts/setupgrid.sh /root/yadagedev/yadage/examples/workdir4/param.dat /root/yadagedev/yadage/examples/workdir4/grid.tar.gz'
+DEBUG:step_logger_grid:started run subprocess with pid 29466. now wait to finish
 DEBUG:step_logger_grid:process children: []
 INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
 INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
@@ -80,91 +81,112 @@ INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules:
 INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
 INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
 INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
-DEBUG:step_logger_grid:docker run subprocess finished. return code: 1
-ERROR:step_logger_grid:non-zero return code raising exception
-ERROR:step_logger_grid:subprocess failed. code: 1,  command docker run --rm -v /var/lib/docker/volumes/testworkdir/_data:/Users/lukas/Code/yadagedev/yadage/examples/workdir4 --cidfile /Users/lukas/Code/yadagedev/yadage/examples/workdir4/grid.cid lukasheinrich/higgs-mc-studies sh -c ' ./scripts/setupgrid.sh /Users/lukas/Code/yadagedev/yadage/examples/workdir4/param.dat /Users/lukas/Code/yadagedev/yadage/examples/workdir4/grid.tar.gz'
-Traceback (most recent call last):
-  File "/Users/lukas/Code/yadagedev/packtivity/packtivity/handlers/environment_handlers.py", line 113, in docker_run
-    raise subprocess.CalledProcessError(returncode =  proc.returncode, cmd = fullest_command)
-CalledProcessError: Command 'docker run --rm -v /var/lib/docker/volumes/testworkdir/_data:/Users/lukas/Code/yadagedev/yadage/examples/workdir4 --cidfile /Users/lukas/Code/yadagedev/yadage/examples/workdir4/grid.cid lukasheinrich/higgs-mc-studies sh -c ' ./scripts/setupgrid.sh /Users/lukas/Code/yadagedev/yadage/examples/workdir4/param.dat /Users/lukas/Code/yadagedev/yadage/examples/workdir4/grid.tar.gz'' returned non-zero exit status 1
-DEBUG:step_logger_grid:finally for run
-ERROR:step_logger_grid:grid raised exception
-Traceback (most recent call last):
-  File "/Users/lukas/Code/yadagedev/packtivity/packtivity/__init__.py", line 27, in packtivity
-    run_in_env(uniquetag,step['environment'],command,context)
-  File "/Users/lukas/Code/yadagedev/packtivity/packtivity/__init__.py", line 21, in run_in_env
-    return handler(nametag,environment,context,command)
-  File "/Users/lukas/Code/yadagedev/packtivity/packtivity/handlers/environment_handlers.py", line 145, in docker_enc_handler
-    docker_run(docker_run_cmd,log,workdir,nametag)
-  File "/Users/lukas/Code/yadagedev/packtivity/packtivity/handlers/environment_handlers.py", line 117, in docker_run
-    raise RuntimeError('failed docker subprocess in docker_enc_handler.')
-RuntimeError: failed docker subprocess in docker_enc_handler.
-INFO:adage:extending graph.
-ERROR:adage:some weird exception caught in adage process loop
-Traceback (most recent call last):
-  File "/Users/lukas/Code/yadagedev/adage/adage/__init__.py", line 100, in rundag
-    update_dag(adageobj)
-  File "/Users/lukas/Code/yadagedev/adage/adage/__init__.py", line 52, in update_dag
-    rule.apply(adageobj)
-  File "/Users/lukas/Code/yadagedev/yadage/yadage/yadagemodels.py", line 79, in apply
-    self.rule.apply(WorkflowView(adageobj,self.offset))
-  File "/Users/lukas/Code/yadagedev/yadage/yadage/yadagemodels.py", line 27, in apply
-    self.schedule()
-  File "/Users/lukas/Code/yadagedev/yadage/yadage/yadagemodels.py", line 52, in schedule
-    scheduler(self,self.stageinfo)
-  File "/Users/lukas/Code/yadagedev/yadage/yadage/handlers/scheduler_handlers.py", line 137, in multi_stage
-    k:select_parameter(stage,v) for k,v in spec['parameters'].iteritems()
-  File "/Users/lukas/Code/yadagedev/yadage/yadage/handlers/scheduler_handlers.py", line 137, in <dictcomp>
-    k:select_parameter(stage,v) for k,v in spec['parameters'].iteritems()
-  File "/Users/lukas/Code/yadagedev/yadage/yadage/handlers/scheduler_handlers.py", line 58, in select_parameter
-    value = resolve_reference(stage,parameter)
-  File "/Users/lukas/Code/yadagedev/yadage/yadage/handlers/scheduler_handlers.py", line 51, in resolve_reference
-    outputs = select_outputs(steps, selection['output'], selection.get('flatten',False), selection.get('unwrap',False))
-  File "/Users/lukas/Code/yadagedev/yadage/yadage/handlers/scheduler_handlers.py", line 44, in select_outputs
-    return combine_outputs(map(lambda s: resolve_output(s,selection),steps),flatten,unwrapsingle)
-  File "/Users/lukas/Code/yadagedev/yadage/yadage/handlers/scheduler_handlers.py", line 44, in <lambda>
-    return combine_outputs(map(lambda s: resolve_output(s,selection),steps),flatten,unwrapsingle)
-  File "/Users/lukas/Code/yadagedev/yadage/yadage/handlers/scheduler_handlers.py", line 22, in resolve_output
-    return (step.identifier,jsonpointer.JsonPointer.from_parts([selection]),step.result[selection])
-TypeError: 'NoneType' object has no attribute '__getitem__'
-INFO:adage.node:node finished <Node name: grid id: bed87c9c-011e-4b1a-a865-3e9ab242f3f8 state: SUCCESS> finished
-Traceback (most recent call last):
-  File "/Users/lukas/Code/yadagedev/venv/bin/yadage-run", line 9, in <module>
-    load_entry_point('yadage', 'console_scripts', 'yadage-run')()
-  File "/Users/lukas/Code/yadagedev/venv/lib/python2.7/site-packages/click/core.py", line 716, in __call__
-    return self.main(*args, **kwargs)
-  File "/Users/lukas/Code/yadagedev/venv/lib/python2.7/site-packages/click/core.py", line 696, in main
-    rv = self.invoke(ctx)
-  File "/Users/lukas/Code/yadagedev/venv/lib/python2.7/site-packages/click/core.py", line 889, in invoke
-    return ctx.invoke(self.callback, **ctx.params)
-  File "/Users/lukas/Code/yadagedev/venv/lib/python2.7/site-packages/click/core.py", line 534, in invoke
-    return callback(*args, **kwargs)
-  File "/Users/lukas/Code/yadagedev/yadage/yadage/steering.py", line 21, in main
-    steering_api.run_workflow(workdir,analysis,initdata,toplevel,loginterval,schemadir = schemasource)
-  File "/Users/lukas/Code/yadagedev/yadage/yadage/steering_api.py", line 46, in run_workflow
-    workdir = workdir
-  File "/Users/lukas/Code/yadagedev/adage/adage/__init__.py", line 100, in rundag
-    update_dag(adageobj)
-  File "/Users/lukas/Code/yadagedev/adage/adage/__init__.py", line 52, in update_dag
-    rule.apply(adageobj)
-  File "/Users/lukas/Code/yadagedev/yadage/yadage/yadagemodels.py", line 79, in apply
-    self.rule.apply(WorkflowView(adageobj,self.offset))
-  File "/Users/lukas/Code/yadagedev/yadage/yadage/yadagemodels.py", line 27, in apply
-    self.schedule()
-  File "/Users/lukas/Code/yadagedev/yadage/yadage/yadagemodels.py", line 52, in schedule
-    scheduler(self,self.stageinfo)
-  File "/Users/lukas/Code/yadagedev/yadage/yadage/handlers/scheduler_handlers.py", line 137, in multi_stage
-    k:select_parameter(stage,v) for k,v in spec['parameters'].iteritems()
-  File "/Users/lukas/Code/yadagedev/yadage/yadage/handlers/scheduler_handlers.py", line 137, in <dictcomp>
-    k:select_parameter(stage,v) for k,v in spec['parameters'].iteritems()
-  File "/Users/lukas/Code/yadagedev/yadage/yadage/handlers/scheduler_handlers.py", line 58, in select_parameter
-    value = resolve_reference(stage,parameter)
-  File "/Users/lukas/Code/yadagedev/yadage/yadage/handlers/scheduler_handlers.py", line 51, in resolve_reference
-    outputs = select_outputs(steps, selection['output'], selection.get('flatten',False), selection.get('unwrap',False))
-  File "/Users/lukas/Code/yadagedev/yadage/yadage/handlers/scheduler_handlers.py", line 44, in select_outputs
-    return combine_outputs(map(lambda s: resolve_output(s,selection),steps),flatten,unwrapsingle)
-  File "/Users/lukas/Code/yadagedev/yadage/yadage/handlers/scheduler_handlers.py", line 44, in <lambda>
-    return combine_outputs(map(lambda s: resolve_output(s,selection),steps),flatten,unwrapsingle)
-  File "/Users/lukas/Code/yadagedev/yadage/yadage/handlers/scheduler_handlers.py", line 22, in resolve_output
-    return (step.identifier,jsonpointer.JsonPointer.from_parts([selection]),step.result[selection])
-TypeError: 'NoneType' object has no attribute '__getitem__'
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2
+INFO:adage:successful: 2 | failed: 0 | running: 1| notrun: 0 | total: 3 | rules: 2

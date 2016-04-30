@@ -16,7 +16,7 @@ stages:
       scheduler_type: singlestep-stage
       step: {$ref: 'steps.yml#/pythia'}
       parameters:
-        settings_file: /analysis/pythia_main/example_main /analysis/mainPythiaMLM.cmnd
+        settings_file: /analysis/mainPythiaMLM.cmnd
         hepmcfile: '{workdir}/outputfile.hepmc'
         lhefile: {stages: madevent, output: lhefile}
 
