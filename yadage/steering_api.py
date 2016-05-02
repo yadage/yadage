@@ -4,6 +4,7 @@ import adage.backends
 import yadagemodels
 import logging
 import os
+import json
 import workflow_loader
 from yadage.yadagemodels import YadageWorkflow
 import visualize
@@ -46,5 +47,7 @@ def run_workflow(workdir,analysis, initdata, loadtoplevel, loginterval, schemadi
                  trackevery = loginterval,
                  workdir = '{}/_adage'.format(workdir)
                 )
-    
+    os.makedirs('{}/_yadage/'.format(workdir))
+    with open('{}/_yadage/yadage.json'.format(workdir),'w') as f:
+        json.dump(workflow.stepsbystage,f)
     log.info('finished yadage workflow %s',analysis)

@@ -18,7 +18,7 @@ stages:
         param_card: {stages: prepare, output: param_card}
         gridpack: '{workdir}/grid.tar.gz'
 
-  - name: madevent
+  - name: subchain
     dependencies: ['grid']
     scheduler:
       scheduler_type: multistep-stage
@@ -38,4 +38,4 @@ stages:
       step: {$ref: 'steps.yml#/rootmerge'}
       parameters:
         mergedfile: '{workdir}/anamerged.root'
-        inputfiles: {stages: '*.analysis', output: analysis_output}
+        inputfiles: {stages: 'madevent.*.analysis', output: analysis_output}

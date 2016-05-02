@@ -1,5 +1,6 @@
 import logging
 import adage
+import jsonpointer
 import jsonpath_rw
 from yadagestep import initstep
 log = logging.getLogger(__name__)
@@ -28,8 +29,8 @@ class stage_base(object):
         dependencies = [self.view.dag.getNode(k.stepid) for k in step.inputs]
         self.view.addStep(step, stage = self.name , depends_on = dependencies)
 
-    def addWorkflow(self,rules, initstep, offset):
-        self.view.addWorkflow(rules, initstep = initstep, offset = offset)
+    def addWorkflow(self,rules, initstep, stage):
+        self.view.addWorkflow(rules, initstep = initstep, stage = stage)
  
 class initStage(stage_base):
     def __init__(self, step, context, dependencies):
@@ -54,7 +55,7 @@ class YadageWorkflow(adage.adageobject):
         super(YadageWorkflow,self).__init__()
         self.stepsbystage = {}
 
-    def view(self,offset = None):
+    def view(self,offset = ''):
         return WorkflowView(self,offset)
 
     @classmethod
@@ -76,18 +77,10 @@ class offsetRule(object):
     def apply(self,adageobj):
         self.rule.apply(WorkflowView(adageobj,self.offset))
 
-def offsetdict(base,offset = None):
-    if not offset:
-        return base
-    matches = jsonpath_rw.parse(offset).find(base)
-    assert len(matches)==1
-    return matches[0].value
-
-STAGESEP = '.'
 class WorkflowView(object):
-    def __init__(self,workflowobj,offset = None):
+    def __init__(self,workflowobj,offset = ''):
         self.offset = offset
-        self.steps  = offsetdict(workflowobj.stepsbystage,offset)
+        self.steps  = jsonpointer.JsonPointer(self.offset).resolve(workflowobj.stepsbystage)
         self.dag    = workflowobj.dag
         self.rules  = workflowobj.rules
 
@@ -105,13 +98,24 @@ class WorkflowView(object):
         step = initstep(name,initdata)
         self.addRule(initStage(step,{},[]),self.offset)
             
-    def addRule(self,rule,offset = None):
-        if offset:
-            self.steps[offset] = {}
-        fulloffset = offset if not self.offset else STAGESEP.join([self.offset,offset])
+    def addRule(self,rule,offset = ''):
+        thisoffset = jsonpointer.JsonPointer(offset).path
+        if self.offset:
+            fulloffset = jsonpointer.JsonPointer.from_parts(jsonpointer.JsonPointer(self.offset).parts + thisoffset.parts)
+        else:
+            fulloffset = thisoffset
+        
         self.rules += [offsetRule(rule,fulloffset)]
     
-    def addWorkflow(self,rules, initstep = None, offset = None):
+    def addWorkflow(self,rules, initstep = None, stage = None):
+        newsteps = {}
+        if stage in self.steps:
+            self.steps[stage] += [newsteps]
+        elif stage is not None:
+            self.steps[stage]  = [newsteps]
+        
+        offset = jsonpointer.JsonPointer.from_parts([stage,len(self.steps[stage])-1]).path if stage else ''
+        
         if initstep:
             self.addRule(initStage(initstep,{},[]),offset)
         for rule in rules:

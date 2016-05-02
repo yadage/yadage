@@ -58,7 +58,6 @@ def select_parameter(stage,parameter):
         value = resolve_reference(stage,parameter)
     return value
 
-
 def finalize_value(stage,step,value,context):
     if type(value)==outputReference:
         step.used_input(value)
@@ -93,7 +92,7 @@ def addStepOrWorkflow(name,stage,step,spec):
         newcontext['readonly'] += [ro for ro in itertools.chain(stage.context['readonly'],stage.context['readwrite'])]
         os.makedirs(newcontext['readwrite'][0])
         subrules = [jsonstage(yml,newcontext) for yml in spec['workflow']['stages']]
-        stage.addWorkflow(subrules, initstep = step, offset = name)
+        stage.addWorkflow(subrules, initstep = step, stage = stage.name)
     else:
         stage.addStep(step)
 
@@ -151,7 +150,3 @@ def multi_stage(stage,spec):
         
         addStepOrWorkflow(singlename,stage,step.s(**finalized),spec)        
 
-    
-    
-
-    
