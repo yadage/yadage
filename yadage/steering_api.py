@@ -33,7 +33,8 @@ def run_workflow(workdir,analysis, initdata, loadtoplevel, loginterval, schemadi
     )
     
     rootcontext = {
-        'workdir': os.path.abspath(workdir)
+        'readwrite': [os.path.abspath(workdir)],
+        'readonly': []
     }
     
     workflow = YadageWorkflow.fromJSON(workflow_json,rootcontext)

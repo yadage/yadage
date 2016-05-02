@@ -71,6 +71,8 @@ def finalize_value(stage,step,value,context):
     return value
     
 def finalize_input(stage,step,json,context):
+    context = context.copy()
+    context['workdir'] = context['readwrite'][0]
     result = {}
     for k,v in json.iteritems():
         if type(v) is not list:
@@ -87,10 +89,9 @@ def step_or_init(name,spec,context):
 
 def addStepOrWorkflow(name,stage,step,spec):
     if type(step)==initstep:
-        newcontext = {'workdir':'{}/{}'.format(stage.context['workdir'],name)}
-        newcontext['readonly'] = stage.context['readonly'] if 'readonly' in stage.context else stage.context['workdir']
-
-        os.makedirs(newcontext['workdir'])
+        newcontext = {'readwrite':['{}/{}'.format(stage.context['readwrite'][0],name)], 'readonly':[]}
+        newcontext['readonly'] += [ro for ro in itertools.chain(stage.context['readonly'],stage.context['readwrite'])]
+        os.makedirs(newcontext['readwrite'][0])
         subrules = [jsonstage(yml,newcontext) for yml in spec['workflow']['stages']]
         stage.addWorkflow(subrules, initstep = step, offset = name)
     else:

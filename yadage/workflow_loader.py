@@ -5,20 +5,19 @@ import jsonref
 import requests
 import yaml
 import urllib2
-from jsonschema import Draft4Validator, validators
 import logging
 import packtivity
+from jsonschema import Draft4Validator, validators
 log = logging.getLogger(__name__)
 
 def extend_with_default(validator_class):
     validate_properties = validator_class.VALIDATORS["properties"]
-
+    
     def set_defaults(validator, properties, instance, schema):
-
         for prop, subschema in properties.iteritems():
             if "default" in subschema:
                 instance.setdefault(prop, subschema["default"])
-
+                
         for error in validate_properties(
             validator, properties, instance, schema,
         ):
@@ -51,7 +50,6 @@ def loader(toplevel):
                 raise RuntimeError
     def load(uri):
         full_uri = '{}/{}'.format(base_uri,uri)
-        # print full_uri
         log.debug('trying to load uri: %s',full_uri)
         return jsonref.load_uri(full_uri, base_uri = base_uri, loader = yamlloader)
     return load
@@ -66,7 +64,6 @@ def validator(schema_name,schemadir):
     abspath = '{}/{}.json'.format(schemabase,schema_name)
     this_base_uri = abspath.rsplit('/',1)[0]+'/'
 
-    # print abspath
     schema   = json.loads(urllib2.urlopen(abspath).read())
     resolver = jsonschema.RefResolver(this_base_uri, schema)
     return DefaultValidatingDraft4Validator(schema, resolver = resolver)

@@ -4,8 +4,6 @@ import jsonpath_rw
 from yadagestep import initstep
 log = logging.getLogger(__name__)
 
-STAGESEP = '.'
-
 class stage_base(object):
     def __init__(self,name,context,dependencies):
         self.name = name
@@ -85,6 +83,7 @@ def offsetdict(base,offset = None):
     assert len(matches)==1
     return matches[0].value
 
+STAGESEP = '.'
 class WorkflowView(object):
     def __init__(self,workflowobj,offset = None):
         self.offset = offset
