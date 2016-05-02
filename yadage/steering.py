@@ -4,6 +4,7 @@ import os
 import steering_api
 import logging
 import yaml
+import capschemas
 
 log = logging.getLogger(__name__)
 
@@ -12,7 +13,7 @@ log = logging.getLogger(__name__)
 @click.option('-t','--toplevel', default = os.getcwd())
 @click.option('-v','--verbosity', default = 'INFO')
 @click.option('-i','--loginterval', default = 30)
-@click.option('-c','--schemasource', default = 'from-github')
+@click.option('-c','--schemasource', default = capschemas.schemadir)
 @click.argument('analysis')
 @click.argument('initdata', default = '')
 def main(workdir,analysis,initdata,toplevel,verbosity,loginterval,schemasource):
