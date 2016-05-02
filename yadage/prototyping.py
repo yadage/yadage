@@ -15,11 +15,3 @@ class stage(stage_base):
             rules += [instance]
             return instance
         return decorator
-            
-class adageview(object):
-    def __init__(self,adageobj):
-        self.adageobj = adageobj
-    
-    def stage(name):
-        match = [x for x in self.adageobj if x.name == name]
-        assert len(match==1)

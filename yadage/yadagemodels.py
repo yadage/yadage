@@ -99,12 +99,11 @@ class WorkflowView(object):
         self.addRule(initStage(step,{},[]),self.offset)
             
     def addRule(self,rule,offset = ''):
-        thisoffset = jsonpointer.JsonPointer(offset).path
+        thisoffset = jsonpointer.JsonPointer(offset)
         if self.offset:
-            fulloffset = jsonpointer.JsonPointer.from_parts(jsonpointer.JsonPointer(self.offset).parts + thisoffset.parts)
+            fulloffset = jsonpointer.JsonPointer.from_parts(jsonpointer.JsonPointer(self.offset).parts + thisoffset.parts).path
         else:
-            fulloffset = thisoffset
-        
+            fulloffset = thisoffset.path
         self.rules += [offsetRule(rule,fulloffset)]
     
     def addWorkflow(self,rules, initstep = None, stage = None):
