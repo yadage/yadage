@@ -1,5 +1,6 @@
 import logging
 import adage
+import adage.node
 import jsonpointer
 import jsonpath_rw
 from yadagestep import initstep
@@ -17,7 +18,7 @@ class stage_base(object):
             if not depsteps:
                 #we expect the dependent stage to have scheduled steps
                 return False
-            if not all([x.successful() for x in depsteps]):
+            if not all([x.has_result() for x in depsteps]):
                 return False
         return True
 
@@ -40,6 +41,9 @@ class initStage(stage_base):
     def schedule(self):
         self.addStep(self.step)
     
+    def json(self):
+        return {'type':'initStage','info':'just init', 'name':self.name}
+    
 class jsonstage(stage_base):
     def __init__(self,json,context):
         self.stageinfo = json['scheduler']
@@ -49,7 +53,29 @@ class jsonstage(stage_base):
         from yadage.handlers.scheduler_handlers import handlers as sched_handlers
         scheduler = sched_handlers[self.stageinfo['scheduler_type']]
         scheduler(self,self.stageinfo)
-        
+
+    def json(self):
+        return {'type':'jsonstage','info':self.stageinfo,'name':self.name}
+
+
+class YadageNode(adage.node.Node):
+    def __init__(self,name,task,identifier = None):
+        super(YadageNode,self).__init__(name,task,identifier)
+    
+    def __repr__(self):
+        import time
+        lifetime = time.time()-self.define_time
+        return '<YadageNode {} {} lifetime: {} (id: {}) >'.format(self.name,self.state,lifetime,self.identifier)
+
+    def has_result(self):
+        return self.task.prepublished or self.successful()
+    
+    @property
+    def result(self):
+        if self.task.prepublished:
+            return self.task.prepublished
+        return super(YadageNode,self).result
+
 class YadageWorkflow(adage.adageobject):
     def __init__(self):
         super(YadageWorkflow,self).__init__()
@@ -77,6 +103,9 @@ class offsetRule(object):
     def apply(self,adageobj):
         self.rule.apply(WorkflowView(adageobj,self.offset))
 
+    def json(self):
+        return {'type':'offset','offset':self.offset,'rule':self.rule.json()}
+
 class WorkflowView(object):
     def __init__(self,workflowobj,offset = ''):
         self.offset = offset
@@ -88,7 +117,8 @@ class WorkflowView(object):
         return [self.dag.getNode(step) for match in jsonpath_rw.parse(query).find(self.steps) for step in match.value]
         
     def addStep(self,step, stage, depends_on = None):
-        node = self.dag.addTask(step, nodename = step.name, depends_on = depends_on)
+        node = YadageNode(step.name,step)
+        self.dag.addNode(node,depends_on = depends_on)
         if stage in self.steps:
             self.steps[stage] += [node.identifier]
         else:
@@ -104,6 +134,7 @@ class WorkflowView(object):
             fulloffset = jsonpointer.JsonPointer.from_parts(jsonpointer.JsonPointer(self.offset).parts + thisoffset.parts).path
         else:
             fulloffset = thisoffset.path
+
         self.rules += [offsetRule(rule,fulloffset)]
     
     def addWorkflow(self,rules, initstep = None, stage = None):

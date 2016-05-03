@@ -36,7 +36,8 @@ def add_outputs_to_cluster(step,cluster):
             cluster.add_node(pydotplus.graphviz.Node(name, label = label, color = 'blue'))
             cluster.add_edge(pydotplus.graphviz.Edge(step.identifier,name))
     
-def add_step_to_cluster(step,adagegraph,cluster,fullgraph):
+def add_step_to_cluster(step,workflow,stagecluster,provgraph):
+    step = workflow.dag.getNode(step)
     stepid = step.identifier
 
     pars = step.task.attributes.copy()
@@ -49,39 +50,51 @@ ______
 '''
 
     rep = step_report.format(name = step.name, pars = '\n'.join(parstrings))
-    cluster.add_node(pydotplus.graphviz.Node(
-            name = stepid,
-            obj_dict = None,
-            color = 'red',
-            label = rep,
-            shape = 'box'
+    stagecluster.add_node(pydotplus.graphviz.Node(
+                name = stepid,
+                obj_dict = None,
+                color = 'red',
+                label = rep,
+                shape = 'box'
         )
     )
-    add_outputs_to_cluster(step,cluster)
+    add_outputs_to_cluster(step,stagecluster)
 
     #connect node to outputs
     if step.task.inputs:
-        #if input information is there, add edge to input
-        for k,inputs_from_node in step.task.inputs.iteritems():
-            for one in inputs_from_node:
-                fullgraph.add_edge(pydotplus.graphviz.Edge(output_id(k,one[0],one[1]),stepid))
+        # if input information is there, add edge to input
+        for reference in step.task.inputs:
+            refid = reference.stepid
+            refptr = reference.pointer
+            index =  refptr.parts[1] if len(refptr.parts)>1 else None
+            provgraph.add_edge(pydotplus.graphviz.Edge(output_id(refid,refptr.parts[0],index),stepid))
     else:
         #if not, we'll just add to the dependent node directly
-        for pre in adagegraph.predecessors(stepid):
+        for pre in workflow.dag.predecessors(stepid):
             log.warning('really no inputs to this node but predecessors?: %s',step)
-            fullgraph.add_edge(pydotplus.graphviz.Edge(pre,stepid))
+            provgraph.add_edge(pydotplus.graphviz.Edge(pre,stepid))
 
-def write_prov_graph(workdir,adagegraph,workflow):
-    provgraph = pydotplus.graphviz.Graph()
+def fillscope(cluster,workflow,scope = ''):
+    import jsonpointer
+    scopeptr = jsonpointer.JsonPointer(scope)
+    scoped = scopeptr.resolve(workflow.stepsbystage)
+    for stage,elements in scoped.iteritems():
+        stagescopeprts = scopeptr.parts+[stage]
+        stagecluster = pydotplus.graphviz.Cluster(graph_name = '_'.join(stagescopeprts), label = stage, labeljust = 'l')
+        cluster.add_subgraph(stagecluster)
+        for i,element in enumerate(elements):
+            if type(element)==str:
+                targetcl = stagecluster if stage is not 'init' else cluster
+                targetcl.add_node(pydotplus.graphviz.Node(element, label = stage, color = 'blue'))
+            elif type(element)==dict:
+                fillscope(stagecluster,workflow,jsonpointer.JsonPointer.from_parts(scopeptr.parts+[stage,i]).path)
     
-    for stage in nx.topological_sort(simple_stage_graph(workflow)):
-        stagecluster = pydotplus.graphviz.Cluster(graph_name = stage, label = stage, labeljust = 'l')
-        provgraph.add_subgraph(stagecluster)
-        for step in workflow.stage(stage).scheduled_steps:
-            add_step_to_cluster(step,adagegraph,stagecluster,provgraph)
-            
+def write_prov_graph(workdir,workflow):
+    provgraph = pydotplus.graphviz.Graph()
+
+    fillscope(provgraph,workflow)
     with open('{}/yadage_workflow_instance.dot'.format(workdir),'w') as dotfile:
         dotfile.write(provgraph.to_string())
-    
+
     subprocess.call(shlex.split('dot -Tpdf {}/yadage_workflow_instance.dot'.format(workdir)),
                     stdout = open('{}/yadage_workflow_instance.pdf'.format(workdir),'w'))

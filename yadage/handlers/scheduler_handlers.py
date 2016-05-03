@@ -18,6 +18,7 @@ handlers,scheduler = utils.handler_decorator()
 ###     - the step attributes are determined using the scheduler spec and context
 ###     - a list of used inputs (in the form of [stepname,outputkey,index])
 
+
 def resolve_output(step,selection):
     return (step.identifier,jsonpointer.JsonPointer.from_parts([selection]),step.result[selection])
 

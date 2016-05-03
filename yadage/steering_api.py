@@ -44,10 +44,15 @@ def run_workflow(workdir,analysis, initdata, loadtoplevel, loginterval, schemadi
     adage.rundag(workflow,
                  track = True,
                  backend = backend,
+                 update_interval = 2,
                  trackevery = loginterval,
                  workdir = '{}/_adage'.format(workdir)
                 )
-    os.makedirs('{}/_yadage/'.format(workdir))
-    with open('{}/_yadage/yadage.json'.format(workdir),'w') as f:
+    yadagedir = '{}/_yadage/'.format(workdir)
+    os.makedirs(yadagedir)
+    with open('{}/yadage.json'.format(yadagedir),'w') as f:
         json.dump(workflow.stepsbystage,f)
+
+    visualize.write_prov_graph(yadagedir,workflow)
+
     log.info('finished yadage workflow %s',analysis)
