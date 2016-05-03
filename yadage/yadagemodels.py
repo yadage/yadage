@@ -108,13 +108,14 @@ class offsetRule(object):
 
 class WorkflowView(object):
     def __init__(self,workflowobj,offset = ''):
-        self.offset = offset
-        self.steps  = jsonpointer.JsonPointer(self.offset).resolve(workflowobj.stepsbystage)
+        self.offset   = offset
+        self.steps    = jsonpointer.JsonPointer(self.offset).resolve(workflowobj.stepsbystage)
         self.dag    = workflowobj.dag
         self.rules  = workflowobj.rules
 
     def getSteps(self,query):
-        return [self.dag.getNode(step) for match in jsonpath_rw.parse(query).find(self.steps) for step in match.value]
+        matches = jsonpath_rw.parse(query).find(self.steps)
+        return [self.dag.getNode(step) for match in matches for step in match.value]
         
     def addStep(self,step, stage, depends_on = None):
         node = YadageNode(step.name,step)
@@ -135,7 +136,9 @@ class WorkflowView(object):
         else:
             fulloffset = thisoffset.path
 
-        self.rules += [offsetRule(rule,fulloffset)]
+        newrule = offsetRule(rule,fulloffset)
+        self.rules += [newrule]
+        return rule
     
     def addWorkflow(self,rules, initstep = None, stage = None):
         newsteps = {}
@@ -149,4 +152,5 @@ class WorkflowView(object):
         if initstep:
             self.addRule(initStage(initstep,{},[]),offset)
         for rule in rules:
-            self.addRule(rule,offset)
+            offsetrule = self.addRule(rule,offset)            
+        

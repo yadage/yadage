@@ -40,6 +40,7 @@ def run_workflow(workdir,analysis, initdata, loadtoplevel, loginterval, schemadi
     workflow = YadageWorkflow.fromJSON(workflow_json,rootcontext)
     workflow.view().init(initdata)
 
+
     adage.rundag(workflow,
                  track = True,
                  backend = backend,
@@ -53,5 +54,4 @@ def run_workflow(workdir,analysis, initdata, loadtoplevel, loginterval, schemadi
         json.dump(workflow.stepsbystage,f)
 
     visualize.write_prov_graph(yadagedir,workflow)
-
     log.info('finished yadage workflow %s',analysis)
