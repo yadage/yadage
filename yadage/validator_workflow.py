@@ -1,21 +1,27 @@
 #!/usr/bin/env python
+import os
+import capschemas
 import click
 import jsonschema
-from workflow_loader import validate_workflow
+import workflow_loader
 import logging
+
 logging.basicConfig(level = logging.DEBUG)
 log = logging.getLogger(__name__)
 @click.command()
 @click.argument('workflow')
-@click.argument('toplevel')
-@click.argument('schemadir')
+@click.argument('toplevel', default = os.getcwd())
+@click.argument('schemadir', default = capschemas.schemadir)
 def main(workflow,toplevel,schemadir):
     try:
-        validate_workflow(workflow, toplevel = toplevel, schemadir = schemadir)
+        data = workflow_loader.workflow(workflow, toplevel = toplevel, schemadir = schemadir, validate = True)
         click.secho('workflow validates against schema', fg = 'green')
     except jsonschema.exceptions.ValidationError:
         log.exception('validation error')
         click.secho('workflow does not validate against schema', fg = 'red')
+    except:
+        click.secho('this is not even wrong (non-ValidationError exception)', fg = 'red')
+
         
 if __name__ == '__main__':
     main()
