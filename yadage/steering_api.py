@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import adage
 import adage.backends
-import yadagemodels
 import logging
 import os
 import json

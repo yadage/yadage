@@ -29,7 +29,7 @@ def combine_outputs(outputs,flatten,unwrapsingle):
             if flatten: 
                 for i in range(len(result)):
                     deeppointer = jsonpointer.JsonPointer.from_parts(pointer.parts+[i])
-                    combined+=[outputReference(stepid,jsonpointer.JsonPointer.from_parts(pointer.parts+[i]))]
+                    combined+=[outputReference(stepid,deeppointer)]
             else:
                 combined+=[outputReference(stepid,pointer)]
         else:
@@ -65,7 +65,7 @@ def finalize_value(stage,step,value,context):
         v = value.pointer.resolve(stage.view.dag.getNode(value.stepid).result)
         return finalize_value(stage,step,v,context)
     if type(value)==list:
-        return [finalize_value(stage,step,v,context) for v in value]
+        return [finalize_value(stage,step,x,context) for x in value]
     if type(value)==str:
         return value.format(**context)
     return value
@@ -110,7 +110,6 @@ def simple_stage(stage,spec):
     addStepOrWorkflow(stage.name,stage,step.s(**finalized),spec)        
     
 def scatter(parameters,scatter):
-    steps = []
     commonpars = parameters.copy()
     to_scatter = {}
     for scatpar in scatter['parameters']:
