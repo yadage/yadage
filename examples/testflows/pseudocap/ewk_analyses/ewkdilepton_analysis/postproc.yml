@@ -1,0 +1,13 @@
+process:
+  process_type: 'string-interpolated-cmd'
+  cmd: '/resources/pMSSM-TwoLep-Fit/post_fit.sh {fitresultsarchive} {workdir} {modelName} {resultsyaml}'
+publisher:
+  publisher_type: 'frompar-pub'
+  outputmap:
+    output: resultsyaml
+environment:
+  environment_type: 'docker-encapsulated'
+  envscript: /resources/fitenv.sh
+  image: lukasheinrich/dilepton_fit
+  resources:
+    - CVMFS

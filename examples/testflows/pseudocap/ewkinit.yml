@@ -1,0 +1,4 @@
+dataset: this.is.a.dataset
+modelName: 12345
+efficiency_file: file.eff
+xsections_file: xsec.root

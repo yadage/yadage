@@ -1,0 +1,14 @@
+process:
+  process_type: 'string-interpolated-cmd'
+  cmd: '/resources/download.py {dataset} {outDir} {outList}'
+publisher:
+  publisher_type: 'frompar-pub'
+  outputmap:
+    output: outList
+environment:
+  environment_type: 'docker-encapsulated'
+  envscript: /resources/downloadenv.sh
+  image: lukasheinrich/dilepton_download
+  resources:
+    - CVMFS
+    - GRIDProxy

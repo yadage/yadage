@@ -1,0 +1,57 @@
+stages:
+  - name: download
+    dependencies: ['init']
+    scheduler:
+      scheduler_type: 'singlestep-stage'
+      step: {$ref: 'common_steps/download.yml'} 
+      parameters:
+        dataset: {stages: 'init', output: dataset, unwrap: true}
+        outDir: '{workdir}/grid_download'
+        outList: '{workdir}/files.list'
+
+  - name: ntupling
+    dependencies: ['download']
+    scheduler:
+      scheduler_type: 'singlestep-stage'
+      step: {$ref: 'ewksusy_steps/ntupling.yml'}
+      parameters:
+        minintup: '{workdir}/mini.root'
+        maxsyst: 1
+        input_type: '-mc'
+        filter: '-nomllalpgenfilter'
+        blinded: '-unblind'
+        include_truth: '-truth'
+        filelist: {stages: 'download', output: 'output', unwrap: true}
+
+  - name: histfitprepare
+    dependencies: ['ntupling']
+    scheduler:
+      scheduler_type: 'singlestep-stage'
+      step: {$ref: 'ewk_analyses/ewkdilepton_analysis/histfitprep.yml'}
+      parameters:
+        efficiency_file: {stages: init, output: efficiency_file, unwrap: true}
+        xsections_file: {stages: init, output: xsections_file, unwrap: true}
+        modelName: {stages: init, output: modelName, unwrap: true}
+        miniroot: {stages: ntupling, output: output, unwrap: true}
+        histfittree_file: '{workdir}/out.root'
+        yield_file: '{workdir}/out.yield'
+
+  - name: fit
+    dependencies: ['histfitprepare']
+    scheduler:
+      scheduler_type: 'singlestep-stage'
+      step: {$ref: 'ewk_analyses/ewkdilepton_analysis/fit.yml'}
+      parameters:
+        fitresults: '{workdir}/fit.tgz'
+        histfitroot: {stages: 'histfitprepare', output: output_tree, unwrap: true}
+
+  - name: postproc
+    dependencies: ['fit']
+    scheduler:
+      scheduler_type: 'singlestep-stage'
+      step: {$ref: 'ewk_analyses/ewkdilepton_analysis/postproc.yml'}
+      parameters:
+        workdir: '{workdir}/postproc'
+        modelName: {stages: init, output: modelName, unwrap: true}
+        resultsyaml: '{workdir}/results.yaml'
+        fitresultsarchive: {stages: fit, output: output, unwrap: true}

@@ -1,0 +1,14 @@
+process:
+  process_type: 'string-interpolated-cmd'
+  cmd: 'python preparehistfit.py {miniroot} {efficiency_file} {xsections_file} {modelName} {histfittree_file} {yield_file}'
+publisher:
+  publisher_type: 'frompar-pub'
+  outputmap:
+    output_tree: histfittree_file
+    output_yield: yield_file
+environment:
+  environment_type: 'docker-encapsulated'
+  envscript: /resources/prepareenv.sh
+  image: lukasheinrich/dilepton_histfitprep
+  resources:
+    - CVMFS
