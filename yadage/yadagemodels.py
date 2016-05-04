@@ -2,10 +2,18 @@ import logging
 import adage
 import adage.node
 import jsonpointer
+import time
 import jsonpath_rw
 from yadagestep import initstep
 log = logging.getLogger(__name__)
 
+class wflow_proxy(object):
+    def __init__(self,fullrules):
+        self.fullrules = fullrules
+    
+    def done(self,applied_rules):
+        return all(rl in applied_rules for rl in self.fullrules)
+            
 class stage_base(object):
     def __init__(self,name,context,dependencies):
         self.name = name
@@ -14,12 +22,18 @@ class stage_base(object):
 
     def applicable(self,flowview):
         for x in self.dependencies:
-            depsteps = flowview.getSteps(x)
-            if not depsteps:
-                #we expect the dependent stage to have scheduled steps
+            depmatches = flowview.query(x,flowview.steps)
+            if not depmatches:
                 return False
-            if not all([x.has_result() for x in depsteps]):
-                return False
+            issubwork = type(depmatches[0].value[0])==dict
+            if issubwork:
+                depmatches = flowview.query(x,flowview.myrules)
+                allsubs =  [proxy for match in depmatches for proxy in match.value]
+                if not all([x.done(flowview.applied_rules) for x in allsubs]):
+                    return False
+            else:
+                if not all([x.has_result() for x in flowview.getSteps(x)]):
+                    return False
         return True
 
     def apply(self,flowview):
@@ -63,9 +77,8 @@ class YadageNode(adage.node.Node):
         super(YadageNode,self).__init__(name,task,identifier)
     
     def __repr__(self):
-        import time
         lifetime = time.time()-self.define_time
-        return '<YadageNode {} {} lifetime: {} (id: {}) >'.format(self.name,self.state,lifetime,self.identifier)
+        return '<YadageNode {} {} lifetime: {} (id: {})>'.format(self.name,self.state,lifetime,self.identifier)
 
     def has_result(self):
         return self.task.prepublished or self.successful()
@@ -80,6 +93,7 @@ class YadageWorkflow(adage.adageobject):
     def __init__(self):
         super(YadageWorkflow,self).__init__()
         self.stepsbystage = {}
+        self.rulesbystage = {} #tracking subworkflow rules
 
     def view(self,offset = ''):
         return WorkflowView(self,offset)
@@ -110,12 +124,17 @@ class WorkflowView(object):
     def __init__(self,workflowobj,offset = ''):
         self.offset   = offset
         self.steps    = jsonpointer.JsonPointer(self.offset).resolve(workflowobj.stepsbystage)
+        self.myrules  = jsonpointer.JsonPointer(self.offset).resolve(workflowobj.rulesbystage)
         self.dag    = workflowobj.dag
         self.rules  = workflowobj.rules
+        self.applied_rules = workflowobj.applied_rules
+
+    def query(self,query,collection):
+        matches = jsonpath_rw.parse(query).find(collection)
+        return matches
 
     def getSteps(self,query):
-        matches = jsonpath_rw.parse(query).find(self.steps)
-        return [self.dag.getNode(step) for match in matches for step in match.value]
+        return [self.dag.getNode(step) for match in self.query(query,self.steps) for step in match.value]
         
     def addStep(self,step, stage, depends_on = None):
         node = YadageNode(step.name,step)
@@ -138,9 +157,9 @@ class WorkflowView(object):
 
         newrule = offsetRule(rule,fulloffset)
         self.rules += [newrule]
-        return rule
+        return newrule
     
-    def addWorkflow(self,rules, initstep = None, stage = None):
+    def addWorkflow(self, rules, initstep = None, stage = None):
         newsteps = {}
         if stage in self.steps:
             self.steps[stage] += [newsteps]
@@ -151,6 +170,9 @@ class WorkflowView(object):
         
         if initstep:
             self.addRule(initStage(initstep,{},[]),offset)
-        for rule in rules:
-            offsetrule = self.addRule(rule,offset)            
-        
+
+        fullrules = [self.addRule(rule,offset) for rule in rules]
+        if stage in self.myrules:
+            self.myrules[stage] += [wflow_proxy(fullrules)]
+        elif stage is not None:
+            self.myrules[stage]  = [wflow_proxy(fullrules)]
