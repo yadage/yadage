@@ -1,9 +1,0 @@
-- name: substageA
-  dependencies: []
-  scheduler:
-    type: dummy
-
-- name: substageB
-  dependencies: ['substageA']
-  scheduler:
-    type: dummy
