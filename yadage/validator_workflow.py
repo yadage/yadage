@@ -6,13 +6,15 @@ import jsonschema
 import workflow_loader
 import logging
 
-logging.basicConfig(level = logging.DEBUG)
+logging.basicConfig(level = logging.INFO)
 log = logging.getLogger(__name__)
 @click.command()
 @click.argument('workflow')
-@click.argument('toplevel', default = os.getcwd())
+@click.argument('toplevel', default = None)
 @click.argument('schemadir', default = capschemas.schemadir)
 def main(workflow,toplevel,schemadir):
+    if not toplevel:
+        toplevel = os.getcwd()
     try:
         data = workflow_loader.workflow(workflow, toplevel = toplevel, schemadir = schemadir, validate = True)
         click.secho('workflow validates against schema', fg = 'green')
