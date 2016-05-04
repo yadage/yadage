@@ -77,7 +77,7 @@ class initStage(stage_base):
 class jsonstage(stage_base):
     def __init__(self,json,context):
         self.stageinfo = json['scheduler']
-        super(jsonstage,self).__init__(json['name'],context,json['dependencies'])
+        super(jsonstage,self).__init__(json['name'],context,json['dependencies']['expressions'])
         
     def schedule(self):
         from yadage.handlers.scheduler_handlers import handlers as sched_handlers

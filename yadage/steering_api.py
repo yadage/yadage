@@ -37,7 +37,6 @@ def run_workflow(workdir,analysis, initdata, loadtoplevel, loginterval, schemadi
         schemadir = schemadir,
         validate = validate
     )
-    
     workflow = YadageWorkflow.fromJSON(workflow_json,rootcontext)
     workflow.view().init(initdata)
 
@@ -53,6 +52,8 @@ def run_workflow(workdir,analysis, initdata, loadtoplevel, loginterval, schemadi
     os.makedirs(yadagedir)
     with open('{}/yadage.json'.format(yadagedir),'w') as f:
         json.dump(workflow.stepsbystage,f)
+    with open('{}/yadage_template.json'.format(yadagedir),'w') as f:
+        json.dump(workflow_json,f)
 
     visualize.write_prov_graph(yadagedir,workflow)
     log.info('finished yadage workflow %s',analysis)
