@@ -20,10 +20,16 @@ def run_workflow(workdir,analysis, initdata, loadtoplevel, loginterval, schemadi
     
     backend = adage.backends.MultiProcBackend(2)
     
+
+
+    rootcontext = {
+        'readwrite': [os.path.abspath(workdir)],
+        'readonly': []
+    }
     for k,v in initdata.iteritems():
         candpath = '{}/inputs/{}'.format(workdir,v)
         if os.path.exists(candpath):
-            initdata[k] = '/workdir/inputs/{}'.format(v)
+            initdata[k] = '{}/inputs/{}'.format(rootcontext['readwrite'][0],v)
             
     workflow_json = workflow_loader.workflow(
         analysis,
@@ -31,11 +37,6 @@ def run_workflow(workdir,analysis, initdata, loadtoplevel, loginterval, schemadi
         schemadir = schemadir,
         validate = validate
     )
-    
-    rootcontext = {
-        'readwrite': [os.path.abspath(workdir)],
-        'readonly': []
-    }
     
     workflow = YadageWorkflow.fromJSON(workflow_json,rootcontext)
     workflow.view().init(initdata)
@@ -55,3 +56,4 @@ def run_workflow(workdir,analysis, initdata, loadtoplevel, loginterval, schemadi
 
     visualize.write_prov_graph(yadagedir,workflow)
     log.info('finished yadage workflow %s',analysis)
+    
