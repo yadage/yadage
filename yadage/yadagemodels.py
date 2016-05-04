@@ -13,7 +13,20 @@ class wflow_proxy(object):
     
     def done(self,applied_rules):
         return all(rl in applied_rules for rl in self.fullrules)
-            
+
+def walksteps(obj):
+    if type(obj) == list:
+        for x in obj:
+            for o in walksteps(x):
+                yield o
+    elif type(obj) == dict:
+        for k,v in obj.iteritems():
+            for o in walksteps(v):
+                yield o
+    else:
+        yield obj
+
+
 class stage_base(object):
     def __init__(self,name,context,dependencies):
         self.name = name
@@ -29,7 +42,10 @@ class stage_base(object):
             if issubwork:
                 depmatches = flowview.query(x,flowview.myrules)
                 allsubs =  [proxy for match in depmatches for proxy in match.value]
-                if not all([x.done(flowview.applied_rules) for x in allsubs]):
+
+                allapplied = all([subflow.done(flowview.applied_rules) for subflow in allsubs])
+                allstepsok = all([flowview.dag.getNode(x).has_result() for x in walksteps(flowview.steps)])
+                if not (allapplied and allstepsok):
                     return False
             else:
                 if not all([x.has_result() for x in flowview.getSteps(x)]):
@@ -81,7 +97,7 @@ class YadageNode(adage.node.Node):
         return '<YadageNode {} {} lifetime: {} (id: {})>'.format(self.name,self.state,lifetime,self.identifier)
 
     def has_result(self):
-        return self.task.prepublished or self.successful()
+        return (self.task.prepublished is not None) or self.successful()
     
     @property
     def result(self):
