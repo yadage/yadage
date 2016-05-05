@@ -87,11 +87,15 @@ def step_or_init(name,spec,context):
     elif 'workflow' in spec:
         return initstep('init {}'.format(name))
 
+def make_new_context(name,oldcontext):
+    newcontext = {'readwrite':['{}/{}'.format(oldcontext['readwrite'][0],name)], 'readonly':[]}
+    newcontext['readonly'] += [ro for ro in itertools.chain(oldcontext['readonly'],oldcontext['readwrite'])]
+    os.makedirs(newcontext['readwrite'][0])
+    return newcontext
+
 def addStepOrWorkflow(name,stage,step,spec):
     if type(step)==initstep:
-        newcontext = {'readwrite':['{}/{}'.format(stage.context['readwrite'][0],name)], 'readonly':[]}
-        newcontext['readonly'] += [ro for ro in itertools.chain(stage.context['readonly'],stage.context['readwrite'])]
-        os.makedirs(newcontext['readwrite'][0])
+        newcontxt = make_new_context(name,stage.context)
         subrules = [jsonstage(yml,newcontext) for yml in spec['workflow']['stages']]
         stage.addWorkflow(subrules, initstep = step, stage = stage.name)
     else:
