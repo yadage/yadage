@@ -95,7 +95,7 @@ def make_new_context(name,oldcontext):
 
 def addStepOrWorkflow(name,stage,step,spec):
     if type(step)==initstep:
-        newcontxt = make_new_context(name,stage.context)
+        newcontext = make_new_context(name,stage.context)
         subrules = [jsonstage(yml,newcontext) for yml in spec['workflow']['stages']]
         stage.addWorkflow(subrules, initstep = step, stage = stage.name)
     else:
