@@ -23,4 +23,4 @@ script:
   # - yadage-run -t from-github workdir_pheno pheno_workflows/madgraph_delphes.yml ctx.yml -i 60
   # - ls -lrt workdir_pheno
   - docker build -t lukasheinrich/yadage .
-  - docker run -it busyboxy ls -lrt /
+  - docker run -it  lukasheinrich/yadage docker ps -a
