@@ -17,7 +17,7 @@ install:
 script:
   - pyflakes yadage
   - yadage-validate rootflow.yml from-github/higgsmcproduction
-  - "echo 'events: 100' > input.yml"
+  - "echo 'nevents: 100' > input.yml"
   - "echo 'rivet_analysis: MC_GENERIC' >> input.yml"
   - cat input.yml
   - mkdir workdir_pheno
