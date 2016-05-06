@@ -3,6 +3,7 @@ import adage
 import adage.node
 import jsonpointer
 import time
+import uuid
 import jsonpath_rw
 from yadagestep import initstep
 log = logging.getLogger(__name__)
@@ -126,6 +127,7 @@ class offsetRule(object):
     def __init__(self,rule,offset = None):
         self.rule = rule
         self.offset = offset
+        self.id = uuid.uuid4()
     
     def applicable(self,adageobj):
         return self.rule.applicable(WorkflowView(adageobj,self.offset))
@@ -134,7 +136,7 @@ class offsetRule(object):
         self.rule.apply(WorkflowView(adageobj,self.offset))
 
     def json(self):
-        return {'type':'offset','offset':self.offset,'rule':self.rule.json()}
+        return {'type':'offset','offset':self.offset,'rule':self.rule.json(),'id':self.id}
 
 class WorkflowView(object):
     def __init__(self,workflowobj,offset = ''):
