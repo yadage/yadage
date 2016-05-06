@@ -12,6 +12,7 @@ class stepbase(object):
         self.name = name
         self.inputs = []
         self.attributes = {}
+        self.prepublished = None
         
     def used_input(self,reference):
         self.inputs += [reference]
@@ -21,12 +22,11 @@ class initstep(stepbase):
         super(initstep,self).__init__(name)
         self.prepublished = None
         if initdata:
-            self.attributes = initdata
-    
+            self.s(**initdata)
+        
     def __call__(self):
-        self._result = self.attributes
-        return self._result
-
+        pass
+        
     def s(self,**attributes):
         self.attributes = attributes
         self.prepublished = self.attributes
