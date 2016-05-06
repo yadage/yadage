@@ -86,13 +86,36 @@ def fillscope(cluster,workflow,scope = ''):
             if type(element)==str:
                 targetcl = stagecluster if stage is not 'init' else cluster
                 targetcl.add_node(pydotplus.graphviz.Node(element, label = stage, color = 'blue'))
+                attach_json(targetcl,element,workflow.dag.getNode(element).result)
             elif type(element)==dict:
                 fillscope(stagecluster,workflow,jsonpointer.JsonPointer.from_parts(scopeptr.parts+[stage,i]).path)
-    
+
+def attach_json(provgraph,parent,jsondata):
+    resultid = '{}_result'.format(parent)
+    resultcluster = pydotplus.graphviz.Cluster(graph_name = 'results', label = 'results', labeljust = 'l')
+    provgraph.add_subgraph(resultcluster)
+    resultcluster.add_node(pydotplus.graphviz.Node(resultid,label = 'result', shape = 'box', color = 'red'))
+    provgraph.add_edge(pydotplus.graphviz.Edge(parent,resultid))
+
+def attach_to_results(provgraph,workflow,node):
+    deps = list(set([x.stepid for x in workflow.dag.getNode(node).task.inputs]))
+    for dep in deps:
+        resultid = '{}_result'.format(dep)
+        provgraph.add_edge(pydotplus.graphviz.Edge(resultid,node))
+        
+
+def connect(provgraph,workflow):
+    for node in workflow.dag.nodes():
+        attach_to_results(provgraph,workflow,node)
+        
+            
+
 def write_prov_graph(workdir,workflow):
     provgraph = pydotplus.graphviz.Graph()
 
     fillscope(provgraph,workflow)
+    connect(provgraph,workflow)
+
     with open('{}/yadage_workflow_instance.dot'.format(workdir),'w') as dotfile:
         dotfile.write(provgraph.to_string())
 
