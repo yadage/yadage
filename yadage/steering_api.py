@@ -20,10 +20,7 @@ def run_workflow(workdir,analysis, initdata, loadtoplevel, loginterval, schemadi
         raise RuntimeError('workdir %s does not exist',workdir)
     
     backend = yadage.jsonbackend.JSONBackend()
-    # backend = adage.backends.MultiProcBackend(2)
     
-
-
     rootcontext = {
         'readwrite': [os.path.abspath(workdir)],
         'readonly': []
@@ -41,8 +38,8 @@ def run_workflow(workdir,analysis, initdata, loadtoplevel, loginterval, schemadi
     )
     workflow = YadageWorkflow.fromJSON(workflow_json,rootcontext)
     workflow.view().init(initdata)
-
-
+    
+    
     adage.rundag(workflow,
                  track = True,
                  backend = backend,
@@ -56,7 +53,7 @@ def run_workflow(workdir,analysis, initdata, loadtoplevel, loginterval, schemadi
         json.dump(workflow.stepsbystage,f)
     with open('{}/yadage_template.json'.format(yadagedir),'w') as f:
         json.dump(workflow_json,f)
-
+    
     visualize.write_prov_graph(yadagedir,workflow)
     log.info('finished yadage workflow %s',analysis)
     
