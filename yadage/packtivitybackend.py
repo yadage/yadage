@@ -4,11 +4,11 @@ import yadage.yadagestep
 from packtivity import packtivity_callable
 log = logging.getLogger(__name__)
 
-class JSONResultProxy(object):
+class PacktivityProxy(object):
     def __init__(self,task,multiprocprox,prepublished = None):
         self.proxy = multiprocprox
 
-class JSONBackend(object):
+class PacktivityBackend(object):
     def __init__(self,nparallel = 2):
         self.multiproc = adage.backends.MultiProcBackend(nparallel)
         
@@ -18,7 +18,7 @@ class JSONBackend(object):
         else:
             acallable = task
         multiprocprox = self.multiproc.submit(acallable)
-        return JSONResultProxy(task,multiprocprox)
+        return PacktivityProxy(task,multiprocprox)
         
     def result(self,resultproxy):
         return self.multiproc.result(resultproxy.proxy)

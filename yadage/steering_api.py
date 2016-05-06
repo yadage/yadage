@@ -5,12 +5,12 @@ import logging
 import os
 import json
 import workflow_loader
-import yadage.jsonbackend
+import yadage.packtivitybackend
 from yadage.yadagemodels import YadageWorkflow
 import visualize
 log = logging.getLogger(__name__)
 
-def run_workflow(workdir,analysis, initdata, loadtoplevel, loginterval, schemadir, validate = True):
+def run_workflow(workdir,analysis, initdata, loadtoplevel, loginterval, schemadir, validate = True, nparallel = 2):
     """
     Main entry point to run a Yadage workflow
     """
@@ -19,7 +19,7 @@ def run_workflow(workdir,analysis, initdata, loadtoplevel, loginterval, schemadi
     if not os.path.exists(workdir):
         os.makedirs(workdir)
     
-    backend = yadage.jsonbackend.JSONBackend()
+    backend = yadage.packtivitybackend.PacktivityBackend(nparallel)
     
     rootcontext = {
         'readwrite': [os.path.abspath(workdir)],
@@ -38,7 +38,6 @@ def run_workflow(workdir,analysis, initdata, loadtoplevel, loginterval, schemadi
     )
     workflow = YadageWorkflow.fromJSON(workflow_json,rootcontext)
     workflow.view().init(initdata)
-    
     
     adage.rundag(workflow,
                  track = True,
