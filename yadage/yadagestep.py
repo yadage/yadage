@@ -34,17 +34,18 @@ class stepbase(object):
 class initstep(stepbase):
     def __init__(self,name, initdata = None):
         super(initstep,self).__init__(name)
-        self.prepublished = None
         if initdata:
             self.attributes = initdata
     
+    @property
+    def prepublished(self):
+        return self.attributes
+    
     def __call__(self):
-        self._result = self.attributes
-        return self._result
-
+        pass
+        
     def s(self,**attributes):
         self.attributes = attributes
-        self.prepublished = self.attributes
         return self
         
 class yadagestep(stepbase):
@@ -55,15 +56,6 @@ class yadagestep(stepbase):
         self.p = None
         self.prepublished = None
         
-    def __call__(self,**attributes):
-        self.s(**attributes)
-        self._result = self.p()
-        log.debug('packtivity result is: {}'.format(self._result))
-        return self._result
-    
     def s(self,**attributes):
         self.attributes.update(**attributes)
-        self.p = packtivity_callable(self.name,self.spec,self.attributes,self.context)
-        if self.p.published_data:
-            self.prepublished = self.p.published_data
         return self

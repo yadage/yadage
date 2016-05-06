@@ -5,6 +5,7 @@ import logging
 import os
 import json
 import workflow_loader
+import yadage.jsonbackend
 from yadage.yadagemodels import YadageWorkflow
 import visualize
 log = logging.getLogger(__name__)
@@ -18,7 +19,8 @@ def run_workflow(workdir,analysis, initdata, loadtoplevel, loginterval, schemadi
     if not os.path.exists(workdir):
         raise RuntimeError('workdir %s does not exist',workdir)
     
-    backend = adage.backends.MultiProcBackend(2)
+    backend = yadage.jsonbackend.JSONBackend()
+    # backend = adage.backends.MultiProcBackend(2)
     
 
 
