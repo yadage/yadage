@@ -17,7 +17,7 @@ def run_workflow(workdir,analysis, initdata, loadtoplevel, loginterval, schemadi
     
     log.info('running yadage workflow %s',analysis)
     if not os.path.exists(workdir):
-        raise RuntimeError('workdir %s does not exist',workdir)
+        os.makedirs(workdir)
     
     backend = yadage.jsonbackend.JSONBackend()
     
