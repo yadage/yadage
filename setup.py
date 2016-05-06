@@ -23,7 +23,8 @@ setup(
     'jsonpath_rw',
     'packtivity',
     'adage',
-    'cap-schemas'
+    'cap-schemas',
+    'jq'
   ],
   entry_points = {
       'console_scripts': [
