@@ -3,6 +3,9 @@ import utils
 import jsonpointer
 import itertools
 import os
+import copy
+import jq
+import jsonpath_rw
 
 from yadage.yadagestep import yadagestep, initstep, outputReference
 from yadage.yadagemodels import jsonstage
@@ -18,22 +21,32 @@ handlers,scheduler = utils.handler_decorator()
 ###     - the step attributes are determined using the scheduler spec and context
 ###     - a list of used inputs (in the form of [stepname,outputkey,index])
 
+def pointerize(jsondata, asref = False, stepid = None):
+    allleafs = jq.jq('leaf_paths').transform(jsondata, multiple_output=True)
+    leafpointers = [jsonpointer.JsonPointer.from_parts(x).path for x in allleafs]
+    jsondata_proxy = copy.deepcopy(jsondata)
+    for leaf in leafpointers:
+        x = jsonpointer.JsonPointer(leaf)
+        x.set(jsondata_proxy, outputReference(stepid,x) if asref else x.path)
+    return jsondata_proxy
 
-def resolve_output(step,selection):
-    return (step.identifier,jsonpointer.JsonPointer.from_parts([selection]),step.result[selection])
+def select_reference(step,selection):
+    pointerized = pointerize(step.result, asref = True, stepid = step.identifier)
+    matches = jsonpath_rw.parse(selection).find(pointerized)
+    assert len(matches)==1
+    return matches[0].value
 
 def combine_outputs(outputs,flatten,unwrapsingle):
     combined = []
-    for stepid, pointer, result in outputs:
-        if type(result)==list:
+    for reference in outputs:
+        if type(reference)==list:
             if flatten: 
-                for i in range(len(result)):
-                    deeppointer = jsonpointer.JsonPointer.from_parts(pointer.parts+[i])
-                    combined+=[outputReference(stepid,deeppointer)]
+                for elementref in reference:
+                    combined+=[elementref]
             else:
-                combined+=[outputReference(stepid,pointer)]
+                combined+=[reference]
         else:
-            combined+=[outputReference(stepid,pointer)]
+            combined+=[reference]
     if len(combined)==1 and unwrapsingle:
         combined = combined[0]
     return combined
@@ -42,7 +55,7 @@ def select_steps(stage,query):
     return stage.view.getSteps(query)
 
 def select_outputs(steps,selection,flatten,unwrapsingle):
-    return combine_outputs(map(lambda s: resolve_output(s,selection),steps),flatten,unwrapsingle)
+    return combine_outputs(map(lambda s: select_reference(s,selection),steps),flatten,unwrapsingle)
 
 def resolve_reference(stage,selection):
     if type(selection) is not dict:
@@ -60,6 +73,7 @@ def select_parameter(stage,parameter):
     return value
 
 def finalize_value(stage,step,value,context):
+
     if type(value)==outputReference:
         step.used_input(value)
         v = value.pointer.resolve(stage.view.dag.getNode(value.stepid).result)
