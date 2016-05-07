@@ -102,7 +102,7 @@ def add_result(graph,parent,jsondata):
 
     for leaf in leafpointers:
         leafid = path_to_id(parent,leaf.path)
-        value = leaf.resolve(jsondata)
+        # value = leaf.resolve(jsondata)
         source = '|'.join(leaf.parts)
         label = '{}'.format(source)
         graph.add_node(pydotplus.graphviz.Node(leafid, label = label, color = 'red'))
