@@ -1,9 +1,13 @@
 import shlex
 import pydotplus
+import jsonpointer
 import networkx as nx
 from networkx.drawing.nx_pydot import write_dot
 import logging
+import jsonpointer
+import jq
 import subprocess
+
 log = logging.getLogger(__name__)
 
 def simple_stage_graph(workflow):
@@ -75,7 +79,6 @@ ______
             provgraph.add_edge(pydotplus.graphviz.Edge(pre,stepid))
 
 def fillscope(cluster,workflow,scope = ''):
-    import jsonpointer
     scopeptr = jsonpointer.JsonPointer(scope)
     scoped = scopeptr.resolve(workflow.stepsbystage)
     for stage,elements in scoped.iteritems():
@@ -84,32 +87,38 @@ def fillscope(cluster,workflow,scope = ''):
         cluster.add_subgraph(stagecluster)
         for i,element in enumerate(elements):
             if type(element)==str:
-                targetcl = stagecluster if stage is not 'init' else cluster
-                targetcl.add_node(pydotplus.graphviz.Node(element, label = stage, color = 'blue'))
-                attach_json(targetcl,element,workflow.dag.getNode(element).result)
+                targetcl = cluster#stagecluster if stage is not 'init' else cluster
+                targetcl.add_node(pydotplus.graphviz.Node(element, label = stage, color = 'blue', shape = 'box'))
+                add_result(targetcl,element,workflow.dag.getNode(element).result)
             elif type(element)==dict:
                 fillscope(stagecluster,workflow,jsonpointer.JsonPointer.from_parts(scopeptr.parts+[stage,i]).path)
 
-def attach_json(provgraph,parent,jsondata):
-    resultid = '{}_result'.format(parent)
-    resultcluster = pydotplus.graphviz.Cluster(graph_name = 'results', label = 'results', labeljust = 'l')
-    provgraph.add_subgraph(resultcluster)
-    resultcluster.add_node(pydotplus.graphviz.Node(resultid,label = 'result', shape = 'box', color = 'red'))
-    provgraph.add_edge(pydotplus.graphviz.Edge(parent,resultid))
+
+def path_to_id(stepid,path):
+    return '{}_{}'.format(stepid,path.replace('/','_'))
+
+def add_result(graph,parent,jsondata):
+    allleafs = jq.jq('leaf_paths').transform(jsondata, multiple_output=True)
+    leafpointers = [jsonpointer.JsonPointer.from_parts(x) for x in allleafs]
+
+    for leaf in leafpointers:
+        leafid = path_to_id(parent,leaf.path)
+        value = leaf.resolve(jsondata)
+        source = '|'.join(leaf.parts)
+        label = '{}'.format(source,value)
+        graph.add_node(pydotplus.graphviz.Node(leafid, label = label, color = 'red'))
+        graph.add_edge(pydotplus.graphviz.Edge(parent,leafid))
 
 def attach_to_results(provgraph,workflow,node):
-    deps = list(set([x.stepid for x in workflow.dag.getNode(node).task.inputs]))
-    for dep in deps:
-        resultid = '{}_result'.format(dep)
+    for dep in workflow.dag.getNode(node).task.inputs:
+        resultid =  path_to_id(dep.stepid,dep.pointer.path)
         provgraph.add_edge(pydotplus.graphviz.Edge(resultid,node))
         
-
+        
 def connect(provgraph,workflow):
     for node in workflow.dag.nodes():
         attach_to_results(provgraph,workflow,node)
         
-            
-
 def write_prov_graph(workdir,workflow):
     provgraph = pydotplus.graphviz.Graph()
 
@@ -118,6 +127,6 @@ def write_prov_graph(workdir,workflow):
 
     with open('{}/yadage_workflow_instance.dot'.format(workdir),'w') as dotfile:
         dotfile.write(provgraph.to_string())
-
-    subprocess.call(shlex.split('dot -Tpdf {}/yadage_workflow_instance.dot'.format(workdir)),
-                    stdout = open('{}/yadage_workflow_instance.pdf'.format(workdir),'w'))
+        
+    with open('{}/yadage_workflow_instance.pdf'.format(workdir),'w') as pdffile:
+        subprocess.call(shlex.split('dot -Tpdf {}/yadage_workflow_instance.dot'.format(workdir)), stdout = pdffile)

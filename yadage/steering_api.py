@@ -42,7 +42,7 @@ def run_workflow(workdir,analysis, initdata, loadtoplevel, loginterval, schemadi
     adage.rundag(workflow,
                  track = True,
                  backend = backend,
-                 update_interval = 2,
+                 update_interval = 0.02,
                  trackevery = loginterval,
                  workdir = '{}/_adage'.format(workdir)
                 )
