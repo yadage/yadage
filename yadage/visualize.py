@@ -78,15 +78,27 @@ ______
             provgraph.add_edge(pydotplus.graphviz.Edge(pre,stepid))
 
 def fillscope(cluster,workflow,scope = ''):
+    # scopecluster = stagecluster = pydotplus.graphviz.Cluster(graph_name = '_'.join(stagescopeprts),
+    scopecluster = pydotplus.graphviz.Cluster(
+                        graph_name = scope.replace('/',''),
+                        label = ''.join(['[{}]'.format(p) for p in scope.split('/')[1:]]),
+                        style = 'solid',
+                        color = 'black')
+    cluster.add_subgraph(scopecluster)
     scopeptr = jsonpointer.JsonPointer(scope)
     scoped = scopeptr.resolve(workflow.stepsbystage)
     for stage,elements in scoped.iteritems():
         stagescopeprts = scopeptr.parts+[stage]
-        stagecluster = pydotplus.graphviz.Cluster(graph_name = '_'.join(stagescopeprts), label = stage, labeljust = 'l')
-        cluster.add_subgraph(stagecluster)
+        stagecluster = pydotplus.graphviz.Cluster(
+            graph_name = '_'.join(stagescopeprts),
+            label = stage,
+            labeljust = 'l',
+            color = 'grey',
+            style = 'dashed')
+        scopecluster.add_subgraph(stagecluster)
         for i,element in enumerate(elements):
             if type(element)==str:
-                targetcl = cluster#stagecluster if stage is not 'init' else cluster
+                targetcl = stagecluster if stage is not 'init' else scopecluster
                 targetcl.add_node(pydotplus.graphviz.Node(element, label = stage, color = 'blue', shape = 'box'))
                 add_result(targetcl,element,workflow.dag.getNode(element).result)
             elif type(element)==dict:
@@ -103,7 +115,7 @@ def add_result(graph,parent,jsondata):
     for leaf in leafpointers:
         leafid = path_to_id(parent,leaf.path)
         # value = leaf.resolve(jsondata)
-        source = '|'.join(leaf.parts)
+        source = ''.join(['[{}]'.format(p) for p in leaf.parts])
         label = '{}'.format(source)
         graph.add_node(pydotplus.graphviz.Node(leafid, label = label, color = 'red'))
         graph.add_edge(pydotplus.graphviz.Edge(parent,leafid))
