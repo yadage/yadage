@@ -4,7 +4,6 @@ import jsonpointer
 import networkx as nx
 from networkx.drawing.nx_pydot import write_dot
 import logging
-import jsonpointer
 import jq
 import subprocess
 
@@ -105,7 +104,7 @@ def add_result(graph,parent,jsondata):
         leafid = path_to_id(parent,leaf.path)
         value = leaf.resolve(jsondata)
         source = '|'.join(leaf.parts)
-        label = '{}'.format(source,value)
+        label = '{}'.format(source)
         graph.add_node(pydotplus.graphviz.Node(leafid, label = label, color = 'red'))
         graph.add_edge(pydotplus.graphviz.Edge(parent,leafid))
 
