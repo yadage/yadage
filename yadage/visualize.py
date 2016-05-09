@@ -98,8 +98,9 @@ def fillscope(cluster,workflow,scope = ''):
         scopecluster.add_subgraph(stagecluster)
         for i,element in enumerate(elements):
             if type(element)==str:
-                targetcl = stagecluster if stage is not 'init' else scopecluster
-                targetcl.add_node(pydotplus.graphviz.Node(element, label = stage, color = 'blue', shape = 'box'))
+                targetcl = stagecluster if stage != 'init' else scopecluster
+                shape = 'diamond' if stage == 'init' else 'box'
+                targetcl.add_node(pydotplus.graphviz.Node(element, label = stage, color = 'blue', shape = shape))
                 add_result(targetcl,element,workflow.dag.getNode(element).result)
             elif type(element)==dict:
                 fillscope(stagecluster,workflow,jsonpointer.JsonPointer.from_parts(scopeptr.parts+[stage,i]).path)

@@ -33,7 +33,14 @@ def pointerize(jsondata, asref = False, stepid = None):
 def select_reference(step,selection):
     pointerized = pointerize(step.result, asref = True, stepid = step.identifier)
     matches = jsonpath_rw.parse(selection).find(pointerized)
-    assert len(matches)==1
+    if not matches:
+        log.error('no matches found for selection %s in result %s',selection,step.result)
+        raise RuntimeError('no matches found in reference selection')
+
+
+    if len(matches) > 1:
+        log.error('found multiple matches to query: %s within result: %s\n \ matches %s',selection,step.result,matches)
+        raise RuntimeError('multiple matches in result jsonpath query')
     return matches[0].value
 
 def combine_outputs(outputs,flatten,unwrapsingle):

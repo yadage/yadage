@@ -27,7 +27,6 @@ def walksteps(obj):
     else:
         yield obj
 
-
 class stage_base(object):
     def __init__(self,name,context,dependencies):
         self.name = name
@@ -87,7 +86,6 @@ class jsonstage(stage_base):
 
     def json(self):
         return {'type':'jsonstage','info':self.stageinfo,'name':self.name}
-
 
 class YadageNode(adage.node.Node):
     def __init__(self,name,task,identifier = None):
