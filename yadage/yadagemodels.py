@@ -53,6 +53,7 @@ class stage_base(object):
         return True
 
     def apply(self,flowview):
+        log.debug('applying stage: %s',self.name)
         self.view = flowview
         self.schedule()
     
