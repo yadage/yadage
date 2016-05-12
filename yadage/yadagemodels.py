@@ -133,7 +133,7 @@ class offsetRule(object):
     
     def apply(self,adageobj):
         self.rule.apply(WorkflowView(adageobj,self.offset))
-
+        
     def json(self):
         return {'type':'offset','offset':self.offset,'rule':self.rule.json(),'id':self.id}
 
@@ -185,9 +185,8 @@ class WorkflowView(object):
         
         offset = jsonpointer.JsonPointer.from_parts([stage,len(self.steps[stage])-1]).path if stage else ''
         
-        if initstep:
-            self.addRule(initStage(initstep,{},[]),offset)
-
+        if initstep: rules += [initStage(initstep,{},[])]
+        
         fullrules = [self.addRule(rule,offset) for rule in rules]
         if stage in self.myrules:
             self.myrules[stage] += [wflow_proxy(fullrules)]
