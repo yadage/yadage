@@ -143,6 +143,7 @@ class YadageWorkflow(adage.adageobject):
     def __init__(self):
         super(YadageWorkflow,self).__init__()
         self.stepsbystage = {}
+        self.workflowsbystage = {} #tracking subworkflow rules
         self.bookkeeping = {'_meta':{'rules':[],'steps':[]}}
         
     def view(self,offset = ''):
