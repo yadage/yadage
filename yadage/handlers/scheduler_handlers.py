@@ -103,10 +103,11 @@ def finalize_input(stage,step,json,context):
     return result
 
 def step_or_init(name,spec,context):
+    stepctx = newcontext = make_new_context(name,context)
     if 'step' in spec:
-        return yadagestep(name = name, spec = spec['step'], context = context)
+        return stepctx, yadagestep(name = name, spec = spec['step'], context = stepctx)
     elif 'workflow' in spec:
-        return initstep('init {}'.format(name))
+        return stepctx, initstep('init {}'.format(name))
 
 def make_new_context(name,oldcontext):
     newcontext = {'readwrite':['{}/{}'.format(oldcontext['readwrite'][0],name)], 'readonly':[]}
@@ -114,10 +115,9 @@ def make_new_context(name,oldcontext):
     os.makedirs(newcontext['readwrite'][0])
     return newcontext
 
-def addStepOrWorkflow(name,stage,step,spec):
+def addStepOrWorkflow(name,stage,context,step,spec):
     if type(step)==initstep:
-        newcontext = make_new_context(name,stage.context)
-        subrules = [jsonstage(yml,newcontext) for yml in spec['workflow']['stages']]
+        subrules = [jsonstage(yml,context) for yml in spec['workflow']['stages']]
         stage.addWorkflow(subrules, initstep = step)
     else:
         stage.addStep(step)
@@ -128,11 +128,11 @@ def simple_stage(stage,spec):
     parameters = {
         k:select_parameter(stage,v) for k,v in spec['parameters'].iteritems()
     }
-
-    step = step_or_init(name = stage.name, spec = spec, context = stage.context)
-    finalized = finalize_input(stage,step,parameters,stage.context)
-
-    addStepOrWorkflow(stage.name,stage,step.s(**finalized),spec)        
+    
+    ctx, step = step_or_init(name = stage.name, spec = spec, context = stage.context)
+    finalized = finalize_input(stage,step,parameters,ctx)
+    
+    addStepOrWorkflow(stage.name,stage,ctx,step.s(**finalized),spec)        
     
 def scatter(parameters,scatter):
     commonpars = parameters.copy()
@@ -166,12 +166,14 @@ def multi_stage(stage,spec):
     singlesteppars = scatter(parameters,spec['scatter'])
 
     for i,pars in enumerate(singlesteppars):
-        index_context = stage.context.copy()
-        index_context.update(index = i)
         
         singlename = '{}_{}'.format(stage.name,i)
-        step = step_or_init(name = singlename, spec = spec, context = stage.context)
+        ctx, step = step_or_init(name = singlename, spec = spec, context = stage.context)
+
+        index_context = ctx.copy()
+        index_context.update(index = i)
+
         finalized = finalize_input(stage,step,pars,index_context)
         
-        addStepOrWorkflow(singlename,stage,step.s(**finalized),spec)        
+        addStepOrWorkflow(singlename,stage,ctx,step.s(**finalized),spec)        
 
