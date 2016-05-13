@@ -151,6 +151,7 @@ class YadageWorkflow(adage.adageobject):
     def json(self):
         from adage.serialize import obj_to_json
         data = obj_to_json(self,ruleserializer = lambda r:r.json(), taskserializer = lambda t:t.json(), proxyserializer = lambda p: p.json())
+        data['bookkeeping']=self.bookkeeping
         return data
         
     @classmethod
