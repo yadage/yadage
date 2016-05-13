@@ -143,7 +143,6 @@ class YadageWorkflow(adage.adageobject):
     def __init__(self):
         super(YadageWorkflow,self).__init__()
         self.stepsbystage = {}
-        self.workflowsbystage = {} #tracking subworkflow rules
         self.bookkeeping = {'_meta':{'rules':[],'steps':[]}}
         
     def view(self,offset = ''):
@@ -204,7 +203,8 @@ class WorkflowView(object):
         self.bookkeeper['_meta']['steps'] += [node.identifier]
 
     def addWorkflow(self, rules, initstep = None, stage = None):
-        if initstep: rules += [initStage(initstep,{},[])]
+        if initstep:
+            rules += [initStage(initstep,{},[])]
         
         newsteps = {}
         if stage in self.steps:
@@ -224,6 +224,7 @@ class WorkflowView(object):
                 booker[p] = {'_meta':{'rules':[],'steps':[]}}
             booker = booker[p]
         
-        fullids = [self.addRule(rule,offset) for rule in rules]
+        for rule in rules:
+            self.addRule(rule,offset)
         
         
