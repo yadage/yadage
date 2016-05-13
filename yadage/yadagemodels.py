@@ -33,7 +33,6 @@ def checkmeta(flowview,metainfo):
     stepsok = all([flowview.dag.getNode(x).has_result for x in metainfo['steps']])
     return (rulesok and stepsok)
 
-
 def scope_done(scope,flowview):
     result = True
     
@@ -204,7 +203,6 @@ class WorkflowView(object):
 
     def addWorkflow(self, rules, initstep = None, stage = None):
         if initstep: rules += [initStage(initstep,{},[])]
-        
         newsteps = {}
         if stage in self.steps:
             self.steps[stage] += [newsteps]
@@ -222,7 +220,3 @@ class WorkflowView(object):
             else:
                 booker[p] = {'_meta':{'rules':[],'steps':[]}}
             booker = booker[p]
-        
-        fullids = [self.addRule(rule,offset) for rule in rules]
-        
-        
