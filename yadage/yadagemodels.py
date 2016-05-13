@@ -8,67 +8,17 @@ import jsonpath_rw
 from yadagestep import initstep
 log = logging.getLogger(__name__)
 
-def convert(thing):
-    if type(thing)==jsonpath_rw.jsonpath.Index:
-        return thing.index
-    if type(thing)==jsonpath_rw.jsonpath.Fields:
-        fs = thing.fields
-        assert len(fs)==1
-        return fs[0]
-
-def unravelpath(path):
-    if type(path)==jsonpath_rw.jsonpath.Child:
-        for x in unravelpath(path.left):
-            yield x
-        yield convert(path.right)
-    else:
-        yield convert(path)
-
-def path2pointer(path):
-    return jsonpointer.JsonPointer.from_parts(x for x in unravelpath(path)).path
-
-def checkmeta(flowview,metainfo):
-    applied_ids = [rl.identifier for rl in flowview.applied_rules]
-    rulesok = all([x in applied_ids for x in metainfo['rules']])
-    stepsok = all([flowview.dag.getNode(x).has_result for x in metainfo['steps']])
-    return (rulesok and stepsok)
-
-
-def scope_done(scope,flowview):
-    result = True
-    
-    bookkeeper = jsonpointer.JsonPointer(scope).resolve(flowview.bookkeeper)
-    for k,v in bookkeeper.iteritems():
-        for k,v in bookkeeper.iteritems():
-            if k=='_meta':
-                result = result and checkmeta(flowview,v)
-            else:
-                childscope = scope+'/{}'.format(k)
-                result = result and scope_done(childscope,flowview)
-    return result
-
-################
-
 class stage_base(object):
-    def __init__(self,name,context,dependencies):
+    def __init__(self,name,context,dependencies = None):
         self.name = name
         self.context = context
-        self.dependencies = dependencies
+        self.depspec = dependencies
         
     def applicable(self,flowview):
-        for x in self.dependencies:
-            depmatches = flowview.query(x,flowview.steps)
-            
-            if not depmatches:
-                return False
-            issubwork = '_nodeid' not in depmatches[0].value[0]
-            if issubwork:
-                if not all([scope_done(scope['_offset'],flowview) for match in depmatches for scope in match.value]):
-                    return False
-            else:
-                if not all([x.has_result() for x in flowview.getSteps(x)]):
-                    return False
-        return True
+        if not self.depspec: return True
+        from handlers.predicate_handlers import handlers as pred_handlers
+        predicate = pred_handlers[self.depspec['dependency_type']]
+        return predicate(flowview,self.depspec)
         
     def apply(self,flowview):
         log.debug('applying stage: %s',self.name)
@@ -96,7 +46,7 @@ class initStage(stage_base):
 class jsonstage(stage_base):
     def __init__(self,json,context):
         self.stageinfo = json['scheduler']
-        super(jsonstage,self).__init__(json['name'],context,json['dependencies']['expressions'])
+        super(jsonstage,self).__init__(json['name'],context,json['dependencies'])
         
     def schedule(self):
         from yadage.handlers.scheduler_handlers import handlers as sched_handlers
@@ -130,7 +80,6 @@ class YadageNode(adage.node.Node):
         return '<YadageNode {} {} lifetime: {} (id: {})>'.format(self.name,self.state,lifetime,self.identifier)
 
     def has_result(self):
-        # return self.successful()
         return (self.task.prepublished is not None) or self.successful()
     
     @property
@@ -183,7 +132,7 @@ class WorkflowView(object):
         
     def init(self, initdata, name = 'init'):
         step = initstep(name,initdata)
-        self.addRule(initStage(step,{},[]),self.offset)
+        self.addRule(initStage(step,{},None),self.offset)
             
     def addRule(self,rule,offset = ''):
         
@@ -210,7 +159,7 @@ class WorkflowView(object):
 
     def addWorkflow(self, rules, initstep = None, stage = None):
         if initstep:
-            rules += [initStage(initstep,{},[])]
+            rules += [initStage(initstep,{},None)]
         
         newsteps = {}
         if stage in self.steps:
