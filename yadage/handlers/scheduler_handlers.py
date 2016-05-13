@@ -80,6 +80,7 @@ def select_parameter(stage,parameter):
     return value
 
 def finalize_value(stage,step,value,context):
+
     if type(value)==outputReference:
         step.used_input(value)
         v = value.pointer.resolve(stage.view.dag.getNode(value.stepid).result)
