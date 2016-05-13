@@ -55,3 +55,6 @@ def run_workflow(workdir,analysis, initdata, loadtoplevel, loginterval, schemadi
     
     visualize.write_prov_graph(yadagedir,workflow)
     log.info('finished yadage workflow %s',analysis)
+    # import IPython
+    # IPython.embed()
+
