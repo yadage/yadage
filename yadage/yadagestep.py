@@ -27,6 +27,9 @@ class initstep(stepbase):
     def __call__(self):
         pass
         
+    def json(self):
+        return {'type':'initstep', 'attributes': self.attributes}
+    
     def s(self,**attributes):
         self.attributes = attributes
         self.prepublished = self.attributes
@@ -37,7 +40,9 @@ class yadagestep(stepbase):
         super(yadagestep,self).__init__(name)
         self.spec = spec
         self.context = context
-        self.p = None
+        
+    def json(self):
+        return {'type':'yadagestep','spec':self.spec, 'context':self.context, 'attributes': self.attributes}
         
     def s(self,**attributes):
         self.attributes.update(**attributes)

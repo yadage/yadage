@@ -148,6 +148,11 @@ class YadageWorkflow(adage.adageobject):
     def view(self,offset = ''):
         return WorkflowView(self,offset)
         
+    def json(self):
+        from adage.serialize import obj_to_json
+        data = obj_to_json(self,ruleserializer = lambda r:r.json(), taskserializer = lambda t:t.json(), proxyserializer = lambda p: p.json())
+        return data
+        
     @classmethod
     def fromJSON(cls,jsondata,context):
         instance = cls()

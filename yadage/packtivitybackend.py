@@ -8,6 +8,9 @@ class PacktivityProxy(object):
     def __init__(self,task,multiprocprox,prepublished = None):
         self.proxy = multiprocprox
 
+    def json(self):
+        return {'type':'packtivity_proxy','def':'not yet...'}
+
 class PacktivityBackend(object):
     def __init__(self,nparallel = 2):
         self.multiproc = adage.backends.MultiProcBackend(nparallel)

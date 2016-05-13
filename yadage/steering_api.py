@@ -49,7 +49,7 @@ def run_workflow(workdir,analysis, initdata, loadtoplevel, loginterval, schemadi
     yadagedir = '{}/_yadage/'.format(workdir)
     os.makedirs(yadagedir)
     with open('{}/yadage.json'.format(yadagedir),'w') as f:
-        json.dump(workflow.stepsbystage,f)
+        json.dump(workflow.json(),f)
     with open('{}/yadage_template.json'.format(yadagedir),'w') as f:
         json.dump(workflow_json,f)
     
