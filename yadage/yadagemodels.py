@@ -10,6 +10,7 @@ log = logging.getLogger(__name__)
 
 class stage_base(object):
     def __init__(self,name,context,dependencies = None):
+        self.view = None
         self.name = name
         self.context = context
         self.depspec = dependencies
@@ -21,7 +22,6 @@ class stage_base(object):
         return predicate(flowview,self.depspec)
         
     def apply(self,flowview):
-        log.debug('applying stage: %s',self.name)
         self.view = flowview
         self.schedule()
         
@@ -92,7 +92,7 @@ class YadageWorkflow(adage.adageobject):
     def __init__(self):
         super(YadageWorkflow,self).__init__()
         self.stepsbystage = {}
-        self.bookkeeping = {'_meta':{'rules':[],'steps':[]}}
+        self.bookkeeping = {}
         
     def view(self,offset = ''):
         return WorkflowView(self,offset)
@@ -111,6 +111,16 @@ class YadageWorkflow(adage.adageobject):
         rootview.addWorkflow(rules)
         return instance
 
+def createOffsetMeta(offset,bookkeeping):
+    pointer = jsonpointer.JsonPointer(offset)
+    parts = pointer.parts
+    view = bookkeeping
+    for x in parts:
+        if not x in view: view[x] = {}
+        view = view[x]
+    scoped = pointer.resolve(bookkeeping)
+    if not '_meta' in scoped: scoped['_meta'] = {'rules':[],'steps':[]}
+
 class WorkflowView(object):
     def __init__(self,workflowobj,offset = ''):
         self.dag           = workflowobj.dag
@@ -120,7 +130,6 @@ class WorkflowView(object):
         self.offset        = offset
         self.steps         = jsonpointer.JsonPointer(self.offset).resolve(workflowobj.stepsbystage)
         self.bookkeeper    = jsonpointer.JsonPointer(self.offset).resolve(workflowobj.bookkeeping)
-        
         
     def query(self,query,collection):
         matches = jsonpath_rw.parse(query).find(collection)
@@ -143,6 +152,7 @@ class WorkflowView(object):
             fulloffset = thisoffset.path
         offsetrule = offsetRule(rule,fulloffset)
         self.rules += [offsetrule]
+        createOffsetMeta(thisoffset.path,self.bookkeeper)
         thisoffset.resolve(self.bookkeeper)['_meta']['rules'] += [offsetrule.identifier]
         return offsetrule.identifier
     
@@ -160,24 +170,15 @@ class WorkflowView(object):
     def addWorkflow(self, rules, initstep = None, stage = None):
         if initstep:
             rules += [initStage(initstep,{},None)]
-        
         newsteps = {}
         if stage in self.steps:
             self.steps[stage] += [newsteps]
         elif stage is not None:
             self.steps[stage]  = [newsteps]
-
+            
         offset = jsonpointer.JsonPointer.from_parts([stage,len(self.steps[stage])-1]).path if stage else ''
         if stage is not None:
             self.steps[stage][-1]['_offset'] = offset
-        
-        booker = self.bookkeeper
-        for p in jsonpointer.JsonPointer(offset).parts:
-            if p in booker:
-                pass
-            else:
-                booker[p] = {'_meta':{'rules':[],'steps':[]}}
-            booker = booker[p]
         
         for rule in rules:
             self.addRule(rule,offset)
