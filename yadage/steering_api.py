@@ -9,8 +9,8 @@ from yadage.yadagemodels import YadageWorkflow
 import visualize
 
 
-# from yadage.backends import packtivitybackend
-from yadage.backends import packtivity_celery
+from yadage.backends import packtivitybackend
+# from yadage.backends import packtivity_celery
 
 
 log = logging.getLogger(__name__)
@@ -42,9 +42,9 @@ def run_workflow(workdir, workflow, initdata, loadtoplevel, loginterval, schemad
     workflow = YadageWorkflow.createFromJSON(workflow_json,rootcontext)
     workflow.view().init(initdata)
 
-    # backend = packtivitybackend.PacktivityMultiProcBackend(nparallel)
-    import backends.celeryapp
-    backend = packtivity_celery.PacktivityCeleryBackend(backends.celeryapp.app)
+    backend = packtivitybackend.PacktivityMultiProcBackend(nparallel)
+    # import backends.celeryapp
+    # backend = packtivity_celery.PacktivityCeleryBackend(backends.celeryapp.app)
     adage.rundag(workflow,
                  track = True,
                  backend = backend,

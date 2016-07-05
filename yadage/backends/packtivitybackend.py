@@ -20,7 +20,6 @@ class PacktivityProxyBase(object):
         return 'PacktivityProxyBase'
 
     def json(self):
-        details = None
         return {
             'type':self.proxyname(),
             'proxydetails': self.details()
