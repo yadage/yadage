@@ -4,24 +4,26 @@ from celery import shared_task
 from packtivity import packtivity
 from packtivitybackend import AdagePacktivityBackendBase, PacktivityProxyBase
 
-
-
 @shared_task
 def packtivity_task(name, spec, attributes, context):
     '''celery enabled packtiity'''
-    print 'running packtivity'
+    print 'running a packtivity via a celery task'
     return packtivity(name,spec,attributes,context)
 
 @shared_task
 def init_task():
     '''dummy task'''
-    print 'dummytask used for init steps'
+    print 'running a dummytask used for init steps'
 
 class PacktivityCeleryProxy(PacktivityProxyBase):
     def proxyname(self):
         return 'PacktivityCeleryProxy'
+
     def details(self):
-        return {'no':'details'}
+        return {
+            'task_id':self.proxy.task_id,
+            'task_name':self.proxy.task_name
+        }
 
 class PacktivityCeleryBackend(AdagePacktivityBackendBase):
     def __init__(self,app):

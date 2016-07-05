@@ -11,7 +11,6 @@ class PacktivityProxyBase(object):
     and proxyname methods
     '''
     def __init__(self,task,proxy,prepublished = None):
-        print 'init with {}'.format(proxy)
         self.proxy = proxy
 
     def details(self):

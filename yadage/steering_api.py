@@ -39,7 +39,7 @@ def run_workflow(workdir, workflow, initdata, loadtoplevel, loginterval, schemad
         schemadir = schemadir,
         validate = validate
     )
-    workflow = YadageWorkflow.fromJSON(workflow_json,rootcontext)
+    workflow = YadageWorkflow.createFromJSON(workflow_json,rootcontext)
     workflow.view().init(initdata)
 
     # backend = packtivitybackend.PacktivityMultiProcBackend(nparallel)
@@ -59,6 +59,9 @@ def run_workflow(workdir, workflow, initdata, loadtoplevel, loginterval, schemad
         json.dump(workflow.json(),f)
     with open('{}/yadage_template.json'.format(yadagedir),'w') as f:
         json.dump(workflow_json,f)
+
+    # import IPython
+    # IPython.embed()
 
     visualize.write_prov_graph(yadagedir,workflow)
     log.info('finished yadage workflow %s',workflow)
