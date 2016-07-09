@@ -188,8 +188,6 @@ class YadageWorkflow(adage.adageobject):
                            taskserializer  = json_or_nil,
                            proxyserializer = json_or_nil,
                            )
-
-        log.info('adding bookkeeping and by-stage-indexed steps to JSON')
         data['bookkeeping']  = self.bookkeeping
         data['stepsbystage'] = self.stepsbystage
         return data
