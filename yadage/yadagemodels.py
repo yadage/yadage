@@ -1,14 +1,21 @@
 import logging
 import adage
 import adage.node
+import adage.serialize
 import jsonpointer
 import time
 import uuid
 import jsonpath_rw
-from yadagestep import initstep
+import yadagestep
 log = logging.getLogger(__name__)
 
 class stage_base(object):
+    '''
+    Base class for workflow stages (i.e. extension rules)
+    provides common datastructures and the extension predicate.
+    Implementations are required to provide a schedule()
+    method that is called upon apply
+    '''
     def __init__(self,name,context,dependencies = None):
         self.view = None
         self.name = name
@@ -32,7 +39,18 @@ class stage_base(object):
     def addWorkflow(self,rules, initstep):
         self.view.addWorkflow(rules, initstep = initstep, stage = self.name)
 
+    #(de-)serialization
+    def json(self):
+        return {
+            'name':self.name,
+            'context':self.context,
+            'dependencies':self.depspec
+        }
+
 class initStage(stage_base):
+    '''
+    simple stage that just adds a initializer step to the DAG
+    '''
     def __init__(self, step, context, dependencies):
         super(initStage,self).__init__('init', context,dependencies)
         self.step = step
@@ -40,25 +58,55 @@ class initStage(stage_base):
     def schedule(self):
         self.addStep(self.step)
 
-    def json(self):
-        return {'type':'initStage','info':'just init', 'name':self.name}
+    #(de-)serialization
+    @classmethod
+    def fromJSON(cls,data):
+        instance = cls(
+            step = yadagestep.initstep.fromJSON(data['step']),
+            context = data['context'],
+            dependencies = data['dependencies']
+        )
+        return instance
 
-class jsonstage(stage_base):
+    def json(self):
+        data = super(initStage,self).json()
+        data.update(type = 'initStage', info = '', step = self.step.json())
+        return data
+
+class jsonStage(stage_base):
+    '''
+    A stage that is defined via the JSON scheduler schemas
+    '''
     def __init__(self,json,context):
         self.stageinfo = json['scheduler']
-        super(jsonstage,self).__init__(json['name'],context,json['dependencies'])
+        super(jsonStage,self).__init__(json['name'],context,json['dependencies'])
 
     def schedule(self):
         from yadage.handlers.scheduler_handlers import handlers as sched_handlers
         scheduler = sched_handlers[self.stageinfo['scheduler_type']]
         scheduler(self,self.stageinfo)
 
+    #(de-)serialization
+    @classmethod
+    def fromJSON(cls,data):
+        return cls(json = {
+            'scheduler':data['info'],
+            'name':data['name'],
+            'dependencies':data['dependencies']
+        }, context = data['context'])
+
     def json(self):
-        return {'type':'jsonstage','info':self.stageinfo,'name':self.name}
+        data = super(jsonStage,self).json()
+        data.update(type = 'jsonStage', info = self.stageinfo)
+        return data
 
 class offsetRule(object):
-    def __init__(self,rule,offset = None):
-        self.identifier = str(uuid.uuid4())
+    '''
+    A wrapper object around a scoped rule, so that it can be applied from
+    a global p.o.v., i.e. as adage expects its rules.
+    '''
+    def __init__(self,rule,offset = None, identifier = None):
+        self.identifier = identifier or str(uuid.uuid4())
         self.rule = rule
         self.offset = offset
 
@@ -68,10 +116,30 @@ class offsetRule(object):
     def apply(self,adageobj):
         self.rule.apply(WorkflowView(adageobj,self.offset))
 
+    #(de-)serialization
+    @classmethod
+    def fromJSON(cls,data):
+        if data['rule']['type'] == 'initStage':
+            rule = initStage.fromJSON(data['rule'])
+        elif data['rule']['type'] == 'jsonStage':
+            rule = jsonStage.fromJSON(data['rule'])
+        return cls(
+                    rule = rule,
+                    identifier = data['id'],
+                    offset = data['offset']
+                   )
+
     def json(self):
-        return {'type':'offset','offset':self.offset,'rule':self.rule.json(),'id':self.identifier}
+        return {'type':'offset',
+                'id':self.identifier,
+                'offset':self.offset,
+                'rule':self.rule.json()}
 
 class YadageNode(adage.node.Node):
+    '''
+    Node object for yadage that extends the default with
+    the ability to have prepublished results
+    '''
     def __init__(self,name,task,identifier = None):
         super(YadageNode,self).__init__(name,task,identifier)
 
@@ -88,7 +156,23 @@ class YadageNode(adage.node.Node):
             return self.task.prepublished
         return super(YadageNode,self).result
 
+    @classmethod
+    def fromJSON(cls,data):
+        if data['task']['type'] == 'initstep':
+            task = yadagestep.initstep.fromJSON(data['task'])
+        elif data['task']['type'] == 'yadagestep':
+            task = yadagestep.yadagestep.fromJSON(data['task'])
+        return cls(data['name'],task,data['id'])
+
+
+def json_or_nil(x):
+    return None if x is None else x.json()
+
 class YadageWorkflow(adage.adageobject):
+    '''
+    The overall workflow state object that extends the basic
+    Adage state object by two bookkeeping structures.
+    '''
     def __init__(self):
         super(YadageWorkflow,self).__init__()
         self.stepsbystage = {}
@@ -100,18 +184,42 @@ class YadageWorkflow(adage.adageobject):
     def json(self):
         from adage.serialize import obj_to_json
         data = obj_to_json(self,
-                           ruleserializer = lambda r:r.json(),
-                           taskserializer = lambda t:t.json(),
-                           proxyserializer = lambda p: p.json()
+                           ruleserializer  = json_or_nil,
+                           taskserializer  = json_or_nil,
+                           proxyserializer = json_or_nil,
                            )
+
+        log.info('adding bookkeeping and by-stage-indexed steps to JSON')
         data['bookkeeping']  = self.bookkeeping
         data['stepsbystage'] = self.stepsbystage
         return data
 
+    #(de-)serialization
+    @classmethod
+    def fromJSON(cls,data,proxyclass,backend = None):
+        rules, applied = [], []
+        for x in data['rules']:
+            rules += [offsetRule.fromJSON(x)]
+        for x in data['applied']:
+            applied += [offsetRule.fromJSON(x)]
+
+        instance = cls()
+        instance.rules = rules
+        instance.applied_rules = applied
+        instance.bookkeeping = data['bookkeeping']
+        instance.stepsbystage = data['stepsbystage']
+        instance.dag = adage.serialize.dag_from_json(
+            data['dag'],
+            YadageNode,
+            proxyclass,
+            backend
+        )
+        return instance
+
     @classmethod
     def createFromJSON(cls,jsondata,context):
         instance = cls()
-        rules = [jsonstage(yml,context) for yml in jsondata['stages']]
+        rules = [jsonStage(yml,context) for yml in jsondata['stages']]
         rootview = WorkflowView(instance)
         rootview.addWorkflow(rules)
         return instance
@@ -124,14 +232,20 @@ def createOffsetMeta(offset,bookkeeping):
         if not x in view: view[x] = {}
         view = view[x]
     scoped = pointer.resolve(bookkeeping)
-    if not '_meta' in scoped: scoped['_meta'] = {'rules':[],'steps':[]}
+    if not '_meta' in scoped:
+        scoped['_meta'] = {'rules':[],'steps':[]}
 
 class WorkflowView(object):
+    '''
+    Provides a 'view' of the overall workflow object that corresponds
+    to a particular level of nesting. That is, this presents the scope
+    within which extension rules operate (i.e. add steps, reference
+    other steps, etc)
+    '''
     def __init__(self,workflowobj,offset = ''):
         self.dag           = workflowobj.dag
         self.rules         = workflowobj.rules
         self.applied_rules = workflowobj.applied_rules
-
         self.offset        = offset
         self.steps         = jsonpointer.JsonPointer(self.offset).resolve(workflowobj.stepsbystage)
         self.bookkeeper    = jsonpointer.JsonPointer(self.offset).resolve(workflowobj.bookkeeping)
@@ -145,7 +259,7 @@ class WorkflowView(object):
         return result
 
     def init(self, initdata, name = 'init'):
-        step = initstep(name,initdata)
+        step = yadagestep.initstep(name,initdata)
         self.addRule(initStage(step,{},None),self.offset)
 
     def addRule(self,rule,offset = ''):

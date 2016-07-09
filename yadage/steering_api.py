@@ -9,13 +9,18 @@ from yadage.yadagemodels import YadageWorkflow
 import visualize
 
 
-from yadage.backends import packtivitybackend
-# from yadage.backends import packtivity_celery
-
-
 log = logging.getLogger(__name__)
 
-def run_workflow(workdir, workflow, initdata, loadtoplevel, loginterval, schemadir, validate = True, nparallel = 2):
+def run_workflow(
+    workdir,
+    workflow,
+    initdata,
+    loadtoplevel,
+    loginterval,
+    schemadir,
+    backend,
+    validate = True
+    ):
     """
     Main entry point to run a Yadage workflow
     """
@@ -42,9 +47,12 @@ def run_workflow(workdir, workflow, initdata, loadtoplevel, loginterval, schemad
     workflow = YadageWorkflow.createFromJSON(workflow_json,rootcontext)
     workflow.view().init(initdata)
 
-    backend = packtivitybackend.PacktivityMultiProcBackend(nparallel)
-    # import backends.celeryapp
-    # backend = packtivity_celery.PacktivityCeleryBackend(backends.celeryapp.app)
+    yadagedir = '{}/_yadage/'.format(workdir)
+    os.makedirs(yadagedir)
+
+    with open('{}/yadage_instance_before.json'.format(yadagedir),'w') as f:
+        json.dump(workflow.json(),f)
+
     adage.rundag(workflow,
                  track = True,
                  backend = backend,
@@ -53,8 +61,6 @@ def run_workflow(workdir, workflow, initdata, loadtoplevel, loginterval, schemad
                  workdir = '{}/_adage'.format(workdir)
                 )
 
-    yadagedir = '{}/_yadage/'.format(workdir)
-    os.makedirs(yadagedir)
     with open('{}/yadage_instance.json'.format(yadagedir),'w') as f:
         json.dump(workflow.json(),f)
     with open('{}/yadage_template.json'.format(yadagedir),'w') as f:

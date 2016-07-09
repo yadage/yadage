@@ -10,7 +10,7 @@ class PacktivityProxyBase(object):
     that is passed in the ctor. Implementations can override details
     and proxyname methods
     '''
-    def __init__(self,task,proxy,prepublished = None):
+    def __init__(self,proxy):
         self.proxy = proxy
 
     def details(self):
@@ -68,4 +68,4 @@ class PacktivityMultiProcBackend(AdagePacktivityBackendBase):
         multiprocprox = self.adagebackend.submit(acallable)
 
         #since we can't really persistify the proxies of an in-memory process pool, we'll just return the base
-        return PacktivityProxyBase(task,multiprocprox)
+        return PacktivityProxyBase(multiprocprox)

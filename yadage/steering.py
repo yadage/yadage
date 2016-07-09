@@ -14,13 +14,29 @@ log = logging.getLogger(__name__)
 @click.option('-v','--verbosity', default = 'INFO')
 @click.option('-i','--loginterval', default = 30)
 @click.option('-c','--schemasource', default = capschemas.schemadir)
-@click.option('-p','--parallel', default = 2)
+@click.option('-b','--backend', default = 'multiproc:2')
 @click.argument('workflow')
 @click.argument('initdata', default = '')
-def main(workdir,workflow,initdata,toplevel,verbosity,loginterval,schemasource,parallel):
+def main(workdir,workflow,initdata,toplevel,verbosity,loginterval,schemasource,backend):
     logging.basicConfig(level = getattr(logging,verbosity))
     initdata = yaml.load(open(initdata)) if initdata else {}
-    steering_api.run_workflow(workdir,workflow,initdata,toplevel,loginterval,schemadir = schemasource, nparallel = parallel)
+
+    if backend.startswith('multiproc'):
+        import backends.packtivitybackend as pb
+        nparallel = int(backend.split(':')[1])
+        backend = pb.PacktivityMultiProcBackend(nparallel)
+    elif backend == 'celery':
+        import backends.celeryapp
+        import backends.packtivity_celery as pc
+        backend = pc.PacktivityCeleryBackend(backends.celeryapp.app)
+
+    steering_api.run_workflow(
+        workdir,
+        workflow,
+        initdata,
+        toplevel,
+        loginterval,
+        schemadir = schemasource, backend = backend)
 
 if __name__ == '__main__':
     main()

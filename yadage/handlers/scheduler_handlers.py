@@ -8,7 +8,7 @@ import jq
 import jsonpath_rw
 
 from yadage.yadagestep import yadagestep, initstep, outputReference
-from yadage.yadagemodels import jsonstage
+from yadage.yadagemodels import jsonStage
 
 log = logging.getLogger(__name__)
 
@@ -47,7 +47,7 @@ def combine_outputs(outputs,flatten,unwrapsingle):
     combined = []
     for reference in outputs:
         if type(reference)==list:
-            if flatten: 
+            if flatten:
                 for elementref in reference:
                     combined+=[elementref]
             else:
@@ -80,17 +80,16 @@ def select_parameter(stage,parameter):
     return value
 
 def finalize_value(stage,step,value,context):
-
     if type(value)==outputReference:
         step.used_input(value)
         v = value.pointer.resolve(stage.view.dag.getNode(value.stepid).result)
         return finalize_value(stage,step,v,context)
     if type(value)==list:
         return [finalize_value(stage,step,x,context) for x in value]
-    if type(value)==str:
+    if type(value) in [str,unicode]:
         return value.format(**context)
     return value
-    
+
 def finalize_input(stage,step,json,context):
     context = context.copy()
     context['workdir'] = context['readwrite'][0]
@@ -117,14 +116,14 @@ def make_new_context(name,oldcontext):
 def addStepOrWorkflow(name,stage,step,spec):
     if type(step)==initstep:
         newcontext = make_new_context(name,stage.context)
-        subrules = [jsonstage(yml,newcontext) for yml in spec['workflow']['stages']]
+        subrules = [jsonStage(yml,newcontext) for yml in spec['workflow']['stages']]
         stage.addWorkflow(subrules, initstep = step)
     else:
         stage.addStep(step)
 
 @scheduler('singlestep-stage')
 def simple_stage(stage,spec):
-    
+
     parameters = {
         k:select_parameter(stage,v) for k,v in spec['parameters'].iteritems()
     }
@@ -132,14 +131,14 @@ def simple_stage(stage,spec):
     step = step_or_init(name = stage.name, spec = spec, context = stage.context)
     finalized = finalize_input(stage,step,parameters,stage.context)
 
-    addStepOrWorkflow(stage.name,stage,step.s(**finalized),spec)        
-    
+    addStepOrWorkflow(stage.name,stage,step.s(**finalized),spec)
+
 def scatter(parameters,scatter):
     commonpars = parameters.copy()
     to_scatter = {}
     for scatpar in scatter['parameters']:
         to_scatter[scatpar] = commonpars.pop(scatpar)
-    
+
     singlesteppars=[]
     if scatter['method']=='zip':
         keys, zippable = zip(*[(k,v) for i,(k,v) in enumerate(to_scatter.iteritems())])
@@ -168,10 +167,9 @@ def multi_stage(stage,spec):
     for i,pars in enumerate(singlesteppars):
         index_context = stage.context.copy()
         index_context.update(index = i)
-        
+
         singlename = '{}_{}'.format(stage.name,i)
         step = step_or_init(name = singlename, spec = spec, context = stage.context)
         finalized = finalize_input(stage,step,pars,index_context)
-        
-        addStepOrWorkflow(singlename,stage,step.s(**finalized),spec)        
 
+        addStepOrWorkflow(singlename,stage,step.s(**finalized),spec)

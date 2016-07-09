@@ -1,6 +1,7 @@
 import yadage.yadagestep
 import adage.backends
 from celery import shared_task
+from celery.result import AsyncResult
 from packtivity import packtivity
 from packtivitybackend import AdagePacktivityBackendBase, PacktivityProxyBase
 
@@ -25,6 +26,15 @@ class PacktivityCeleryProxy(PacktivityProxyBase):
             'task_name':self.proxy.task_name
         }
 
+    @classmethod
+    def fromJSON(cls,data):
+        proxy = AsyncResult(
+            data['proxydetails']['task_id'],
+            task_name = data['proxydetails']['task_name']
+        )
+        return cls(proxy)
+
+
 class PacktivityCeleryBackend(AdagePacktivityBackendBase):
     def __init__(self,app):
         super(PacktivityCeleryBackend,self).__init__(adage.backends.CeleryBackend(app))
@@ -42,4 +52,4 @@ class PacktivityCeleryBackend(AdagePacktivityBackendBase):
         else:
             raise RuntimeError('cannot figure out how to submit a task of type {}'.format(tasktype))
 
-        return PacktivityCeleryProxy(task,resultproxy)
+        return PacktivityCeleryProxy(resultproxy)
