@@ -25,7 +25,7 @@ def mancli():
 @click.argument('workflow')
 @click.argument('initdata', default = '')
 @click.option('-t','--toplevel', default = os.getcwd())
-@click.option('-s','--statefile', default = 'manual_instance.json')
+@click.option('-s','--statefile', default = 'yadage_instance.json')
 def init(workdir,workflow,initdata,statefile,toplevel):
     workflow_def = yadage.workflow_loader.workflow(
         toplevel = toplevel,
@@ -42,10 +42,15 @@ def init(workdir,workflow,initdata,statefile,toplevel):
     initdata = yaml.load(open(initdata)) if initdata else {}
     workflow.view().init(initdata)
 
-    with open(statefile,'w') as f:
-        json.dump(workflow.json(),f)
 
     click.secho('initialized workflow', fg = 'green')
+
+    yadagedir = '{}/_yadage'.format(workdir)
+    os.makedirs(yadagedir)
+    statefile = '{}/{}'.format(yadagedir,statefile)
+    click.secho('statefile at {}'.format(statefile))
+    with open(statefile,'w') as f:
+        json.dump(workflow.json(),f)
 
 
 
@@ -77,12 +82,17 @@ def custom_decider(decide_func):
     return decider
 
 @mancli.command()
-@click.option('-s','--statefile', default = 'manual_instance.json')
-def step(statefile):
+@click.argument('workdir')
+@click.option('-s','--statefile', default = 'yadage_instance.json')
+def step(workdir,statefile):
+    yadagedir = '{}/_yadage'.format(workdir)
     backend = yadage.backends.packtivity_celery.PacktivityCeleryBackend(
         yadage.backends.celeryapp.app
     )
 
+
+    statefile = '{}/{}'.format(yadagedir,statefile)
+    click.secho('loading state from {}'.format(statefile))
     workflow = yadage.yadagemodels.YadageWorkflow.fromJSON(
         json.load(open(statefile)),
         yadage.backends.packtivity_celery.PacktivityCeleryProxy,
@@ -104,8 +114,7 @@ def step(statefile):
         coroutine.next()
     except StopIteration:
         click.secho('workflow done.', fg = 'green')
-        yadage.visualize.write_prov_graph(os.getcwd(),workflow)
-        adage.visualize.print_dag(workflow.dag,'adage',os.getcwd(),1.0)
+        yadage.visualize.write_prov_graph(yadagedir,workflow)
 
     with open(statefile,'w') as f:
         json.dump(workflow.json(),f)
