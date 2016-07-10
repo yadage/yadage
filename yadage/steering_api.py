@@ -7,6 +7,7 @@ import json
 import workflow_loader
 from yadage.yadagemodels import YadageWorkflow
 import visualize
+import interactive
 
 
 log = logging.getLogger(__name__)
@@ -19,6 +20,7 @@ def run_workflow(
     loginterval,
     schemadir,
     backend,
+    user_interaction = False,
     validate = True
     ):
     """
@@ -53,12 +55,22 @@ def run_workflow(
     with open('{}/yadage_instance_before.json'.format(yadagedir),'w') as f:
         json.dump(workflow.json(),f)
 
+    if user_interaction:
+        extend,submit = interactive.interactive_deciders()
+        interactive_kwargs = {
+            'extend_decider': extend,
+            'submit_decider': submit
+        }
+    else:
+        interactive_kwargs = {}
+
     adage.rundag(workflow,
                  track = True,
                  backend = backend,
                  update_interval = 0.02,
                  trackevery = loginterval,
-                 workdir = '{}/_adage'.format(workdir)
+                 workdir = '{}/_adage'.format(workdir),
+                 **interactive_kwargs
                 )
 
     with open('{}/yadage_instance.json'.format(yadagedir),'w') as f:

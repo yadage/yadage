@@ -29,7 +29,8 @@ setup(
   entry_points = {
       'console_scripts': [
           'yadage-run=yadage.steering:main',
-          'yadage-validate=yadage.validator_workflow:main'
+          'yadage-manual=yadage.manualcli:mancli',
+          'yadage-validate=yadage.validator_workflow:main',
       ],
   },
   dependency_links = [
