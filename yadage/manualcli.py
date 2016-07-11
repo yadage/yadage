@@ -13,6 +13,7 @@ import yadage.backends.celeryapp
 import yadage.workflow_loader
 import yadage.yadagemodels
 import yadage.visualize
+import yadage.interactive
 import logging
 logging.basicConfig()
 
@@ -90,7 +91,6 @@ def step(workdir,statefile):
         yadage.backends.celeryapp.app
     )
 
-
     statefile = '{}/{}'.format(yadagedir,statefile)
     click.secho('loading state from {}'.format(statefile))
     workflow = yadage.yadagemodels.YadageWorkflow.fromJSON(
@@ -99,11 +99,7 @@ def step(workdir,statefile):
         backend
     )
 
-    extend_decider = custom_decider(decide_rule)()
-    extend_decider.next() #prime decider
-
-    submit_decider = custom_decider(decide_step)()
-    submit_decider.next() #prime decider
+    extend_decider,submit_decider = yadage.interactive.interactive_deciders()
 
     coroutine = adage.adage_coroutine(backend,extend_decider,submit_decider)
     coroutine.next() #prime the coroutine....

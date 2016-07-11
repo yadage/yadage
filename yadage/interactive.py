@@ -11,7 +11,7 @@ def decide_rule(rule,state):
     return shall
 
 def decide_step(dag,nodeobj):
-    print 'we could submit a DAG node (id: {}) DAG is: {}'.format(nodeobj,dag)
+    click.echo('we could submit a DAG node (id: {}) DAG is: {}'.format(nodeobj,dag))
     shall = raw_input(click.style("Shall we? (y/N) ", fg = 'magenta')).lower() == 'y'
     if shall:
         click.secho('ok we will submit.', fg = 'green')
