@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
   name = 'yadage',
-  version = '0.0.1',
+  version = '0.0.2',
   description = 'yadage - YAML based adage',
   url = '',
   author = 'Lukas Heinrich',
@@ -13,6 +13,7 @@ setup(
     'functools32',
     'adage>0.2.0',
     'packtivity>0.0.1',
+    'cap-schemas',
     'click',
     'psutil',
     'requests[security]>=2.9',
@@ -23,7 +24,6 @@ setup(
     'jsonpath_rw',
     'packtivity',
     'adage',
-    'cap-schemas',
     'jq'
   ],
   entry_points = {
@@ -34,8 +34,5 @@ setup(
       ],
   },
   dependency_links = [
-      'https://github.com/lukasheinrich/adage/tarball/master#egg=adage-0.3.1',
-      'https://github.com/lukasheinrich/packtivity/tarball/master#egg=packtivity-0.0.2',
-      'https://github.com/lukasheinrich/cap-schemas/tarball/master#egg=cap-schemas-0.0.1'
   ]
 )
