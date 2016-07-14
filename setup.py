@@ -26,11 +26,8 @@ setup(
     'adage',
     'jq'
   ],
-  extras_requires = {
-    'celery' : [
-      'celery',
-      'redis'
-    ]
+  extras_require = {
+    'celery' : ['celery','redis']
   },
   entry_points = {
       'console_scripts': [
