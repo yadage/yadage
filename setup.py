@@ -26,6 +26,12 @@ setup(
     'adage',
     'jq'
   ],
+  extras_requires = {
+    'celery' : [
+      'celery',
+      'redis'
+    ]
+  },
   entry_points = {
       'console_scripts': [
           'yadage-run=yadage.steering:main',
