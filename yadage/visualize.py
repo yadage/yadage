@@ -38,7 +38,7 @@ def add_outputs_to_cluster(step,cluster):
             label += ' {}'.format(y)
             cluster.add_node(pydotplus.graphviz.Node(name, label = label, color = 'blue'))
             cluster.add_edge(pydotplus.graphviz.Edge(step.identifier,name))
-    
+
 def add_step_to_cluster(step,workflow,stagecluster,provgraph):
     step = workflow.dag.getNode(step)
     stepid = step.identifier
@@ -128,13 +128,13 @@ def attach_to_results(provgraph,workflow,node):
     for dep in workflow.dag.getNode(node).task.inputs:
         resultid =  path_to_id(dep.stepid,dep.pointer.path)
         provgraph.add_edge(pydotplus.graphviz.Edge(resultid,node))
-        
-        
+
+
 def connect(provgraph,workflow):
     for node in workflow.dag.nodes():
         attach_to_results(provgraph,workflow,node)
-        
-def write_prov_graph(workdir,workflow):
+
+def write_prov_graph(workdir,workflow,vizformat = 'pdf'):
     provgraph = pydotplus.graphviz.Graph()
 
     fillscope(provgraph,workflow)
@@ -142,6 +142,6 @@ def write_prov_graph(workdir,workflow):
 
     with open('{}/yadage_workflow_instance.dot'.format(workdir),'w') as dotfile:
         dotfile.write(provgraph.to_string())
-        
-    with open('{}/yadage_workflow_instance.pdf'.format(workdir),'w') as pdffile:
-        subprocess.call(shlex.split('dot -Tpdf {}/yadage_workflow_instance.dot'.format(workdir)), stdout = pdffile)
+
+    with open('{}/yadage_workflow_instance.{}'.format(workdir,vizformat),'w') as outfile:
+        subprocess.call(shlex.split('dot -T{} {}/yadage_workflow_instance.dot'.format(vizformat,workdir)), stdout = outfile)
