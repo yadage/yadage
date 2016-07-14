@@ -103,11 +103,18 @@ def finalize_input(stage,step,json,context):
 
 def step_or_init(name,spec,context):
     if 'step' in spec:
-        return yadagestep(name = name, spec = spec['step'], context = context)
+        stepcontext = make_new_context(name,context)
+        return yadagestep(name = name, spec = spec['step'], context = stepcontext)
     elif 'workflow' in spec:
         return initstep('init {}'.format(name))
 
 def make_new_context(name,oldcontext):
+    '''
+    creates a new context from an existing context.
+    specifically it declares a new read-write nested under the old
+    context's read-write and adds all read-write and read-only locations
+    of the old context as read-only
+    '''
     newcontext = {'readwrite':['{}/{}'.format(oldcontext['readwrite'][0],name)], 'readonly':[]}
     newcontext['readonly'] += [ro for ro in itertools.chain(oldcontext['readonly'],oldcontext['readwrite'])]
     os.makedirs(newcontext['readwrite'][0])
@@ -129,7 +136,7 @@ def simple_stage(stage,spec):
     }
 
     step = step_or_init(name = stage.name, spec = spec, context = stage.context)
-    finalized = finalize_input(stage,step,parameters,stage.context)
+    finalized = finalize_input(stage,step,parameters,step.context)
 
     addStepOrWorkflow(stage.name,stage,step.s(**finalized),spec)
 
