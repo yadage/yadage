@@ -91,6 +91,11 @@ def finalize_value(stage,step,value,context):
     return value
 
 def finalize_input(stage,step,json,context):
+    '''
+    evaluate final values of parameters by either resolving a
+    reference to a upstream output or evaluating a static
+    reference from the template (possibly string-interpolated)
+    '''
     context = context.copy()
     context['workdir'] = context['readwrite'][0]
     result = {}
