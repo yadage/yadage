@@ -25,7 +25,6 @@ class stepbase(object):
         self.inputs = []
         self.attributes = {}
         self.prepublished = None
-        # self.context = {'readwrite':['dummy'],'readonly':[]}
 
     def used_input(self,reference):
         self.inputs += [reference]

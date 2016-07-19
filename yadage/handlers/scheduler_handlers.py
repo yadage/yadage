@@ -171,7 +171,9 @@ def singlestep_stage(stage,spec):
     }
 
     step = step_or_init(name = stage.name, spec = spec, context = stage.context)
-    finalized = finalize_input(stage,step,parameters,step.context)
+
+    ctx = step.context if hasattr(step,'context') else stage.context
+    finalized = finalize_input(stage,step,parameters,ctx)
 
     addStepOrWorkflow(stage.name,stage,step.s(**finalized),spec)
 
