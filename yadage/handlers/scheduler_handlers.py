@@ -12,38 +12,48 @@ from yadage.yadagemodels import jsonStage
 
 log = logging.getLogger(__name__)
 
-handlers,scheduler = utils.handler_decorator()
+handlers, scheduler = utils.handler_decorator()
 
-### A scheduler does the following things:
-###   - attached new nodes to the DAG
-###   - for each added step
-###     - the step is given a name
-###     - the step attributes are determined using the scheduler spec and context
-###     - a list of used inputs (in the form of [stepname,outputkey,index])
+# A scheduler does the following things:
+#   - attached new nodes to the DAG
+# - for each added step
+#     - the step is given a name
+#     - the step attributes are determined using the scheduler spec and context
+#     - a list of used inputs (in the form of [stepname,outputkey,index])
 
-def pointerize(jsondata, asref = False, stepid = None):
+
+def pointerize(jsondata, asref=False, stepid=None):
+    '''
+    a helper method that replaces leaf nodes in a JSON object with
+    a outputReference objects (~ a JSONPath) pointing to that leaf position
+    useful to track access to leaf nodes later on.
+    '''
     allleafs = jq.jq('leaf_paths').transform(jsondata, multiple_output=True)
     leafpointers = [jsonpointer.JsonPointer.from_parts(x).path for x in allleafs]
     jsondata_proxy = copy.deepcopy(jsondata)
     for leaf in leafpointers:
         x = jsonpointer.JsonPointer(leaf)
-        x.set(jsondata_proxy, outputReference(stepid,x) if asref else x.path)
+        x.set(jsondata_proxy, outputReference(stepid, x) if asref else x.path)
     return jsondata_proxy
 
-def select_reference(step,selection):
-    pointerized = pointerize(step.result, asref = True, stepid = step.identifier)
+
+def select_reference(step, selection):
+    '''
+    resolves a jsonpath selection and returns JSONPointerized matches
+    '''
+    pointerized = pointerize(step.result, asref=True, stepid=step.identifier)
     matches = jsonpath_rw.parse(selection).find(pointerized)
     if not matches:
-        log.error('no matches found for selection %s in result %s',selection,step.result)
+        log.error('no matches found for selection %s in result %s', selection, step.result)
         raise RuntimeError('no matches found in reference selection')
 
-
     if len(matches) > 1:
-        log.error('found multiple matches to query: %s within result: %s\n \ matches %s',selection,step.result,matches)
+        log.error('found multiple matches to query: %s within result: %s\n \ matches %s', selection, step.result, matches)
         raise RuntimeError('multiple matches in result jsonpath query')
     return matches[0].value
 
-def combine_outputs(outputs,flatten,unwrapsingle):
+
+def combine_outputs(outputs, flatten, unwrapsingle):
     combined = []
     for reference in outputs:
         if type(reference)==list:
@@ -61,16 +71,23 @@ def combine_outputs(outputs,flatten,unwrapsingle):
 def select_steps(stage,query):
     return stage.view.getSteps(query)
 
+
 def select_outputs(steps,selection,flatten,unwrapsingle):
-    return combine_outputs(map(lambda s: select_reference(s,selection),steps),flatten,unwrapsingle)
+    return combine_outputs(map(lambda s: select_reference(s, selection), steps), flatten, unwrapsingle)
+
 
 def resolve_reference(stage,selection):
+    '''resolves a output reference by selecting the stage and stage outputs'''
     if type(selection) is not dict:
         return None
     else:
-        steps   = select_steps(stage, selection['stages'])
-        outputs = select_outputs(steps, selection['output'], selection.get('flatten',False), selection.get('unwrap',False))
+        steps = select_steps(stage, selection['stages'])
+        outputs = select_outputs(steps,
+                                 selection['output'],
+                                 selection.get('flatten', False),
+                                 selection.get('unwrap', False))
         return outputs
+
 
 def select_parameter(stage,parameter):
     if type(parameter) is not dict:
@@ -79,7 +96,12 @@ def select_parameter(stage,parameter):
         value = resolve_reference(stage,parameter)
     return value
 
+
 def finalize_value(stage,step,value,context):
+    '''
+    finalize a value by recursively resolving references and
+    interpolating with the context when necessary
+    '''
     if type(value)==outputReference:
         step.used_input(value)
         v = value.pointer.resolve(stage.view.dag.getNode(value.stepid).result)
@@ -133,11 +155,19 @@ def addStepOrWorkflow(name,stage,step,spec):
     else:
         stage.addStep(step)
 
+def get_parameters(spec):
+    return {x['key']:x['value']for x in spec['parameters']}
+
 @scheduler('singlestep-stage')
-def simple_stage(stage,spec):
+def singlestep_stage(stage,spec):
+    '''
+    a simple state that adds a single step/workflow. The node is attached
+    to the DAG based on used upstream outputs
+    '''
+
 
     parameters = {
-        k:select_parameter(stage,v) for k,v in spec['parameters'].iteritems()
+        k:select_parameter(stage,v) for k,v in get_parameters(spec).iteritems()
     }
 
     step = step_or_init(name = stage.name, spec = spec, context = stage.context)
@@ -170,15 +200,25 @@ def scatter(parameters,scatter):
     return singlesteppars
 
 @scheduler('multistep-stage')
-def multi_stage(stage,spec):
+def multistep_stage(stage,spec):
+    '''
+    a stage that attaches an array of nodes to the DAG. The number of nodes
+    is determined by a scattering recipe. Currently two algs are supported
+    'zip': one or more arrays of length n are iterated through in lock-step.
+           n nodes are added to the DAG where the  parameters values are set to
+           the values in the iteration
+    'cartesian': a cartesian product of a number of arrays (possibly different sizes)
+                 adds n1 x n2 x ... nj nodes.
+    Nodes are attached to the DAG based on used upstream inputs
+    '''
     parameters = {
-        k:select_parameter(stage,v) for k,v in spec['parameters'].iteritems()
+        k:select_parameter(stage,v) for k,v in get_parameters(spec).iteritems()
     }
     singlesteppars = scatter(parameters,spec['scatter'])
 
     for i,pars in enumerate(singlesteppars):
         index_context = stage.context.copy()
-        index_context.update(index = i)
+        index_context.update(index=i)
 
         singlename = '{}_{}'.format(stage.name,i)
         step = step_or_init(name = singlename, spec = spec, context = stage.context)
