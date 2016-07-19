@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
   name = 'yadage',
-  version = '0.0.6',
+  version = '0.1.0',
   description = 'yadage - YAML based adage',
   url = '',
   author = 'Lukas Heinrich',
