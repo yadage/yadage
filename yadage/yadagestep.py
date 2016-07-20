@@ -42,7 +42,7 @@ class initstep(stepbase):
     def __init__(self,name, initdata = None):
         super(initstep,self).__init__(name)
         self.prepublished = None
-        if initdata:
+        if initdata is not None:
             self.s(**initdata)
 
     def __call__(self):
@@ -78,6 +78,10 @@ class yadagestep(stepbase):
         #attempt to prepublish output data merely from inputs
         #will still be None if not possible
         self.prepublished = packtivity.prepublish(self.spec,self.attributes,self.context)
+        log.debug('parameters for yadagestep set to %s. prepublished result, if any: %s',
+            self.attributes,
+            self.prepublished
+        )
         return self
 
     #(de-)serialization

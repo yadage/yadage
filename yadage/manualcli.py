@@ -15,7 +15,7 @@ import yadage.yadagemodels
 import yadage.visualize
 import yadage.interactive
 import logging
-logging.basicConfig()
+log = logging.getLogger(__name__)
 
 @click.group()
 def mancli():
@@ -85,7 +85,9 @@ def custom_decider(decide_func):
 @mancli.command()
 @click.argument('workdir')
 @click.option('-s','--statefile', default = 'yadage_instance.json')
-def step(workdir,statefile):
+@click.option('-v','--verbosity', default = 'ERROR')
+def step(workdir,statefile,verbosity):
+    logging.basicConfig(level = getattr(logging,verbosity))
     yadagedir = '{}/_yadage'.format(workdir)
     backend = yadage.backends.packtivity_celery.PacktivityCeleryBackend(
         yadage.backends.celeryapp.app

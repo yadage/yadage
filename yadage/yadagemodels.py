@@ -56,6 +56,7 @@ class initStage(stage_base):
         self.step = step
 
     def schedule(self):
+        log.debug('initializing a scope with init step: %s',self.step.prepublished)
         self.addStep(self.step)
 
     #(de-)serialization
@@ -145,14 +146,14 @@ class YadageNode(adage.node.Node):
 
     def __repr__(self):
         lifetime = time.time()-self.define_time
-        return '<YadageNode {} {} lifetime: {} (id: {})>'.format(self.name,self.state,lifetime,self.identifier)
+        return '<YadageNode {} {} lifetime: {} (id: {}) has result: {}>'.format(self.name,self.state,lifetime,self.identifier,self.has_result())
 
     def has_result(self):
         return (self.task.prepublished is not None) or self.successful()
 
     @property
     def result(self):
-        if self.task.prepublished:
+        if self.task.prepublished is not None:
             return self.task.prepublished
         return super(YadageNode,self).result
 
@@ -275,6 +276,8 @@ class WorkflowView(object):
     def addStep(self,step, stage, depends_on = None):
         node = YadageNode(step.name,step)
         self.dag.addNode(node,depends_on = depends_on)
+
+        log.debug('added node %s',node)
 
         noderef = {'_nodeid':node.identifier}
         if stage in self.steps:

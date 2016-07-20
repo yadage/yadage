@@ -41,6 +41,7 @@ def select_reference(step, selection):
     '''
     resolves a jsonpath selection and returns JSONPointerized matches
     '''
+    log.debug('selecting output from step %s',step)
     pointerized = pointerize(step.result, asref=True, stepid=step.identifier)
     matches = jsonpath_rw.parse(selection).find(pointerized)
     if not matches:
@@ -78,14 +79,17 @@ def select_outputs(steps,selection,flatten,unwrapsingle):
 
 def resolve_reference(stage,selection):
     '''resolves a output reference by selecting the stage and stage outputs'''
+    log.debug('resolving selection %s',selection)
     if type(selection) is not dict:
         return None
     else:
         steps = select_steps(stage, selection['stages'])
+        log.debug('selected steps %s',steps)
         outputs = select_outputs(steps,
                                  selection['output'],
                                  selection.get('flatten', False),
                                  selection.get('unwrap', False))
+        log.debug('selected outputs %s',outputs)
         return outputs
 
 
@@ -164,6 +168,7 @@ def singlestep_stage(stage,spec):
     a simple state that adds a single step/workflow. The node is attached
     to the DAG based on used upstream outputs
     '''
+    log.debug('scheduling singlestep stage with spec:\n%s',spec)
 
 
     parameters = {
@@ -213,6 +218,7 @@ def multistep_stage(stage,spec):
                  adds n1 x n2 x ... nj nodes.
     Nodes are attached to the DAG based on used upstream inputs
     '''
+    log.debug('scheduling multistep stage with spec:\n%s',spec)
     parameters = {
         k:select_parameter(stage,v) for k,v in get_parameters(spec).iteritems()
     }
