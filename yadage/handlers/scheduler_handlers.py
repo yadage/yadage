@@ -146,7 +146,11 @@ def make_new_context(name,oldcontext):
     context's read-write and adds all read-write and read-only locations
     of the old context as read-only
     '''
-    newcontext = {'readwrite':['{}/{}'.format(oldcontext['readwrite'][0],name)], 'readonly':[]}
+    newcontext = {
+        'nametag':name,
+        'readwrite':['{}/{}'.format(oldcontext['readwrite'][0],name)],
+        'readonly':[]
+    }
     newcontext['readonly'] += [ro for ro in itertools.chain(oldcontext['readonly'],oldcontext['readwrite'])]
     os.makedirs(newcontext['readwrite'][0])
     return newcontext

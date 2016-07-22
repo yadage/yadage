@@ -1,25 +1,7 @@
-import yadage.backends.packtivity_celery
-import yadage.yadagemodels
-import yadage.backends.celeryapp
-import json
-
-def load_state(statefile):
-    backend = yadage.backends.packtivity_celery.PacktivityCeleryBackend(
-        yadage.backends.celeryapp.app
-    )
-
-    workflow = yadage.yadagemodels.YadageWorkflow.fromJSON(
-        json.load(open(statefile)),
-        yadage.backends.packtivity_celery.PacktivityCeleryProxy,
-        backend
-    )
-    return workflow
-
 import jsonpointer
 import shutil
 import os
 import networkx as nx
-import adage.visualize as av
 
 def select_rule(workflow,offset,name):
     for x in workflow.applied_rules:

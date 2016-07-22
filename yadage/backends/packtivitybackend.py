@@ -59,7 +59,7 @@ class PacktivityMultiProcBackend(AdagePacktivityBackendBase):
         '''
         tasktype = type(task)
         if tasktype == yadage.yadagestep.yadagestep:
-            acallable = packtivity_callable(task.name,task.spec,task.attributes,task.context)
+            acallable = packtivity_callable(task.spec,task.attributes,task.context)
         elif tasktype == yadage.yadagestep.initstep:
             acallable = task
         else:

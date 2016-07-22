@@ -6,10 +6,10 @@ from packtivity import packtivity
 from packtivitybackend import AdagePacktivityBackendBase, PacktivityProxyBase
 
 @shared_task
-def packtivity_task(name, spec, attributes, context):
+def packtivity_task(spec, attributes, context):
     '''celery enabled packtiity'''
     print 'running a packtivity via a celery task'
-    return packtivity(name,spec,attributes,context)
+    return packtivity(spec,attributes,context)
 
 @shared_task
 def init_task():
@@ -46,7 +46,7 @@ class PacktivityCeleryBackend(AdagePacktivityBackendBase):
         '''
         tasktype = type(task)
         if tasktype == yadage.yadagestep.yadagestep:
-            resultproxy = packtivity_task.delay(task.name,task.spec,task.attributes,task.context)
+            resultproxy = packtivity_task.delay(task.spec,task.attributes,task.context)
         elif tasktype == yadage.yadagestep.initstep:
             resultproxy = init_task.delay()
         else:
