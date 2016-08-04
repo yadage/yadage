@@ -9,6 +9,8 @@ import time
 import adage
 import adage.visualize as av
 
+import packtivity.statecontexts.poxisfs_context as statecontext
+
 import yadage.backends.packtivity_celery
 import yadage.backends.celeryapp
 import yadage.workflow_loader
@@ -34,10 +36,7 @@ def init(workdir,workflow,initdata,statefile,toplevel):
         source = workflow
     )
 
-    rootcontext = {
-        'readwrite': [os.path.abspath(workdir)],
-        'readonly': []
-    }
+    rootcontext = statecontext.make_new_context(workdir)
 
     workflow = yadage.yadagemodels.YadageWorkflow.createFromJSON(workflow_def,rootcontext)
 

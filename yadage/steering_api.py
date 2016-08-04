@@ -8,6 +8,7 @@ import workflow_loader
 from yadage.yadagemodels import YadageWorkflow
 import visualize
 import interactive
+import  packtivity.statecontexts.poxisfs_context as statecontext
 
 
 log = logging.getLogger(__name__)
@@ -28,13 +29,8 @@ def run_workflow(
     """
 
     log.info('running yadage workflow %s',workflow)
-    if not os.path.exists(workdir):
-        os.makedirs(workdir)
+    rootcontext = statecontext.make_new_context(workdir)
 
-    rootcontext = {
-        'readwrite': [os.path.abspath(workdir)],
-        'readonly': []
-    }
     for k,v in initdata.iteritems():
         candpath = '{}/inputs/{}'.format(workdir,v)
         if os.path.exists(candpath):

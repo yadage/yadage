@@ -9,6 +9,7 @@ import jsonpath_rw
 
 from yadage.yadagestep import yadagestep, initstep, outputReference
 from yadage.yadagemodels import jsonStage
+import  packtivity.statecontexts.poxisfs_context as statecontext
 
 log = logging.getLogger(__name__)
 
@@ -134,30 +135,15 @@ def finalize_input(stage,step,json,context):
 
 def step_or_init(name,spec,context):
     if 'step' in spec:
-        stepcontext = make_new_context(name,context)
+        stepcontext = statecontext.make_new_context(name,context)
         return yadagestep(name = name, spec = spec['step'], context = stepcontext)
     elif 'workflow' in spec:
         return initstep('init {}'.format(name))
 
-def make_new_context(name,oldcontext):
-    '''
-    creates a new context from an existing context.
-    specifically it declares a new read-write nested under the old
-    context's read-write and adds all read-write and read-only locations
-    of the old context as read-only
-    '''
-    newcontext = {
-        'nametag':name,
-        'readwrite':['{}/{}'.format(oldcontext['readwrite'][0],name)],
-        'readonly':[]
-    }
-    newcontext['readonly'] += [ro for ro in itertools.chain(oldcontext['readonly'],oldcontext['readwrite'])]
-    os.makedirs(newcontext['readwrite'][0])
-    return newcontext
 
 def addStepOrWorkflow(name,stage,step,spec):
     if type(step)==initstep:
-        newcontext = make_new_context(name,stage.context)
+        newcontext = statecontext.make_new_context(name,stage.context)
         subrules = [jsonStage(yml,newcontext) for yml in spec['workflow']['stages']]
         stage.addWorkflow(subrules, initstep = step)
     else:
