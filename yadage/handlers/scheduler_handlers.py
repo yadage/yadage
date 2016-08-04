@@ -2,7 +2,6 @@ import logging
 import utils
 import jsonpointer
 import itertools
-import os
 import copy
 import jq
 import jsonpath_rw
