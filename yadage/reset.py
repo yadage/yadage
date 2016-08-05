@@ -1,7 +1,6 @@
 import jsonpointer
-import shutil
-import os
 import networkx as nx
+import  packtivity.statecontexts.poxisfs_context as statecontext
 
 def select_rule(workflow,offset,name):
     for x in workflow.applied_rules:
@@ -25,9 +24,7 @@ def reset_step(workflow,step):
     s = workflow.dag.getNode(step)
     reset_node_state(s)
     try:
-        for rw in s.task.context['readwrite']:
-            shutil.rmtree(rw)
-            os.makedirs(rw)
+        statecontext.reset_state(s.task.context)
     except AttributeError:
         pass
 
