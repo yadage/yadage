@@ -11,8 +11,8 @@ setup(
   include_package_data = True,
   install_requires = [
     'functools32',
-    'adage>0.5.2',
-    'packtivity>0.0.1',
+    'adage',
+    'packtivity',
     'cap-schemas',
     'click',
     'psutil',
