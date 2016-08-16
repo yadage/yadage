@@ -7,22 +7,6 @@ import subprocess
 
 log = logging.getLogger(__name__)
 
-def output_id(stepid,outputkey,index):
-    identifier = 'output_{}_{}'.format(stepid,outputkey)
-    if index is not None:
-        identifier += '_{}'.format(index)
-    return identifier
-
-def add_outputs_to_cluster(step,cluster):
-    #add outputs circles
-    for k,v in step.result.iteritems():
-        for i,y in (enumerate(v) if type(v)==list else [(None,v)]):
-            name = output_id(step.identifier,k,i)
-            label = '{}[{}]: '.format(k,i) if i is not None else '{}: '.format(k)
-            label += ' {}'.format(y)
-            cluster.add_node(pydotplus.graphviz.Node(name, label = label, color = 'blue'))
-            cluster.add_edge(pydotplus.graphviz.Edge(step.identifier,name))
-
 def fillscope(cluster,workflow,scope = ''):
     # scopecluster = stagecluster = pydotplus.graphviz.Cluster(graph_name = '_'.join(stagescopeprts),
     scopecluster = pydotplus.graphviz.Cluster(
