@@ -32,7 +32,6 @@ class AdagePacktivityBackendBase(object):
     to submit the task and return a appropriate proxy object deriving from
     PacktivityProxyBase
     '''
-
     def __init__(self,adagebackend):
         self.adagebackend = adagebackend
 

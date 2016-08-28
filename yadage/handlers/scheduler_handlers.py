@@ -122,6 +122,7 @@ def finalize_input(stage,step,json,context):
     reference to a upstream output or evaluating a static
     reference from the template (possibly string-interpolated)
     '''
+
     context = context.copy()
     context['workdir'] = context['readwrite'][0]
     result = {}
@@ -130,6 +131,7 @@ def finalize_input(stage,step,json,context):
             result[k] = finalize_value(stage,step,v,context)
         else:
             result[k] = [finalize_value(stage,step,element,context) for element in v]
+
     return result
 
 def step_or_init(name,spec,context):
@@ -212,13 +214,11 @@ def multistep_stage(stage,spec):
         k:select_parameter(stage,v) for k,v in get_parameters(spec).iteritems()
     }
     singlesteppars = scatter(parameters,spec['scatter'])
-
     for i,pars in enumerate(singlesteppars):
-        index_context = stage.context.copy()
-        index_context.update(index=i)
-
         singlename = '{}_{}'.format(stage.name,i)
         step = step_or_init(name = singlename, spec = spec, context = stage.context)
-        finalized = finalize_input(stage,step,pars,index_context)
-
+        ctx = step.context if hasattr(step,'context') else stage.context
+        ctx = ctx.copy()
+        ctx.update(index = i)
+        finalized = finalize_input(stage,step,pars,ctx)
         addStepOrWorkflow(singlename,stage,step.s(**finalized),spec)
