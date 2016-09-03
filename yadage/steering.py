@@ -16,11 +16,16 @@ log = logging.getLogger(__name__)
 @click.option('-c','--schemasource', default = capschemas.schemadir)
 @click.option('-b','--backend', default = 'multiproc:2')
 @click.option('--interactive/--not-interactive', default = False)
+@click.option('--parameter', '-p', multiple=True)
 @click.argument('workflow')
 @click.argument('initdata', default = '')
-def main(workdir,workflow,initdata,toplevel,verbosity,loginterval,schemasource,backend,interactive):
+def main(workdir,workflow,initdata,toplevel,verbosity,loginterval,schemasource,backend,interactive,parameter):
     logging.basicConfig(level = getattr(logging,verbosity))
     initdata = yaml.load(open(initdata)) if initdata else {}
+
+    for x in parameter:
+        key,value = x.split('=')
+        initdata[key]=value
 
     if backend.startswith('multiproc'):
         import backends.packtivitybackend as pb
