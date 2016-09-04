@@ -16,10 +16,11 @@ log = logging.getLogger(__name__)
 @click.option('-c','--schemasource', default = capschemas.schemadir)
 @click.option('-b','--backend', default = 'multiproc:2')
 @click.option('--interactive/--not-interactive', default = False)
+@click.option('--validate/--no-validate', default = True)
 @click.option('--parameter', '-p', multiple=True)
 @click.argument('workflow')
 @click.argument('initdata', default = '')
-def main(workdir,workflow,initdata,toplevel,verbosity,loginterval,schemasource,backend,interactive,parameter):
+def main(workdir,workflow,initdata,toplevel,verbosity,loginterval,schemasource,backend,interactive,parameter,validate):
     logging.basicConfig(level = getattr(logging,verbosity))
     initdata = yaml.load(open(initdata)) if initdata else {}
 
@@ -35,6 +36,9 @@ def main(workdir,workflow,initdata,toplevel,verbosity,loginterval,schemasource,b
         import backends.celeryapp
         import backends.packtivity_celery as pc
         backend = pc.PacktivityCeleryBackend(backends.celeryapp.app)
+    elif backend == 'foreground':
+        import backends.packtivitybackend as pb
+        backend = pb.PacktivityForegroundBackend()
 
     steering_api.run_workflow(
         workdir,
@@ -42,6 +46,7 @@ def main(workdir,workflow,initdata,toplevel,verbosity,loginterval,schemasource,b
         initdata,
         toplevel,
         loginterval,
+        validate = validate,
         schemadir = schemasource, backend = backend, user_interaction = interactive)
 
 if __name__ == '__main__':
