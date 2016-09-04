@@ -74,8 +74,5 @@ def run_workflow(
     with open('{}/yadage_template.json'.format(yadagedir),'w') as f:
         json.dump(workflow_json,f)
 
-    # import IPython
-    # IPython.embed()
-
     visualize.write_prov_graph(yadagedir,workflow)
     log.info('finished yadage workflow %s',workflow)
