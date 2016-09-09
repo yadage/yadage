@@ -19,10 +19,13 @@ log = logging.getLogger(__name__)
 @click.option('--validate/--no-validate', default = True)
 @click.option('--parameter', '-p', multiple=True)
 @click.argument('workflow')
-@click.argument('initdata', default = '')
-def main(workdir,workflow,initdata,toplevel,verbosity,loginterval,schemasource,backend,interactive,parameter,validate):
+@click.argument('initdatas', nargs = -1)
+def main(workdir,workflow,initdatas,toplevel,verbosity,loginterval,schemasource,backend,interactive,parameter,validate):
     logging.basicConfig(level = getattr(logging,verbosity))
-    initdata = yaml.load(open(initdata)) if initdata else {}
+
+    initdata = {}
+    for initfile in initdatas:
+        initdata.update(**yaml.load(open(initfile)))
 
     for x in parameter:
         key,value = x.split('=')
