@@ -12,5 +12,5 @@ A declarative way to define [adage](https://github.com/lukasheinrich/adage.git) 
 
 or just 
 
-   eval $(curl https://raw.githubusercontent.com/lukasheinrich/yadage/master/yadagedocker.sh)
-   yadage-run -t from-github/phenochain mdwork madgraph_delphes.yml -p nevents=100
+    eval $(curl https://raw.githubusercontent.com/lukasheinrich/yadage/master/yadagedocker.sh)
+    yadage-run -t from-github/phenochain mdwork madgraph_delphes.yml -p nevents=100
