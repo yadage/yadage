@@ -18,6 +18,7 @@ def run_workflow(
     workflow,
     initdata,
     loadtoplevel,
+    updateinterval,
     loginterval,
     schemadir,
     backend,
@@ -63,7 +64,7 @@ def run_workflow(
     adage.rundag(workflow,
                  track = True,
                  backend = backend,
-                 update_interval = 0.02,
+                 update_interval = updateinterval,
                  trackevery = loginterval,
                  workdir = '{}/_adage'.format(workdir),
                  **interactive_kwargs

@@ -13,6 +13,7 @@ log = logging.getLogger(__name__)
 @click.option('-t','--toplevel', default = os.getcwd())
 @click.option('-v','--verbosity', default = 'INFO')
 @click.option('-i','--loginterval', default = 30)
+@click.option('-u','--updateinterval', default = 30)
 @click.option('-c','--schemasource', default = capschemas.schemadir)
 @click.option('-b','--backend', default = 'multiproc:2')
 @click.option('--interactive/--not-interactive', default = False)
@@ -20,7 +21,18 @@ log = logging.getLogger(__name__)
 @click.option('--parameter', '-p', multiple=True)
 @click.argument('workflow')
 @click.argument('initdatas', nargs = -1)
-def main(workdir,workflow,initdatas,toplevel,verbosity,loginterval,schemasource,backend,interactive,parameter,validate):
+def main(workdir,
+         workflow,
+         initdatas,
+         toplevel,
+         verbosity,
+         loginterval,
+         updateinterval,
+         schemasource,
+         backend,
+         interactive,
+         parameter,
+         validate):
     logging.basicConfig(level = getattr(logging,verbosity))
 
     initdata = {}
@@ -48,6 +60,7 @@ def main(workdir,workflow,initdatas,toplevel,verbosity,loginterval,schemasource,
         workflow,
         initdata,
         toplevel,
+        updateinterval,
         loginterval,
         validate = validate,
         schemadir = schemasource, backend = backend, user_interaction = interactive)
