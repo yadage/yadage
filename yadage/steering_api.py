@@ -74,5 +74,6 @@ def run_workflow(
     with open('{}/yadage_template.json'.format(yadagedir),'w') as f:
         json.dump(workflow_json,f)
 
-    visualize.write_prov_graph(yadagedir,workflow)
+    visualize.write_prov_graph(yadagedir,workflow, vizformat = 'png')
+    visualize.write_prov_graph(yadagedir,workflow, vizformat = 'pdf')
     log.info('finished yadage workflow %s',workflow)
