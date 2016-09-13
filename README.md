@@ -7,7 +7,7 @@
 
 A declarative way to define [adage](https://github.com/lukasheinrich/adage.git) workflows using a JSON schema (but we'll always write it as YAML)
 
-    docker run -it -v /var/run/docker.sock:/var/run/docker.sock -v $PWD:$PWD -w $PWD lukasheinrich/yadage bash
+    docker run --rm -it -v /var/run/docker.sock:/var/run/docker.sock -v $PWD:$PWD -w $PWD lukasheinrich/yadage bash
     yadage-run -t from-github/phenochain mdwork madgraph_delphes.yml -p nevents=100
 
 or just 
