@@ -55,6 +55,11 @@ def select_reference(step, selection):
 
 
 def combine_outputs(outputs, flatten, unwrapsingle):
+    '''
+    combines the result of multiple reference selections into a single outputs.
+    non-list values will just be combined into a list while lists will be concatenated
+    optinally we can return the sole element of a single-value list (argument: unwrapsingle)
+    '''
     combined = []
     for reference in outputs:
         if type(reference)==list:
@@ -136,7 +141,7 @@ def finalize_input(stage,step,json,context):
 
 def step_or_init(name,spec,context):
     if 'step' in spec:
-        stepcontext = statecontext.make_new_context(name,context)
+        stepcontext = statecontext.make_new_context(name,context, subdir = True)
         return yadagestep(name = name, spec = spec['step'], context = stepcontext)
     elif 'workflow' in spec:
         return initstep('init {}'.format(name))
@@ -174,6 +179,10 @@ def singlestep_stage(stage,spec):
     addStepOrWorkflow(stage.name,stage,step.s(**finalized),spec)
 
 def scatter(parameters,scatter):
+    '''
+    this method turns a parameter set and scatter definition into a list
+    of single parameter sets.
+    ''''
     commonpars = parameters.copy()
     to_scatter = {}
     for scatpar in scatter['parameters']:
