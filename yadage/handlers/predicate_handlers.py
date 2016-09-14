@@ -39,6 +39,11 @@ def checkmeta(flowview,metainfo):
 
 
 def scope_done(scope,flowview):
+    '''
+    walks recursively all scopes starting at some initial scope to determine if
+    all steps and rules under this scope have been executed / applied. Will indicate
+    that it's save to reference any result of the workflow within that scope.
+    '''
     log.debug('checking scope %s on view with offset %s',scope,flowview.offset)
     result = True
 
@@ -54,6 +59,10 @@ def scope_done(scope,flowview):
 
 @scheduler('jsonpath_ready')
 def jsonpath_ready(flowview,depspec):
+    '''
+    the main predicate for yadage. for a list of jsonpath expressions
+    determine whether the stage or workflow scope is ready (i.e. has a result)
+    '''
     log.debug('checking jsonpath ready predicate\n%s',depspec)
     dependencies = depspec['expressions']
     for x in dependencies:
