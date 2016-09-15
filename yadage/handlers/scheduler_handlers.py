@@ -182,7 +182,7 @@ def scatter(parameters,scatter):
     '''
     this method turns a parameter set and scatter definition into a list
     of single parameter sets.
-    ''''
+    '''
     commonpars = parameters.copy()
     to_scatter = {}
     for scatpar in scatter['parameters']:
