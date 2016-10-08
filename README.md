@@ -1,7 +1,7 @@
 # yadage - yaml based adage
 
-[![Build Status](https://travis-ci.org/lukasheinrich/yadage.svg?branch=master)](https://travis-ci.org/lukasheinrich/yadage)
-[![Code Health](https://landscape.io/github/lukasheinrich/yadage/master/landscape.svg?style=flat)](https://landscape.io/github/lukasheinrich/yadage/master)
+[![Build Status](https://travis-ci.org/diana-hep/yadage.svg?branch=master)](https://travis-ci.org/lukasheinrich/yadage)
+[![Code Health](https://landscape.io/github/diana-hep/yadage/master/landscape.svg?style=flat)](https://landscape.io/github/lukasheinrich/yadage/master)
 [![Documentation Status](https://readthedocs.org/projects/yadage/badge/?version=latest)](http://yadage.readthedocs.org/en/latest/?badge=latest)
 [![](https://images.microbadger.com/badges/image/lukasheinrich/yadage.svg)](https://microbadger.com/images/lukasheinrich/yadage "Get your own image badge on microbadger.com")
 
