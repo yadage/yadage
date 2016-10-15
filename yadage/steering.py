@@ -19,6 +19,7 @@ log = logging.getLogger(__name__)
 @click.option('--interactive/--not-interactive', default = False)
 @click.option('--validate/--no-validate', default = True)
 @click.option('--parameter', '-p', multiple=True)
+@click.option('--visualize/--no-visualize', default = True)
 @click.argument('workflow')
 @click.argument('initdatas', nargs = -1)
 def main(workdir,
@@ -32,7 +33,8 @@ def main(workdir,
          backend,
          interactive,
          parameter,
-         validate):
+         validate,
+         visualize):
     logging.basicConfig(level = getattr(logging,verbosity))
 
     initdata = {}
@@ -41,7 +43,7 @@ def main(workdir,
 
     for x in parameter:
         key,value = x.split('=')
-        initdata[key]=value
+        initdata[key]=yaml.load(value)
 
     if backend.startswith('multiproc'):
         import backends.packtivitybackend as pb
@@ -54,16 +56,26 @@ def main(workdir,
     elif backend == 'foreground':
         import backends.packtivitybackend as pb
         backend = pb.PacktivityForegroundBackend()
+    elif backend == 'jira':
+        import backends.jira as jb
+        backend = jb.JiraBackend('workflow request - {}:{}'.format(toplevel,workflow),'some description')
 
-    steering_api.run_workflow(
-        workdir,
-        workflow,
-        initdata,
-        toplevel,
-        updateinterval,
-        loginterval,
-        validate = validate,
-        schemadir = schemasource, backend = backend, user_interaction = interactive)
+    rc =  steering_api.run_workflow(
+            workdir,
+            workflow,
+            initdata,
+            toplevel,
+            updateinterval,
+            loginterval,
+            validate = validate,
+            doviz = visualize,
+            schemadir = schemasource,
+            backend = backend,
+            user_interaction = interactive)
+    if rc:
+        exc = click.exceptions.ClickException(click.style("Workflow failed", fg = 'red'))
+        exc.exit_code = rc
+        raise exc
 
 if __name__ == '__main__':
     main()

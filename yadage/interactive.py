@@ -3,20 +3,22 @@ import click
 def decide_rule(rule,state):
     click.secho('we could extend DAG with rule', fg = 'blue')
     click.secho('rule: {}/{} ({})'.format(rule.offset,rule.rule.name,rule.identifier))
-    shall = raw_input(click.style("Shall we? (y/N) ", fg = 'blue')).lower() == 'y'
+    resp = raw_input(click.style("Shall we? (y/N) ", fg = 'blue'))
+    shall = resp.lower() == 'y'
     if shall:
         click.secho('ok we will extend.', fg = 'green')
     else:
-        click.secho('maybe another time...', fg = 'yellow')
+        click.secho('maybe another time... your response: {}'.format(resp), fg = 'yellow')
     return shall
 
 def decide_step(dag,nodeobj):
     click.echo('we could submit a DAG node (id: {}) DAG is: {}'.format(nodeobj,dag))
-    shall = raw_input(click.style("Shall we? (y/N) ", fg = 'magenta')).lower() == 'y'
+    resp = raw_input(click.style("Shall we? (y/N) ", fg = 'magenta'))
+    shall = resp.lower() == 'y'
     if shall:
         click.secho('ok we will submit.', fg = 'green')
     else:
-        click.secho('will not submit for now...', fg = 'yellow')
+        click.secho('will not submit for now... your response: {}'.format(resp), fg = 'yellow')
     return shall
 
 def custom_decider(decide_func):
