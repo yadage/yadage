@@ -7,32 +7,11 @@ log = logging.getLogger(__name__)
 
 handlers,scheduler = utils.handler_decorator()
 
-def convert(thing):
-    if type(thing)==jsonpath_rw.jsonpath.Index:
-        return thing.index
-    if type(thing)==jsonpath_rw.jsonpath.Fields:
-        fs = thing.fields
-        assert len(fs)==1
-        return fs[0]
-
-def unravelpath(path):
-    if type(path)==jsonpath_rw.jsonpath.Child:
-        for x in unravelpath(path.left):
-            yield x
-        yield convert(path.right)
-    else:
-        yield convert(path)
-
-def path2pointer(path):
-    return jsonpointer.JsonPointer.from_parts(x for x in unravelpath(path)).path
-
 def checkmeta(flowview,metainfo):
     log.debug('checking meta %s on view with offset %s',metainfo,flowview.offset)
     applied_ids = [rl.identifier for rl in flowview.applied_rules]
     rulesok = all([x in applied_ids for x in metainfo['rules']])
 
-    # for x in metainfo['steps']:
-    #     print 'checking step',x,flowview.dag.getNode(x).has_result
     stepsok = all([flowview.dag.getNode(x).has_result() for x in metainfo['steps']])
     log.debug('all rules applied: %s, all steps have results: %s',rulesok,stepsok)
     return (rulesok and stepsok)

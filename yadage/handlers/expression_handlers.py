@@ -10,7 +10,6 @@ log = logging.getLogger(__name__)
 
 handlers,scheduler = utils.handler_decorator()
 
-
 def pointerize(jsondata, asref=False, stepid=None):
     '''
     a helper method that replaces leaf nodes in a JSON object with
