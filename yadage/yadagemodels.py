@@ -231,7 +231,7 @@ def createOffsetMeta(offset,bookkeeping):
         if not x in view: view[x] = {}
         view = view[x]
     scoped = pointer.resolve(bookkeeping)
-    if not '_meta' in scoped:
+    if '_meta' not in scoped:
         scoped['_meta'] = {'rules':[],'steps':[]}
 
 class WorkflowView(object):
