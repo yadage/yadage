@@ -1,11 +1,8 @@
 import logging
 import utils
-import jsonpointer
 import itertools
-import copy
-import jq
-import jsonpath_rw
 
+from expression_handlers import handlers as exprhandlers
 from yadage.yadagestep import yadagestep, initstep, outputReference
 from yadage.yadagemodels import jsonStage
 import  packtivity.statecontexts.poxisfs_context as statecontext
@@ -21,90 +18,13 @@ handlers, scheduler = utils.handler_decorator()
 #     - the step attributes are determined using the scheduler spec and context
 #     - a list of used inputs (in the form of [stepname,outputkey,index])
 
-
-def pointerize(jsondata, asref=False, stepid=None):
-    '''
-    a helper method that replaces leaf nodes in a JSON object with
-    a outputReference objects (~ a JSONPath) pointing to that leaf position
-    useful to track access to leaf nodes later on.
-    '''
-    allleafs = jq.jq('leaf_paths').transform(jsondata, multiple_output=True)
-    leafpointers = [jsonpointer.JsonPointer.from_parts(x).path for x in allleafs]
-    jsondata_proxy = copy.deepcopy(jsondata)
-    for leaf in leafpointers:
-        x = jsonpointer.JsonPointer(leaf)
-        x.set(jsondata_proxy, outputReference(stepid, x) if asref else x.path)
-    return jsondata_proxy
-
-
-def select_reference(step, selection):
-    '''
-    resolves a jsonpath selection and returns JSONPointerized matches
-    '''
-    log.debug('selecting output from step %s',step)
-    pointerized = pointerize(step.result, asref=True, stepid=step.identifier)
-    matches = jsonpath_rw.parse(selection).find(pointerized)
-    if not matches:
-        log.error('no matches found for selection %s in result %s', selection, step.result)
-        raise RuntimeError('no matches found in reference selection')
-
-    if len(matches) > 1:
-        log.error('found multiple matches to query: %s within result: %s\n \ matches %s', selection, step.result, matches)
-        raise RuntimeError('multiple matches in result jsonpath query')
-    return matches[0].value
-
-
-def combine_outputs(outputs, flatten, unwrapsingle):
-    '''
-    combines the result of multiple reference selections into a single outputs.
-    non-list values will just be combined into a list while lists will be concatenated
-    optinally we can return the sole element of a single-value list (argument: unwrapsingle)
-    '''
-    combined = []
-    for reference in outputs:
-        if type(reference)==list:
-            if flatten:
-                for elementref in reference:
-                    combined+=[elementref]
-            else:
-                combined+=[reference]
-        else:
-            combined+=[reference]
-    if len(combined)==1 and unwrapsingle:
-        combined = combined[0]
-    return combined
-
-def select_steps(stage,query):
-    return stage.view.getSteps(query)
-
-
-def select_outputs(steps,selection,flatten,unwrapsingle):
-    return combine_outputs(map(lambda s: select_reference(s, selection), steps), flatten, unwrapsingle)
-
-
-def resolve_reference(stage,selection):
-    '''resolves a output reference by selecting the stage and stage outputs'''
-    log.debug('resolving selection %s',selection)
-    if type(selection) is not dict:
-        return None
-    else:
-        steps = select_steps(stage, selection['stages'])
-        log.debug('selected steps %s',steps)
-        outputs = select_outputs(steps,
-                                 selection['output'],
-                                 selection.get('flatten', False),
-                                 selection.get('unwrap', False))
-        log.debug('selected outputs %s',outputs)
-        return outputs
-
-
-def select_parameter(stage,parameter):
+def select_parameter(stageview,parameter):
     if type(parameter) is not dict:
         value = parameter
     else:
-        value = resolve_reference(stage,parameter)
+        handler = exprhandlers[parameter['expression_type']]
+        value = handler(stageview,parameter)
     return value
-
 
 def finalize_value(stage,step,value,context):
     '''
@@ -166,14 +86,12 @@ def singlestep_stage(stage,spec):
     '''
     log.debug('scheduling singlestep stage with spec:\n%s',spec)
 
+    step = step_or_init(name = stage.name, spec = spec, context = stage.context)
+    ctx = step.context if hasattr(step,'context') else stage.context
 
     parameters = {
-        k:select_parameter(stage,v) for k,v in get_parameters(spec).iteritems()
+        k:select_parameter(stage.view,v) for k,v in get_parameters(spec).iteritems()
     }
-
-    step = step_or_init(name = stage.name, spec = spec, context = stage.context)
-
-    ctx = step.context if hasattr(step,'context') else stage.context
     finalized = finalize_input(stage,step,parameters,ctx)
 
     addStepOrWorkflow(stage.name,stage,step.s(**finalized),spec)
@@ -220,7 +138,7 @@ def multistep_stage(stage,spec):
     '''
     log.debug('scheduling multistep stage with spec:\n%s',spec)
     parameters = {
-        k:select_parameter(stage,v) for k,v in get_parameters(spec).iteritems()
+        k:select_parameter(stage.view,v) for k,v in get_parameters(spec).iteritems()
     }
     singlesteppars = scatter(parameters,spec['scatter'])
     for i,pars in enumerate(singlesteppars):

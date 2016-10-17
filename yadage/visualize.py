@@ -32,6 +32,8 @@ def fillscope(cluster,workflow,scope = ''):
                 targetcl = stagecluster if stage != 'init' else scopecluster
                 shape = 'diamond' if stage == 'init' else 'box'
                 label = '' if stage == 'init' else '{}[{}]'.format(stage,i)
+                # if not stage=='init':
+                #     label += '\n'+', '.join(get_input_par_jsonpaths(workflow.dag.getNode(element).task.attributes))
                 additional = {'fixedsize':True, 'height':0.2, 'width':0.2} if stage == 'init' else {}
                 targetcl.add_node(pydotplus.graphviz.Node(element, label = label, color = 'blue', shape = shape,**additional))
                 add_result(targetcl,element,workflow.dag.getNode(element).result)
@@ -41,6 +43,12 @@ def fillscope(cluster,workflow,scope = ''):
 
 def path_to_id(stepid,path):
     return '{}_{}'.format(stepid,path.replace('/','_'))
+
+def get_input_par_jsonpaths(inputpars):
+    allleafs = jq.jq('leaf_paths').transform(inputpars, multiple_output=True)
+    leafpointers = [jsonpointer.JsonPointer.from_parts(x) for x in allleafs]
+    return [p.path for p in leafpointers]
+
 
 def add_result(graph,parent,jsondata):
     allleafs = jq.jq('leaf_paths').transform(jsondata, multiple_output=True)
