@@ -1,7 +1,6 @@
 import logging
 import utils
 import jsonpointer
-import jsonpath_rw
 
 log = logging.getLogger(__name__)
 
