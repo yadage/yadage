@@ -228,7 +228,7 @@ def createOffsetMeta(offset,bookkeeping):
     parts = pointer.parts
     view = bookkeeping
     for x in parts:
-        if not x in view: view[x] = {}
+        if x not in view: view[x] = {}
         view = view[x]
     scoped = pointer.resolve(bookkeeping)
     if '_meta' not in scoped:
