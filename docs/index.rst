@@ -12,6 +12,8 @@ Contents:
    :maxdepth: 2
 
    introduction
+   definingworkflows
+   executingworkflows
 
 Overview
 ========

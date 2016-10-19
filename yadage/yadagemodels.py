@@ -224,10 +224,12 @@ class YadageWorkflow(adage.adageobject):
         return instance
 
 def createOffsetMeta(offset,bookkeeping):
+    '''
+    sets up a location to track rule and step ids for a given scope offset
+    '''
     pointer = jsonpointer.JsonPointer(offset)
-    parts = pointer.parts
     view = bookkeeping
-    for x in parts:
+    for x in pointer.parts:
         if x not in view: view[x] = {}
         view = view[x]
     scoped = pointer.resolve(bookkeeping)
