@@ -5,6 +5,9 @@ import steering_api
 import logging
 import yaml
 import capschemas
+import psutil
+import zipfile
+import urllib
 
 log = logging.getLogger(__name__)
 
@@ -15,7 +18,8 @@ log = logging.getLogger(__name__)
 @click.option('-i','--loginterval', default = 30)
 @click.option('-u','--updateinterval', default = 0.02)
 @click.option('-c','--schemasource', default = capschemas.schemadir)
-@click.option('-b','--backend', default = 'multiproc:2')
+@click.option('-b','--backend', default = 'multiproc:auto')
+@click.option('-a','--inputarchive', default = None)
 @click.option('--interactive/--not-interactive', default = False)
 @click.option('--validate/--no-validate', default = True)
 @click.option('--parameter', '-p', multiple=True)
@@ -34,8 +38,20 @@ def main(workdir,
          interactive,
          parameter,
          validate,
-         visualize):
+         visualize,
+         inputarchive):
     logging.basicConfig(level = getattr(logging,verbosity))
+
+    if inputarchive:
+        if os.path.exists(workdir):
+            raise click.exceptions.ClickException(click.style("workdirectory exists and input archive give. Can't have both", fg = 'red'))
+        inputdata = '{}/inputs'.format(workdir)
+        os.makedirs(inputdata)
+        localzipfile = '{}/inputarchive.zip'.format(workdir)
+        urllib.urlretrieve(inputarchive,localzipfile)
+        with zipfile.ZipFile(localzipfile) as zf:
+            zf.extractall(path = inputdata)
+        os.remove(localzipfile)
 
     initdata = {}
     for initfile in initdatas:
@@ -47,7 +63,11 @@ def main(workdir,
 
     if backend.startswith('multiproc'):
         import backends.packtivitybackend as pb
-        nparallel = int(backend.split(':')[1])
+        nparallel  = backend.split(':')[1]
+        if nparallel == 'auto':
+            nparallel = psutil.cpu_count()
+        else:
+            nparallel = int(nparallel)
         backend = pb.PacktivityMultiProcBackend(nparallel)
     elif backend == 'celery':
         import backends.celeryapp
