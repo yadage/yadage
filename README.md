@@ -1,5 +1,6 @@
 # yadage - yaml based adage
 
+[![PyPI version](https://badge.fury.io/py/yadage.svg)](https://badge.fury.io/py/yadage)
 [![Build Status](https://travis-ci.org/diana-hep/yadage.svg?branch=master)](https://travis-ci.org/diana-hep/yadage)
 [![Code Health](https://landscape.io/github/diana-hep/yadage/master/landscape.svg?style=flat)](https://landscape.io/github/diana-hep/yadage/master)
 [![Documentation Status](https://readthedocs.org/projects/diana-hep/badge/?version=latest)](http://yadage.readthedocs.org/en/latest/?badge=latest)
