@@ -17,6 +17,14 @@ Yadage is available from PyPI and can be installed via `pip`::
   pip install yadage
 
 
+
+First Run
+---------
+
+To test the installation run this command::
+
+  yadage-run -t from-github/testing/local-helloworld workdir workflow.yml -p par=World
+
 Using the Yadage Docker Image
 -----------------------------
 
@@ -26,11 +34,12 @@ One can use `yadage` without installation via the offical image. The docker imag
 
 .. _`Docker Hub`: https://hub.docker.com/r/lukasheinrich/yadage/
 
-It is built using the Dockerfile at the root of the source repository.
+It is built using the Dockerfile at the root of the source repository. With the following alias, one can use the `yadage-run` command similar to how one would use it with `yadage` installed::
 
-First Run
----------
+  function yadage-run {
+    docker run --rm -it -e PACKTIVITY_WITHIN_DOCKER=true -v $PWD:$PWD -w $PWD -v /var/run/docker.sock:/var/run/docker.sock lukasheinrich/yadage yadage-run $*
+  }
 
-To test the installation run this command::
+This alias is retrievable from the repo using an shell evaluation as follows::
 
-  yadage-run -t from-github/testing/local-helloworld workdir workflow.yml -p par=World
+  eval "$(curl https://raw.githubusercontent.com/diana-hep/yadage/master/yadagedocker.sh)"
