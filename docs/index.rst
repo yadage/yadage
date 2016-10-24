@@ -55,7 +55,7 @@ This is a simple one-stage workflow with a single parameter::
 
 Since this workflow is stored on GitHub, you can run it simply using this command line::
 
-  yadage-run -t from-github/testing/local-helloworld workdir workflow.yml -p par=World
+  yadage-run -t from-github/testing/busybox-helloworld workdir workflow.yml -p par=World
 
 
 Indices and tables
