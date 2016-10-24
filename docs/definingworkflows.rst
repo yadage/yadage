@@ -4,6 +4,9 @@ Defining Workflows
 Introduction
 ------------
 
+Workflows are defined through JSON documents that adhere to a set of defined JSON schemas. To aid legibility they can also be written as YAML documents, as it is a superset of JSON. The YAML loader of the yadage engine also supports a number of shorthands that map 1<->1 to a more verbose version (notably in the stage definitions) and fill in default values when they are not present. We will be using the YAML way of writing the workflow specs throughout these documents.
+
+
 Basic Terminology
 -----------------
 
@@ -21,7 +24,7 @@ A stage consists of two pieces
 
 1. A stage body (i.e. its scheduler):
 
-  This section describes the logic how to define new nodes and new edges to attach them to the existing graph. Currently yadage supports two stages, one defining a single node and defining multiple nodes, both of which add edges according to the the data accessed from upstream nodes.
+  This section describes the logic how to define new nodes (i.e. packtivities with a specific parameter input) and new edges to attach them to the existing graph. Currently yadage supports two stages, one defining a single node and defining multiple nodes, both of which add edges according to the the data accessed from upstream nodes.
 
 2. A predicate (i.e. its dependencies):
 
@@ -41,13 +44,78 @@ During loading each workflow spec is intepreted  with respect to a `toplevel` ad
 Example
 .........
 
+In this example stage (details on how to define a stage will be explained below), the packtivity to be scheduled by this stage is referenced using :code:`{$ref: 'steps.yml#/pythia'}` ::
+
+  name: pythia
+  dependencies: ['init']
+  scheduler:
+    scheduler_type: singlestep-stage
+    step: {$ref: 'steps.yml#/pythia'}
+    parameters:
+      settings_file: /analysis/mainPythiaMLM.cmnd
+      hepmcfile: '{workdir}/outputfile.hepmc'
+      lhefile: {stages: init, output: lhefile}
+
+Assuming that this stage definition is part of an workflow stored at :code:`http://www.example.com/sub/path/workflow.yml`, yadage will look at the same parent location (:code:`http://www.example.com/sub/path`) to look for resource named :code:`http://www.example.com/sub/path/steps.yml`, load it and return the JSON tree under the :code:`pythia` property. The :code:`steps.yml` file could e.g. contain (again details on defining packtivities can be found below)::
+
+  pythia:
+    process:
+      process_type: 'string-interpolated-cmd'
+      cmd: '/analysis/pythia_main/example_main {settings_file} {hepmcfile} {lhefile}'
+    publisher:
+      publisher_type: 'frompar-pub'
+      outputmap:
+        hepmcfile: hepmcfile
+    environment:
+      environment_type: 'docker-encapsulated'
+      image: 'lukasheinrich/higgs-mc-studies'
 
 Defining a Packtivity
 ---------------------
 
+A packtivity represents a parametrized task/activity description with "batteries included", i.e. with full information about the environment and expected result data, such that ideally it can be reproduced on a generic computing resource that is not tailored to that activity.
+
+To define such a packageed activity, one needs to define three pieces of information:
+
+1. A parametrized task description, such as a templated command line string
+2. A environment description. This should be as complete as possible and ideally deployable on a diverse set of resources. We will be mainly using Docker images.
+3. A result extraction spec that describes how to extract the relevant data fragments after the task has completed. An example is extracting a set of filenames from a work directory or from the original parameters. Currently yadage supports a number of definition schemas for each of these pieces
+
+Process Definitions
+```````````````````
+
+
+Environment Definitions
+```````````````````````
+
+Publisher Definitions
+`````````````````````
+
 
 Defining a Stage
 ----------------
+
+As explained above, a stage is defined by a predicate and a scheduler. The generic structure of a stage definition is::
+
+  name: <stage name>
+  dependencies: <predicate definition>
+  scheduler: <scheduler definition>
+
+Predicate Definitions
+`````````````````````
+
+Currently a single
+
+Scheduler Definitions
+`````````````````````
+
+Currenty yadage supports two schedulers:
+
+1. a singlestep stage, scheduling a single packtivity with a specific parameter set
+2. a multistep stage, scheduling a number of instances of the same packtivity but with different parameters each. A number of ways to build the parameter sets are supported.
+
+
+
 
 Composition using Subworkflows
 ------------------------------
