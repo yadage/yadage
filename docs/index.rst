@@ -35,7 +35,6 @@ This is a simple one-stage workflow with a single parameter::
 
   stages:
     - name: hello_world
-      dependencies: []
       scheduler:
         scheduler_type: singlestep-stage
         parameters:

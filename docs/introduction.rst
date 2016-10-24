@@ -17,7 +17,6 @@ Yadage is available from PyPI and can be installed via `pip`::
   pip install yadage
 
 
-
 First Run
 ---------
 
