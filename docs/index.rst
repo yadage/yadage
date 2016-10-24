@@ -14,6 +14,7 @@ Contents:
    introduction
    definingworkflows
    executingworkflows
+   contributing
 
 Overview
 ========

@@ -186,6 +186,11 @@ Environment Definitions
 Publisher Definitions
 `````````````````````
 
+  The publisher contains a description of how to extract relevant result data from a packtivity after (or before) it has been executed. This is necessary to provide downstream packtivities an entrypoint to further process data fragments produced by a particular packtivities. We will show a number of possible publishers here:
+
+  1. publishing directly from the parameter set
+  2. dynamic results via work directory globbing
+
 
 Defining a Stage
 ----------------
@@ -199,7 +204,39 @@ As explained above, a stage is defined by a predicate and a scheduler. The gener
 Predicate Definitions
 `````````````````````
 
-Currently a single type of predicate is supported based on JSON path expressions. In a YAML description (which internally uniquely maps to a more verbose JSON definition), it's enought to 
+Currently a single type of predicate is supported based on JSON path expressions. In a YAML description (which internally uniquely maps to a more verbose JSON definition), it's enough to specify a number of JSON Path expressions, each of which point to other stages. The predicate will return True (therefore signaling that scheduling of the stage can proceed) when all nodes defined by the referenced stage have a published JSON result object (either pre-published or published after the steps have been completed).
+
+Example: ::
+
+  - name: prepare
+    dependencies: []
+    scheduler:
+      scheduler_type: 'singlestep-stage'
+      parameters:
+        model: sm
+        parametercard: '{workdir}/param.dat'
+        inputpars: defaultparam.yml
+      step: {$ref: 'preparestep.yml'}
+  - name: madgraph
+    dependencies: ['prepare','init']
+    scheduler:
+      scheduler_type: 'singlestep-stage'
+      parameters:
+        outputlhe: '{workdir}/output.lhe'
+        events: {stages: init, output: nevents, unwrap: true}
+        paramcard: {stages: prepare, output: parcard, unwrap: true}
+      step: {$ref: 'madgraph.yml'}
+  - name: pythia
+    dependencies: ['madgraph']
+    scheduler:
+      scheduler_type: 'singlestep-stage'
+      parameters:
+        outputhepmc: '{workdir}/output.hepmc'
+        events: {stages: init, output: nevents, unwrap: true}
+        lhefile: {stages: madgraph, output: lhefile, unwrap: true}
+      step: {$ref: 'pythia.yml'}
+
+
 
 
 Scheduler Definitions
