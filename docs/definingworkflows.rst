@@ -122,13 +122,66 @@ Process Definitions
 
     cat fileA fileB fileC > outputfile
 
-
-
 2. interpolated interpreted scripts.
 
+  Sometimes the environment does not have completely wrapped command line programs that completely wrap the task at hand, but need a more than a single command to correctly run the task. Therefore another process environment used frequently is the interpolated script process, in which a multi-statement script is interpolated by the parameters (similar to the process), and then is interpreted by the backend using a specified interpreter (the default being :code:`sh`).
+
+  In YAML, the script in conveniently defined using block notation. This is how one would defined a basic shell script to convert all lower case letters of a input file (a parameter) into upper case letters and write the result to an output file.
+
+  .. code-block:: shell
+
+    process_type: 'interpolated-script-cmd'
+    script: |
+      echo This is again some prose....
+      echo "Let's show the environment"
+      env
+      echo "finally let's just copy the file but with upper case"
+      cat {infile} | tr '[:lower:]' '[:upper:]' > {outputfile}
+
+
+  The interpreter can be specified under the :code:`interpreter` property. For example one could use python
+
+  .. code-block:: python
+
+    process_type: 'interpolated-script-cmd'
+    interpreter: python
+    script: |
+      print 'Hello from Python'
+      with open('{infile}') as input:
+        with open('{outputfile}','w') as  output:
+          output.write(input.read().upper())
+
+  or even the C++ interpreter cling via ROOT
+
+  .. code-block:: text
+
+    process_type: 'interpolated-script-cmd'
+    interpreter: root -b
+    script: |
+      #include <iostream>
+      #include <fstream>
+      {{
+        std::ifstream t("{infile}");
+        std::string str((std::istreambuf_iterator<char>(t)),
+                         std::istreambuf_iterator<char>());
+        std::cout << str << std::endl;
+        TString tstring(str.c_str());
+        tstring.ToUpper();
+        TCanvas c1;
+        TH1F h("hist",tstring.Data(),100,-5,5);
+        h.FillRandom("gaus",5000);
+        h.Draw();
+        c1.SaveAs("{outputfile}");
+        return 0;
+      }}
+
+  In languages (such as C++ as in the example above) that use braces, one must take care to escape them properly using doubling (:code:`{{` and :code:`}}`) in order to not interfere with the interpolation.
 
 Environment Definitions
 ```````````````````````
+
+  The most commonly used environment description is one that uses Docker Images.
+
 
 Publisher Definitions
 `````````````````````
@@ -146,7 +199,8 @@ As explained above, a stage is defined by a predicate and a scheduler. The gener
 Predicate Definitions
 `````````````````````
 
-Currently a single
+Currently a single type of predicate is supported based on JSON path expressions. In a YAML description (which internally uniquely maps to a more verbose JSON definition), it's enought to 
+
 
 Scheduler Definitions
 `````````````````````
