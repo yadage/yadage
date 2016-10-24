@@ -6,7 +6,6 @@ Introduction
 
 Workflows are defined through JSON documents that adhere to a set of defined JSON schemas. To aid legibility they can also be written as YAML documents, as it is a superset of JSON. The YAML loader of the yadage engine also supports a number of shorthands that map 1<->1 to a more verbose version (notably in the stage definitions) and fill in default values when they are not present. We will be using the YAML way of writing the workflow specs throughout these documents.
 
-
 Basic Terminology
 -----------------
 
@@ -83,6 +82,49 @@ To define such a packageed activity, one needs to define three pieces of informa
 
 Process Definitions
 ```````````````````
+
+1. string interpolated Command Lines
+
+  The simplest process description is a command line string with one or more placeholders. This description assumes python-style placeholders and interpolation algorithms. The placeholders will be matched to the parameters associated to a gien packtivity instance.
+
+  Example::
+
+    process:
+      process_type: 'string-interpolated-cmd'
+      cmd: '/path/to/binary {input_file} {output_file}'
+
+  for a parameter set such as the following::
+
+    {
+      "input_file": "/a/path/to/an/input_file.txt",
+      "input_file": "/a/path/to/an/output_file.txt"
+    }
+
+  This will result in the following command line string::
+
+    /path/to/binary /a/path/to/an/input_file.txt /a/path/to/an/output_file.txt
+
+
+  Handling of Arrays: besides plain old data types (PoD) supported by JSON (i.e. strings, boolean, numbers, null) that will be coerced into strings, this process definition converts arrays to space-delimited string sequences. This makes it easy to pass a number of positional arguments to a command line::
+
+    process:
+      process_type: 'string-interpolated-cmd'
+      cmd: 'cat {inputfiles} > {outputfile}'
+
+  with a parameter set::
+
+    {
+      "inputfiles": ["fileA","fileB","fileC"],
+      "outputfile": "outputfile"
+    }
+
+  will be interpolated as::
+
+    cat fileA fileB fileC > outputfile
+
+
+
+2. interpolated interpreted scripts.
 
 
 Environment Definitions
