@@ -3,12 +3,8 @@ import click
 import os
 import steering_api
 import logging
-import yaml
 import capschemas
-import psutil
 import clihelpers
-import zipfile
-import urllib
 
 log = logging.getLogger(__name__)
 

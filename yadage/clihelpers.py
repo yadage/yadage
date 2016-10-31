@@ -1,4 +1,10 @@
 import yaml
+import os
+import click
+import zipfile
+import psutil
+import urllib
+
 def getinit_data(initfiles,parameters):
     '''
     get initial data from both a list of files and a list of 'pname=pvalue'
@@ -25,7 +31,7 @@ def prepare_workdir_from_archive(workdir,inputarchive):
         zf.extractall(path = inputdata)
     os.remove(localzipfile)
 
-def setupbackend_fromstring(backend):
+def setupbackend_fromstring(backend, name = 'backendname'):
     if backend.startswith('multiproc'):
         import backends.packtivitybackend as pb
         nparallel  = backend.split(':')[1]
@@ -43,4 +49,4 @@ def setupbackend_fromstring(backend):
         backend = pb.PacktivityForegroundBackend()
     elif backend == 'jira':
         import backends.jira as jb
-        backend = jb.JiraBackend('workflow request - {}:{}'.format(toplevel,workflow),'some description')
+        backend = jb.JiraBackend('workflow request - {}'.format(name),'some description')

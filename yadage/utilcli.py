@@ -3,7 +3,6 @@ import json
 import click
 import tempfile
 import shutil
-from jq import jq
 import yadagemodels
 import visualize
 import backends.staticbackend

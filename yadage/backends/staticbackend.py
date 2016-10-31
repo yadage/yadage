@@ -1,7 +1,3 @@
-import jirainterface
-from packtivitybackend import PacktivityProxyBase
-import yadage.yadagestep
-
 class StaticProxy():
     def __init__(self,taskid):
         self.taskid = taskid

@@ -7,7 +7,6 @@ import time
 import uuid
 import jsonpath_rw
 import yadagestep
-import os
 from backends import NoneProxy
 
 log = logging.getLogger(__name__)

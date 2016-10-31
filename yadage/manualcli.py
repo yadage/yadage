@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import os
 import json
-import yaml
 import click
 import time
 import adage
