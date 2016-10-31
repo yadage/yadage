@@ -32,6 +32,7 @@ class AdagePacktivityBackendBase(object):
     to submit the task and return a appropriate proxy object deriving from
     PacktivityProxyBase
     '''
+
     def __init__(self,adagebackend):
         self.adagebackend = adagebackend
 
@@ -121,7 +122,6 @@ class PacktivityForegroundBackend(object):
         except:
             result = None
             status = False
-
 
         #since we can't really persistify the proxies of an in-memory process pool, we'll just return the base
         return PacktivityTrivialProxy(status = status, result = result)

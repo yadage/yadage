@@ -7,6 +7,7 @@ import json
 import workflow_loader
 from yadage.yadagemodels import YadageWorkflow
 import visualize
+import serialize
 import interactive
 import  packtivity.statecontexts.poxisfs_context as statecontext
 
@@ -78,10 +79,13 @@ def run_workflow(
         )
         return_value = RC_SUCCEEDED
     except:
-        log.exception('Unfortunately adage failed. :(')
+        log.exception('Unfortunately we failed. :(')
 
-    with open('{}/yadage_instance.json'.format(yadagedir),'w') as f:
-        json.dump(workflow.json(),f)
+    serialize.snapshot(
+        workflow,
+        '{}/yadage_snapshot_workflow.json'.format(yadagedir),
+        '{}/yadage_snapshot_backend.json'.format(yadagedir)
+    )
     with open('{}/yadage_template.json'.format(yadagedir),'w') as f:
         json.dump(workflow_json,f)
 

@@ -7,6 +7,9 @@ import time
 import uuid
 import jsonpath_rw
 import yadagestep
+import os
+from backends import NoneProxy
+
 log = logging.getLogger(__name__)
 
 class stage_base(object):
@@ -195,7 +198,7 @@ class YadageWorkflow(adage.adageobject):
 
     #(de-)serialization
     @classmethod
-    def fromJSON(cls,data,proxyclass,backend = None):
+    def fromJSON(cls,data,proxyclass = NoneProxy,backend = None):
         rules, applied = [], []
         for x in data['rules']:
             rules += [offsetRule.fromJSON(x)]

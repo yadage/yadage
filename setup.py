@@ -34,6 +34,7 @@ setup(
           'yadage-run=yadage.steering:main',
           'yadage-manual=yadage.manualcli:mancli',
           'yadage-validate=yadage.validator_workflow:main',
+          'yadage-util=yadage.utilcli:utilcli',
       ],
   },
   dependency_links = [

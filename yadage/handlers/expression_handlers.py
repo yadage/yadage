@@ -30,14 +30,14 @@ def select_reference(step, selection):
     resolves a jsonpath selection and returns JSONPointerized matches
     '''
     log.debug('selecting output from step %s',step)
-    pointerized = pointerize(step.result, asref=True, stepid=step.identifier)
+    pointerized = pointerize(step['result'], asref=True, stepid=step['id'])
     matches = jsonpath_rw.parse(selection).find(pointerized)
     if not matches:
-        log.error('no matches found for selection %s in result %s', selection, step.result)
+        log.error('no matches found for selection %s in result %s', selection, step['result'])
         raise RuntimeError('no matches found in reference selection')
 
     if len(matches) > 1:
-        log.error('found multiple matches to query: %s within result: %s\n \ matches %s', selection, step.result, matches)
+        log.error('found multiple matches to query: %s within result: %s\n \ matches %s', selection, step['result'], matches)
         raise RuntimeError('multiple matches in result jsonpath query')
     return matches[0].value
 
@@ -63,7 +63,11 @@ def combine_outputs(outputs, flatten, unwrapsingle):
     return combined
 
 def select_steps(stageview,query):
-    return stageview.getSteps(query)
+    '''
+    selects the step objects from the stage view based on a query and converts them to simple
+    dictionaries with id,result keys
+    '''
+    return [{'id':s.identifier, 'result':s.result} for s in stageview.getSteps(query)]
 
 def select_outputs(steps,selection,flatten,unwrapsingle):
     return combine_outputs(map(lambda s: select_reference(s, selection), steps), flatten, unwrapsingle)
