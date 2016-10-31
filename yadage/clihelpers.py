@@ -50,3 +50,7 @@ def setupbackend_fromstring(backend, name = 'backendname'):
     elif backend == 'jira':
         import backends.jira as jb
         backend = jb.JiraBackend('workflow request - {}'.format(name),'some description')
+    else:
+        raise NotImplementedError('backend config {} not known'.format(backend))
+
+    return backend

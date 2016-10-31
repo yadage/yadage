@@ -37,6 +37,7 @@ class AdagePacktivityBackendBase(object):
         self.adagebackend = adagebackend
 
     def result(self,resultproxy):
+        print 'getting result via proxy',proxy
         return self.adagebackend.result(resultproxy.proxy)
 
     def ready(self,resultproxy):
@@ -117,6 +118,7 @@ class PacktivityForegroundBackend(object):
 
         #we're executing the thing in the foreground
         try:
+            log.info('calling the task directy after submit...' )
             result = acallable()
             status = True
         except:
