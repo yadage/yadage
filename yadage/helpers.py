@@ -39,7 +39,7 @@ def get_id_fromjson(jsonobject, method = 'uuid'):
         raise NotImplementedError('unkown id generation method {}'.format(method))
 
 
-def get_obj_id(obj_with_json_method, method = 'jsonhash'):
+def get_obj_id(obj_with_json_method, method = 'uuid'):
     return get_id_fromjson(obj_with_json_method.json(),method)
 
 
