@@ -4,7 +4,6 @@ import adage.node
 import adage.serialize
 import jsonpointer
 import time
-import uuid
 import jsonpath_rw
 import yadagestep
 from backends import NoneProxy

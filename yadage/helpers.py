@@ -40,7 +40,7 @@ def get_id_fromjson(jsonobject, method = 'uuid'):
 
 
 def get_obj_id(obj_with_json_method, method = 'jsonhash'):
-    return get_id_fromjson(obj_with_json_method.json())
+    return get_id_fromjson(obj_with_json_method.json(),method)
 
 
 import jsonref
