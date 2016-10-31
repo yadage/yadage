@@ -37,7 +37,6 @@ class AdagePacktivityBackendBase(object):
         self.adagebackend = adagebackend
 
     def result(self,resultproxy):
-        print 'getting result via proxy',proxy
         return self.adagebackend.result(resultproxy.proxy)
 
     def ready(self,resultproxy):
