@@ -8,6 +8,7 @@ import uuid
 import jsonpath_rw
 import yadagestep
 from backends import NoneProxy
+from helpers import get_obj_id, get_id_fromjson
 
 log = logging.getLogger(__name__)
 
@@ -109,7 +110,7 @@ class offsetRule(object):
     a global p.o.v., i.e. as adage expects its rules.
     '''
     def __init__(self,rule,offset = None, identifier = None):
-        self.identifier = identifier or str(uuid.uuid4())
+        self.identifier = identifier or get_id_fromjson({'rule':rule.json(), 'offset': offset})
         self.rule = rule
         self.offset = offset
 
@@ -220,6 +221,7 @@ class YadageWorkflow(adage.adageobject):
     @classmethod
     def createFromJSON(cls,jsondata,context):
         instance = cls()
+        # rules = [offsetRule(jsonStage(yml,context), offset = '') for yml in jsondata['stages']]
         rules = [jsonStage(yml,context) for yml in jsondata['stages']]
         rootview = WorkflowView(instance)
         rootview.addWorkflow(rules)
@@ -278,8 +280,12 @@ class WorkflowView(object):
         return offsetrule.identifier
 
     def addStep(self,step, stage, depends_on = None):
-        node = YadageNode(step.name,step)
-        self.dag.addNode(node,depends_on = depends_on)
+        '''
+        adds a node to the DAG connecting it to the passed depending nodes
+        while tracking that it was added by the specified stage
+        '''
+        node = YadageNode(step.name,step, identifier = get_obj_id(step))
+        self.dag.addNode(node , depends_on = depends_on)
 
         log.debug('added node %s',node)
 

@@ -1,3 +1,7 @@
+import hashlib
+import uuid
+import json
+import os
 from backends.staticbackend import StaticProxy
 
 def set_backend(dag,backend,proxymaker):
@@ -11,7 +15,6 @@ def set_backend(dag,backend,proxymaker):
         n.backend = backend
         n.resultproxy = proxymaker(n)
 
-
 def set_static_backend(dag,backend):
     '''
     sets the backend for the case of a static backend
@@ -22,3 +25,28 @@ def set_static_backend(dag,backend):
         backend,
         proxymaker = lambda n: StaticProxy(n.identifier)
     )
+
+def json_hash(jsonable):
+    return hashlib.sha1(json.dumps(jsonable, cls = WithJsonRefEncoder, sort_keys = True)).hexdigest()
+
+def get_id_fromjson(jsonobject, method = 'uuid'):
+    method = os.environ.get('YADAGE_ID_METHOD',method)
+    if method == 'uuid':
+        return str(uuid.uuid1())
+    elif method == 'jsonhash':
+        return json_hash(jsonobject)
+    else:
+        raise NotImplementedError('unkown id generation method {}'.format(method))
+
+
+def get_obj_id(obj_with_json_method, method = 'jsonhash'):
+    return get_id_fromjson(obj_with_json_method.json())
+
+
+import jsonref
+class WithJsonRefEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, jsonref.JsonRef):
+            return {k:v for k,v in obj.iteritems()}
+        else:
+            super(WithJsonRefEncoder,self).default(obj)
