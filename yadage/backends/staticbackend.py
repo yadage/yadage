@@ -1,4 +1,4 @@
-class StaticProxy():
+class StaticProxy(object):
     def __init__(self,taskid):
         self.taskid = taskid
 
