@@ -1,6 +1,7 @@
 Defining Workflows
 ==================================
 
+
 Introduction
 ------------
 
@@ -180,7 +181,52 @@ Process Definitions
 Environment Definitions
 ```````````````````````
 
-  The most commonly used environment description is one that uses Docker Images.
+  The environment description specifies the computing environment in which a job (build from the packtivity parameters and the packtivity spec) is to be executed (by a backend that can handle multiple such environments). We will highlight the most relevant environment specs here:
+
+  1. Environments defined by Docker images
+
+    The most commonly used environment description is one that uses Docker Images. They are defined by specifying the docker image and possibly a tag
+
+
+    .. code-block:: text
+
+      environment:
+        environment_type: 'docker-encapsulated'
+        image: <docker image>
+
+    If no tag is specified (as above), :code:`latest` is used by default. For a specific tag, add the :code:`imagetag` property to the environment definition
+
+    .. code-block:: text
+
+      environment:
+        environment_type: 'docker-encapsulated'
+        image: <docker image>
+        imagetag: <tag>
+
+
+    Extra Resources:
+
+    Sometimes a small number of external resources must be provided to the docker image in order to be fully defined. This is currently mostly HEP specific. The required resources are to be specified as a simple list of keywords under the property :code:`resources` e.g.
+
+
+    .. code-block:: text
+
+      environment:
+        environment_type: 'docker-encapsulated'
+        image: <image>
+        resources:
+          - <resource 1>
+          - <resource 2>
+          - ...
+
+    - :code:`CVMFS`:
+
+      This specifies that on top of the filesystem provided by the Docker image, the environment needs a the distibuted filesystem CVMFS mounted under :code:`/cvmfs`
+
+    - :code:`GRIDProxy`:
+
+      This specifies that it should be possible to obtain a virtual organization X509 proxy using a script from within the container. (for historical purposes implementation should provide, and packtitivies can expect, that script under the path :code:`/recast_auth/getmyproxy.sh`)
+
 
 
 Publisher Definitions
