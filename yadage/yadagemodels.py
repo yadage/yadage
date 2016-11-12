@@ -262,17 +262,32 @@ class WorkflowView(object):
         result =  [self.dag.getNode(step['_nodeid']) for match in self.query(query,self.steps) for step in match.value]
         return result
 
-    def init(self, initdata, name = 'init'):
-        step = yadagestep.initstep(name,initdata)
-        self.addRule(initStage(step,{},None),self.offset)
-
-    def addRule(self,rule,offset = ''):
+    def _makeoffset(self,offset):
         thisoffset = jsonpointer.JsonPointer(offset)
         if self.offset:
             fulloffset = jsonpointer.JsonPointer.from_parts(jsonpointer.JsonPointer(self.offset).parts + thisoffset.parts).path
         else:
             fulloffset = thisoffset.path
-        offsetrule = offsetRule(rule,fulloffset)
+        return fulloffset
+
+    def getRule(self,name,offset = ''):
+        '''retrieve a rule by offset or name'''
+        fulloffset = self._makeoffset(offset)
+        for x in self.rules:
+            if x.offset == fulloffset and x.rule.name == name:
+                return x
+        return None
+    
+    def init(self, initdata, name = 'init'):
+        step = yadagestep.initstep(name,initdata)
+        self.addRule(initStage(step,{},None),self.offset)
+
+    def addRule(self,rule,offset = ''):
+        '''
+        add a DAG extension rule, possibly with a scope offset
+        '''
+        thisoffset = jsonpointer.JsonPointer(offset)
+        offsetrule = offsetRule(rule,self._makeoffset(offset))
         self.rules += [offsetrule]
         createOffsetMeta(thisoffset.path,self.bookkeeper)
         thisoffset.resolve(self.bookkeeper)['_meta']['rules'] += [offsetrule.identifier]

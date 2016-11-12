@@ -4,8 +4,6 @@ import json
 import click
 import time
 import adage
-import adage.visualize as av
-import packtivity.statecontexts.poxisfs_context as statecontext
 import yadage.backends.packtivity_celery
 import yadage.backends.celeryapp
 import yadage.workflow_loader
@@ -15,10 +13,34 @@ import yadage.interactive
 import clihelpers
 import logging
 import serialize
+
+import adage.visualize as av
+import packtivity.statecontexts.poxisfs_context as statecontext
 import reset as yr
 
+from contextlib import contextmanager
 
 log = logging.getLogger(__name__)
+
+@contextmanager
+def workflowctx(workdir,statefile,backendfile):
+    statefile = '{}/{}'.format(get_yadagedir(workdir),statefile)
+    backendfile = '{}/{}'.format(get_yadagedir(workdir),backendfile)
+    backend, workflow =  load_state(statefile)
+
+    yield backend, workflow
+
+    serialize.snapshot(
+        workflow,
+        statefile,
+        backendfile
+    )
+    av.save_dot(
+        av.colorize_graph_at_time(workflow.dag,time.time()).to_string(),
+        '{}/{}'.format(get_yadagedir(workdir),
+        'adage.png'),
+        'png'
+    )
 
 @click.group()
 def mancli():
@@ -54,7 +76,6 @@ def init(workdir,workflow,initfiles,statefile,backendfile,toplevel,parameter,inp
 
     statefile = '{}/{}'.format(get_yadagedir(workdir),statefile)
     backendfile = '{}/{}'.format(get_yadagedir(workdir),backendfile)
-
 
     click.secho('statefile at {}'.format(statefile))
     serialize.snapshot(
@@ -112,33 +133,44 @@ def load_state(statefile):
 
 @mancli.command()
 @click.argument('workdir')
+@click.argument('name')
+@click.option('-o','--offset',default = '')
+@click.option('-s','--statefile', default = 'yadage_wflow_state.json')
+@click.option('-b','--backendfile', default = 'yadage_backend_state.json')
+@click.option('-v','--verbosity', default = 'ERROR')
+def apply(workdir,name,offset,statefile,backendfile,verbosity):
+    logging.basicConfig(level = getattr(logging,verbosity))
+    with workflowctx(workdir,statefile,backendfile) as (backend, workflow):
+        rule = workflow.view(offset).getRule(name)
+        if not rule:
+            click.secho('No such rule, pick one of the below:', fg = 'red')
+            for x in workflow.rules:
+                click.secho('{}/{}'.format(x.offset,x.rule.name))
+            return
+        if not rule.applicable(workflow):
+            click.secho('Rule is not applicable.', fg = 'red')
+            return
+        workflow.rules.remove(rule)
+        rule.apply(workflow)
+        workflow.applied_rules.append(rule)
+
+@mancli.command()
+@click.argument('workdir')
 @click.option('-s','--statefile', default = 'yadage_wflow_state.json')
 @click.option('-b','--backendfile', default = 'yadage_backend_state.json')
 @click.option('-v','--verbosity', default = 'ERROR')
 def step(workdir,statefile,backendfile,verbosity):
     logging.basicConfig(level = getattr(logging,verbosity))
-    statefile = '{}/{}'.format(get_yadagedir(workdir),statefile)
-    backendfile = '{}/{}'.format(get_yadagedir(workdir),backendfile)
-
-    backend, workflow = load_state(statefile)
-
-    extend_decider,submit_decider = yadage.interactive.interactive_deciders()
-    coroutine = adage.adage_coroutine(backend,extend_decider,submit_decider)
-    coroutine.next() #prime the coroutine....
-
-    coroutine.send(workflow)
-    try:
-        click.secho('try stepping workflow')
-        coroutine.next()
-    except StopIteration:
-        finalize_manual(workdir,workflow)
-
-    serialize.snapshot(
-        workflow,
-        statefile,
-        backendfile
-    )
-    av.save_dot(av.colorize_graph_at_time(workflow.dag,time.time()).to_string(),'{}/{}'.format(get_yadagedir(workdir),'adage.png'),'png')
+    with workflowctx(workdir,statefile,backendfile) as (backend, workflow):
+        extend_decider,submit_decider = yadage.interactive.interactive_deciders()
+        coroutine = adage.adage_coroutine(backend,extend_decider,submit_decider)
+        coroutine.next() #prime the coroutine....
+        coroutine.send(workflow)
+        try:
+            click.secho('try stepping workflow')
+            coroutine.next()
+        except StopIteration:
+            finalize_manual(workdir,workflow)
 
 @mancli.command()
 @click.argument('workdir')
@@ -147,17 +179,8 @@ def step(workdir,statefile,backendfile,verbosity):
 @click.option('-b','--backendfile', default = 'yadage_backend_state.json')
 @click.option('-o','--offset', default = '')
 def reset(workdir,statefile,backendfile,offset,name):
-    statefile = '{}/{}'.format(get_yadagedir(workdir),statefile)
-    backendfile = '{}/{}'.format(get_yadagedir(workdir),backendfile)
-
-    backend, workflow = load_state(statefile)
-    yr.reset_state(workflow,offset,name)
-    serialize.snapshot(
-        workflow,
-        statefile,
-        backendfile
-    )
-    av.save_dot(av.colorize_graph_at_time(workflow.dag,time.time()).to_string(),'{}/{}'.format(get_yadagedir(workdir),'adage.png'),'png')
+    with workflowctx(workdir,statefile,backendfile) as (backend, workflow):
+        yr.reset_state(workflow,offset,name)
 
 if __name__ == '__main__':
     mancli()

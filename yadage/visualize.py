@@ -7,25 +7,34 @@ import subprocess
 
 log = logging.getLogger(__name__)
 
-def fillscope(cluster,workflow,scope = ''):
+def fillscope(cluster,workflow,scope = '', subcluster = True):
     # scopecluster = stagecluster = pydotplus.graphviz.Cluster(graph_name = '_'.join(stagescopeprts),
-    scopecluster = pydotplus.graphviz.Cluster(
-                        graph_name = scope.replace('/',''),
-                        label = ''.join(['[{}]'.format(p) for p in scope.split('/')[1:]]),
-                        style = 'solid',
-                        color = 'blue')
-    cluster.add_subgraph(scopecluster)
+
+    if subcluster:
+        scopecluster = pydotplus.graphviz.Cluster(
+                            graph_name = scope.replace('/',''),
+                            label = ''.join(['[{}]'.format(p) for p in scope.split('/')[1:]]),
+                            style = 'solid',
+                            color = 'blue')
+        cluster.add_subgraph(scopecluster)
+    else:
+        scopecluster = cluster
     scopeptr = jsonpointer.JsonPointer(scope)
     scoped = scopeptr.resolve(workflow.stepsbystage)
     for stage,elements in scoped.iteritems():
         stagescopeprts = scopeptr.parts+[stage]
-        stagecluster = pydotplus.graphviz.Cluster(
-            graph_name = '_'.join(stagescopeprts),
-            label = stage,
-            labeljust = 'l',
-            color = 'grey',
-            style = 'dashed')
-        scopecluster.add_subgraph(stagecluster)
+
+        if subcluster:
+            stagecluster = pydotplus.graphviz.Cluster(
+                graph_name = '_'.join(stagescopeprts),
+                label = stage,
+                labeljust = 'l',
+                color = 'grey',
+                style = 'dashed')
+            scopecluster.add_subgraph(stagecluster)
+        else:
+            stagecluster = scopecluster
+
         for i,element in enumerate(elements):
             if '_nodeid' in element:
                 element = element['_nodeid']
@@ -38,7 +47,11 @@ def fillscope(cluster,workflow,scope = ''):
                 targetcl.add_node(pydotplus.graphviz.Node(element, label = label, color = 'blue', shape = shape,**additional))
                 add_result(targetcl,element,workflow.dag.getNode(element).result)
             elif type(element)==dict:
-                fillscope(stagecluster,workflow,jsonpointer.JsonPointer.from_parts(scopeptr.parts+[stage,i]).path)
+                #recurse...
+                fillscope(
+                    stagecluster,workflow,jsonpointer.JsonPointer.from_parts(scopeptr.parts+[stage,i]).path,
+                    subcluster = subcluster
+                )
 
 
 def path_to_id(stepid,path):
@@ -72,11 +85,14 @@ def connect(provgraph,workflow):
     for node in workflow.dag.nodes():
         attach_to_results(provgraph,workflow,node)
 
-def write_prov_graph(workdir,workflow,vizformat = 'pdf'):
+def provdotgraph(workflow,subcluster = True):
     provgraph = pydotplus.graphviz.Graph()
-
-    fillscope(provgraph,workflow)
+    fillscope(provgraph,workflow, subcluster = subcluster)
     connect(provgraph,workflow)
+    return provgraph
+
+def write_prov_graph(workdir,workflow,vizformat = 'pdf'):
+    provgraph = provdotgraph(workflow, subcluster = False)
 
     with open('{}/yadage_workflow_instance.dot'.format(workdir),'w') as dotfile:
         dotfile.write(provgraph.to_string())
