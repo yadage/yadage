@@ -10,7 +10,6 @@ import serialize
 import adage
 import reset as yr
 
-
 log = logging.getLogger(__name__)
 
 @click.group()
@@ -41,9 +40,7 @@ def init(workdir,workflow,initfiles,statefile,backendfile,toplevel,parameter,inp
     click.secho('initialized workflow', fg = 'green')
 
     yadagedir = manualutils.get_yadagedir(workdir)
-    '{}/_yadage'.format(workdir)
     os.makedirs(yadagedir)
-
 
     statefile = '{}/{}'.format(manualutils.get_yadagedir(workdir),statefile)
     backendfile = '{}/{}'.format(manualutils.get_yadagedir(workdir),backendfile)
@@ -57,7 +54,7 @@ def init(workdir,workflow,initfiles,statefile,backendfile,toplevel,parameter,inp
 
 @mancli.command()
 @click.argument('workdir')
-@click.argument('name')
+@click.argument('name', default = '')
 @click.option('-o','--offset',default = '')
 @click.option('-s','--statefile', default = 'yadage_wflow_state.json')
 @click.option('-b','--backendfile', default = 'yadage_backend_state.json')
@@ -65,10 +62,15 @@ def init(workdir,workflow,initfiles,statefile,backendfile,toplevel,parameter,inp
 def apply(workdir,name,offset,statefile,backendfile,verbosity):
     logging.basicConfig(level = getattr(logging,verbosity))
     with manualutils.workflowctx(workdir,statefile,backendfile) as (backend, workflow):
+        if not name:
+            click.secho('Applicable Rules: ', fg = 'blue')
+            for x in manualutils.applicable_rules(workflow):
+                click.secho('{}/{}'.format(x.offset,x.rule.name))
+            return
         rule = workflow.view(offset).getRule(name)
         if not rule:
-            click.secho('No such rule, pick one of the below:', fg = 'red')
-            for x in workflow.rules:
+            click.secho('No such rule, pick one of the applicable below:', fg = 'red')
+            for x in manualutils.applicable_rules(workflow):
                 click.secho('{}/{}'.format(x.offset,x.rule.name))
             return
         if not rule.applicable(workflow):
@@ -77,6 +79,18 @@ def apply(workdir,name,offset,statefile,backendfile,verbosity):
         workflow.rules.remove(rule)
         rule.apply(workflow)
         workflow.applied_rules.append(rule)
+
+@mancli.command()
+@click.argument('workdir')
+@click.argument('name')
+@click.option('-o','--offset',default = '')
+@click.option('-s','--statefile', default = 'yadage_wflow_state.json')
+@click.option('-b','--backendfile', default = 'yadage_backend_state.json')
+@click.option('-v','--verbosity', default = 'ERROR')
+def preview(workdir,name,offset,statefile,backendfile,verbosity):
+    with manualutils.workflowctx(workdir,statefile,backendfile) as (backend, workflow):
+        new_rules, new_nodes = manualutils.preview_rule(workflow,name,offset)
+        click.secho('Preview of Stage: # new rules: {} # new nodes {}'.format(len(new_rules),len(new_nodes)))
 
 @mancli.command()
 @click.argument('workdir')
@@ -95,6 +109,7 @@ def step(workdir,statefile,backendfile,verbosity):
             coroutine.next()
         except StopIteration:
             manualutils.finalize_manual(workdir,workflow)
+
 
 @mancli.command()
 @click.argument('workdir')

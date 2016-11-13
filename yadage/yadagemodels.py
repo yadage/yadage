@@ -270,14 +270,14 @@ class WorkflowView(object):
             fulloffset = thisoffset.path
         return fulloffset
 
-    def getRule(self,name,offset = ''):
-        '''retrieve a rule by offset or name'''
+    def getRule(self, name = None, offset = '', identifier = None):
+        '''retrieve a rule by offset or name or identifier'''
         fulloffset = self._makeoffset(offset)
         for x in self.rules:
-            if x.offset == fulloffset and x.rule.name == name:
+            if x.identifier == identifier or (x.offset == fulloffset and x.rule.name == name):
                 return x
         return None
-    
+
     def init(self, initdata, name = 'init'):
         step = yadagestep.initstep(name,initdata)
         self.addRule(initStage(step,{},None),self.offset)
