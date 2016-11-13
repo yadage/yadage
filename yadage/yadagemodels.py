@@ -273,7 +273,7 @@ class WorkflowView(object):
     def getRule(self, name = None, offset = '', identifier = None):
         '''retrieve a rule by offset or name or identifier'''
         fulloffset = self._makeoffset(offset)
-        for x in self.rules:
+        for x in self.rules + self.applied_rules:
             if x.identifier == identifier or (x.offset == fulloffset and x.rule.name == name):
                 return x
         return None

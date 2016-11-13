@@ -59,7 +59,7 @@ def init(workdir,workflow,initfiles,statefile,backendfile,toplevel,parameter,inp
 @click.option('-s','--statefile', default = 'yadage_wflow_state.json')
 @click.option('-b','--backendfile', default = 'yadage_backend_state.json')
 @click.option('-v','--verbosity', default = 'ERROR')
-def apply_stage(workdir,name,offset,statefile,backendfile,verbosity):
+def apply(workdir,name,offset,statefile,backendfile,verbosity):
     logging.basicConfig(level = getattr(logging,verbosity))
     with manualutils.workflowctx(workdir,statefile,backendfile) as (backend, workflow):
         if not name:

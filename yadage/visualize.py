@@ -92,7 +92,7 @@ def provdotgraph(workflow,subcluster = True):
     return provgraph
 
 def write_prov_graph(workdir,workflow,vizformat = 'pdf'):
-    provgraph = provdotgraph(workflow, subcluster = False)
+    provgraph = provdotgraph(workflow, subcluster = True)
 
     with open('{}/yadage_workflow_instance.dot'.format(workdir),'w') as dotfile:
         dotfile.write(provgraph.to_string())
