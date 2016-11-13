@@ -91,6 +91,8 @@ def preview(workdir,name,offset,statefile,backendfile,verbosity):
     with manualutils.workflowctx(workdir,statefile,backendfile) as (backend, workflow):
         new_rules, new_nodes = manualutils.preview_rule(workflow,name,offset)
         click.secho('Preview of Stage: # new rules: {} # new nodes {}'.format(len(new_rules),len(new_nodes)))
+        for n in new_nodes:
+            click.secho('-> new node "{}" with {} upstream dependencies'.format(n['name'],len(n['parents'])))
 
 @mancli.command()
 @click.argument('workdir')
