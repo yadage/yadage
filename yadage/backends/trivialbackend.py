@@ -13,7 +13,7 @@ class TrivialBackend(object):
     '''
     A trivial backend that can only return proxy based information, no submission
     '''
-    def fail_info(self,resultproxy):
+    def submit(self,task):
         raise NotImplementedError('The trivial proxy is not made for submission')
 
     def result(self,resultproxy):
