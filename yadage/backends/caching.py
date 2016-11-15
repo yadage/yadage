@@ -22,12 +22,12 @@ class CachedBackend(federatedbackend.FederatedBackend):
         hashid = get_obj_id(task)
         if not self.cache: return None
         if not self.cachevalid(task): return None
-        log.info('use cached result for task: {}'.format(task))
         return self.cache.get(hashid,None)
 
     def routedsubmit(self,task):
         cached = self.cacheddata(task)
         if cached:
+            log.info('use cached result for task: {}'.format(task))
             return PacktivityTrivialProxy(**cached)
         else:
             return self.backends['primary'].submit(task)
