@@ -70,25 +70,8 @@ class PacktivityMultiProcBackend(AdagePacktivityBackendBase):
         #since we can't really persistify the proxies of an in-memory process pool, we'll just return the base
         return PacktivityProxyBase(multiprocprox)
 
-class PacktivityTrivialProxy(PacktivityProxyBase):
-    '''
-    A generic serializable proxy wrapper around a proxy object,
-    that is passed in the ctor. Implementations can override details
-    and proxyname methods
-    '''
-    def __init__(self,status, result):
-        self.status = status
-        self.result = result
 
-    def details(self):
-        return {
-            'status':self.status,
-            'result':self.result
-        }
-
-    def proxyname(self):
-            return 'PacktivityTrivialProxy'
-
+from trivialbackend import TrivialProxy
 class PacktivityForegroundBackend(object):
     def result(self,resultproxy):
         return resultproxy.result
@@ -125,4 +108,4 @@ class PacktivityForegroundBackend(object):
             status = False
 
         #since we can't really persistify the proxies of an in-memory process pool, we'll just return the base
-        return PacktivityTrivialProxy(status = status, result = result)
+        return TrivialProxy(status = status, result = result)

@@ -5,10 +5,9 @@ import tempfile
 import shutil
 import yadagemodels
 import visualize
-import backends.staticbackend
 from yadagestep import outputReference
 from handlers.expression_handlers import handlers as exh
-from helpers import set_static_backend
+from helpers import set_trivial_backend
 
 def process(x,dag):
     if type(x)==dict:
@@ -46,8 +45,7 @@ def testsel(instance,results,selection):
     wflow = yadagemodels.YadageWorkflow.fromJSON(
         json.load(open(instance))
     )
-    backend = backends.staticbackend.StaticBackend(json.load(open(results)))
-    set_static_backend(wflow.dag,backend)
+    set_trivial_backend(wflow.dag,json.load(open(results)))
 
     selresult = exh['stage-output-selector'](wflow.view(),yaml.load(selection))
     if not selresult:
@@ -71,8 +69,7 @@ def viz(instance,results,vizpdf):
     wflow = yadagemodels.YadageWorkflow.fromJSON(
         json.load(open(instance))
     )
-    backend = backends.staticbackend.StaticBackend(json.load(open(results)))
-    set_static_backend(wflow.dag,backend)
+    set_trivial_backend(wflow.dag,json.load(open(results)))
 
     dirpath = tempfile.mkdtemp()
     visualize.write_prov_graph(dirpath,wflow)

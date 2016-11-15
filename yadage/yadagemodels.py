@@ -4,6 +4,7 @@ import adage.node
 import adage.serialize
 import jsonpointer
 import time
+import os
 import jsonpath_rw
 import yadagestep
 from backends import NoneProxy
@@ -156,7 +157,7 @@ class YadageNode(adage.node.Node):
 
     @property
     def result(self):
-        if self.task.prepublished is not None:
+        if self.task.prepublished is not None and 'YADAGE_IGNORE_PREPUBLISHING' not in os.environ:
             return self.task.prepublished
         return super(YadageNode,self).result
 

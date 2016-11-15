@@ -3,7 +3,7 @@ import uuid
 import json
 import os
 import jsonref
-from backends.staticbackend import StaticProxy
+from backends.trivialbackend import TrivialProxy,TrivialBackend
 
 def set_backend(dag,backend,proxymaker):
     '''
@@ -16,16 +16,21 @@ def set_backend(dag,backend,proxymaker):
         n.backend = backend
         n.resultproxy = proxymaker(n)
 
-def set_static_backend(dag,backend):
+def set_trivial_backend(dag,jsondata):
     '''
     sets the backend for the case of a static backend
     Proxies are set using the node identifier
     '''
+    backend = TrivialBackend()
     set_backend(
         dag,
         backend,
-        proxymaker = lambda n: StaticProxy(n.identifier)
+        proxymaker = lambda n: TrivialProxy(
+            status = jsondata[n.identifier]['status'],
+            result = jsondata[n.identifier]['result']
+        )
     )
+    return backend
 
 def stepindex(wflow):
     ''''
