@@ -1,6 +1,6 @@
 from packtivitybackend import PacktivityProxyBase
 
-class CERNReuseBackend(PacktivityProxyBase):
+class CERNReuseBackendProxy(PacktivityProxyBase):
     '''
     A proxy to a job submitted to the CERN (still unnamed) reuse backend
     '''
@@ -26,6 +26,7 @@ class CERNReuseBackend(object):
     The CERN (still unnamed) reuse backend
     '''
     def submit(self, task):
+        #this needs to return CERNReuseBackendProxy instances
         raise NotImplementedError('wait for it...')
 
     def result(self, resultproxy):
