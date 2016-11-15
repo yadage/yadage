@@ -87,7 +87,7 @@ class PacktivityTrivialProxy(PacktivityProxyBase):
         }
 
     def proxyname(self):
-        return 'PacktivityTrivialProxy'
+            return 'PacktivityTrivialProxy'
 
 class PacktivityForegroundBackend(object):
     def result(self,resultproxy):

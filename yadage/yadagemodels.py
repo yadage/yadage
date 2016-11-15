@@ -114,7 +114,8 @@ class offsetRule(object):
         self.offset = offset
 
     def applicable(self,adageobj):
-        return self.rule.applicable(WorkflowView(adageobj,self.offset))
+        x = self.rule.applicable(WorkflowView(adageobj,self.offset))
+        return x
 
     def apply(self,adageobj):
         self.rule.apply(WorkflowView(adageobj,self.offset))

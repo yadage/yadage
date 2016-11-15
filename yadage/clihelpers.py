@@ -31,7 +31,7 @@ def prepare_workdir_from_archive(workdir,inputarchive):
         zf.extractall(path = inputdata)
     os.remove(localzipfile)
 
-def setupbackend_fromstring(backend, name = 'backendname'):
+def setupbackend_fromstring(backend, name = 'backendname', cacheconfig = None):
     if backend.startswith('multiproc'):
         import backends.packtivitybackend as pb
         nparallel  = backend.split(':')[1]
@@ -53,4 +53,7 @@ def setupbackend_fromstring(backend, name = 'backendname'):
     else:
         raise NotImplementedError('backend config {} not known'.format(backend))
 
+    if cacheconfig:
+        import backends.caching
+        backend = backends.caching.CachedBackend(backend, cacheconfig = cacheconfig)
     return backend

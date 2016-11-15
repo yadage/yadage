@@ -12,8 +12,9 @@ log = logging.getLogger(__name__)
 @click.option('-v','--verbosity', default = 'INFO')
 @click.option('-i','--loginterval', default = 30)
 @click.option('-u','--updateinterval', default = 0.02)
-@click.option('-c','--schemasource', default = capschemas.schemadir)
+@click.option('-m','--schemasource', default = capschemas.schemadir)
 @click.option('-b','--backend', default = 'multiproc:auto')
+@click.option('-c','--cache', default = '')
 @click.option('--interactive/--not-interactive', default = False)
 @click.option('--validate/--no-validate', default = True)
 @click.option('--visualize/--no-visualize', default = True) #v below this we should only have options/arg available also in yadage-manual
@@ -36,14 +37,15 @@ def main(workdir,
          parameter,
          validate,
          visualize,
-         inputarchive):
+         inputarchive,
+         cache):
     logging.basicConfig(level = getattr(logging,verbosity))
 
     if inputarchive:
         clihelpers.prepare_workdir_from_archive(workdir,inputarchive)
 
     initdata = clihelpers.getinit_data(initfiles,parameter)
-    backend  = clihelpers.setupbackend_fromstring(backend)
+    backend  = clihelpers.setupbackend_fromstring(backend, cacheconfig = cache)
 
     rc =  steering_api.run_workflow(
             workdir,

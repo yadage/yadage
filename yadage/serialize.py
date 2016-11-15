@@ -9,4 +9,10 @@ def snapshot(workflow,wflowfile,resultfile):
         json.dump(workflow.json(),wfile)
 
     with open(resultfile,'w') as rfile:
-        json.dump({k:workflow.dag.getNode(k).result for k in workflow.dag.nodes()},rfile)
+        json.dump({
+            k: {
+                'result' :workflow.dag.getNode(k).result,
+                'status': str(workflow.dag.getNode(k).state)
+                } for k in workflow.dag.nodes()
+            },rfile
+        )

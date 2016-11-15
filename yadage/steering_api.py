@@ -89,7 +89,7 @@ def run_workflow(
 
     with open('{}/yadage_template.json'.format(yadagedir),'w') as f:
         json.dump(workflow_json,f)
-    
+
     if doviz:
         visualize.write_prov_graph(yadagedir,workflow, vizformat = 'png')
         visualize.write_prov_graph(yadagedir,workflow, vizformat = 'pdf')
