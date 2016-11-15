@@ -1,4 +1,5 @@
 class NoneProxy(object):
+
     @classmethod
-    def fromJSON(cls,data):
+    def fromJSON(cls, data):
         return None

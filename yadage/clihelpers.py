@@ -5,7 +5,8 @@ import zipfile
 import psutil
 import urllib
 
-def getinit_data(initfiles,parameters):
+
+def getinit_data(initfiles, parameters):
     '''
     get initial data from both a list of files and a list of 'pname=pvalue'
     strings as they are passed in the command line <pvalue> is assumed to be a
@@ -16,25 +17,28 @@ def getinit_data(initfiles,parameters):
         initdata.update(**yaml.load(open(initfile)))
 
     for x in parameters:
-        key,value = x.split('=')
-        initdata[key]=yaml.load(value)
+        key, value = x.split('=')
+        initdata[key] = yaml.load(value)
     return initdata
 
-def prepare_workdir_from_archive(workdir,inputarchive):
+
+def prepare_workdir_from_archive(workdir, inputarchive):
     if os.path.exists(workdir):
-        raise click.exceptions.ClickException(click.style("workdirectory exists and input archive give. Can't have both", fg = 'red'))
+        raise click.exceptions.ClickException(click.style(
+            "workdirectory exists and input archive give. Can't have both", fg='red'))
     inputdata = '{}/inputs'.format(workdir)
     os.makedirs(inputdata)
     localzipfile = '{}/inputarchive.zip'.format(workdir)
-    urllib.urlretrieve(inputarchive,localzipfile)
+    urllib.urlretrieve(inputarchive, localzipfile)
     with zipfile.ZipFile(localzipfile) as zf:
-        zf.extractall(path = inputdata)
+        zf.extractall(path=inputdata)
     os.remove(localzipfile)
 
-def setupbackend_fromstring(backend, name = 'backendname', cacheconfig = None):
+
+def setupbackend_fromstring(backend, name='backendname', cacheconfig=None):
     if backend.startswith('multiproc'):
         import backends.packtivitybackend as pb
-        nparallel  = backend.split(':')[1]
+        nparallel = backend.split(':')[1]
         if nparallel == 'auto':
             nparallel = psutil.cpu_count()
         else:
@@ -49,11 +53,14 @@ def setupbackend_fromstring(backend, name = 'backendname', cacheconfig = None):
         backend = pb.PacktivityForegroundBackend()
     elif backend == 'jira':
         import backends.jira as jb
-        backend = jb.JiraBackend('workflow request - {}'.format(name),'some description')
+        backend = jb.JiraBackend(
+            'workflow request - {}'.format(name), 'some description')
     else:
-        raise NotImplementedError('backend config {} not known'.format(backend))
+        raise NotImplementedError(
+            'backend config {} not known'.format(backend))
 
     if cacheconfig:
         import backends.caching
-        backend = backends.caching.CachedBackend(backend, cacheconfig = cacheconfig)
+        backend = backends.caching.CachedBackend(
+            backend, cacheconfig=cacheconfig)
     return backend
