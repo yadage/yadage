@@ -19,7 +19,7 @@ class CERNReuseBackendProxy(PacktivityProxyBase):
         #     data['proxydetails']['task_id'],
         #     task_name=data['proxydetails']['task_name']
         # )
-        return cls(proxy)
+        return cls()
 
 class CERNReuseBackend(object):
     '''
