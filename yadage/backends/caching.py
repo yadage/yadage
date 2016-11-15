@@ -63,8 +63,7 @@ class CacheBuilder(object):
         json.dump(cache, open(self.cachefile, 'w'))
 
     def cachevalid(self, task):
-        cache = json.load(open(self.cachefile))
-        return True
+        return True #TODO
 
     def cacheddata(self, task):
         hashid = get_obj_id(task)
