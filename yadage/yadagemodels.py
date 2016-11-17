@@ -9,6 +9,7 @@ import jsonpath_rw
 import yadagestep
 from backends import NoneProxy
 from helpers import get_obj_id, get_id_fromjson
+from yadagestep import outputReference
 
 log = logging.getLogger(__name__)
 
@@ -40,7 +41,7 @@ class stage_base(object):
 
     def addStep(self, step):
         dependencies = [self.view.dag.getNode(k.stepid) for k in step.inputs]
-        self.view.addStep(step, stage=self.name, depends_on=dependencies)
+        return self.view.addStep(step, stage = self.name, depends_on=dependencies)
 
     def addWorkflow(self, rules, initstep):
         self.view.addWorkflow(rules, initstep=initstep, stage=self.name)
@@ -174,6 +175,16 @@ class YadageNode(adage.node.Node):
         if self.task.prepublished is not None and 'YADAGE_IGNORE_PREPUBLISHING' not in os.environ:
             return self.task.prepublished
         return super(YadageNode, self).result
+
+    def readfromresult(self,pointerpath, whoisreading = None, failsilently = False):
+        if not self.has_result():
+            if failsilently: return None
+            raise RuntimeError('attempt')
+        pointer = jsonpointer.JsonPointer(pointerpath)
+        if whoisreading:
+            whoisreading.inputs.append(outputReference(self.identifier,pointer))
+        v = pointer.resolve(self.result)
+        return v
 
     @classmethod
     def fromJSON(cls, data):
@@ -336,6 +347,7 @@ class WorkflowView(object):
         else:
             self.steps[stage] = [noderef]
         self.bookkeeper['_meta']['steps'] += [node.identifier]
+        return node
 
     def addWorkflow(self, rules, initstep=None, stage=None):
         if initstep:
