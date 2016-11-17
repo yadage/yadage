@@ -55,6 +55,10 @@ def setupbackend_fromstring(backend, name='backendname', cacheconfig=None):
         import backends.jira as jb
         backend = jb.JiraBackend(
             'workflow request - {}'.format(name), 'some description')
+    elif backend == 'ipcluster':
+        from ipyparallel import Client
+        import backends.packtivitybackend as pb
+        backend = pb.PacktivityIPyParallelBackend(Client())
     else:
         raise NotImplementedError(
             'backend config {} not known'.format(backend))
