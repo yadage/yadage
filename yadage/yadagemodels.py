@@ -2,9 +2,11 @@ import logging
 import adage
 import adage.node
 import adage.serialize
+import adage.nodestate
 import jsonpointer
 import time
 import os
+import datetime
 import jsonpath_rw
 import yadagestep
 from backends import NoneProxy
@@ -95,6 +97,9 @@ class jsonStage(stage_base):
         super(jsonStage, self).__init__(
             json['name'], context, json['dependencies'])
 
+    def __repr__(self):
+        return '<jsonStage: {}>'.format(self.name)
+
     def schedule(self):
         from yadage.handlers.scheduler_handlers import handlers as sched_handlers
         scheduler = sched_handlers[self.stageinfo['scheduler_type']]
@@ -126,6 +131,9 @@ class offsetRule(object):
             {'rule': rule.json(), 'offset': offset})
         self.rule = rule
         self.offset = offset
+
+    def __repr__(self):
+        return '< offset: "{}" rule: {} >'.format(self.offset,self.rule)
 
     def applicable(self, adageobj):
         x = self.rule.applicable(WorkflowView(adageobj, self.offset))
@@ -164,15 +172,22 @@ class YadageNode(adage.node.Node):
         super(YadageNode, self).__init__(name, task, identifier)
 
     def __repr__(self):
-        lifetime = time.time() - self.define_time
-        return '<YadageNode {} {} lifetime: {} (id: {}) has result: {}>'.format(self.name, self.state, lifetime, self.identifier, self.has_result())
+        lifetime = datetime.timedelta(seconds = (time.time() - self.define_time))
+        runtime = None
+        if self.state != adage.nodestate.DEFINED:
+            referencetime = time.time() if not self.ready() else self.ready_by_time
+            runtime = datetime.timedelta(seconds = (referencetime - self.submit_time))
+        return '<YadageNode {} {} lifetime: {}  runtime: {} (id: {}) has result: {}>'.format(self.name, self.state, lifetime, runtime, self.identifier, self.has_result())
 
     def has_result(self):
+        if 'YADAGE_IGNORE_PREPUBLISHING' in os.environ: return self.successful()
         return (self.task.prepublished is not None) or self.successful()
 
     @property
     def result(self):
         if self.task.prepublished is not None and 'YADAGE_IGNORE_PREPUBLISHING' not in os.environ:
+            if self.ready() and self.successful():
+                assert super(YadageNode, self).result == self.task.prepublished
             return self.task.prepublished
         return super(YadageNode, self).result
 

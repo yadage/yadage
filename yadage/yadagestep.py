@@ -42,7 +42,6 @@ class stepbase(object):
             'inputs': [x.json() for x in self.inputs]
         }
 
-
 class initstep(stepbase):
 
     def __init__(self, name, initdata=None):
@@ -52,7 +51,7 @@ class initstep(stepbase):
             self.s(**initdata)
 
     def __call__(self):
-        pass
+        return self.attributes
 
     def s(self, **attributes):
         self.attributes = attributes

@@ -80,9 +80,33 @@ class PacktivityMultiProcBackend(AdagePacktivityBackendBase):
         return PacktivityProxyBase(multiprocprox)
 
 
+class PacktivityIPyParallelBackend(AdagePacktivityBackendBase):
+
+    def __init__(self, client):
+        super(PacktivityIPyParallelBackend, self).__init__(
+            adage.backends.IPythonParallelBackend(client))
+
+    def submit(self, task):
+        '''
+        if the task type is a genuine yadagestep we submit is as a packtivity callable,
+        if it's an init step, which has a trivial call body, we'll just use it directly
+        '''
+
+        tasktype = type(task)
+        if tasktype == yadage.yadagestep.yadagestep:
+            acallable = packtivity_callable(task.spec, task.attributes, task.context)
+        elif tasktype == yadage.yadagestep.initstep:
+            acallable = task
+        else:
+            raise RuntimeError(
+                'cannot figure out how to submit a task of type {}'.format(tasktype))
+
+        ipyproxy = self.adagebackend.submit(acallable)
+        # since we can't really persistify the proxies of an in-memory process
+        # pool, we'll just return the base
+        return PacktivityProxyBase(ipyproxy)
+
 from trivialbackend import TrivialProxy
-
-
 class PacktivityForegroundBackend(object):
 
     def result(self, resultproxy):

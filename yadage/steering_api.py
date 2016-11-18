@@ -42,9 +42,9 @@ def run_workflow(
     rootcontext = statecontext.make_new_context(workdir)
 
     for k, v in initdata.iteritems():
-        candpath = '{}/inputs/{}'.format(workdir, v)
+        candpath = '{}/init/{}'.format(workdir, v)
         if os.path.exists(candpath):
-            initdata[k] = '{}/inputs/{}'.format(rootcontext['readwrite'][0], v)
+            initdata[k] = '{}/init/{}'.format(rootcontext['readwrite'][0], v)
 
     workflow_json = workflow_loader.workflow(
         workflow,
