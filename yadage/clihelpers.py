@@ -26,7 +26,7 @@ def prepare_workdir_from_archive(workdir, inputarchive):
     if os.path.exists(workdir):
         raise click.exceptions.ClickException(click.style(
             "workdirectory exists and input archive give. Can't have both", fg='red'))
-    inputdata = '{}/inputs'.format(workdir)
+    inputdata = '{}/init'.format(workdir)
     os.makedirs(inputdata)
     localzipfile = '{}/inputarchive.zip'.format(workdir)
     urllib.urlretrieve(inputarchive, localzipfile)
