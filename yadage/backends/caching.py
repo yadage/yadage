@@ -1,12 +1,14 @@
 import federatedbackend
 import json
 import time
-from yadage.helpers import get_obj_id
-from trivialbackend import TrivialProxy, TrivialBackend
 import os
 import logging
 import jq
 import jsonpointer
+import checksumdir
+
+from yadage.helpers import get_obj_id
+from trivialbackend import TrivialProxy, TrivialBackend
 
 log = logging.getLogger(__name__)
 
@@ -77,13 +79,21 @@ class CacheBuilder(object):
         log.info('writing cache to %s',self.cachefile)
         json.dump(self.cache, open(self.cachefile, 'w'), indent=4, sort_keys=True)
 
+    def remove(self,cacheid):
+        self.cache.pop(cacheid)
+
     def cacheresult(self, cacheid, status, result):
         log.info('caching result for cacheid: {}'.format(cacheid))
         self.cache[cacheid]['result'] = {
             'status': 'SUCCESS' if status else 'FAILED',
             'result': result,
-            'cachingtime': time.time()
+            'cachingtime': time.time(),
+            'checksums': None
         }
+        if 'context' in self.cache[cacheid]['task']:
+            checksums = [checksumdir.dirhash(d) for d in self.cache[cacheid]['task']['context']['depwrites']]
+            log.info('checksums are %s',checksums)
+            self.cache[cacheid]['result']['checksums'] = checksums
 
     def cachedresult(self,cacheid, silent = True):
         '''
@@ -103,8 +113,11 @@ class CacheBuilder(object):
     def cachevalid(self, cacheid):
         return True
 
-    def cacheddata(self, task):
-        '''returns results from a valid cache entry if it exists, else None'''
+    def cacheddata(self, task, remove_invalid = True):
+        '''
+        returns results from a valid cache entry if it exists, else None
+        if remove_invalid = True, also removes invalid cache entries from cache
+        '''
         cacheid = self.cacheid(task)
         #register this task with the cacheid if we don't know about it yet
         log.info('checking cache for task %s',task.name)
@@ -115,6 +128,8 @@ class CacheBuilder(object):
             return None
         if not self.cachevalid(cacheid):
             log.info('cache non-valid for task %s (%s)',task.name,cacheid)
+            self.remove(cacheid)
+            self.cache[cacheid] = {'task' : task.json()}
             return None
         #return a cached result if we have one if not, return None
         result =  self.cachedresult(cacheid, silent = True)
@@ -129,12 +144,31 @@ class ResultFilesExistCache(CacheBuilder):
     def __init__(self, cachefile):
         super(ResultFilesExistCache, self).__init__(cachefile)
 
+    def remove(self,cacheid):
+        import shutil
+        task = self.cache[cacheid]['task']
+        log.info('removing cache entry %s',cacheid)
+        workdir = task['context']['readwrite'][0]
+        log.info('deleting rw location %s',workdir)
+        shutil.rmtree(workdir)
+        super(ResultFilesExistCache, self).remove(cacheid)
+
     def cachevalid(self, cacheid):
         task = self.cache[cacheid]['task']
         result = self.cache[cacheid]['result']['result']
         if task['type'] == 'initstep':
             return True
 
+
+        #check if dependent state is still the same
+
+        stored_checksums = self.cache[cacheid]['result']['checksums']
+        checksums_now = [checksumdir.dirhash(d) for d in task['context']['depwrites']]
+        log.info('checksums comparison: %s',checksums_now == stored_checksums)
+        if not checksums_now == stored_checksums:
+            return False
+
+        #check if our result fragments are still there
         rwloc = task['context']['readwrite'][0]
         resultleafs = jq.jq('leaf_paths').transform(result, multiple_output=True)
         resultleafs = [jsonpointer.JsonPointer.from_parts(x).resolve(result) for x in resultleafs]

@@ -43,6 +43,17 @@ class stage_base(object):
 
     def addStep(self, step):
         dependencies = [self.view.dag.getNode(k.stepid) for k in step.inputs]
+
+        try:
+            depwrites = []
+            for d in dependencies:
+                try:
+                    depwrites += d.task.context['readwrite']
+                except AttributeError:
+                    pass
+            step.context['depwrites'] = depwrites
+        except AttributeError:
+            pass
         return self.view.addStep(step, stage = self.name, depends_on=dependencies)
 
     def addWorkflow(self, rules, initstep):
