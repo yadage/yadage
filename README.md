@@ -48,3 +48,10 @@ You can try this workflow via
     yadage-run -t from-github/testing/busybox-helloworld workdir workflow.yml -p par=World
 
 For more thorough examples, please see the [documentation](http://yadage.readthedocs.io/en/latest/)
+
+### Published versions of related packages (dependencies of yadage)
+
+* packtivity: [![PyPI version](https://badge.fury.io/py/yadage.svg)](https://badge.fury.io/py/packtivity)
+* cap-schemas: [![PyPI version](https://badge.fury.io/py/yadage.svg)](https://badge.fury.io/py/cap-schemas)
+* adage: [![PyPI version](https://badge.fury.io/py/yadage.svg)](https://badge.fury.io/py/adage)
+
