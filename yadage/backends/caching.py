@@ -29,10 +29,10 @@ class CachedBackend(federatedbackend.FederatedBackend):
             log.info('default caching strategy')
             self.cache = CacheBuilder(configparts[0])
         else:
-            configfile, strategy = configparts
+            strategy, configfile = configparts
             if strategy == 'resultexists':
                 log.info('resultexists caching strategy')
-                self.cache = ResultFilesExistCache(configparts[0])
+                self.cache = ResultFilesExistCache(configfile)
             else:
                 raise RuntimeError('unknown caching config')
 
@@ -49,9 +49,10 @@ class CachedBackend(federatedbackend.FederatedBackend):
     def routedsubmit(self, task):
         cached = self.cache.cacheddata(task)
         if cached:
-            log.info('use cached result for task: {}'.format(task))
+            log.info('use cached result for task: {}'.format(task.name))
             return TrivialProxy(status=cached['status'], result = cached['result'])
         else:
+            log.info('do proper submit for task: {}'.format(task.name))
             #create id for this task using the cache builder, with which
             #we will store the result with once it's ready
             cacheid = self.cache.cacheid(task)
