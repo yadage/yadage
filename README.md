@@ -51,7 +51,7 @@ For more thorough examples, please see the [documentation](http://yadage.readthe
 
 ### Published versions of related packages (dependencies of yadage)
 
-
+| package | version |
 | ------------- |-------------| 
 | packtivity     | [![PyPI version](https://badge.fury.io/py/packtivity.svg)](https://badge.fury.io/py/packtivity) | 
 | cap-schemas    | [![PyPI version](https://badge.fury.io/py/cap-schemas.svg)](https://badge.fury.io/py/cap-schemas)      |   
