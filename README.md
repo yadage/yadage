@@ -49,7 +49,7 @@ You can try this workflow via
 
 For more thorough examples, please see the [documentation](http://yadage.readthedocs.io/en/latest/)
 
-### Published versions of related packages (dependencies of yadage)
+### Published versions of related packages (main dependencies of yadage)
 
 | package | version |
 | ------------- |-------------| 
