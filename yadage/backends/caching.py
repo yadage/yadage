@@ -167,6 +167,7 @@ class ResultFilesExistCache(CacheBuilder):
         checksums_now = [checksumdir.dirhash(d) for d in task['context']['depwrites']]
         log.info('checksums comparison: %s',checksums_now == stored_checksums)
         if not checksums_now == stored_checksums:
+            log.info('cache invalid due to changed input state')
             return False
 
         #check if our result fragments are still there
@@ -177,6 +178,7 @@ class ResultFilesExistCache(CacheBuilder):
             if rwloc in x:
                 exists = os.path.exists(x)
                 if not exists:
+                    log.info('cache invalid due to missing data fragments')
                     return False
         log.info('all file refs in result exist already.')
         return True
