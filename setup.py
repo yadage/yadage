@@ -24,7 +24,7 @@ setup(
     'jsonpath_rw',
     'packtivity',
     'adage',
-    'checksumdir'
+    'checksumdir',
     'jq'
   ],
   extras_require = {
