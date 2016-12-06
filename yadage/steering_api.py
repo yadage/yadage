@@ -9,6 +9,7 @@ from yadage.yadagemodels import YadageWorkflow
 import visualize
 import serialize
 import interactive
+import shutil
 import packtivity.statecontexts.poxisfs_context as statecontext
 
 
@@ -56,6 +57,9 @@ def run_workflow(
     workflow.view().init(initdata)
 
     yadagedir = '{}/_yadage/'.format(workdir)
+    if os.path.exists(yadagedir):
+        log.info('yadage meta directory exists.. will remove and remake')
+        shutil.rmtree(yadagedir)
     os.makedirs(yadagedir)
 
     with open('{}/yadage_instance_before.json'.format(yadagedir), 'w') as f:
