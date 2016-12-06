@@ -65,6 +65,7 @@ def setupbackend_fromstring(backend, name='backendname', cacheconfig=None):
 
     if cacheconfig:
         import backends.caching
-        backend = backends.caching.CachedBackend(
-            backend, cacheconfig=cacheconfig)
+        backend = backends.caching.CachedBackend(backend,
+            cacheconfig=cacheconfig
+        )
     return backend

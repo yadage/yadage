@@ -187,7 +187,9 @@ class YadageNode(adage.node.Node):
     def result(self):
         if self.task.prepublished is not None and 'YADAGE_IGNORE_PREPUBLISHING' not in os.environ:
             if self.ready() and self.successful():
-                assert super(YadageNode, self).result == self.task.prepublished
+                sanity =  super(YadageNode, self).result == self.task.prepublished
+                if not sanity:
+                    raise RuntimeError('prepublished and actual result differ:\nlhs:\n{}\nrhs:{}'.format(super(YadageNode, self).result,self.task.prepublished))
             return self.task.prepublished
         return super(YadageNode, self).result
 

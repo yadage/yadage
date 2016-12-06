@@ -2,8 +2,9 @@ import logging
 import adage.backends
 import yadage.yadagestep
 from packtivity import packtivity_callable
-log = logging.getLogger(__name__)
+from trivialbackend import TrivialProxy
 
+log = logging.getLogger(__name__)
 
 class PacktivityProxyBase(object):
     '''
@@ -106,7 +107,6 @@ class PacktivityIPyParallelBackend(AdagePacktivityBackendBase):
         # pool, we'll just return the base
         return PacktivityProxyBase(ipyproxy)
 
-from trivialbackend import TrivialProxy
 class PacktivityForegroundBackend(object):
 
     def result(self, resultproxy):

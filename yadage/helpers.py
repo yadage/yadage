@@ -4,7 +4,8 @@ import json
 import os
 import jsonref
 from backends.trivialbackend import TrivialProxy, TrivialBackend
-
+import logging
+log = logging.getLogger(__name__)
 
 def set_backend(dag, backend, proxymaker):
     '''
@@ -49,10 +50,13 @@ DEFAULT_ID_METHOD = 'jsonhash'
 
 
 def json_hash(jsonable):
-    return hashlib.sha1(json.dumps(jsonable, cls=WithJsonRefEncoder, sort_keys=True)).hexdigest()
+    # log.info('hashing: %s',json.dumps(jsonable, cls=WithJsonRefEncoder, sort_keys=True))
+    hash  = hashlib.sha1(json.dumps(jsonable, cls=WithJsonRefEncoder, sort_keys=True)).hexdigest()
+    # log.info('got %s',hash)
+    return hash
 
 
-def get_id_fromjson(jsonobject, method=DEFAULT_ID_METHOD):
+def get_id_fromjson(jsonobject, method = DEFAULT_ID_METHOD):
     method = os.environ.get('YADAGE_ID_METHOD', method)
     if method == 'uuid':
         return str(uuid.uuid1())
@@ -62,8 +66,7 @@ def get_id_fromjson(jsonobject, method=DEFAULT_ID_METHOD):
         raise NotImplementedError(
             'unkown id generation method {}'.format(method))
 
-
-def get_obj_id(obj_with_json_method, method=DEFAULT_ID_METHOD):
+def get_obj_id(obj_with_json_method, method = DEFAULT_ID_METHOD):
     return get_id_fromjson(obj_with_json_method.json(), method)
 
 
