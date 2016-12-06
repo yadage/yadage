@@ -51,7 +51,7 @@ For more thorough examples, please see the [documentation](http://yadage.readthe
 
 ### Published versions of related packages (dependencies of yadage)
 
-* packtivity: [![PyPI version](https://badge.fury.io/py/yadage.svg)](https://badge.fury.io/py/packtivity)
-* cap-schemas: [![PyPI version](https://badge.fury.io/py/yadage.svg)](https://badge.fury.io/py/cap-schemas)
-* adage: [![PyPI version](https://badge.fury.io/py/yadage.svg)](https://badge.fury.io/py/adage)
+* packtivity: [![PyPI version](https://badge.fury.io/py/packtivity.svg)](https://badge.fury.io/py/packtivity)
+* cap-schemas: [![PyPI version](https://badge.fury.io/py/cap-schemas.svg)](https://badge.fury.io/py/cap-schemas)
+* adage: [![PyPI version](https://badge.fury.io/py/adage.svg)](https://badge.fury.io/py/adage)
 
