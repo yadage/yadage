@@ -43,7 +43,15 @@ def setupbackend_fromstring(backend, name='backendname', cacheconfig=None):
             nparallel = psutil.cpu_count()
         else:
             nparallel = int(nparallel)
-        backend = pb.PacktivityMultiProcBackend(nparallel)
+
+        import backends.cappack
+        config = {
+            'environment':{
+                'docker-encapsulated': 'cap'
+            }
+        }
+
+        backend = pb.PacktivityMultiProcBackend(nparallel, packtivity_config = config)
     elif backend == 'celery':
         import backends.celeryapp
         import backends.packtivity_celery as pc

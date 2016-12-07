@@ -55,7 +55,8 @@ class AdagePacktivityBackendBase(object):
 
 class PacktivityMultiProcBackend(AdagePacktivityBackendBase):
 
-    def __init__(self, nparallel=2):
+    def __init__(self, nparallel=2, packtivity_config = None):
+        self.packtivity_config = packtivity_config
         super(PacktivityMultiProcBackend, self).__init__(
             adage.backends.MultiProcBackend(nparallel))
 
@@ -67,7 +68,9 @@ class PacktivityMultiProcBackend(AdagePacktivityBackendBase):
         tasktype = type(task)
         if tasktype == yadage.yadagestep.yadagestep:
             acallable = packtivity_callable(
-                task.spec, task.attributes, task.context)
+                task.spec, task.attributes, task.context,
+                config = self.packtivity_config
+        )
         elif tasktype == yadage.yadagestep.initstep:
             acallable = task
         else:
