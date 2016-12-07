@@ -44,13 +44,13 @@ def setupbackend_fromstring(backend, name='backendname', cacheconfig=None):
         else:
             nparallel = int(nparallel)
 
-        import backends.cappack
-        config = {
-            'environment':{
-                'docker-encapsulated': 'cap'
-            }
-        }
-
+        import importlib
+        import os
+        import json
+        config = {}
+        if 'YADAGE_PACKCONFIG' in os.environ:
+            importlib.import_module(os.environ['YADAGE_PACKIMPORT'])
+            config = json.loads(os.environ['YADAGE_PACKCONFIG'])
         backend = pb.PacktivityMultiProcBackend(nparallel, packtivity_config = config)
     elif backend == 'celery':
         import backends.celeryapp
