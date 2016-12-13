@@ -2,7 +2,6 @@ import yaml
 import os
 import click
 import zipfile
-import psutil
 import urllib
 
 
