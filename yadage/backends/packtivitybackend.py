@@ -31,7 +31,8 @@ class PacktivityBackend(federatedbackend.FederatedBackend):
                 backend,
                 cacheconfig=cacheconfig
             )
-
+        else:
+            self.cached = False
         super(PacktivityBackend, self).__init__({
             'init': TrivialBackend(),
             'packtivity': backend
