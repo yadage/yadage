@@ -20,6 +20,6 @@ script:
 
   - "echo 'nevents: 100' > input.yml"
   - yadage-run -t from-github/phenochain workdir_pheno_delphes madgraph_delphes.yml input.yml 
-  - ls -lrt workdir_pheno_delphes
+  - find workdir_pheno_delphes
 
   - docker build -t lukasheinrich/yadage .
