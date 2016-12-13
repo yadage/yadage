@@ -153,7 +153,8 @@ class ResultFilesExistCache(CacheBuilder):
         log.info('removing cache entry %s',cacheid)
         workdir = task['context']['readwrite'][0]
         log.info('deleting rw location %s',workdir)
-        shutil.rmtree(workdir)
+        if os.path.exists(workdir):
+            shutil.rmtree(workdir)
         super(ResultFilesExistCache, self).remove(cacheid)
 
     def cachevalid(self, cacheid):
