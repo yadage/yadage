@@ -8,7 +8,9 @@ log = logging.getLogger(__name__)
 
 
 class InitProxy(TrivialProxy):
-    pass
+    def proxyname(self):
+        return 'InitProxy'
+
 
 class PacktivityBackend(federatedbackend.FederatedBackend):
     '''

@@ -1,4 +1,5 @@
-class TrivialProxy(object):
+from packtivity.asyncbackends import PacktivityProxyBase
+class TrivialProxy(PacktivityProxyBase):
     '''
     A trivial proxy that carries the results and status already
     '''
@@ -7,9 +8,18 @@ class TrivialProxy(object):
         self.status = status
         self.result = result
 
-    def json(self):
-        return None
+    def proxyname(self):
+        return 'TrivialProxy'
 
+    def details(self):
+        return {
+            'result':self.result,
+            'status':self.status
+        }
+
+    @classmethod
+    def fromJSON(cls,data):
+        return cls(data['proxydetails']['status'],data['proxydetails']['result'])
 
 class TrivialBackend(object):
     '''

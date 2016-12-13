@@ -2,8 +2,6 @@ import json
 import click
 import time
 import copy
-import yadage.backends.packtivity_celery
-import yadage.backends.celeryapp
 import yadage.workflow_loader
 import yadage.yadagemodels
 import yadage.visualize
@@ -72,19 +70,30 @@ def get_yadagedir(workdir):
     return '{}/_yadage'.format(workdir)
 
 
+class VariableProxy():
+    @staticmethod
+    def fromJSON(data):
+        import packtivity.asyncbackends
+        import yadage.backends.packtivitybackend
+        if data['proxyname']=='InitProxy':
+            return yadage.backends.packtivitybackend.InitProxy.fromJSON(data)
+        elif data['proxyname']=='CeleryProxy':
+            return packtivity.asyncbackends.CeleryProxy.fromJSON(data)
+        else:
+            raise RuntimeError('only celery support for now...')
+
 def load_state(statefile):
-    backend = yadage.backends.packtivity_celery.PacktivityCeleryBackend(
-        yadage.backends.celeryapp.app
-    )
+    from clihelpers import setupbackend_fromstring
+
+    backend = setupbackend_fromstring('celery')
 
     click.secho('loading state from {}'.format(statefile))
     workflow = yadage.yadagemodels.YadageWorkflow.fromJSON(
         json.load(open(statefile)),
-        yadage.backends.packtivity_celery.PacktivityCeleryProxy,
+        VariableProxy,
         backend
     )
     return backend, workflow
-
 
 def finalize_manual(workdir, workflow):
     click.secho('workflow done.', fg='green')
