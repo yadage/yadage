@@ -1,153 +1,65 @@
+import federatedbackend
 import logging
-import adage.backends
 import yadage.yadagestep
-from packtivity import packtivity_callable
-from trivialbackend import TrivialProxy
+from trivialbackend import TrivialProxy, TrivialBackend
+from packtivity.utils import backend_from_string
 
 log = logging.getLogger(__name__)
 
-class PacktivityProxyBase(object):
+
+class InitProxy(TrivialProxy):
+    pass
+
+class PacktivityBackend(federatedbackend.FederatedBackend):
     '''
-    A generic serializable proxy wrapper around a proxy object,
-    that is passed in the ctor. Implementations can override details
-    and proxyname methods
-    '''
-
-    def __init__(self, proxy):
-        self.proxy = proxy
-
-    def details(self):
-        return None
-
-    def proxyname(self):
-        return 'PacktivityProxyBase'
-
-    def json(self):
-        return {
-            'type': self.proxyname(),
-            'proxydetails': self.details()
-        }
-
-
-class AdagePacktivityBackendBase(object):
-    '''
-    A wrapper generic backend base class around an existing adage backend.
-    Implementations need to override the submit method and figure out how
-    to submit the task and return a appropriate proxy object deriving from
-    PacktivityProxyBase
+    a backend that mainly submits step tasks to packtivity backend
+    except for init nodes, which are resolvable trivially.
     '''
 
-    def __init__(self, adagebackend):
-        self.adagebackend = adagebackend
+    def __init__(self,  packtivity_backendstring = None, packtivity_backend = None, cacheconfig = None):
+        if packtivity_backendstring:
+            is_sync, backend = backend_from_string(packtivity_backendstring)
+            assert not is_sync
+        elif packtivity_backend:
+            backend = packtivity_backend
+        else:
+            raise RuntimeError('need backend or backendstring')
+        if cacheconfig:
+            self.cached = True
+            import caching
+            backend = caching.CachedBackend(
+                backend,
+                cacheconfig=cacheconfig
+            )
 
-    def result(self, resultproxy):
-        return self.adagebackend.result(resultproxy.proxy)
+        super(PacktivityBackend, self).__init__({
+            'init': TrivialBackend(),
+            'packtivity': backend
+        })
 
-    def ready(self, resultproxy):
-        return self.adagebackend.ready(resultproxy.proxy)
-
-    def successful(self, resultproxy):
-        return self.adagebackend.successful(resultproxy.proxy)
-
-    def fail_info(self, resultproxy):
-        return self.adagebackend.fail_info(resultproxy.proxy)
-
-
-class PacktivityMultiProcBackend(AdagePacktivityBackendBase):
-
-    def __init__(self, nparallel=2, packtivity_config = None):
-        self.packtivity_config = packtivity_config
-        super(PacktivityMultiProcBackend, self).__init__(
-            adage.backends.MultiProcBackend(nparallel))
-
-    def submit(self, task):
-        '''
-        if the task type is a genuine yadagestep we submit is as a packtivity callable,
-        if it's an init step, which has a trivial call body, we'll just use it directly
-        '''
+    def routedsubmit(self, task):
         tasktype = type(task)
         if tasktype == yadage.yadagestep.yadagestep:
-            acallable = packtivity_callable(
-                task.spec, task.attributes, task.context,
-                config = self.packtivity_config
-        )
+            #this is a little hacky, because the packtivity backends
+            #take unrolled spec/parameters/context while the adage API
+            #takes generalized task objects
+            #possibly could use Munch on the packtivity side to
+            #dynammicaly create .task/.attributes/.context-able objects
+            if self.cached:
+                #Cached backends adhere to the task-based API
+                return self.backends['packtivity'].submit(task)
+            else:
+                #primary packtivity backends adhere to the unrolled API
+                return self.backends['packtivity'].submit(
+                    task.spec, task.attributes, task.context
+                )
         elif tasktype == yadage.yadagestep.initstep:
-            acallable = task
+            #init steps are by definition successful
+            return InitProxy(status = 'SUCCESS', result = task.attributes)
+
+    def routeproxy(self, proxy):
+        if type(proxy) == InitProxy:
+            return 'init'
         else:
-            raise RuntimeError(
-                'cannot figure out how to submit a task of type {}'.format(tasktype))
-
-        multiprocprox = self.adagebackend.submit(acallable)
-
-        # since we can't really persistify the proxies of an in-memory process
-        # pool, we'll just return the base
-        return PacktivityProxyBase(multiprocprox)
-
-
-class PacktivityIPyParallelBackend(AdagePacktivityBackendBase):
-
-    def __init__(self, client):
-        super(PacktivityIPyParallelBackend, self).__init__(
-            adage.backends.IPythonParallelBackend(client))
-
-    def submit(self, task):
-        '''
-        if the task type is a genuine yadagestep we submit is as a packtivity callable,
-        if it's an init step, which has a trivial call body, we'll just use it directly
-        '''
-
-        tasktype = type(task)
-        if tasktype == yadage.yadagestep.yadagestep:
-            acallable = packtivity_callable(task.spec, task.attributes, task.context)
-        elif tasktype == yadage.yadagestep.initstep:
-            acallable = task
-        else:
-            raise RuntimeError(
-                'cannot figure out how to submit a task of type {}'.format(tasktype))
-
-        ipyproxy = self.adagebackend.submit(acallable)
-        # since we can't really persistify the proxies of an in-memory process
-        # pool, we'll just return the base
-        return PacktivityProxyBase(ipyproxy)
-
-class PacktivityForegroundBackend(object):
-
-    def result(self, resultproxy):
-        return resultproxy.result
-
-    def ready(self, resultproxy):
-        return True
-
-    def successful(self, resultproxy):
-        return resultproxy.status
-
-    def fail_info(self, resultproxy):
-        raise NotImplementedError
-
-    def submit(self, task):
-        '''
-        if the task type is a genuine yadagestep we submit is as a packtivity callable,
-        if it's an init step, which has a trivial call body, we'll just use it directly
-        '''
-        tasktype = type(task)
-        if tasktype == yadage.yadagestep.yadagestep:
-            acallable = packtivity_callable(
-                task.spec, task.attributes, task.context)
-        elif tasktype == yadage.yadagestep.initstep:
-            acallable = task
-        else:
-            raise RuntimeError(
-                'cannot figure out how to submit a task of type {}'.format(tasktype))
-
-        # we're executing the thing in the foreground
-        try:
-            log.info('calling the task directy after submit...')
-            result = acallable()
-            status = True
-        except:
-            result = None
-            status = False
-
-        # since we can't really persistify the proxies of an in-memory process
-        # pool, we'll just return the base
-        return TrivialProxy(status=status, result=result)
+            return 'packtivity'
+        raise NotImplementedError('needs implementation')

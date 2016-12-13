@@ -30,7 +30,8 @@ def run_workflow(
     backend,
     user_interaction=False,
     validate=True,
-    doviz=True
+    doviz=True,
+    accept_existing_workdir = False
 ):
     """
     Main entry point to run a Yadage workflow
@@ -41,6 +42,16 @@ def run_workflow(
 
     log.info('running yadage workflow %s', workflow)
     rootcontext = statecontext.make_new_context(workdir)
+    
+    yadagedir = '{}/_yadage/'.format(workdir)
+    if os.path.exists(yadagedir):
+        if not accept_existing_workdir:
+            log.error('yadage meta directory exists. explicitly accept')
+            return return_value
+        log.info('yadage meta directory exists.. will remove and remake')
+        shutil.rmtree(yadagedir)
+    os.makedirs(yadagedir)
+
 
     for k, v in initdata.iteritems():
         candpath = '{}/init/{}'.format(workdir, v)
@@ -55,12 +66,6 @@ def run_workflow(
     )
     workflow = YadageWorkflow.createFromJSON(workflow_json, rootcontext)
     workflow.view().init(initdata)
-
-    yadagedir = '{}/_yadage/'.format(workdir)
-    if os.path.exists(yadagedir):
-        log.info('yadage meta directory exists.. will remove and remake')
-        shutil.rmtree(yadagedir)
-    os.makedirs(yadagedir)
 
     with open('{}/yadage_instance_before.json'.format(yadagedir), 'w') as f:
         json.dump(workflow.json(), f)
@@ -83,6 +88,7 @@ def run_workflow(
                      workdir='{}/_adage'.format(workdir),
                      **interactive_kwargs
                      )
+        #only here will we explicitly set the RC to success...
         return_value = RC_SUCCEEDED
     except:
         log.exception('Unfortunately we failed. :(')

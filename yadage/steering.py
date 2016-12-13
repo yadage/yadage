@@ -18,6 +18,7 @@ log = logging.getLogger(__name__)
 @click.option('-c', '--cache', default='')
 @click.option('--interactive/--not-interactive', default=False)
 @click.option('--validate/--no-validate', default=True)
+@click.option('--accept-workdir/--no-accept-workdir', default=False)
 # v below this we should only have options/arg available also in yadage-manual
 @click.option('--visualize/--no-visualize', default=True)
 @click.option('-t', '--toplevel', default=os.getcwd())
@@ -40,7 +41,8 @@ def main(workdir,
          validate,
          visualize,
          inputarchive,
-         cache):
+         cache,
+         accept_workdir):
     logging.basicConfig(level=getattr(logging, verbosity))
 
     if inputarchive:
@@ -60,7 +62,8 @@ def main(workdir,
         doviz=visualize,
         schemadir=schemasource,
         backend=backend,
-        user_interaction=interactive
+        user_interaction=interactive,
+        accept_existing_workdir = accept_workdir
     )
     if rc:
         exc = click.exceptions.ClickException(

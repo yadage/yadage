@@ -56,7 +56,7 @@ class CachedBackend(federatedbackend.FederatedBackend):
             #create id for this task using the cache builder, with which
             #we will store the result with once it's ready
             cacheid = self.cache.cacheid(task)
-            primaryproxy = self.backends['primary'].submit(task)
+            primaryproxy = self.backends['primary'].submit(task.spec, task.attributes, task.context)
             primaryproxy.cacheid = cacheid
             return primaryproxy
 
@@ -85,6 +85,7 @@ class CacheBuilder(object):
 
     def cacheresult(self, cacheid, status, result):
         log.info('caching result for cacheid: {}'.format(cacheid))
+        log.info('caching result for process: {}'.format(self.cache[cacheid]['task']['spec']['process']))
         self.cache[cacheid]['result'] = {
             'status': 'SUCCESS' if status else 'FAILED',
             'result': result,
@@ -93,6 +94,7 @@ class CacheBuilder(object):
         }
         if 'context' in self.cache[cacheid]['task']:
             checksums = [checksumdir.dirhash(d) for d in self.cache[cacheid]['task']['context']['depwrites']]
+            log.info('compute checksums for %s',self.cache[cacheid]['task']['context']['depwrites'])
             log.info('checksums are %s',checksums)
             self.cache[cacheid]['result']['checksums'] = checksums
 
@@ -168,6 +170,9 @@ class ResultFilesExistCache(CacheBuilder):
         log.info('checksums comparison: %s',checksums_now == stored_checksums)
         if not checksums_now == stored_checksums:
             log.info('cache invalid due to changed input state')
+            log.info(task['context']['depwrites'])
+            log.info(stored_checksums)
+            log.info(checksums_now)
             return False
 
         #check if our result fragments are still there

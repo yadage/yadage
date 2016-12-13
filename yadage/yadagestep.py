@@ -3,7 +3,6 @@ import logging
 import jsonpointer
 log = logging.getLogger(__name__)
 
-
 class outputReference(object):
 
     def __init__(self, stepid, pointer):
@@ -20,7 +19,6 @@ class outputReference(object):
             'stepid': self.stepid,
             'pointer_path': self.pointer.path
         }
-
 
 class stepbase(object):
 
@@ -49,9 +47,6 @@ class initstep(stepbase):
         self.prepublished = None
         if initdata is not None:
             self.s(**initdata)
-
-    def __call__(self):
-        return self.attributes
 
     def s(self, **attributes):
         self.attributes = attributes
@@ -84,11 +79,11 @@ class yadagestep(stepbase):
         self.attributes.update(**attributes)
         # attempt to prepublish output data merely from inputs
         # will still be None if not possible
-        self.prepublished = packtivity.prepublish(
+        self.prepublished = packtivity.prepublish_default(
             self.spec, self.attributes, self.context)
         log.debug('parameters for yadagestep set to %s. prepublished result, if any: %s',
-                  self.attributes,
-                  self.prepublished
+                    self.attributes,
+                    self.prepublished
                   )
         return self
 

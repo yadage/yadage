@@ -35,45 +35,7 @@ def prepare_workdir_from_archive(workdir, inputarchive):
     os.remove(localzipfile)
 
 
-def setupbackend_fromstring(backend, name='backendname', cacheconfig=None):
-    if backend.startswith('multiproc'):
-        import backends.packtivitybackend as pb
-        nparallel = backend.split(':')[1]
-        if nparallel == 'auto':
-            nparallel = psutil.cpu_count()
-        else:
-            nparallel = int(nparallel)
-
-        import importlib
-        import os
-        import json
-        config = {}
-        if 'YADAGE_PACKCONFIG' in os.environ:
-            importlib.import_module(os.environ['YADAGE_PACKIMPORT'])
-            config = json.loads(os.environ['YADAGE_PACKCONFIG'])
-        backend = pb.PacktivityMultiProcBackend(nparallel, packtivity_config = config)
-    elif backend == 'celery':
-        import backends.celeryapp
-        import backends.packtivity_celery as pc
-        backend = pc.PacktivityCeleryBackend(backends.celeryapp.app)
-    elif backend == 'foreground':
-        import backends.packtivitybackend as pb
-        backend = pb.PacktivityForegroundBackend()
-    elif backend == 'jira':
-        import backends.jira as jb
-        backend = jb.JiraBackend(
-            'workflow request - {}'.format(name), 'some description')
-    elif backend == 'ipcluster':
-        from ipyparallel import Client
-        import backends.packtivitybackend as pb
-        backend = pb.PacktivityIPyParallelBackend(Client())
-    else:
-        raise NotImplementedError(
-            'backend config {} not known'.format(backend))
-
-    if cacheconfig:
-        import backends.caching
-        backend = backends.caching.CachedBackend(backend,
-            cacheconfig=cacheconfig
-        )
+def setupbackend_fromstring(backend, name = 'backendname', cacheconfig=None):
+    import backends.packtivitybackend as pb
+    backend = pb.PacktivityBackend(packtivity_backendstring = backend, cacheconfig = cacheconfig)
     return backend
