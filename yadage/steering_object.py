@@ -10,7 +10,6 @@ import capschemas
 import shutil
 import logging
 import packtivity.statecontexts.poxisfs_context as statecontext
-import logging
 
 class YadageSteering():
     def __init__(self,logger = None):

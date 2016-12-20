@@ -3,7 +3,7 @@
 from contextlib import contextmanager
 from steering_object import YadageSteering
 import logging
-import functools
+import interactive
 import capschemas
 
 log = logging.getLogger(__name__)
@@ -20,12 +20,12 @@ def run_workflow(*args, **kwargs):
     # success RC explicityly
     return_value = RC_FAILED
     try:
-        with steering_ctx(*args, **kwargs) as ys:
-            #do nothing...
+        with steering_ctx(*args, **kwargs):
             pass
         return_value = RC_SUCCEEDED
     except:
         log.exception('Unfortunately we failed. :(')
+    return return_value
 
 @contextmanager
 def steering_ctx(
