@@ -43,7 +43,7 @@ def main(workdir,
          inputarchive,
          cache,
          accept_workdir):
-    logging.basicConfig(level=getattr(logging, verbosity))
+    logging.basicConfig(level=getattr(logging, verbosity), format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
     if inputarchive:
         clihelpers.prepare_workdir_from_archive(workdir, inputarchive)
