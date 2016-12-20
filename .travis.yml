@@ -16,8 +16,8 @@ install:
 
 script:
   - pyflakes yadage
+  - cd tests; pytests ; cd ..
   - yadage-validate rootflow.yml from-github/higgsmcproduction
-
   - "echo 'nevents: 100' > input.yml"
   - yadage-run -t from-github/phenochain workdir_pheno_delphes madgraph_delphes.yml input.yml 
   - find workdir_pheno_delphes
