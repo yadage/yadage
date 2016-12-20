@@ -188,7 +188,9 @@ class YadageNode(adage.node.Node):
         if self.state != adage.nodestate.DEFINED:
             referencetime = time.time() if not self.ready() else self.ready_by_time
             runtime = datetime.timedelta(seconds = (referencetime - self.submit_time))
-        return '<YadageNode {} {} lifetime: {}  runtime: {} (id: {}) has result: {}>'.format(self.name, self.state, lifetime, runtime, self.identifier, self.has_result())
+        return '<YadageNode {} {} lifetime: {}  runtime: {} (id: {}) has result: {}>'.format(
+            self.name, self.state, lifetime, runtime, self.identifier, self.has_result()
+        )
 
     def has_result(self):
         if 'YADAGE_IGNORE_PREPUBLISHING' in os.environ: return self.successful()

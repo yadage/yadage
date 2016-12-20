@@ -124,7 +124,7 @@ class CacheBuilder(object):
         cacheid = self.cacheid(task)
         #register this task with the cacheid if we don't know about it yet
         log.info('checking cache for task %s',task.name)
-        if not cacheid in self.cache:
+        if cacheid not in self.cache:
             self.cache[cacheid] = {'task' : task.json()}
         if not self.cacheexists(cacheid):
             log.info('cache non-existent for task %s (%s)',task.name,cacheid)
