@@ -49,10 +49,10 @@ class CachedBackend(federatedbackend.FederatedBackend):
     def routedsubmit(self, task):
         cached = self.cache.cacheddata(task)
         if cached:
-            log.info('use cached result for task: {}'.format(task.name))
+            log.info('use cached result for task: %s',task.name)
             return TrivialProxy(status=cached['status'], result = cached['result'])
         else:
-            log.info('do proper submit for task: {}'.format(task.name))
+            log.info('do proper submit for task: %s',task.name)
             #create id for this task using the cache builder, with which
             #we will store the result with once it's ready
             cacheid = self.cache.cacheid(task)
@@ -84,8 +84,8 @@ class CacheBuilder(object):
         self.cache.pop(cacheid)
 
     def cacheresult(self, cacheid, status, result):
-        log.info('caching result for cacheid: {}'.format(cacheid))
-        log.info('caching result for process: {}'.format(self.cache[cacheid]['task']['spec']['process']))
+        log.info('caching result for cacheid: %s',cacheid)
+        log.info('caching result for process: %s',self.cache[cacheid]['task']['spec']['process'])
         self.cache[cacheid]['result'] = {
             'status': 'SUCCESS' if status else 'FAILED',
             'result': result,
