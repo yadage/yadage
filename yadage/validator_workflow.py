@@ -4,7 +4,7 @@ import click
 import jsonschema
 import logging
 import workflow_loader
-import capschemas
+import yadageschemas
 import json
 import jsonref
 
@@ -30,7 +30,7 @@ def main(workflow, toplevel, schemadir, stdout):
     if not toplevel:
         toplevel = os.getcwd()
     if not schemadir:
-        schemadir = capschemas.schemadir
+        schemadir = yadageschemas.schemadir
     try:
         data = workflow_loader.workflow(
             workflow, toplevel=toplevel, schemadir=schemadir, validate=True)

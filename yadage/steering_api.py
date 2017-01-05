@@ -4,7 +4,7 @@ from contextlib import contextmanager
 from steering_object import YadageSteering
 import logging
 import interactive
-import capschemas
+import yadageschemas
 
 log = logging.getLogger(__name__)
 
@@ -36,7 +36,7 @@ def steering_ctx(
     backend,
     updateinterval = 0.02,
     loginterval = 30,
-    schemadir = capschemas.schemadir,
+    schemadir = yadageschemas.schemadir,
     user_interaction=False,
     validate=True,
     doviz=True,

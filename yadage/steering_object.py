@@ -6,7 +6,7 @@ import workflow_loader
 from yadage.yadagemodels import YadageWorkflow
 import visualize
 import serialize
-import capschemas
+import yadageschemas
 import shutil
 import logging
 import packtivity.statecontexts.poxisfs_context as statecontext
@@ -31,7 +31,7 @@ class YadageSteering():
             shutil.rmtree(self.yadagedir)
         os.makedirs(self.yadagedir)
     
-    def init_workflow(self,workflow, toplevel, initdata, search_initdir = True, validate = True, schemadir = capschemas.schemadir):
+    def init_workflow(self,workflow, toplevel, initdata, search_initdir = True, validate = True, schemadir = yadageschemas.schemadir):
         ##check input data
         if search_initdir:
             for k, v in initdata.iteritems():
