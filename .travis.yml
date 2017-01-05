@@ -9,7 +9,6 @@ python:
 
 install:
   - pip install pyflakes
-  - "pip install git+git://github.com/lukasheinrich/adage.git@master"
   - "pip install . --process-dependency-links"
   - sudo apt-get install -y graphviz
   - sudo apt-get install -y imagemagick
@@ -21,5 +20,5 @@ script:
   - "echo 'nevents: 100' > input.yml"
   - yadage-run -t from-github/phenochain workdir_pheno_delphes madgraph_delphes.yml input.yml 
   - find workdir_pheno_delphes
-
+  - cd tests; ./readme_test.sh; cd ..
   - docker build -t lukasheinrich/yadage .
