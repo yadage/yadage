@@ -54,6 +54,6 @@ For more thorough examples, please see the [documentation](http://yadage.readthe
 | package | version |
 | ------------- |-------------| 
 | packtivity     | [![PyPI version](https://badge.fury.io/py/packtivity.svg)](https://badge.fury.io/py/packtivity) | 
-| cap-schemas    | [![PyPI version](https://badge.fury.io/py/cap-schemas.svg)](https://badge.fury.io/py/cap-schemas)      |   
+| yadage-schemas    | [![PyPI version](https://badge.fury.io/py/yadage-schemas.svg)](https://badge.fury.io/py/yadage-schemas)      |   
 | adage | [![PyPI version](https://badge.fury.io/py/adage.svg)](https://badge.fury.io/py/adage)      |  
 
