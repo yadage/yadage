@@ -13,7 +13,7 @@ setup(
     'functools32',
     'adage',
     'packtivity',
-    'cap-schemas',
+    'yadage-schemas',
     'click',
     'psutil',
     'requests[security]>=2.9',
