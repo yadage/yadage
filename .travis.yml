@@ -15,7 +15,7 @@ install:
 
 script:
   - pyflakes yadage
-  - cd tests && pytests && cd ..
+  #- cd tests && pytests && cd ..
   #- cd tests && ./readme_test.sh && cd ..
   - yadage-validate rootflow.yml from-github/higgsmcproduction
   - "echo 'nevents: 100' > input.yml"
