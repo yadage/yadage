@@ -4,6 +4,7 @@ import os
 import json
 import workflow_loader
 from yadage.yadagemodels import YadageWorkflow
+import clihelpers
 import visualize
 import serialize
 import yadageschemas
@@ -34,10 +35,7 @@ class YadageSteering():
     def init_workflow(self,workflow, toplevel, initdata, search_initdir = True, validate = True, schemadir = yadageschemas.schemadir):
         ##check input data
         if search_initdir:
-            for k, v in initdata.iteritems():
-                candpath = '{}/init/{}'.format(self.workdir, v)
-                if os.path.exists(candpath):
-                    initdata[k] = '{}/init/{}'.format(self.rootcontext['readwrite'][0], v)
+            clihelpers.discover_initfiles(initdata,os.path.realpath(self.workdir))
 
         workflow_json = workflow_loader.workflow(
             workflow,

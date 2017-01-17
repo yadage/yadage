@@ -4,6 +4,12 @@ import click
 import zipfile
 import urllib
 
+def discover_initfiles(initdata,workdir):
+    for k, v in initdata.iteritems():
+        candpath = '{}/init/{}'.format(workdir, v)
+        if os.path.exists(candpath):
+            initdata[k] = candpath
+    return initdata
 
 def getinit_data(initfiles, parameters):
     '''
