@@ -36,6 +36,13 @@ def printRef(ref, dag, indent=''):
         fg='cyan')
 
 
+def wflow_with_trivial_backend(instance,results):
+    wflow = yadagemodels.YadageWorkflow.fromJSON(
+        json.load(open(instance))
+    )
+    set_trivial_backend(wflow.dag, json.load(open(results)))
+    return wflow
+
 @click.group()
 def utilcli():
     pass
@@ -46,10 +53,7 @@ def utilcli():
 @click.argument('results')
 @click.argument('selection')
 def testsel(instance, results, selection):
-    wflow = yadagemodels.YadageWorkflow.fromJSON(
-        json.load(open(instance))
-    )
-    set_trivial_backend(wflow.dag, json.load(open(results)))
+    wflow = wflow_with_trivial_backend(instance,results)
 
     selresult = exh[
         'stage-output-selector'](wflow.view(), yaml.load(selection))
@@ -71,10 +75,7 @@ def testsel(instance, results, selection):
 @click.argument('results')
 @click.argument('vizpdf')
 def viz(instance, results, vizpdf):
-    wflow = yadagemodels.YadageWorkflow.fromJSON(
-        json.load(open(instance))
-    )
-    set_trivial_backend(wflow.dag, json.load(open(results)))
+    wflow = wflow_with_trivial_backend(instance,results)
 
     dirpath = tempfile.mkdtemp()
     visualize.write_prov_graph(dirpath, wflow)

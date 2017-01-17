@@ -48,7 +48,8 @@ class YadageSteering():
         with open('{}/yadage_template.json'.format(self.yadagedir), 'w') as f:
             json.dump(workflow_json, f)
         self.workflow = YadageWorkflow.createFromJSON(workflow_json, self.rootcontext)
-        self.workflow.view().init(initdata)
+        if initdata:
+            self.workflow.view().init(initdata)
 
     def adage_argument(self,**kwargs):
         self.adage_kwargs.update(**kwargs)

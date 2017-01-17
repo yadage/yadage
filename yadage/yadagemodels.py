@@ -326,8 +326,29 @@ class WorkflowView(object):
         return matches
 
     def getSteps(self, query):
-        result = [self.dag.getNode(step['_nodeid']) for match in self.query(
-            query, self.steps) for step in match.value]
+        '''
+        returns steps related to the JSONPath query.
+        if a query points to a stage (say 'stagename'):
+            will return all toplevel steps.. no recursion into subworkflows
+        if a query points to steps (e.g. 'stagename[*]')
+            will return a steps directly
+
+        '''
+        nodeids = []
+
+        matches = self.query(query, self.steps)
+        for match in matches:
+            value = match.value
+            #step endpoint case
+            if isinstance(value,dict) and '_nodeid' in value: 
+                nodeids.append(value['_nodeid'])
+            #stage endpoint case
+            elif isinstance(value,list):
+                for item in value:
+                    if '_nodeid' in item:
+                        nodeids.append(item['_nodeid'])
+
+        result = [self.dag.getNode(nodeid) for nodeid in nodeids]
         return result
 
     def _makeoffset(self, offset):
@@ -374,10 +395,7 @@ class WorkflowView(object):
         log.debug('added node %s', node)
 
         noderef = {'_nodeid': node.identifier}
-        if stage in self.steps:
-            self.steps[stage] += [noderef]
-        else:
-            self.steps[stage] = [noderef]
+        self.steps.setdefault(stage,[]).append(noderef)
         self.bookkeeper['_meta']['steps'] += [node.identifier]
         return node
 
