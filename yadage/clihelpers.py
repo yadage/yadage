@@ -3,10 +3,14 @@ import os
 import click
 import zipfile
 import urllib
+import logging
+log = logging.getLogger(__name__)
 
-def discover_initfiles(initdata,workdir):
+def discover_initfiles(initdata,sourcedir):
+    '''inspect sourcedir '''
     for k, v in initdata.iteritems():
-        candpath = '{}/init/{}'.format(workdir, v)
+        if type(v) not in [unicode,str]: continue
+        candpath = '{}/{}'.format(sourcedir, v)
         if os.path.exists(candpath):
             initdata[k] = candpath
     return initdata
@@ -19,6 +23,7 @@ def getinit_data(initfiles, parameters):
     '''
     initdata = {}
     for initfile in initfiles:
+        log.info('loading initialization data from file %s',initfile)
         initdata.update(**yaml.load(open(initfile)))
 
     for x in parameters:
@@ -31,13 +36,14 @@ def prepare_workdir_from_archive(workdir, inputarchive):
     if os.path.exists(workdir):
         raise click.exceptions.ClickException(click.style(
             "workdirectory exists and input archive give. Can't have both", fg='red'))
-    inputdata = '{}/init'.format(workdir)
-    os.makedirs(inputdata)
+    initdir = os.path.join(workdir,'init')
+    os.makedirs(initdir)
     localzipfile = '{}/inputarchive.zip'.format(workdir)
     urllib.urlretrieve(inputarchive, localzipfile)
     with zipfile.ZipFile(localzipfile) as zf:
-        zf.extractall(path=inputdata)
+        zf.extractall(path=initdir)
     os.remove(localzipfile)
+    return initdir
 
 
 def setupbackend_fromstring(backend, name = 'backendname', cacheconfig=None):

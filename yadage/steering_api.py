@@ -34,6 +34,7 @@ def steering_ctx(
     initdata,
     loadtoplevel,
     backend,
+    initdir = None,
     updateinterval = 0.02,
     loginterval = 30,
     schemadir = yadageschemas.schemadir,

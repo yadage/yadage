@@ -11,7 +11,9 @@ import yadageschemas
 import shutil
 import logging
 import packtivity.statecontexts.poxisfs_context as statecontext
+import logging
 
+log = logging.getLogger(__name__)
 class YadageSteering():
     def __init__(self,logger = None):
         self.log = logger or logging.getLogger(__name__)
@@ -32,10 +34,10 @@ class YadageSteering():
             shutil.rmtree(self.yadagedir)
         os.makedirs(self.yadagedir)
     
-    def init_workflow(self,workflow, toplevel, initdata, search_initdir = True, validate = True, schemadir = yadageschemas.schemadir):
+    def init_workflow(self,workflow, toplevel, initdata, initdir = None, search_initdir = True, validate = True, schemadir = yadageschemas.schemadir):
         ##check input data
-        if search_initdir:
-            clihelpers.discover_initfiles(initdata,os.path.realpath(self.workdir))
+        if search_initdir and initdir:
+            clihelpers.discover_initfiles(initdata,os.path.realpath(initdir))
 
         workflow_json = workflow_loader.workflow(
             workflow,
@@ -47,7 +49,10 @@ class YadageSteering():
             json.dump(workflow_json, f)
         self.workflow = YadageWorkflow.createFromJSON(workflow_json, self.rootcontext)
         if initdata:
+            log.info('initializing workflow with %s',initdata)
             self.workflow.view().init(initdata)
+        else:
+            log.info('no initialization data')
 
     def adage_argument(self,**kwargs):
         self.adage_kwargs.update(**kwargs)

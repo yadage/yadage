@@ -45,8 +45,9 @@ def main(workdir,
          accept_workdir):
     logging.basicConfig(level=getattr(logging, verbosity), format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
+    initdir = None
     if inputarchive:
-        clihelpers.prepare_workdir_from_archive(workdir, inputarchive)
+        initdir = clihelpers.prepare_workdir_from_archive(workdir, inputarchive)
 
     initdata = clihelpers.getinit_data(initfiles, parameter)
     backend = clihelpers.setupbackend_fromstring(backend, cacheconfig=cache)
@@ -56,12 +57,13 @@ def main(workdir,
         workflow,
         initdata,
         toplevel,
+        backend=backend,
+        initdir = initdir,
         updateinterval = updateinterval,
         loginterval = loginterval,
         validate=validate,
         doviz=visualize,
         schemadir=schemasource,
-        backend=backend,
         user_interaction=interactive,
         accept_existing_workdir = accept_workdir
     )
