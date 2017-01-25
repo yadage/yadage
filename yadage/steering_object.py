@@ -11,7 +11,6 @@ import yadageschemas
 import shutil
 import logging
 import packtivity.statecontexts.poxisfs_context as statecontext
-import logging
 
 log = logging.getLogger(__name__)
 class YadageSteering():
