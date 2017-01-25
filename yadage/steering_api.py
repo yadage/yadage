@@ -46,7 +46,7 @@ def steering_ctx(
     log.info('running yadage workflow %s', workflow)
     ys = YadageSteering(logger = log)
     ys.prepare_workdir(workdir, accept_existing_workdir)
-    ys.init_workflow(workflow, loadtoplevel, initdata, validate = validate, schemadir = schemadir)
+    ys.init_workflow(workflow, loadtoplevel, initdata, initdir = initdir, validate = validate, schemadir = schemadir)
     ys.adage_argument(default_trackers = doviz)
     ys.adage_argument(
         default_trackers = doviz,

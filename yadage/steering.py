@@ -16,6 +16,7 @@ log = logging.getLogger(__name__)
 @click.option('-m', '--schemasource', default=yadageschemas.schemadir)
 @click.option('-b', '--backend', default='multiproc:auto')
 @click.option('-c', '--cache', default='')
+@click.option('-d','--initdir', default='init', help = "relative path (to workdir) to initialiation data directory")
 @click.option('--interactive/--not-interactive', default=False)
 @click.option('--validate/--no-validate', default=True)
 @click.option('--accept-workdir/--no-accept-workdir', default=False)
@@ -42,12 +43,14 @@ def main(workdir,
          visualize,
          inputarchive,
          cache,
-         accept_workdir):
+         accept_workdir,
+         initdir):
     logging.basicConfig(level=getattr(logging, verbosity), format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
-    initdir = None
     if inputarchive:
         initdir = clihelpers.prepare_workdir_from_archive(workdir, inputarchive)
+    else:
+        initdir = os.path.join(workdir,initdir)
 
     initdata = clihelpers.getinit_data(initfiles, parameter)
     backend = clihelpers.setupbackend_fromstring(backend, cacheconfig=cache)

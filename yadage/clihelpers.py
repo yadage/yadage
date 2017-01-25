@@ -8,6 +8,7 @@ log = logging.getLogger(__name__)
 
 def discover_initfiles(initdata,sourcedir):
     '''inspect sourcedir '''
+    log.info('inspecting %s to discover referenced input files',sourcedir)
     for k, v in initdata.iteritems():
         if type(v) not in [unicode,str]: continue
         candpath = '{}/{}'.format(sourcedir, v)
