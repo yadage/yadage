@@ -250,7 +250,7 @@ As explained above, a stage is defined by a predicate and a scheduler. The gener
 Predicate Definitions
 `````````````````````
 
-Currently a single type of predicate is supported based on JSON path expressions. In a YAML description (which internally uniquely maps to a more verbose JSON definition), it's enough to specify a number of JSON Path expressions, each of which point to other stages. The predicate will return True (therefore signaling that scheduling of the stage can proceed) when all nodes defined by the referenced stage have a published JSON result object (either pre-published or published after the steps have been completed).
+Currently a single type of predicate is supported based on JSONPath expressions. In a YAML description (which internally uniquely maps to a more verbose JSON definition), it's enough to specify a number of JSON Path expressions, each of which point to other stages. The predicate will return True (therefore signaling that scheduling of the stage can proceed) when all nodes defined by the referenced stage have a published JSON result object (either pre-published or published after the steps have been completed).
 
 Example: ::
 
@@ -288,12 +288,21 @@ Example: ::
 Scheduler Definitions
 `````````````````````
 
-Currenty yadage supports two schedulers:
+Yadage is designed to be extendable. As such each stage scheduler definition comes with with its own schema. This allows yadage to include new scheduling patterns over time. Currenty yadage supports two schedulers:
 
 1. a singlestep stage, scheduling a single packtivity with a specific parameter set
 2. a multistep stage, scheduling a number of instances of the same packtivity but with different parameters each. A number of ways to build the parameter sets are supported.
 
+Typically, stages come with a number of adjustable parameters that steer how it nodes are scheduled in detail.
 
+Single-Step Stages
+..................
+
+Single Step stages 
+
+
+Multi-Step Stages
+..................
 
 
 Composition using Subworkflows
