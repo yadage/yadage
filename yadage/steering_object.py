@@ -21,9 +21,12 @@ class YadageSteering():
         self.workflow = None
         self.adage_kwargs = {}
 
-    def prepare_workdir(self, workdir, accept_existing_workdir):
+    def prepare_workdir(self, workdir, accept_existing_workdir, contextinit = None):
         self.workdir = workdir
-        self.rootcontext = statecontext.make_new_context(workdir)
+
+        self.rootcontext = contextinit or {}
+        self.rootcontext = statecontext.merge_contexts(self.rootcontext,statecontext.make_new_context(workdir))
+
         self.yadagedir = '{}/_yadage/'.format(workdir)
 
         if os.path.exists(self.yadagedir):

@@ -321,13 +321,24 @@ Examples of valid references are;
 1. :code:`{stages: 'eventgeneration', output: eventfile, unwrap: true}`
 2. :code:`{stages: 'subchain.[*].analysis', output: analysis_output}`
 
-- **Stage selection**: 
+- **Selecting Stages**: 
 
 The syntax for the stage selection uses the same JSONPath standard to select stages. In its most simple form, this is simply the stage name (such as in the first example above). The role of this stage selection is to return a list of packtivity nodes that have been scheduled by those stages and whose output holds the desired information.
 
-- ** Output **
+- **Selecting Outputss**
 
-The output selection identifies
+The output selection identifies individual values inside the outputs JSON documents that the selected packtivities publish. Under the :code:`output` key a single JSONPath expression is specified that operates on each of the packtivities.
+
+For example, if a single multi-step stage is selection unser :code:`stages` it may return a list of packtivity outputs ::
+
+  - {firstkey: A, secondkey: B}
+  - {firstkey: C, secondkey: D}
+
+
+
+
+- **Unwrapping**
+
 
 
 

@@ -3,9 +3,10 @@
 from contextlib import contextmanager
 from steering_object import YadageSteering
 import logging
+import importlib
 import interactive
 import yadageschemas
-
+import os
 log = logging.getLogger(__name__)
 
 RC_FAILED = 1
@@ -34,6 +35,7 @@ def steering_ctx(
     initdata,
     loadtoplevel,
     backend,
+    read = None,
     initdir = None,
     updateinterval = 0.02,
     loginterval = 30,
@@ -45,9 +47,17 @@ def steering_ctx(
     
     log.info('running yadage workflow %s', workflow)
     ys = YadageSteering(logger = log)
-    ys.prepare_workdir(workdir, accept_existing_workdir)
+    ys.prepare_workdir(workdir, accept_existing_workdir, contextinit = read)
     ys.init_workflow(workflow, loadtoplevel, initdata, initdir = initdir, validate = validate, schemadir = schemadir)
-    ys.adage_argument(default_trackers = doviz)
+
+
+    custom_tracker = os.environ.get('YADAGE_CUSTOM_TRACKER',None)
+    if custom_tracker:
+        modulename,trackerclassname = custom_tracker.split(':')
+        module = importlib.import_module(modulename)
+        trackerclass = getattr(module,trackerclassname)
+        ys.adage_argument(additional_trackers = [trackerclass()])
+
     ys.adage_argument(
         default_trackers = doviz,
         backend = backend,
