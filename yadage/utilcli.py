@@ -5,6 +5,7 @@ import tempfile
 import shutil
 import yadagemodels
 import visualize
+import logging
 from yadagestep import outputReference
 from handlers.expression_handlers import handlers as exh
 from helpers import set_trivial_backend
@@ -52,7 +53,13 @@ def utilcli():
 @click.argument('instance')
 @click.argument('results')
 @click.argument('selection')
-def testsel(instance, results, selection):
+@click.option('-v', '--verbosity', default='INFO')
+def testsel(instance, results, selection,verbosity):
+
+
+    logging.basicConfig(level=getattr(logging, verbosity), format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+
     wflow = wflow_with_trivial_backend(instance,results)
 
     selresult = exh[

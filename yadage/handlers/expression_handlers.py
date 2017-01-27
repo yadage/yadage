@@ -6,6 +6,7 @@ import copy
 from yadage.yadagestep import outputReference
 import jsonpath_rw
 
+
 log = logging.getLogger(__name__)
 
 handlers, scheduler = utils.handler_decorator()

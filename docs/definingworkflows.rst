@@ -305,6 +305,32 @@ Multi-Step Stages
 ..................
 
 
+Output Selection / Referencing
+..............................
+
+While future stage definitions may use alternative syntax, both single- and multi-stage definitions employ the same schema
+in their parameter section to select data from other stages, i.e. to build the links between outputs of upstream nodes and
+input parameters of the packtivities to be scheduled by the stage.
+
+The structure of a parameter reference in YAML syntax is:
+
+:code:`{stages: <stage selection expression>, output: <output>(, <optional keys>)}`
+
+Examples of valid references are;
+
+1. :code:`{stages: 'eventgeneration', output: eventfile, unwrap: true}`
+2. :code:`{stages: 'subchain.[*].analysis', output: analysis_output}`
+
+- **Stage selection**: 
+
+The syntax for the stage selection uses the same JSONPath standard to select stages. In its most simple form, this is simply the stage name (such as in the first example above). The role of this stage selection is to return a list of packtivity nodes that have been scheduled by those stages and whose output holds the desired information.
+
+- ** Output **
+
+The output selection identifies
+
+
+
 Composition using Subworkflows
 ------------------------------
 
