@@ -7,7 +7,6 @@ import logging
 import jsonpointer
 import jq
 import glob2 as glob
-import copy
 
 log = logging.getLogger(__name__)
 
