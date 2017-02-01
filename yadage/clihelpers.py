@@ -4,17 +4,34 @@ import click
 import zipfile
 import urllib
 import logging
+import jsonpointer
+import jq
+import glob2 as glob
+import copy
+
 log = logging.getLogger(__name__)
 
+
+def leaf_iterator(jsonable):
+    allleafs = jq.jq('leaf_paths').transform(jsonable, multiple_output = True)
+    leafpointers = [jsonpointer.JsonPointer.from_parts(x) for x in allleafs]
+    for x in leafpointers:
+        yield x,x.get(jsonable)
+
 def discover_initfiles(initdata,sourcedir):
-    '''inspect sourcedir '''
+    '''inspect sourcedir, first tries exact path match, and then (possbly recursive) glob'''
     log.info('inspecting %s to discover referenced input files',sourcedir)
-    for k, v in initdata.iteritems():
-        if type(v) not in [unicode,str]: continue
-        candpath = '{}/{}'.format(sourcedir, v)
-        if os.path.exists(candpath):
-            initdata[k] = candpath
-    return initdata
+
+    filled_initdata = copy.deepcopy(initdata)
+    for pointer,value in leaf_iterator(initdata):
+        if type(value) not in [str,unicode]: continue
+        within_sourcedir = os.path.join(sourcedir,value)
+        globresult = glob.glob(os.path.join(sourcedir,value))
+        if os.path.exists(within_sourcedir):
+            pointer.set(filled_initdata,within_sourcedir)
+        elif globresult:
+            pointer.set(filled_initdata,globresult)
+    return filled_initdata
 
 def getinit_data(initfiles, parameters):
     '''

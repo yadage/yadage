@@ -25,7 +25,8 @@ setup(
     'packtivity',
     'adage',
     'checksumdir',
-    'jq'
+    'jq',
+    'glob2'
   ],
   extras_require = {
     'celery' : ['celery','redis']
