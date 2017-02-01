@@ -22,16 +22,16 @@ def discover_initfiles(initdata,sourcedir):
     '''inspect sourcedir, first tries exact path match, and then (possbly recursive) glob'''
     log.info('inspecting %s to discover referenced input files',sourcedir)
 
-    filled_initdata = copy.deepcopy(initdata)
+    # filled_initdata = copy.deepcopy(initdata)
     for pointer,value in leaf_iterator(initdata):
         if type(value) not in [str,unicode]: continue
         within_sourcedir = os.path.join(sourcedir,value)
         globresult = glob.glob(os.path.join(sourcedir,value))
         if os.path.exists(within_sourcedir):
-            pointer.set(filled_initdata,within_sourcedir)
+            pointer.set(initdata,within_sourcedir)
         elif globresult:
-            pointer.set(filled_initdata,globresult)
-    return filled_initdata
+            pointer.set(initdata,globresult)
+    return initdata
 
 def getinit_data(initfiles, parameters):
     '''
