@@ -3,8 +3,6 @@ import json
 import time
 import os
 import logging
-import jq
-import jsonpointer
 import checksumdir
 import shutil
 
@@ -122,7 +120,6 @@ class CacheBuilder(object):
     def cachevalid(self, cacheid):
         raise RuntimeError('implement cache validation')
 
-
     def cacheddata(self, task, remove_invalid = True):
         '''
         returns results from a valid cache entry if it exists, else None
@@ -184,16 +181,11 @@ class ChecksumCache(CacheBuilder):
 
     def cachevalid(self, cacheid):
         task = self.cache[cacheid]['task']
-        result = self.cache[cacheid]['result']['result']
         if task['type'] == 'initstep':
             return True
 
-
-        #check if dependent state is still the same
-
         stored_validation_data = self.cache[cacheid]['result']['validation_data']
         validation_data_now = self.generate_validation_data(cacheid)
-
 
         valid_depstate = (validation_data_now['depstate_checksums'] == stored_validation_data['depstate_checksums'])
         valid_state = (validation_data_now['state_checksums'] == stored_validation_data['state_checksums'])
