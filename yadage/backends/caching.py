@@ -6,6 +6,7 @@ import logging
 import jq
 import jsonpointer
 import checksumdir
+import shutil
 
 from yadage.helpers import get_obj_id
 from trivialbackend import TrivialProxy, TrivialBackend
@@ -30,11 +31,12 @@ class CachedBackend(federatedbackend.FederatedBackend):
             self.cache = CacheBuilder(configparts[0])
         else:
             strategy, configfile = configparts
-            if strategy == 'resultexists':
-                log.info('resultexists caching strategy')
-                self.cache = ResultFilesExistCache(configfile)
+            if strategy == 'checksums':
+                log.info('checksums caching strategy')
+                self.cache = ChecksumCache(configfile)
             else:
                 raise RuntimeError('unknown caching config')
+
 
     def ready(self, proxy):
         isready = super(CachedBackend, self).ready(proxy)
@@ -83,20 +85,24 @@ class CacheBuilder(object):
     def remove(self,cacheid):
         self.cache.pop(cacheid)
 
+
+    def generate_validation_data(self,cacheid):
+        raise NotImplementedError
+
+
     def cacheresult(self, cacheid, status, result):
+        '''
+        saves a result and its status under a unique identifier and includes
+        validation data to verify the cache validity at a later point in time
+        '''
         log.info('caching result for cacheid: %s',cacheid)
         log.info('caching result for process: %s',self.cache[cacheid]['task']['spec']['process'])
         self.cache[cacheid]['result'] = {
             'status': 'SUCCESS' if status else 'FAILED',
             'result': result,
             'cachingtime': time.time(),
-            'checksums': None
+            'validation_data': self.generate_validation_data(cacheid)
         }
-        if 'context' in self.cache[cacheid]['task']:
-            checksums = [checksumdir.dirhash(d) for d in self.cache[cacheid]['task']['context']['depwrites']]
-            log.info('compute checksums for %s',self.cache[cacheid]['task']['context']['depwrites'])
-            log.info('checksums are %s',checksums)
-            self.cache[cacheid]['result']['checksums'] = checksums
 
     def cachedresult(self,cacheid, silent = True):
         '''
@@ -114,7 +120,8 @@ class CacheBuilder(object):
         return cacheid in self.cache and 'result' in self.cache[cacheid]
 
     def cachevalid(self, cacheid):
-        return True
+        raise RuntimeError('implement cache validation')
+
 
     def cacheddata(self, task, remove_invalid = True):
         '''
@@ -139,23 +146,41 @@ class CacheBuilder(object):
         log.info('returning cached result %s',result)
         return result
 
-class ResultFilesExistCache(CacheBuilder):
+class ChecksumCache(CacheBuilder):
     '''
     This is a cache that attempts checks for file paths in result object
     leaves and checks if they already exist. If yes
     '''
     def __init__(self, cachefile):
-        super(ResultFilesExistCache, self).__init__(cachefile)
+        super(ChecksumCache, self).__init__(cachefile)
 
     def remove(self,cacheid):
-        import shutil
         task = self.cache[cacheid]['task']
         log.info('removing cache entry %s',cacheid)
         workdir = task['context']['readwrite'][0]
         log.info('deleting rw location %s',workdir)
         if os.path.exists(workdir):
             shutil.rmtree(workdir)
-        super(ResultFilesExistCache, self).remove(cacheid)
+        super(ChecksumCache, self).remove(cacheid)
+
+
+    def generate_validation_data(self,cacheid):
+        validation_data = {}
+
+        log.info('compute dep checksums for %s',self.cache[cacheid]['task']['context']['depwrites'])
+        dep_checksums = [checksumdir.dirhash(d) for d in self.cache[cacheid]['task']['context']['depwrites'] if os.path.isdir(d)]
+
+        log.info('compute checksums for %s',self.cache[cacheid]['task']['context']['readwrite'])
+        state_checksums = [checksumdir.dirhash(d) for d in self.cache[cacheid]['task']['context']['readwrite'] if os.path.isdir(d)]
+
+        validation_data = {
+            'depstate_checksums': dep_checksums,
+            'state_checksums': state_checksums
+        }
+
+        log.info('validation data is are %s',validation_data)
+        return validation_data
+
 
     def cachevalid(self, cacheid):
         task = self.cache[cacheid]['task']
@@ -166,25 +191,19 @@ class ResultFilesExistCache(CacheBuilder):
 
         #check if dependent state is still the same
 
-        stored_checksums = self.cache[cacheid]['result']['checksums']
-        checksums_now = [checksumdir.dirhash(d) for d in task['context']['depwrites']]
-        log.info('checksums comparison: %s',checksums_now == stored_checksums)
-        if not checksums_now == stored_checksums:
+        stored_validation_data = self.cache[cacheid]['result']['validation_data']
+        validation_data_now = self.generate_validation_data(cacheid)
+
+
+        valid_depstate = (validation_data_now['depstate_checksums'] == stored_validation_data['depstate_checksums'])
+        valid_state = (validation_data_now['state_checksums'] == stored_validation_data['state_checksums'])
+        log.info('checksums comparison: %s',validation_data_now == stored_validation_data)
+        if not valid_depstate:
             log.info('cache invalid due to changed input state')
-            log.info(task['context']['depwrites'])
-            log.info(stored_checksums)
-            log.info(checksums_now)
+            return False
+        if not valid_state:
+            log.info('cache invalid due to changed data in output state')
             return False
 
-        #check if our result fragments are still there
-        rwloc = task['context']['readwrite'][0]
-        resultleafs = jq.jq('leaf_paths').transform(result, multiple_output=True)
-        resultleafs = [jsonpointer.JsonPointer.from_parts(x).resolve(result) for x in resultleafs]
-        for x in resultleafs:
-            if rwloc in x:
-                exists = os.path.exists(x)
-                if not exists:
-                    log.info('cache invalid due to missing data fragments')
-                    return False
-        log.info('all file refs in result exist already.')
+        log.info('cache valid')
         return True
