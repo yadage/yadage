@@ -15,6 +15,7 @@ Contents:
    definingworkflows
    executingworkflows
    contributing
+   coderef
 
 Overview
 ========

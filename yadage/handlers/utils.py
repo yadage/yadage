@@ -4,5 +4,6 @@ def handler_decorator():
     def decorator(name):
         def wrap(func):
             handlers[name] = func
+            return func
         return wrap
     return handlers, decorator

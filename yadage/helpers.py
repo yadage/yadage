@@ -18,7 +18,6 @@ def leaf_iterator(jsonable, path = None):
     '''
     path = path or []
     if type(jsonable) == list:
-
         for i,x in enumerate(jsonable):
             thispath = copy.deepcopy(path)
             thispath.append(i)
@@ -78,9 +77,9 @@ DEFAULT_ID_METHOD = 'jsonhash'
 
 def json_hash(jsonable):
     # log.info('hashing: %s',json.dumps(jsonable, cls=WithJsonRefEncoder, sort_keys=True))
-    hash  = hashlib.sha1(json.dumps(jsonable, cls=WithJsonRefEncoder, sort_keys=True)).hexdigest()
+    the_hash  = hashlib.sha1(json.dumps(jsonable, cls=WithJsonRefEncoder, sort_keys=True)).hexdigest()
     # log.info('got %s',hash)
-    return hash
+    return the_hash
 
 
 def get_id_fromjson(jsonobject, method = DEFAULT_ID_METHOD):

@@ -1,15 +1,6 @@
 from setuptools import setup, find_packages
 
-setup(
-  name = 'yadage',
-  version = '0.10.6',
-  description = 'yadage - YAML based adage',
-  url = '',
-  author = 'Lukas Heinrich',
-  author_email = 'lukas.heinrich@cern.ch',
-  packages = find_packages(),
-  include_package_data = True,
-  install_requires = [
+deps = [
     'functools32',
     'adage',
     'packtivity',
@@ -25,9 +16,23 @@ setup(
     'packtivity',
     'adage',
     'checksumdir',
-    'jq',
     'glob2'
-  ],
+  ]
+
+
+if not 'READTHEDOCS' in os.environ:
+  deps += ['jq']
+
+setup(
+  name = 'yadage',
+  version = '0.10.6',
+  description = 'yadage - YAML based adage',
+  url = '',
+  author = 'Lukas Heinrich',
+  author_email = 'lukas.heinrich@cern.ch',
+  packages = find_packages(),
+  include_package_data = True,
+  install_requires = deps,
   extras_require = {
     'celery' : ['celery','redis']
   },
