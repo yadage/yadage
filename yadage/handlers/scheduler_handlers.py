@@ -2,10 +2,11 @@ import logging
 import utils
 import itertools
 
+import packtivity.statecontexts.posixfs_context as statecontext
+
 from expression_handlers import handlers as exprhandlers
 from yadage.yadagestep import yadagestep, initstep, outputReference
 from yadage.yadagemodels import jsonStage
-import packtivity.statecontexts.poxisfs_context as statecontext
 
 log = logging.getLogger(__name__)
 

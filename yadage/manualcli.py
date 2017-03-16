@@ -4,7 +4,7 @@ import click
 import os
 import manualutils
 import yadage.workflow_loader
-import packtivity.statecontexts.poxisfs_context as statecontext
+import packtivity.statecontexts.posixfs_context as statecontext
 import clihelpers
 import serialize
 import adage

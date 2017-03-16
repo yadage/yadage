@@ -10,7 +10,7 @@ import serialize
 import yadageschemas
 import shutil
 import logging
-import packtivity.statecontexts.poxisfs_context as statecontext
+import packtivity.statecontexts.posixfs_context as statecontext
 
 log = logging.getLogger(__name__)
 class YadageSteering():
