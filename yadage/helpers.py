@@ -6,7 +6,6 @@ import jsonref
 import copy
 from backends.trivialbackend import TrivialProxy, TrivialBackend
 import logging
-import copy
 import jsonpointer
 
 log = logging.getLogger(__name__)
