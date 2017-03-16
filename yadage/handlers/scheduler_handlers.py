@@ -1,12 +1,14 @@
 import logging
 import utils
 import itertools
+import copy
 
 import packtivity.statecontexts.posixfs_context as statecontext
 
 from expression_handlers import handlers as exprhandlers
 from yadage.yadagestep import yadagestep, initstep, outputReference
 from yadage.yadagemodels import jsonStage
+from yadage.helpers import leaf_iterator
 
 log = logging.getLogger(__name__)
 
@@ -28,42 +30,28 @@ def select_parameter(stageview, parameter):
         value = handler(stageview, parameter)
     return value
 
-
 def finalize_value(stage, step, value, context):
     '''
     finalize a value by recursively resolving references and
-    interpolating with the context when necessary
+    contextualizing it for the passed state context
     '''
     if type(value) == outputReference:
         step.used_input(value)
         v = value.pointer.resolve(stage.view.dag.getNode(value.stepid).result)
         return finalize_value(stage, step, v, context)
-    if type(value) == list:
-        return [finalize_value(stage, step, x, context) for x in value]
-    if type(value) in [str, unicode]:
-        return value.format(**context)
-    return value
+    return statecontext.contextualize_data(value,context)
 
 
-def finalize_input(stage, step, json, context):
+def finalize_input(stage, step, jsondata, context):
     '''
     evaluate final values of parameters by either resolving a
     reference to a upstream output or evaluating a static
     reference from the template (possibly string-interpolated)
     '''
-
-    context = context.copy()
-    context['workdir'] = context['readwrite'][0]
-    result = {}
-    for k, v in json.iteritems():
-        if type(v) is not list:
-            result[k] = finalize_value(stage, step, v, context)
-        else:
-            result[k] = [finalize_value(
-                stage, step, element, context) for element in v]
-
+    result = copy.deepcopy(jsondata)
+    for leaf_pointer, leaf_value in leaf_iterator(jsondata):
+        leaf_pointer.set(result,finalize_value(stage, step, leaf_value, context))
     return result
-
 
 def step_or_init(name, spec, context):
     if 'step' in spec:
@@ -82,10 +70,8 @@ def addStepOrWorkflow(name, stage, step, spec):
     else:
         stage.addStep(step)
 
-
 def get_parameters(spec):
     return {x['key']: x['value']for x in spec['parameters']}
-
 
 @scheduler('singlestep-stage')
 def singlestep_stage(stage, spec):
