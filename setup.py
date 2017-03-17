@@ -24,7 +24,7 @@ deps = [
 
 if 'READTHEDOCS' in os.environ:
   deps = [
-    'packtivity'
+    # 'packtivity'
   ]
 
 setup(
