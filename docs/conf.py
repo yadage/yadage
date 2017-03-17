@@ -348,6 +348,6 @@ class Mock(MagicMock):
             return MagicMock()
 
 MOCK_MODULES = [
-    'packtivity','packtivity.statecontexts','packtivity.statecontexts.posixfs_context','jq'
+    'packtivity','packtivity.statecontexts','packtivity.statecontexts.posixfs_context','packtivity.asyncbackends','jq'
 ]
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
