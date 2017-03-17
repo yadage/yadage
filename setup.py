@@ -17,12 +17,14 @@ deps = [
     'packtivity',
     'adage',
     'checksumdir',
-    'glob2'
+    'glob2',
+    'jq'
+]
+
+
+if 'READTHEDOCS' in os.environ:
+  deps += [
   ]
-
-
-if not 'READTHEDOCS' in os.environ:
-  deps += ['jq']
 
 setup(
   name = 'yadage',
