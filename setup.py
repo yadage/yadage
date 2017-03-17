@@ -14,8 +14,6 @@ deps = [
     'jsonschema',
     'jsonpointer>=1.10',
     'jsonpath_rw',
-    'packtivity',
-    'adage',
     'checksumdir',
     'glob2',
     'jq'
@@ -24,7 +22,21 @@ deps = [
 
 if 'READTHEDOCS' in os.environ:
   deps = [
-    # 'packtivity'
+    'functools32',
+    'yadage-schemas',
+    'click',
+    'psutil',
+    'requests[security]>=2.9',
+    'pyyaml',
+    'jsonref',
+    'jsonschema',
+    'jsonpointer>=1.10',
+    'jsonpath_rw',
+    # 'packtivity',
+    # 'adage',
+    'checksumdir',
+    'glob2',
+    # 'jq'
   ]
 
 setup(
