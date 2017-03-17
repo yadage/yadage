@@ -23,7 +23,7 @@ deps = [
 
 
 if 'READTHEDOCS' in os.environ:
-  deps += [
+  deps = [
   ]
 
 setup(
