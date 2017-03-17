@@ -347,5 +347,7 @@ class Mock(MagicMock):
     def __getattr__(cls, name):
             return MagicMock()
 
-MOCK_MODULES = ['packtivity','packtivity.statecontexts','packtivity.statecontexts.posixfs_context']
+MOCK_MODULES = [
+    'packtivity','packtivity.statecontexts','packtivity.statecontexts.posixfs_context','jq'
+]
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
