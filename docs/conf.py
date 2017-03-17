@@ -340,8 +340,8 @@ texinfo_documents = [
 # texinfo_no_detailmenu = False
 
 
+import sys
 from mock import Mock as MagicMock
-
 class Mock(MagicMock):
     @classmethod
     def __getattr__(cls, name):
