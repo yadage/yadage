@@ -334,9 +334,6 @@ For example, if a single multi-step stage is selection unser :code:`stages` it m
   - {firstkey: A, secondkey: B}
   - {firstkey: C, secondkey: D}
 
-
-
-
 - **Unwrapping**
 
 
