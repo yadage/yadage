@@ -1,10 +1,11 @@
 import click
-
+# import IPython
 
 def decide_rule(rule, state):
     click.secho('we could extend DAG with rule', fg='blue')
     click.secho('rule: {}/{} ({})'.format(rule.offset,
                                           rule.rule.name, rule.identifier))
+    # IPython.embed()
     resp = raw_input(click.style("Shall we? (y/N) ", fg='blue'))
     shall = resp.lower() == 'y'
     if shall:
@@ -18,6 +19,8 @@ def decide_rule(rule, state):
 def decide_step(dag, nodeobj):
     click.echo(
         'we could submit a DAG node (id: {}) DAG is: {}'.format(nodeobj, dag))
+
+    # IPython.embed()
     resp = raw_input(click.style("Shall we? (y/N) ", fg='magenta'))
     shall = resp.lower() == 'y'
     if shall:

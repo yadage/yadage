@@ -139,9 +139,7 @@ def singlestep_stage(stage, spec):
         k: select_parameter(stage.view, v) for k, v in get_parameters(spec).iteritems()
     }
     finalized = finalize_input(stage.view, step, parameters, ctx)
-
     addStepOrWorkflow(stage.name, stage, step.s(**finalized), spec)
-
 
 def scatter(parameters, scatter):
     '''
@@ -206,5 +204,5 @@ def multistep_stage(stage, spec):
         ctx = step.context if hasattr(step, 'context') else stage.context
         ctx = ctx.copy()
         ctx.update(index=i)
-        finalized = finalize_input(stage, step, pars, ctx)
+        finalized = finalize_input(stage.view, step, pars, ctx)
         addStepOrWorkflow(singlename, stage, step.s(**finalized), spec)

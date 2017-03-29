@@ -43,12 +43,15 @@ def steering_ctx(
     user_interaction=False,
     validate=True,
     doviz=True,
-    accept_existing_workdir = False):
+    accept_existing_workdir = False,
+    ctrlsetup = 'inmem'):
     
     log.info('running yadage workflow %s', workflow)
     ys = YadageSteering(logger = log)
+
+
     ys.prepare_workdir(workdir, accept_existing_workdir, contextinit = read)
-    ys.init_workflow(workflow, loadtoplevel, initdata, initdir = initdir, validate = validate, schemadir = schemadir)
+    ys.init_workflow(workflow, loadtoplevel, initdata, ctrlsetup = ctrlsetup, initdir = initdir, validate = validate, schemadir = schemadir)
 
 
     custom_tracker = os.environ.get('YADAGE_CUSTOM_TRACKER',None)

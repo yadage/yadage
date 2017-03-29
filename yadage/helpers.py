@@ -5,32 +5,34 @@ import os
 import jsonref
 import copy
 from backends.trivialbackend import TrivialProxy, TrivialBackend
+
 import logging
 import jsonpointer
 
 log = logging.getLogger(__name__)
 
-def leaf_iterator(jsonable, path = None):
+def leaf_iterator(jsonlike, path = None):
     ''''
+    :param jsonlike: a jsonlike object (i.e. nested lists/arrays: leaf-types must not be JSONable)
     helper function that returns leaf values, just like JSON leaf values
     but where instead the object type must not be JSON serializable
     returns iterator that yields (JSON path, value) pairs
     '''
     path = path or []
-    if type(jsonable) == list:
-        for i,x in enumerate(jsonable):
+    if type(jsonlike) == list:
+        for i,x in enumerate(jsonlike):
             thispath = copy.deepcopy(path)
             thispath.append(i)
             for leaf in leaf_iterator(x, path = thispath):
                 yield leaf
-    elif type(jsonable) == dict:
-        for k,v in jsonable.iteritems():
+    elif type(jsonlike) == dict:
+        for k,v in jsonlike.iteritems():
             thispath = copy.deepcopy(path)
             thispath.append(k)
             for leaf in leaf_iterator(v, path = thispath):
                 yield leaf
     else:
-        yield jsonpointer.JsonPointer.from_parts(path),jsonable
+        yield jsonpointer.JsonPointer.from_parts(path),jsonlike
 
 
 def set_backend(dag, backend, proxymaker):

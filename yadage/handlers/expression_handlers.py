@@ -38,14 +38,13 @@ def select_reference(step, selection):
     if not matches:
         log.error('no matches found for selection %s in result %s',
                   selection, step['result'])
-        raise RuntimeError('no matches found in reference selection')
+        raise RuntimeError('no matches found in reference selection. selection %s', selection)
 
     if len(matches) > 1:
         log.error('found multiple matches to query: %s within result: %s\n \ matches %s',
                   selection, step['result'], matches)
         raise RuntimeError('multiple matches in result jsonpath query')
     return matches[0].value
-
 
 def combine_outputs(outputs, flatten, unwrapsingle):
     '''

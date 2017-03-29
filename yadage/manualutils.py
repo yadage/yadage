@@ -8,7 +8,6 @@ import yadage.visualize
 import yadage.interactive
 import serialize
 import adage.visualize as av
-
 from contextlib import contextmanager
 
 
@@ -31,7 +30,6 @@ def workflowctx(workdir, statefile, backendfile):
                        'adage.png'),
         'png'
     )
-
 
 def decide_rule(rule, state):
     click.secho('we could extend DAG with rule', fg='blue')
@@ -69,7 +67,6 @@ def custom_decider(decide_func):
 def get_yadagedir(workdir):
     return '{}/_yadage'.format(workdir)
 
-
 class VariableProxy():
     @staticmethod
     def fromJSON(data):
@@ -80,12 +77,12 @@ class VariableProxy():
         elif data['proxyname']=='CeleryProxy':
             return packtivity.asyncbackends.CeleryProxy.fromJSON(data)
         else:
-            raise RuntimeError('only celery support for now...')
+            raise RuntimeError('only celery support for now... found proxy with name: {}'.format(data['proxyname']))
 
-def load_state(statefile):
+def load_state(statefile, backendstring = None, backend = None):
     from clihelpers import setupbackend_fromstring
-
-    backend = setupbackend_fromstring('celery')
+    if backendstring:
+        backend = setupbackend_fromstring(backendstring)
 
     click.secho('loading state from {}'.format(statefile))
     workflow = yadage.yadagemodels.YadageWorkflow.fromJSON(

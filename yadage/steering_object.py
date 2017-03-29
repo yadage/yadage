@@ -3,6 +3,7 @@ import adage.backends
 import os
 import json
 import workflow_loader
+from yadage.controllers import setup_controller_fromstring
 from yadage.yadagemodels import YadageWorkflow
 import clihelpers
 import visualize
@@ -18,8 +19,12 @@ class YadageSteering():
         self.log = logger or logging.getLogger(__name__)
         self.workdir = None
         self.yadagedir = None
-        self.workflow = None
+        self.controller = None
         self.adage_kwargs = {}
+
+    @property
+    def workflow(self):
+        return self.controller.adageobj
 
     def prepare_workdir(self, workdir, accept_existing_workdir, contextinit = None):
         self.workdir = workdir
@@ -36,7 +41,7 @@ class YadageSteering():
             shutil.rmtree(self.yadagedir)
         os.makedirs(self.yadagedir)
     
-    def init_workflow(self,workflow, toplevel, initdata, initdir = None, search_initdir = True, validate = True, schemadir = yadageschemas.schemadir):
+    def init_workflow(self, workflow, toplevel, initdata, ctrlsetup = 'inmem', initdir = None, search_initdir = True, validate = True, schemadir = yadageschemas.schemadir):
         ##check input data
         if search_initdir and initdir:
             clihelpers.discover_initfiles(initdata,os.path.realpath(initdir))
@@ -49,19 +54,22 @@ class YadageSteering():
         )
         with open('{}/yadage_template.json'.format(self.yadagedir), 'w') as f:
             json.dump(workflow_json, f)
-        self.workflow = YadageWorkflow.createFromJSON(workflow_json, self.rootcontext)
+        workflowobj = YadageWorkflow.createFromJSON(workflow_json, self.rootcontext)
         if initdata:
             log.info('initializing workflow with %s',initdata)
-            self.workflow.view().init(initdata)
+            workflowobj.view().init(initdata)
         else:
             log.info('no initialization data')
+
+        self.controller = setup_controller_fromstring(workflowobj, ctrlsetup)
 
     def adage_argument(self,**kwargs):
         self.adage_kwargs.update(**kwargs)
 
-    def run_adage(self,**kwargs):
+    def run_adage(self, **kwargs):
         self.adage_argument(**kwargs)
-        adage.rundag(self.workflow,**self.adage_kwargs)
+        self.controller.backend = self.adage_kwargs.pop('backend')
+        adage.rundag(controller = self.controller, **self.adage_kwargs)
 
     def serialize(self):
         serialize.snapshot(

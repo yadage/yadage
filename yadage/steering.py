@@ -17,6 +17,7 @@ log = logging.getLogger(__name__)
 @click.option('-m', '--schemasource', default=yadageschemas.schemadir, help = 'schema directory for workflow validation')
 @click.option('-b', '--backend', default='multiproc:auto', help = 'packtivity backend string')
 @click.option('-c', '--cache', default='')
+@click.option('-s', '--statectrl', default='inmem')
 @click.option('-d','--initdir', default='init', help = "relative path (to workdir) to initialiation data directory")
 @click.option('--interactive/--not-interactive', default=False, help = 'en-/disable user interactio (sign-off graph extensions and packtivity submissions)')
 @click.option('--validate/--no-validate', default=True, help = 'en-/disable workflow spec validation')
@@ -45,6 +46,7 @@ def main(workdir,
          read,
          visualize,
          inputarchive,
+         statectrl,
          cache,
          accept_workdir,
          initdir):
@@ -72,7 +74,8 @@ def main(workdir,
         doviz=visualize,
         schemadir=schemasource,
         user_interaction=interactive,
-        accept_existing_workdir = accept_workdir
+        accept_existing_workdir = accept_workdir,
+        ctrlsetup = statectrl
     )
     if rc:
         exc = click.exceptions.ClickException(
