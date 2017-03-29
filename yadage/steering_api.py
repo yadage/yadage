@@ -46,14 +46,11 @@ def steering_ctx(
     accept_existing_workdir = False,
     ctrlsetup = 'inmem'):
     
-    log.info('running yadage workflow %s', workflow)
-    ys = YadageSteering(logger = log)
-
-
+    ys = YadageSteering()
+ 
     ys.prepare_workdir(workdir, accept_existing_workdir, contextinit = read)
     ys.init_workflow(workflow, loadtoplevel, initdata, ctrlsetup = ctrlsetup, initdir = initdir, validate = validate, schemadir = schemadir)
-
-
+    
     custom_tracker = os.environ.get('YADAGE_CUSTOM_TRACKER',None)
     if custom_tracker:
         modulename,trackerclassname = custom_tracker.split(':')
@@ -63,7 +60,6 @@ def steering_ctx(
 
     ys.adage_argument(
         default_trackers = doviz,
-        backend = backend,
         trackevery = loginterval,
         update_interval = updateinterval,
         workdir='{}/_adage'.format(ys.workdir)
@@ -75,7 +71,9 @@ def steering_ctx(
             submit_decider = submit
         )
     yield ys
-    ys.run_adage()
+
+    log.info('running yadage workflow %s on backend %s', workflow, backend)
+    ys.run_adage(backend)
     ys.serialize()
     if doviz:
         ys.visualize()

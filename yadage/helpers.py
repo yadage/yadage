@@ -14,9 +14,7 @@ log = logging.getLogger(__name__)
 def leaf_iterator(jsonlike, path = None):
     ''''
     :param jsonlike: a jsonlike object (i.e. nested lists/arrays: leaf-types must not be JSONable)
-    helper function that returns leaf values, just like JSON leaf values
-    but where instead the object type must not be JSON serializable
-    returns iterator that yields (JSON path, value) pairs
+    :return: iterator that yields (JSON path, leaf value) tuples
     '''
     path = path or []
     if type(jsonlike) == list:

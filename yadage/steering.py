@@ -50,6 +50,7 @@ def main(workdir,
          cache,
          accept_workdir,
          initdir):
+
     logging.basicConfig(level=getattr(logging, verbosity), format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
     if inputarchive:
@@ -58,22 +59,22 @@ def main(workdir,
         initdir = os.path.join(workdir,initdir)
 
     initdata = clihelpers.getinit_data(initfiles, parameter)
-    backend = clihelpers.setupbackend_fromstring(backend, cacheconfig=cache)
+    backend  = clihelpers.setupbackend_fromstring(backend, cacheconfig=cache)
 
     rc = steering_api.run_workflow(
         workdir,
         workflow,
         initdata,
         toplevel,
-        backend=backend,
+        backend = backend,
         initdir = initdir,
         updateinterval = updateinterval,
         loginterval = loginterval,
         read = yaml.load(open(read)) if read else None,
-        validate=validate,
-        doviz=visualize,
-        schemadir=schemasource,
-        user_interaction=interactive,
+        validate = validate,
+        doviz = visualize,
+        schemadir = schemasource,
+        user_interaction = interactive,
         accept_existing_workdir = accept_workdir,
         ctrlsetup = statectrl
     )

@@ -15,8 +15,8 @@ import packtivity.statecontexts.posixfs_context as statecontext
 
 log = logging.getLogger(__name__)
 class YadageSteering():
-    def __init__(self,logger = None):
-        self.log = logger or logging.getLogger(__name__)
+    def __init__(self,loggername = __name__):
+        self.log = logging.getLogger(loggername)
         self.workdir = None
         self.yadagedir = None
         self.controller = None
@@ -31,7 +31,6 @@ class YadageSteering():
 
         self.rootcontext = contextinit or {}
         self.rootcontext = statecontext.merge_contexts(self.rootcontext,statecontext.make_new_context(workdir))
-
         self.yadagedir = '{}/_yadage/'.format(workdir)
 
         if os.path.exists(self.yadagedir):
@@ -66,9 +65,10 @@ class YadageSteering():
     def adage_argument(self,**kwargs):
         self.adage_kwargs.update(**kwargs)
 
-    def run_adage(self, **kwargs):
-        self.adage_argument(**kwargs)
-        self.controller.backend = self.adage_kwargs.pop('backend')
+    def run_adage(self, backend, **adage_kwargs):
+        self.controller.backend = backend
+        self.adage_argument(**adage_kwargs)
+
         adage.rundag(controller = self.controller, **self.adage_kwargs)
 
     def serialize(self):
