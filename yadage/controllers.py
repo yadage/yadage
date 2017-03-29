@@ -33,10 +33,9 @@ def setup_controller_fromstring(workflowobj, ctrlstring = 'inmem'):
             deserializer = functools.partial(load_state_custom_deserializer, backendstring = 'celery'),
             initdata = workflowobj
         )
-        return StatefulController(model, backend = None)
+        return StatefulController(model)
     else:
         raise RuntimeError('unknown workflow controller %s', ctrlstring)
-
 
 class FileBackedModel(object):
     def __init__(self, filename, deserializer, initdata = None):
@@ -64,8 +63,8 @@ class FileBackedModel(object):
 @contextlib.contextmanager
 def transaction(model):
     '''
-    context manager to automatically read fresh state from a model and commit changes on context exit
-    model needs to support .read() and .commit() methods.
+    param: model: a model object with .load() and .commit(data) methods
+
     '''
     # log.info('loading model')
     data = model.load()
@@ -77,8 +76,8 @@ class StatefulController(BaseController):
     '''
     workflow controller, that explicltly calls transaction methods on non read-only operations on the workflow state
     '''
-    def __init__(self, model, backend):
-        super(StatefulController, self).__init__()
+    def __init__(self, model, backend = None):
+        super(StatefulController, self).__init__(backend)
         self.model = model
         self._adageobj = model.load()
 

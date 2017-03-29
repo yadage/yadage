@@ -47,7 +47,6 @@ def steering_ctx(
     ctrlsetup = 'inmem'):
     
     ys = YadageSteering()
- 
     ys.prepare_workdir(workdir, accept_existing_workdir, contextinit = read)
     ys.init_workflow(workflow, loadtoplevel, initdata, ctrlsetup = ctrlsetup, initdir = initdir, validate = validate, schemadir = schemadir)
     

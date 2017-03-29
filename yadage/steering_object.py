@@ -26,7 +26,7 @@ class YadageSteering():
     def workflow(self):
         return self.controller.adageobj
 
-    def prepare_workdir(self, workdir, accept_existing_workdir, contextinit = None):
+    def prepare_workdir(self, workdir, accept_existing_workdir = False, contextinit = None):
         self.workdir = workdir
 
         self.rootcontext = contextinit or {}
