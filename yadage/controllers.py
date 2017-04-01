@@ -1,15 +1,28 @@
-import contextlib
 import json
-from adage.wflowcontroller import BaseController
-import adage.controllerutils as ctrlutils
+import contextlib
 import logging
-
-from yadage.yadagemodels import YadageWorkflow
-from yadage.manualutils import VariableProxy
-from adage.wflowcontroller import InMemoryController
 import functools
 
+import yadage.reset
+import adage.controllerutils as ctrlutils
+from adage.wflowcontroller import BaseController, InMemoryController
+from yadage.yadagemodels import YadageWorkflow
+
+
 log = logging.getLogger(__name__)
+
+
+class VariableProxy():
+    @staticmethod
+    def fromJSON(data):
+        import packtivity.asyncbackends
+        import yadage.backends.packtivitybackend
+        if data['proxyname']=='InitProxy':
+            return yadage.backends.packtivitybackend.InitProxy.fromJSON(data)
+        elif data['proxyname']=='CeleryProxy':
+            return packtivity.asyncbackends.CeleryProxy.fromJSON(data)
+        else:
+            raise RuntimeError('only celery support for now... found proxy with name: {}'.format(data['proxyname']))
 
 def load_state_custom_deserializer(jsondata, backendstring = None):
     from clihelpers import setupbackend_fromstring
@@ -23,6 +36,19 @@ def load_state_custom_deserializer(jsondata, backendstring = None):
     )
     return workflow
 
+def create_model_fromstring(modelidstring):
+    modeltype, modelid = modelidstring.split(':')
+    if modeltype == 'filebacked':
+        return FileBackedModel(
+            filename = modelid,
+            deserializer = functools.partial(load_state_custom_deserializer, backendstring = 'celery'),
+        )
+    if modeltype == 'mongo':
+        return MongoBackedModel(
+            deserializer = functools.partial(load_state_custom_deserializer, backendstring = 'celery'),
+            wflowid = modelid
+        )
+
 def setup_controller_fromstring(workflowobj, ctrlstring = 'inmem'):
     if ctrlstring == 'inmem':
         return InMemoryController(workflowobj, backend = None)
@@ -34,8 +60,35 @@ def setup_controller_fromstring(workflowobj, ctrlstring = 'inmem'):
             initdata = workflowobj
         )
         return StatefulController(model)
+    elif ctrlstring == 'mongo':
+        model = MongoBackedModel(
+            deserializer = functools.partial(load_state_custom_deserializer, backendstring = 'celery'),
+            initdata = workflowobj
+        )
+        return StatefulController(model)
     else:
         raise RuntimeError('unknown workflow controller %s', ctrlstring)
+
+class MongoBackedModel(object):
+    def __init__(self, deserializer, connect_string = 'mongodb://localhost:27017/', initdata = None, wflowid = None):
+        from pymongo import MongoClient
+        from bson.objectid import ObjectId
+        self.deserializer = deserializer
+        self.client = MongoClient(connect_string)
+        self.db = self.client.wflowdb
+        self.collection = self.db.workflows
+        if initdata:
+            insertion = self.collection.insert_one(initdata.json())
+            self.wflowid = insertion.inserted_id
+            log.info('created new workflow object with id %s', str(self.wflowid))
+        if wflowid:
+            self.wflowid = ObjectId(wflowid)
+
+    def commit(self, data):
+        self.collection.replace_one({'_id':self.wflowid}, data.json())
+
+    def load(self):
+        return self.deserializer(self.collection.find_one({'_id':self.wflowid}))
 
 class FileBackedModel(object):
     def __init__(self, filename, deserializer, initdata = None):
@@ -57,20 +110,16 @@ class FileBackedModel(object):
         :return: the adage workflow object holding rules and the graph
         '''
         with open(self.filename) as statefile:
-            self.data = self.deserializer(json.load(statefile))
-            return self.data
+            return self.deserializer(json.load(statefile))
 
 @contextlib.contextmanager
-def transaction(model):
+def transaction(self):
     '''
     param: model: a model object with .load() and .commit(data) methods
-
     '''
-    # log.info('loading model')
-    data = model.load()
-    yield data
-    # log.info('committing model')
-    model.commit(data)
+    self._adageobj = self.model.load()
+    yield
+    self.model.commit(self._adageobj)
 
 class StatefulController(BaseController):
     '''
@@ -79,24 +128,28 @@ class StatefulController(BaseController):
     def __init__(self, model, backend = None):
         super(StatefulController, self).__init__(backend)
         self.model = model
-        self._adageobj = model.load()
+        self._adageobj = self.model.load()
 
     @property
     def adageobj(self):
         return self._adageobj
 
     def submit_nodes(self, nodeids):
-        with transaction(self.model) as self._adageobj:
+        # log.info('about to submit')
+        with transaction(self):
             nodes = [self._adageobj.dag.getNode(nodeid) for nodeid in nodeids]
+            # log.info('submitting nodes to backend: %s', nodes)
             super(StatefulController,self).submit_nodes(nodes)
+            log.info('submitted %s', nodes)
 
     def apply_rules(self, ruleids):
-        with transaction(self.model) as self._adageobj:
+        with transaction(self):
             rules = [r for r in self._adageobj.rules if r.identifier in ruleids]
+            log.info('applying rules: %s', rules)
             super(StatefulController,self).apply_rules(rules)
 
     def sync_backend(self):
-        with transaction(self.model) as self._adageobj:
+        with transaction(self):
             super(StatefulController,self).sync_backend()
 
     def applicable_rules(self):
@@ -111,3 +164,10 @@ class StatefulController(BaseController):
         :return: a list of nodes with sucessfull and completed upstream
         '''
         return [x.identifier for x in ctrlutils.submittable_nodes(self.adageobj)]
+
+    def reset_nodes(self, nodeids):
+        '''
+    
+        '''
+        with transaction(self):
+            yadage.reset.reset_steps(self._adageobj,nodeids)

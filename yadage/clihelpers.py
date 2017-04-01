@@ -48,7 +48,6 @@ def getinit_data(initfiles, parameters):
         initdata[key] = yaml.load(value)
     return initdata
 
-
 def prepare_workdir_from_archive(workdir, inputarchive):
     if os.path.exists(workdir):
         raise click.exceptions.ClickException(click.style(

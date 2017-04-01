@@ -20,6 +20,7 @@ class YadageSteering():
         self.workdir = None
         self.yadagedir = None
         self.controller = None
+        self.rootcontext = None
         self.adage_kwargs = {}
 
     @property
@@ -28,7 +29,6 @@ class YadageSteering():
 
     def prepare_workdir(self, workdir, accept_existing_workdir = False, contextinit = None):
         self.workdir = workdir
-
         self.rootcontext = contextinit or {}
         self.rootcontext = statecontext.merge_contexts(self.rootcontext,statecontext.make_new_context(workdir))
         self.yadagedir = '{}/_yadage/'.format(workdir)
@@ -68,7 +68,6 @@ class YadageSteering():
     def run_adage(self, backend, **adage_kwargs):
         self.controller.backend = backend
         self.adage_argument(**adage_kwargs)
-
         adage.rundag(controller = self.controller, **self.adage_kwargs)
 
     def serialize(self):

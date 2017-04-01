@@ -1,20 +1,7 @@
 import jsonpointer
 import networkx as nx
-import packtivity.statecontexts.poxisfs_context as statecontext
+import packtivity.statecontexts.posixfs_context as statecontext
 
-
-def select_rule(workflow, offset, name):
-    for x in workflow.applied_rules:
-        if x.offset == offset and x.rule.name == name:
-            return x
-    raise RuntimeError('rule not found')
-
-
-def stepsofrule(workflow, offset, name):
-    rule = select_rule(workflow, offset, name)
-    path = '/'.join([rule.offset, rule.rule.name])
-    p = jsonpointer.JsonPointer(path)
-    return rule, [x['_nodeid'] for x in p.resolve(workflow.stepsbystage)]
 
 
 def reset_node_state(node):

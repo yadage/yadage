@@ -9,130 +9,202 @@ import clihelpers
 import serialize
 import adage
 import reset as yr
+from steering_object import YadageSteering
+from controllers import setup_controller_fromstring, create_model_fromstring, StatefulController
 
 log = logging.getLogger(__name__)
-
+logging.basicConfig(level = logging.INFO)
 
 @click.group()
 def mancli():
     pass
 
-
 @mancli.command()
-@click.option('-s', '--statefile', default='yadage_wflow_state.json')
-@click.option('-b', '--backendfile', default='yadage_backend_state.json')
+@click.option('-s', '--statectrl', default='filebacked:helloworld.json')
 @click.option('-t', '--toplevel', default=os.getcwd())
 @click.option('-a', '--inputarchive', default=None)
+@click.option('-d','--initdir', default='init', help = "relative path (to workdir) to initialiation data directory")
 @click.option('--parameter', '-p', multiple=True)
 @click.argument('workdir')
 @click.argument('workflow')
 @click.argument('initfiles', default='')
-def init(workdir, workflow, initfiles, statefile, backendfile, toplevel, parameter, inputarchive):
-    workflow_def = yadage.workflow_loader.workflow(
-        toplevel=toplevel,
-        source=workflow
-    )
-
-    rootcontext = statecontext.make_new_context(workdir)
-    workflow = yadage.yadagemodels.YadageWorkflow.createFromJSON(
-        workflow_def, rootcontext)
-
+def init(workdir, workflow, initfiles, statectrl, initdir, toplevel, parameter, inputarchive):
     initdata = clihelpers.getinit_data(initfiles, parameter)
-    workflow.view().init(initdata)
 
-    click.secho('initialized workflow', fg='green')
+    if inputarchive:
+        initdir = clihelpers.prepare_workdir_from_archive(workdir, inputarchive)
+    else:
+        initdir = os.path.join(workdir,initdir)
 
-    yadagedir = manualutils.get_yadagedir(workdir)
-    os.makedirs(yadagedir)
+    ys = YadageSteering()
+    ys.prepare_workdir(workdir)
+    ys.init_workflow(workflow, toplevel, initdata, ctrlsetup = statectrl, initdir = initdir)
 
-    statefile = '{}/{}'.format(manualutils.get_yadagedir(workdir), statefile)
-    backendfile = '{}/{}'.format(manualutils.get_yadagedir(workdir),
-                                 backendfile)
 
-    click.secho('statefile at {}'.format(statefile))
-    serialize.snapshot(
-        workflow,
-        statefile,
-        backendfile
+def click_print_applicable_stages(controller):
+    click.secho('Applicable Stages: ', fg='blue')
+    for x in controller.adageobj.rules:
+        if x.identifier in controller.applicable_rules():
+            click.secho('{}/{}'.format(x.offset, x.rule.name))
+
+def click_print_submittable_nodes(controller):
+    click.secho('Submittable Nodes: ', fg='blue')
+    _, s2r = manualutils.rule_steps_indices(controller.adageobj)
+    for x in controller.adageobj.dag.nodes():
+        node = controller.adageobj.dag.getNode(x)
+        rule = controller.adageobj.view().getRule(identifier = s2r[node.identifier])
+        if node.identifier in controller.submittable_nodes():
+            click.secho('node: {}({}) part of stage {}'.format(node.name, node.identifier,  '/'.join([rule.offset,rule.rule.name])))
+
+@mancli.command()
+@click.option('-n','--name', default=None)
+@click.option('-s', '--statetype', default='filebacked:helloworld.json')
+@click.option('-v', '--verbosity', default='ERROR')
+def apply(name, statetype, verbosity):
+    logging.basicConfig(level=getattr(logging, verbosity))
+
+    model      = create_model_fromstring(statetype)
+    backend    = clihelpers.setupbackend_fromstring('celery')
+    controller = StatefulController(model)
+
+    if not name:
+        click_print_applicable_stages(controller)
+        return
+
+
+    offset, name = name.split('/')
+    rule = controller.adageobj.view(offset).getRule(name)
+    if not rule:
+        click.secho('No such stage, pick one of the applicable below:', fg='red')
+        click_print_applicable_stages(controller)
+        return
+
+    if rule in controller.adageobj.applied_rules:
+        click.secho('Already applied.', fg = 'yellow')
+        return
+
+    controller.apply_rules([rule.identifier])
+    click.secho('stage applied', fg = 'green')
+
+@mancli.command()
+@click.option('-n','--nodeid', default=None)
+@click.option('-a','--allof', default=None)
+@click.option('-o', '--offset', default='')
+@click.option('-s', '--statetype', default='filebacked:helloworld.json')
+@click.option('-v', '--verbosity', default='ERROR')
+def submit(nodeid, allof, offset, statetype, verbosity):
+    logging.basicConfig(level=getattr(logging, verbosity))
+
+    model   = create_model_fromstring(statetype)
+    controller = StatefulController(model)
+    controller.backend = clihelpers.setupbackend_fromstring('celery')
+
+
+    if not (allof or nodeid):
+        click_print_submittable_nodes(controller)
+        return
+
+    if nodeid:
+        nodes_to_submit = [nodeid] if nodeid in controller.submittable_nodes() else []
+    if allof:
+        offset, name = allof.split('/')
+        rule = manualutils.select_rule(controller.adageobj, offset, name)
+        if not rule:
+            click.secho('stage not found!', fg = 'red')
+            return
+
+
+        all_submittable = controller.submittable_nodes()
+        _, s2r = manualutils.rule_steps_indices(controller.adageobj)
+        nodes_to_submit = [x for x in all_submittable if s2r[x] == rule.identifier]
+
+    if not nodes_to_submit:
+        click.secho('No nodes to submit (perhaps already submitted?)', fg = 'yellow')
+        return
+
+    controller.submit_nodes(nodes_to_submit)
+    click.secho('submitted: {}'.format(nodes_to_submit), fg = 'green')
+
+@mancli.command()
+@click.option('-s', '--statetype', default='filebacked:helloworld.json')
+def show(statetype):
+    model      = create_model_fromstring(statetype)
+    controller = StatefulController(model)
+    controller.backend = clihelpers.setupbackend_fromstring('celery')
+    click.secho('''
+Workflow:
+---------
+state source: {statetype}
+finished: {finished}
+valid: {valid}
+# of applicable rules: {applicable}
+# of submittable nodes: {submittable}
+'''.format(
+    statetype = statetype,
+    finished = click.style(str(controller.finished()), fg = 'green' if controller.finished() else 'yellow'),
+    valid = click.style(str(controller.validate()), fg = 'green' if controller.validate() else 'red'),
+    applicable = len(controller.applicable_rules()),
+    submittable = len(controller.submittable_nodes())
+    ))
+    click_print_applicable_stages(controller)
+    click_print_submittable_nodes(controller)
+
+@mancli.command()
+@click.argument('name')
+@click.option('-s', '--statetype', default='filebacked:helloworld.json')
+def preview(name,statetype):
+    model      = create_model_fromstring(statetype)
+    controller = StatefulController(model)
+    controller.backend = clihelpers.setupbackend_fromstring('celery')
+
+    new_rules, new_nodes = manualutils.preview_rule(controller.adageobj, name)
+    click.secho('Preview of Stage: # new rules: {} # new nodes {}'.format(
+        len(new_rules), len(new_nodes)))
+    for n in new_nodes:
+        click.secho(
+            '-> new node "{}" with {} upstream dependencies'.format(n['name'], len(n['parents'])))
+@mancli.command()
+@click.option('-s', '--statetype', default='filebacked:helloworld.json')
+@click.option('-v', '--verbosity', default='ERROR')
+@click.option('-n', '--nsteps', default=1)
+@click.option('-u', '--update-interval', default=1)
+def step(statetype, verbosity, nsteps, update_interval):
+    logging.basicConfig(level=getattr(logging, verbosity))
+
+
+    model   = create_model_fromstring(statetype)
+    backend = clihelpers.setupbackend_fromstring('celery')
+
+    extend, submit = yadage.interactive.interactive_deciders(idbased = True)
+    ys = YadageSteering()
+    ys.adage_argument()
+    ys.controller = StatefulController(model)
+    ys.run_adage(backend,
+        maxsteps = nsteps,
+        default_trackers = False,
+        submit_decider = submit,
+        extend_decider = extend,
+        update_interval = update_interval
     )
 
-
 @mancli.command()
-@click.argument('workdir')
-@click.argument('name', default='')
-@click.option('-o', '--offset', default='')
-@click.option('-s', '--statefile', default='yadage_wflow_state.json')
-@click.option('-b', '--backendfile', default='yadage_backend_state.json')
-@click.option('-v', '--verbosity', default='ERROR')
-def apply(workdir, name, offset, statefile, backendfile, verbosity):
-    logging.basicConfig(level=getattr(logging, verbosity))
-    with manualutils.workflowctx(workdir, statefile, backendfile) as (backend, workflow):
-        if not name:
-            click.secho('Applicable Rules: ', fg='blue')
-            for x in manualutils.applicable_rules(workflow):
-                click.secho('{}/{}'.format(x.offset, x.rule.name))
-            return
-        rule = workflow.view(offset).getRule(name)
-        if not rule:
-            click.secho(
-                'No such rule, pick one of the applicable below:', fg='red')
-            for x in manualutils.applicable_rules(workflow):
-                click.secho('{}/{}'.format(x.offset, x.rule.name))
-            return
-        if not rule.applicable(workflow):
-            click.secho('Rule is not applicable.', fg='red')
-            return
-        workflow.rules.remove(rule)
-        rule.apply(workflow)
-        workflow.applied_rules.append(rule)
-
-
-@mancli.command()
-@click.argument('workdir')
 @click.argument('name')
-@click.option('-o', '--offset', default='')
-@click.option('-s', '--statefile', default='yadage_wflow_state.json')
-@click.option('-b', '--backendfile', default='yadage_backend_state.json')
-@click.option('-v', '--verbosity', default='ERROR')
-def preview(workdir, name, offset, statefile, backendfile, verbosity):
-    with manualutils.workflowctx(workdir, statefile, backendfile) as (backend, workflow):
-        new_rules, new_nodes = manualutils.preview_rule(workflow, name, offset)
-        click.secho('Preview of Stage: # new rules: {} # new nodes {}'.format(
-            len(new_rules), len(new_nodes)))
-        for n in new_nodes:
-            click.secho(
-                '-> new node "{}" with {} upstream dependencies'.format(n['name'], len(n['parents'])))
+@click.option('-s', '--statetype', default='filebacked:helloworld.json')
+def reset(statetype, name):
+    model   = create_model_fromstring(statetype)
+    controller = StatefulController(model)
 
+    offset, name = name.split('/')
+    rule = controller.adageobj.view(offset).getRule(name)
+    if not rule:
+        click.secho('state not found!', fg = 'red')
 
-@mancli.command()
-@click.argument('workdir')
-@click.option('-s', '--statefile', default='yadage_wflow_state.json')
-@click.option('-b', '--backendfile', default='yadage_backend_state.json')
-@click.option('-v', '--verbosity', default='ERROR')
-def step(workdir, statefile, backendfile, verbosity):
-    logging.basicConfig(level=getattr(logging, verbosity))
-    with manualutils.workflowctx(workdir, statefile, backendfile) as (backend, workflow):
-        extend_decider, submit_decider = yadage.interactive.interactive_deciders()
-        coroutine = adage.adage_coroutine(
-            backend, extend_decider, submit_decider)
-        coroutine.next()  # prime the coroutine....
-        coroutine.send(workflow)
-        try:
-            click.secho('try stepping workflow')
-            coroutine.next()
-        except StopIteration:
-            manualutils.finalize_manual(workdir, workflow)
+    r2s, _ = manualutils.rule_steps_indices(controller.adageobj)
+    steps_of_rule = r2s[rule.identifier]
 
+    to_reset = steps_of_rule + yadage.reset.collective_downstream(controller.adageobj, steps_of_rule)
 
-@mancli.command()
-@click.argument('workdir')
-@click.argument('name')
-@click.option('-s', '--statefile', default='yadage_wflow_state.json')
-@click.option('-b', '--backendfile', default='yadage_backend_state.json')
-@click.option('-o', '--offset', default='')
-def reset(workdir, statefile, backendfile, offset, name):
-    with manualutils.workflowctx(workdir, statefile, backendfile) as (backend, workflow):
-        yr.reset_state(workflow, offset, name)
+    controller.reset_nodes(to_reset)
 
 if __name__ == '__main__':
     mancli()
