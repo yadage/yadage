@@ -161,12 +161,12 @@ def preview(name,statetype):
 @mancli.command()
 @click.option('-s', '--statetype', default='filebacked:helloworld.json')
 @click.option('-v', '--verbosity', default='ERROR')
-@click.option('-n', '--nsteps', default=1)
+@click.option('-n', '--nsteps', default=-1, help = 'number of steps to process. use -1 to for no limit (will run workflow to completion)')
 @click.option('-u', '--update-interval', default=1)
 def step(statetype, verbosity, nsteps, update_interval):
     logging.basicConfig(level=getattr(logging, verbosity))
 
-
+    maxsteps = nsteps if nsteps >= 0 else None
     model   = create_model_fromstring(statetype)
     backend = clihelpers.setupbackend_fromstring('celery')
 
@@ -175,7 +175,7 @@ def step(statetype, verbosity, nsteps, update_interval):
     ys.adage_argument()
     ys.controller = StatefulController(model)
     ys.run_adage(backend,
-        maxsteps = nsteps,
+        maxsteps = maxsteps,
         default_trackers = False,
         submit_decider = submit,
         extend_decider = extend,
