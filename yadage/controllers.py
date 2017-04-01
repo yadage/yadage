@@ -167,7 +167,7 @@ class StatefulController(BaseController):
 
     def reset_nodes(self, nodeids):
         '''
-    
+        :param nodes: 
         '''
         with transaction(self):
             yadage.reset.reset_steps(self._adageobj,nodeids)

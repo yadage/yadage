@@ -1,14 +1,11 @@
 import networkx as nx
 import packtivity.statecontexts.posixfs_context as statecontext
 
-
-
 def reset_node_state(node):
     node.submit_time = None
     node.ready_by_time = None
     node.resultproxy = None
     node.backend = None
-
 
 def reset_step(workflow, step):
     s = workflow.dag.getNode(step)
@@ -18,11 +15,9 @@ def reset_step(workflow, step):
     except AttributeError:
         pass
 
-
 def reset_steps(workflow, steps):
     for s in steps:
         reset_step(workflow, s)
-
 
 def collective_downstream(workflow, steps):
     downstream = set()

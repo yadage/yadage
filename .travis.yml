@@ -1,24 +1,25 @@
 sudo: required
-
 services:
-  - docker
-
+- docker
 language: python
 python:
-  - '2.7'
-
+- '2.7'
 install:
-  - pip install pyflakes pytest
-  - "pip install . --process-dependency-links"
-  - sudo apt-get install -y graphviz
-  - sudo apt-get install -y imagemagick
-
+- pip install pyflakes pytest
+- pip install . --process-dependency-links
+- sudo apt-get install -y graphviz
+- sudo apt-get install -y imagemagick
 script:
-  - pyflakes yadage
-  #- cd tests && pytests && cd ..
-  #- cd tests && ./readme_test.sh && cd ..
-  - yadage-validate rootflow.yml from-github/higgsmcproduction
-  - "echo 'nevents: 100' > input.yml"
-  - yadage-run -t from-github/phenochain workdir_pheno_delphes madgraph_delphes.yml input.yml 
-  - find workdir_pheno_delphes
-  - docker build -t lukasheinrich/yadage .
+- pyflakes yadage
+- yadage-validate rootflow.yml from-github/higgsmcproduction
+- 'echo ''nevents: 100'' > input.yml'
+- yadage-run -t from-github/phenochain workdir_pheno_delphes madgraph_delphes.yml
+  input.yml
+- find workdir_pheno_delphes
+- docker build -t yadage/yadage:githead .
+- docker login -u $DOCKERLOGIN -p $DOCKERPW
+- docker push yadage/yadage:githead
+env:
+  global:
+  - secure: CzMADlzpQj7vGLOhGYHa8KZXJs69r/e85tPFBAFGl3E+q4dmTazLp9eBgYXe/KW/fnSZIM6PQLFst3lUc0SyQJCyOnUNbja3NRTrKRyzNfYr+yDXIkTiAuS7uF241YuF8WXAjcOYlNLpazVHBu95xroa5k3L6wtKkMi2bIs47EEHYhoTsZcRD5LDXf3d+ULpSYfiydsX3H/4CFa1u79wD26BTv2Ba2vT7lwwzX6hsZv6qGWFbLW2vKRw6zasBqnPfQe4wOhUp0oXF7TusM2/9rTyD0OiwE4pWeJ/B88ZFnUL7pdxPVFhPWmV2vSFdRd7P417vTEGqErEqzTm4csQUbu3PtbLFXbsTfgmIsbJyVIaU1upSo3oxeK1fyje5Yx31zUzgrUzYlKzsMM815F76sfoIAyTBLzyFBWCnM5mK2X5he/y2e0lxuuxxrVgOh1WnabUA6xn1+F7XCBO1BOIjVzGTySYZoi/TcK+TwokI/ZgVKXUrrQGYfeRSXZOIghB6/YoUAwL8Ju2dQaI1g6BQzRtViZ/61PpXzUK2rLQd6dtgUC90WR9q+0lXJ/SPoF774QpUjJFgsy47mc3mdMVL+fiLl6mvuSHrfW0PlrO4mTMY17AV0xQ9E+l4uT2Q0VEnIeMU3Z0dKFa/RFuZTWW5kTGxeTput13cM4GJd6KyCk=
+  - secure: neDsPVu4xDwCKJU/kY87j6XAlkC+7EhUhfzPh/GW+O2I4X5EDGXE7lYtBjW2+gqUZxk/Q1lwGFwH2+wkD7/LVijk4k2Vdn4xZHpxtey6hfhGyQ5aQvLKI7ORIgBPpDUoMjWBA/tFGta4XUnVKarVrQbA3QkAPj+McRxNWmrZxED71XLkYaTfudYJG2VilUr7DL3zFxapkDOma+HlAqEIs4fqAag7/BMur+jggjsS6/BRV4gIhbwLzBztqsYzhdX3Yvr8qGYTzT01zMHzRvBkOtY7qVpWZ8+Me3ItjpWHLR4TsJGenWL9vLhIUEGrJTUP9eg4qAIzqHLBYZfwyO3SwHxMfzgc0RbsR4OJp0j5cIRyZdO0ha08b4LKK4OejYZpp16bo8NLe106r0Xmkiu3ruCr9Qgg4C9OLQ6ermvC55BVkOAbkgClA4Jwu8SnwBFJ+Kd3IiWd625BxHjgURGQg+o+Wjk+6LjkR8jegdd/Gv/68zPBHoAYsDJ9VzojGzqiSixKPYyb9bOkeLSUvwwZWWrkfIo0aGk3yqDTqqt0SwTXE5HF5Rmp9PxAA3H5Gt92G+P8r8/3zab13D0ITiI0B4ej+JtLecPkp3NyYsYIdJlVVkBEMOmobGpq3aIuRs9tUk0ZU7EL1Eo4Tzbl0pXD8LMoqf4DMwZ9t36ao5JApdw=
