@@ -140,12 +140,10 @@ class PersistentController(BaseController):
             nodes = [self._adageobj.dag.getNode(nodeid) for nodeid in nodeids]
             # log.info('submitting nodes to backend: %s', nodes)
             super(PersistentController,self).submit_nodes(nodes)
-            log.info('submitted %s', nodes)
 
     def apply_rules(self, ruleids):
         with transaction(self):
             rules = [r for r in self._adageobj.rules if r.identifier in ruleids]
-            log.info('applying rules: %s', rules)
             super(PersistentController,self).apply_rules(rules)
 
     def sync_backend(self):

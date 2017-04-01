@@ -144,7 +144,7 @@ class offsetRule(object):
         self.offset = offset
 
     def __repr__(self):
-        return '< offset: "{}" rule: {} >'.format(self.offset,self.rule)
+        return '<offsetStage {}/{} >'.format(self.offset,self.rule.name)
 
     def applicable(self, adageobj):
         x = self.rule.applicable(WorkflowView(adageobj, self.offset))
