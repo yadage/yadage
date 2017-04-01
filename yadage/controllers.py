@@ -59,13 +59,13 @@ def setup_controller_fromstring(workflowobj, ctrlstring = 'inmem'):
             deserializer = functools.partial(load_state_custom_deserializer, backendstring = 'celery'),
             initdata = workflowobj
         )
-        return StatefulController(model)
+        return PersistentController(model)
     elif ctrlstring == 'mongo':
         model = MongoBackedModel(
             deserializer = functools.partial(load_state_custom_deserializer, backendstring = 'celery'),
             initdata = workflowobj
         )
-        return StatefulController(model)
+        return PersistentController(model)
     else:
         raise RuntimeError('unknown workflow controller %s', ctrlstring)
 
@@ -121,12 +121,12 @@ def transaction(self):
     yield
     self.model.commit(self._adageobj)
 
-class StatefulController(BaseController):
+class PersistentController(BaseController):
     '''
     workflow controller, that explicltly calls transaction methods on non read-only operations on the workflow state
     '''
     def __init__(self, model, backend = None):
-        super(StatefulController, self).__init__(backend)
+        super(PersistentController, self).__init__(backend)
         self.model = model
         self._adageobj = self.model.load()
 
@@ -139,18 +139,18 @@ class StatefulController(BaseController):
         with transaction(self):
             nodes = [self._adageobj.dag.getNode(nodeid) for nodeid in nodeids]
             # log.info('submitting nodes to backend: %s', nodes)
-            super(StatefulController,self).submit_nodes(nodes)
+            super(PersistentController,self).submit_nodes(nodes)
             log.info('submitted %s', nodes)
 
     def apply_rules(self, ruleids):
         with transaction(self):
             rules = [r for r in self._adageobj.rules if r.identifier in ruleids]
             log.info('applying rules: %s', rules)
-            super(StatefulController,self).apply_rules(rules)
+            super(PersistentController,self).apply_rules(rules)
 
     def sync_backend(self):
         with transaction(self):
-            super(StatefulController,self).sync_backend()
+            super(PersistentController,self).sync_backend()
 
     def applicable_rules(self):
         '''

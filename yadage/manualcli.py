@@ -6,7 +6,7 @@ import manualutils
 import yadage.workflow_loader
 import clihelpers
 from steering_object import YadageSteering
-from controllers import create_model_fromstring, StatefulController
+from controllers import create_model_fromstring, PersistentController
 
 log = logging.getLogger(__name__)
 logging.basicConfig(level = logging.INFO)
@@ -60,7 +60,7 @@ def apply(name, statetype, verbosity):
     logging.basicConfig(level=getattr(logging, verbosity))
 
     model      = create_model_fromstring(statetype)
-    controller = StatefulController(model)
+    controller = PersistentController(model)
 
     if not name:
         click_print_applicable_stages(controller)
@@ -91,7 +91,7 @@ def submit(nodeid, allof, offset, statetype, verbosity):
     logging.basicConfig(level=getattr(logging, verbosity))
 
     model   = create_model_fromstring(statetype)
-    controller = StatefulController(model)
+    controller = PersistentController(model)
     controller.backend = clihelpers.setupbackend_fromstring('celery')
 
 
@@ -124,7 +124,7 @@ def submit(nodeid, allof, offset, statetype, verbosity):
 @click.option('-s', '--statetype', default='filebacked:helloworld.json')
 def show(statetype):
     model      = create_model_fromstring(statetype)
-    controller = StatefulController(model)
+    controller = PersistentController(model)
     controller.backend = clihelpers.setupbackend_fromstring('celery')
     click.secho('''
 Workflow:
@@ -149,7 +149,7 @@ valid: {valid}
 @click.option('-s', '--statetype', default='filebacked:helloworld.json')
 def preview(name,statetype):
     model      = create_model_fromstring(statetype)
-    controller = StatefulController(model)
+    controller = PersistentController(model)
     controller.backend = clihelpers.setupbackend_fromstring('celery')
 
     new_rules, new_nodes = manualutils.preview_rule(controller.adageobj, name)
@@ -173,7 +173,7 @@ def step(statetype, verbosity, nsteps, update_interval):
     extend, submit = yadage.interactive.interactive_deciders(idbased = True)
     ys = YadageSteering()
     ys.adage_argument()
-    ys.controller = StatefulController(model)
+    ys.controller = PersistentController(model)
     ys.run_adage(backend,
         maxsteps = maxsteps,
         default_trackers = False,
@@ -187,7 +187,7 @@ def step(statetype, verbosity, nsteps, update_interval):
 @click.option('-s', '--statetype', default='filebacked:helloworld.json')
 def reset(statetype, name):
     model   = create_model_fromstring(statetype)
-    controller = StatefulController(model)
+    controller = PersistentController(model)
 
     offset, name = name.split('/')
     rule = controller.adageobj.view(offset).getRule(name)
