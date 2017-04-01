@@ -1,4 +1,3 @@
-import jsonpointer
 import networkx as nx
 import packtivity.statecontexts.posixfs_context as statecontext
 
@@ -32,8 +31,3 @@ def collective_downstream(workflow, steps):
             downstream.add(x)
     return list(downstream)
 
-
-def reset_state(workflow, offset, name):
-    rule, steps = stepsofrule(workflow, offset, name)
-    toreset = steps + collective_downstream(workflow, steps)
-    reset_steps(workflow, toreset)

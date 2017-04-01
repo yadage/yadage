@@ -4,13 +4,9 @@ import click
 import os
 import manualutils
 import yadage.workflow_loader
-import packtivity.statecontexts.posixfs_context as statecontext
 import clihelpers
-import serialize
-import adage
-import reset as yr
 from steering_object import YadageSteering
-from controllers import setup_controller_fromstring, create_model_fromstring, StatefulController
+from controllers import create_model_fromstring, StatefulController
 
 log = logging.getLogger(__name__)
 logging.basicConfig(level = logging.INFO)
@@ -64,7 +60,6 @@ def apply(name, statetype, verbosity):
     logging.basicConfig(level=getattr(logging, verbosity))
 
     model      = create_model_fromstring(statetype)
-    backend    = clihelpers.setupbackend_fromstring('celery')
     controller = StatefulController(model)
 
     if not name:
