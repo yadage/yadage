@@ -119,6 +119,11 @@ def transaction(self):
     '''
     self._adageobj = self.model.load()
     yield
+
+    isvalid = self.validate()
+    if not isvalid:
+        #raise RuntimeError('was about to commit invalid data!')
+        log.warning('commit is in valid %s', isvalid)
     self.model.commit(self._adageobj)
 
 class PersistentController(BaseController):
