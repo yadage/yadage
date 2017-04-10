@@ -1,5 +1,5 @@
 FROM cern/cc7-base
-RUN yum install -y gcc gcc-c++ graphviz-devel ImageMagick python-devel libffi-devel openssl openssl-devel unzip nano autoconf automake libtool
+RUN yum install -y gcc gcc-c++ graphviz-devel ImageMagick python-devel libffi-devel openssl openssl-devel unzip nano autoconf automake libtool; yum clean all
 COPY . /yadage
 WORKDIR /yadage
 RUN curl https://bootstrap.pypa.io/get-pip.py | python -
