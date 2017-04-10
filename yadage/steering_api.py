@@ -72,8 +72,10 @@ def steering_ctx(
     yield ys
 
     log.info('running yadage workflow %s on backend %s', workflow, backend)
-    ys.run_adage(backend)
-    ys.serialize()
+    try:
+        ys.run_adage(backend)
+    finally:
+        ys.serialize()
     if doviz:
         ys.visualize()
 

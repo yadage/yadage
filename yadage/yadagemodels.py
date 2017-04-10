@@ -283,8 +283,7 @@ class YadageWorkflow(adage.adageobject):
         instance = cls()
         # rules = [offsetRule(jsonStage(yml,context), offset = '') for yml in jsondata['stages']]
         rules = [jsonStage(yml, context) for yml in jsondata['stages']]
-        rootview = WorkflowView(instance)
-        rootview.addWorkflow(rules)
+        instance.view().addWorkflow(rules)
         return instance
 
 
@@ -374,7 +373,7 @@ class WorkflowView(object):
 
     def addRule(self, rule, offset=''):
         '''
-        add a DAG extension rule, possibly with a scope offset
+        add a DAG extensloaderion rule, possibly with a scope offset
         '''
         thisoffset = jsonpointer.JsonPointer(offset)
         offsetrule = offsetRule(rule, self._makeoffset(offset))

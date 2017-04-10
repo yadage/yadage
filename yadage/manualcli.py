@@ -5,7 +5,9 @@ import os
 import manualutils
 import yadage.workflow_loader
 import clihelpers
+import packtivity.statecontexts.posixfs_context as statecontext
 from steering_object import YadageSteering
+from visualize import write_prov_graph
 from controllers import create_model_fromstring, PersistentController
 
 log = logging.getLogger(__name__)
@@ -130,12 +132,14 @@ def show(statetype):
 Workflow:
 ---------
 state source: {statetype}
+successful: {successful}
 finished: {finished}
 valid: {valid}
 # of applicable rules: {applicable}
 # of submittable nodes: {submittable}
 '''.format(
     statetype = statetype,
+    successful =  click.style(str(controller.successful()), fg = 'green' if controller.successful() else 'red'),
     finished = click.style(str(controller.finished()), fg = 'green' if controller.finished() else 'yellow'),
     valid = click.style(str(controller.validate()), fg = 'green' if controller.validate() else 'red'),
     applicable = len(controller.applicable_rules()),
@@ -181,6 +185,45 @@ def step(statetype, verbosity, nsteps, update_interval):
         extend_decider = extend,
         update_interval = update_interval
     )
+
+@mancli.command()
+@click.option('-s', '--statetype', default='filebacked:helloworld.json')
+@click.option('-v', '--verbosity', default='ERROR')
+@click.option('-o', '--offset')
+@click.option('-t', '--toplevel', default = os.curdir)
+@click.argument('workdir')
+@click.argument('workflow')
+def add(statetype, verbosity, offset, toplevel, workdir, workflow):
+    logging.basicConfig(level=getattr(logging, verbosity))
+
+    model      = create_model_fromstring(statetype)
+    controller = PersistentController(model)
+
+    import yadage.workflow_loader
+    import yadage.yadagemodels
+    workflow_json = yadage.workflow_loader.workflow(
+        workflow,
+        toplevel=toplevel,
+        validate=True
+    )
+
+    context = statecontext.make_new_context(workdir)
+    rules = [yadage.yadagemodels.jsonStage(json, context) for json in workflow_json['stages']]
+    with controller.transaction():
+        controller.adageobj.view().addWorkflow(rules)
+
+@mancli.command()
+@click.option('-s', '--statetype', default='filebacked:helloworld.json')
+@click.option('-f', '--fileformat', default='pdf')
+@click.option('-w', '--workdir', default=os.curdir)
+def visualize(statetype, workdir, fileformat):
+
+    model      = create_model_fromstring(statetype)
+    controller = PersistentController(model)
+
+    write_prov_graph(workdir, controller.adageobj, fileformat)
+
+
 
 @mancli.command()
 @click.argument('name')

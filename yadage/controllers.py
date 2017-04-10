@@ -113,7 +113,7 @@ class FileBackedModel(object):
             return self.deserializer(json.load(statefile))
 
 @contextlib.contextmanager
-def transaction(self):
+def model_transaction(self):
     '''
     param: model: a model object with .load() and .commit(data) methods
     '''
@@ -135,24 +135,28 @@ class PersistentController(BaseController):
         self.model = model
         self._adageobj = self.model.load()
 
+
+    def transaction(self):
+        return model_transaction(self)
+
     @property
     def adageobj(self):
         return self._adageobj
 
     def submit_nodes(self, nodeids):
         # log.info('about to submit')
-        with transaction(self):
+        with self.transaction():
             nodes = [self._adageobj.dag.getNode(nodeid) for nodeid in nodeids]
             # log.info('submitting nodes to backend: %s', nodes)
             super(PersistentController,self).submit_nodes(nodes)
 
     def apply_rules(self, ruleids):
-        with transaction(self):
+        with self.transaction():
             rules = [r for r in self._adageobj.rules if r.identifier in ruleids]
             super(PersistentController,self).apply_rules(rules)
 
     def sync_backend(self):
-        with transaction(self):
+        with self.transaction():
             super(PersistentController,self).sync_backend()
 
     def applicable_rules(self):
@@ -172,5 +176,5 @@ class PersistentController(BaseController):
         '''
         :param nodes: 
         '''
-        with transaction(self):
+        with self.transaction():
             yadage.reset.reset_steps(self._adageobj,nodeids)
