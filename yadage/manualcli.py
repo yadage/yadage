@@ -199,7 +199,6 @@ def add(statetype, verbosity, offset, toplevel, workdir, workflow):
     model      = create_model_fromstring(statetype)
     controller = PersistentController(model)
 
-    import yadage.workflow_loader
     import yadage.yadagemodels
     workflow_json = yadage.workflow_loader.workflow(
         workflow,
