@@ -9,12 +9,14 @@ import os
 import datetime
 import jsonpath_rw
 import yadagestep
+
 from backends import NoneProxy
 from helpers import get_obj_id, get_id_fromjson
 from yadagestep import outputReference
 
-log = logging.getLogger(__name__)
+from handlers.predicate_handlers import handlers as pred_handlers
 
+log = logging.getLogger(__name__)
 
 class stage_base(object):
     '''
@@ -33,13 +35,15 @@ class stage_base(object):
     def applicable(self, flowview):
         if not self.depspec:
             return True
-        from handlers.predicate_handlers import handlers as pred_handlers
         predicate = pred_handlers[self.depspec['dependency_type']]
         return predicate(flowview, self.depspec)
 
     def apply(self, flowview):
         self.view = flowview
         self.schedule()
+
+    def schedule(self):
+        raise NotImplementedError()
 
     def addStep(self, step):
         dependencies = [self.view.dag.getNode(k.stepid) for k in step.inputs]
@@ -112,7 +116,7 @@ class jsonStage(stage_base):
         return '<jsonStage: {}>'.format(self.name)
 
     def schedule(self):
-        from yadage.handlers.scheduler_handlers import handlers as sched_handlers
+        from handlers.scheduler_handlers import handlers as sched_handlers
         scheduler = sched_handlers[self.stageinfo['scheduler_type']]
         scheduler(self, self.stageinfo)
 
@@ -138,19 +142,36 @@ class offsetRule(object):
     '''
 
     def __init__(self, rule, offset=None, identifier=None):
-        self.identifier = identifier or get_id_fromjson(
-            {'rule': rule.json(), 'offset': offset})
+        '''
+        initializes a scoped rule. scope is defined by a JSONPointer, e.g.
+        one[0]two.three
+
+        '''
+
         self.rule = rule
         self.offset = offset
+        self.identifier = identifier or get_id_fromjson({
+            'rule': rule.json(),
+            'offset': offset
+        })
 
     def __repr__(self):
         return '<offsetStage {}/{} >'.format(self.offset,self.rule.name)
 
     def applicable(self, adageobj):
+        '''
+        determin whether the rule is applicable. Evaluated within the offset.
+        :param adageobj: the workflow object
+        '''
         x = self.rule.applicable(WorkflowView(adageobj, self.offset))
         return x
 
     def apply(self, adageobj):
+        '''
+        applies a rule within the scope set by offset
+
+        :param adageobj: the workflow object
+        '''
         self.rule.apply(WorkflowView(adageobj, self.offset))
 
     #(de-)serialization
@@ -193,7 +214,8 @@ class YadageNode(adage.node.Node):
         )
 
     def has_result(self):
-        if 'YADAGE_IGNORE_PREPUBLISHING' in os.environ: return self.successful()
+        if 'YADAGE_IGNORE_PREPUBLISHING' in os.environ:
+            return self.successful()
         return (self.task.prepublished is not None) or self.successful()
 
     @property
@@ -351,6 +373,11 @@ class WorkflowView(object):
         return result
 
     def _makeoffset(self, offset):
+        '''
+        prepare a full offset based on this views' offset and a relative offset
+
+        :param offset: the relative offset
+        '''
         thisoffset = jsonpointer.JsonPointer(offset)
         if self.offset:
             fulloffset = jsonpointer.JsonPointer.from_parts(
@@ -368,6 +395,11 @@ class WorkflowView(object):
         return None
 
     def init(self, initdata, name='init'):
+        '''
+        initialize this scope by adding an initialization stage.
+
+        :param inidata: initialization JSON data
+        '''
         step = yadagestep.initstep(name, initdata)
         self.addRule(initStage(step, {}, None), self.offset)
 

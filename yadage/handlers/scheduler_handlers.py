@@ -29,7 +29,7 @@ def select_parameter(wflowview, parameter):
     :param wflowview: the workflow view on which to evaluete possible value expressions
     :param parameter: either a non-dict value or a JSON-like dict for a
                       supported value expression
-    :return: the parameter value
+    :return: the parameter value 
     '''
     if type(parameter) is not dict:
         value = parameter
@@ -90,10 +90,9 @@ def step_or_init(name, spec, context):
     elif 'workflow' in spec:
         return initstep('init {}'.format(name))
 
-
 def addStepOrWorkflow(name, stage, step, spec):
     '''
-    adds a step or a sub-workflow init step to the current workflow view based on a stage
+    adds a step or a sub-workflow belonging to a stage this stage init step to the current workflow view
     
     :param str name: the name of the step or sub-workflow
     :param stage: the stage from which to use state context and workflow view
@@ -103,7 +102,7 @@ def addStepOrWorkflow(name, stage, step, spec):
     :return: None
     '''
     if type(step) == initstep:
-        newcontext = statecontext.make_new_context(name, stage.context)
+        newcontext = statecontext.make_new_context(name, stage.context, subdir=True)
         subrules = [jsonStage(yml, newcontext)
                     for yml in spec['workflow']['stages']]
         stage.addWorkflow(subrules, initstep=step)

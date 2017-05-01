@@ -11,7 +11,6 @@ from yadage.yadagemodels import YadageWorkflow
 
 log = logging.getLogger(__name__)
 
-
 class VariableProxy():
     @staticmethod
     def fromJSON(data):

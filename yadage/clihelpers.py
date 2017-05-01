@@ -12,6 +12,12 @@ log = logging.getLogger(__name__)
 
 
 def leaf_iterator(jsonable):
+    '''
+    generator function to yield leafs items of a JSON-like structure alongside
+    their position in the structure as determined by a JSONPointer.
+    
+    :return: tuples (jsonpointer, leaf value)
+    '''
     allleafs = jq.jq('leaf_paths').transform(jsonable, multiple_output = True)
     leafpointers = [jsonpointer.JsonPointer.from_parts(x) for x in allleafs]
     for x in leafpointers:

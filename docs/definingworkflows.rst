@@ -18,7 +18,7 @@ The atomic unit of the workflow is a `packtivity` -- a packaged activity. It rep
 Stages:
 ```````
 
-Instead of describing a specific graph of tasks, a yadage workflow definition consists of a collection of `stages` that describe how an existing graph should be extended with additional nodes and edges. Starting from an empty graph (0 nodes, 0 edges), it is built up sequentially through application of these stages.
+Instead of describing a specific graph of tasks, a yadage workflow definition consists of a collection of `stages` that describe how an existing graph should be extended with additional nodes and edges. Starting from an empty graph (0 nodes, 0 edges), it is built up sequentially through application of these stages. This allows yadage to process workflows, whose graph structure is not known at definition time (such as workflow producing a variable number of data fragments).
 
 A stage consists of two pieces
 
@@ -28,7 +28,7 @@ A stage consists of two pieces
 
 2. A predicate (i.e. its dependencies):
 
-  The predicate (also referred to as the stages' dependencies) is a description of when the stage body is ready to be applied. Currently yadage supports a single predicate that takes a number of `JSON Path`_ expressions. Each expression selects a number of stages. The dependency is considered satisfied when all packtivities associated to that stage (i.e. nodes) have a published result.
+  The predicate (also referred to as the stage's dependencies) is a description of when the stage body is ready to be applied. Currently yadage supports a single predicate that takes a number of `JSON Path`_ expressions. Each expression selects a number of stages. The dependency is considered satisfied when all packtivities associated to that stage (i.e. nodes) have a published result.
 
 .. _`JSON Path`: http://goessner.net/articles/JsonPath/
 
@@ -38,6 +38,7 @@ Using JSON references
 Writing the entire workflow in a single file is both cumbersome and limits re-usability of individual components (e.g. for packtivities used in multiple workflows).
 
 During loading each workflow spec is intepreted  with respect to a `toplevel` address. If the workflow contains `JSON references`_ they are resolved with respect to that toplevel URL.
+
 
 .. _`JSON references`: https://tools.ietf.org/id/draft-pbryan-zyp-json-ref-03.html
 
@@ -69,6 +70,22 @@ Assuming that this stage definition is part of an workflow stored at :code:`http
     environment:
       environment_type: 'docker-encapsulated'
       image: 'lukasheinrich/higgs-mc-studies'
+
+Referencing steps outside of the toplevel URL
+.............................................
+
+It is also possible to reference documents outside of the toplevel URL, by specifying a full URL such as :code:`http://example.com/path/to/doc.json` ::
+
+  name: pythia
+  dependencies: ['init']
+  scheduler:
+    scheduler_type: singlestep-stage
+    step: {$ref: 'http://example.com/sub/path/steps.yml#/pythia'}
+    parameters:
+      settings_file: /analysis/mainPythiaMLM.cmnd
+      hepmcfile: '{workdir}/outputfile.hepmc'
+      lhefile: {stages: init, output: lhefile}
+
 
 Defining a Packtivity
 ---------------------
@@ -247,6 +264,8 @@ As explained above, a stage is defined by a predicate and a scheduler. The gener
   dependencies: <predicate definition>
   scheduler: <scheduler definition>
 
+The `name` provides a unique identifier for this stage within its *scope*
+
 Predicate Definitions
 `````````````````````
 
@@ -290,8 +309,8 @@ Scheduler Definitions
 
 Yadage is designed to be extendable. As such each stage scheduler definition comes with with its own schema. This allows yadage to include new scheduling patterns over time. Currenty yadage supports two schedulers:
 
-1. a singlestep stage, scheduling a single packtivity with a specific parameter set
-2. a multistep stage, scheduling a number of instances of the same packtivity but with different parameters each. A number of ways to build the parameter sets are supported.
+1. a single-step stage, scheduling a single packtivity with a specific parameter set
+2. a multi-step stage, scheduling a number of instances of the same packtivity but with different parameters each. A number of ways to build the parameter sets are supported.
 
 Typically, stages come with a number of adjustable parameters that steer how it nodes are scheduled in detail.
 
@@ -337,10 +356,16 @@ For example, if a single multi-step stage is selection unser :code:`stages` it m
 - **Unwrapping**
 
 
+Stage Scopes
+--------------------
+
+To ease composability and avoid unwanted collisions, each Stage is defined within a *scope*, that defines which parts of the overall workflow the stage can access.  Within this scope, the stage is uniquely identified via its name, and predicate and reference resolutions used by the stages are resolved within this scope. Scopes are organized into a JSON like structure, and any one scope is identified using a JSON Pointer. This allows arbitrary nesting of scoped. The initial set of stages are added to the root scope ''. The stages defined as part of sub-workflows are assigned the scope of said sub-workflow.
 
 
 Composition using Subworkflows
 ------------------------------
+
+
 
 
 Validating Workflows
