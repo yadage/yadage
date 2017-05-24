@@ -2,7 +2,7 @@ import federatedbackend
 import logging
 import yadage.yadagestep
 from trivialbackend import TrivialProxy, TrivialBackend
-from packtivity.utils import backend_from_string
+from packtivity.backendutils import backend_from_string
 
 log = logging.getLogger(__name__)
 

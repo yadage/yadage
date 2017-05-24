@@ -81,7 +81,12 @@ def select_outputs(steps, selection, flatten, unwrapsingle):
 
 @scheduler('stage-output-selector')
 def resolve_reference(stageview, selection):
-    '''resolves a output reference by selecting the stage and stage outputs'''
+    '''
+    :param stageview: the workflow view objct
+    :param selection: the JSON-like selection dictionary
+    :return : 
+    resolves a output reference by selecting the stage and stage outputs
+    '''
     log.debug('resolving selection %s', selection)
     if type(selection) is not dict:
         return None
@@ -94,3 +99,9 @@ def resolve_reference(stageview, selection):
                                  selection.get('unwrap', False))
         log.debug('selected outputs %s', outputs)
         return outputs
+
+
+
+@scheduler('jq-stage-output-selector')
+def resolve_jq_reference(stageview, selection):
+    return 
