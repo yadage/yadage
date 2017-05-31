@@ -8,6 +8,7 @@ import time
 import os
 import datetime
 import jsonpath_rw
+import jq
 import yadagestep
 
 from backends import NoneProxy
@@ -345,6 +346,9 @@ class WorkflowView(object):
     def query(self, query, collection):
         matches = jsonpath_rw.parse(query).find(collection)
         return matches
+
+    # def query_jq(self, query, collection):
+    #     jq
 
     def getSteps(self, query):
         '''

@@ -11,6 +11,7 @@ from handlers.expression_handlers import handlers as exh
 from helpers import set_trivial_backend
 
 
+
 def process(x, dag):
     if type(x) == dict:
         for k, v in x.iteritems():
@@ -24,17 +25,6 @@ def process(x, dag):
         return x.pointer.resolve(dag.getNode(x.stepid).result)
     else:
         return x
-
-
-def printRef(ref, dag, indent=''):
-    click.secho('{}name: {} position: {}, value: {}, id: {}'.format(
-        indent,
-        dag.getNode(ref.stepid).name,
-        ref.pointer.path,
-        ref.pointer.resolve(dag.getNode(ref.stepid).result),
-        ref.stepid
-    ),
-        fg='cyan')
 
 
 def wflow_with_trivial_backend(instance,results):
@@ -75,6 +65,80 @@ def testsel(instance, results, selection,verbosity):
         separators=(',', ': ')),
         fg='green'
     )
+
+
+def resolve_wflowref(jsondata):
+    if isinstance(jsondata,list):
+        for x in jsondata:
+            resolve_wflowref(x)
+    if isinstance(jsondata,dict):
+        for x in jsondata.values():
+            resolve_wflowref(x)
+
+
+@utilcli.command()
+@click.argument('instance')
+@click.argument('results')
+@click.argument('sched')
+@click.option('-v', '--verbosity', default='INFO')
+def testsched(instance, results, sched,verbosity):
+
+
+    logging.basicConfig(level=getattr(logging, verbosity), format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    wflow = wflow_with_trivial_backend(instance,results)
+
+    data = yaml.load(open(sched))
+
+
+    import jq
+    import jsonpointer
+    from handlers.expression_handlers import pointerize
+    binds = data['bindings']
+    wflowrefs = [jsonpointer.JsonPointer.from_parts(x) for x in jq.jq('paths(if objects then has("$wflowref") else false end)').transform(binds, multiple_output = True)]
+
+    for wflowref in wflowrefs:
+        nodeselector, resultscript = wflowref.resolve(binds)['$wflowref']
+
+        view = wflow.view()
+        nodes   = [view.dag.getNode(n.get('_nodeid')) for n in jq.jq(nodeselector).transform(view.steps, multiple_output = True)]
+        results = [jq.jq(resultscript).transform(pointerize(n.result,False,n.identifier), multiple_output = True) for n in nodes]
+        wflowref.set(binds,results)
+
+    stagescript = data['steps']
+    stageres = jq.jq(stagescript).transform(binds,multiple_output = False)
+    for forstep in stageres:
+        wflowpointers = [jsonpointer.JsonPointer.from_parts(x) for x in jq.jq('paths(if objects then has("$wflowpointer") else false end)').transform(forstep, multiple_output = True)]
+        for wflowptr in wflowpointers:
+
+            pointer =  wflowptr.resolve(forstep)['$wflowpointer']
+            view = wflow.view()
+            value = jsonpointer.JsonPointer(pointer['result']).resolve(view.dag.getNode(pointer['step']).result)
+            wflowptr.set(forstep,value)
+
+        final = jq.jq(data['post']).transform(forstep)
+        print json.dumps(final)
+    # print stageres
+
+    # stepscript = data['schedule'][1]
+
+    # stepres = jq.jq(stepscript).transform(stageres)
+    # print stepres
+
+    # print results
+
+    # selresult = exh['stage-output-selector'](wflow.view(), yaml.load(selection))
+
+    # if not selresult:
+    #     click.secho('Bad selection', fg='red')
+    #     return
+
+    # click.secho(json.dumps(
+    #     process(selresult, wflow.dag),
+    #     sort_keys=True,
+    #     indent=4,
+    #     separators=(',', ': ')),
+    #     fg='green'
+    # )
 
 
 @utilcli.command()

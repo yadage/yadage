@@ -205,3 +205,53 @@ def multistep_stage(stage, spec):
         ctx.update(index=i)
         finalized = finalize_input(stage.view, step, pars, ctx)
         addStepOrWorkflow(singlename, stage, step.s(**finalized), spec)
+
+
+@scheduler('jq-stage')
+def jq_stage(stage, spec):
+    '''
+
+    :param stage: common stage parent object 
+    :param spec: stage JSON-like spec
+    
+    :return: None
+    '''
+
+    import json
+    import jq
+    import jsonpointer
+    from expression_handlers import pointerize
+    binds = spec['bindings']
+    wflowrefs = [jsonpointer.JsonPointer.from_parts(x) for x in jq.jq('paths(if objects then has("$wflowref") else false end)').transform(binds, multiple_output = True)]
+
+    for wflowref in wflowrefs:
+        nodeselector, resultscript = wflowref.resolve(binds)['$wflowref']
+
+        view = stage.view
+        nodes   = [view.dag.getNode(n.get('_nodeid')) for n in jq.jq(nodeselector).transform(view.steps, multiple_output = True)]
+        results = [jq.jq(resultscript).transform(pointerize(n.result,False,n.identifier), multiple_output = True) for n in nodes]
+        wflowref.set(binds,results)
+
+    stagescript = spec['stepscript']
+    stageres = jq.jq(stagescript).transform(binds,multiple_output = False)
+
+    singlesteppars = []
+    for forstep in stageres:
+        used_refs = []
+        wflowpointers = [jsonpointer.JsonPointer.from_parts(x) for x in jq.jq('paths(if objects then has("$wflowpointer") else false end)').transform(forstep, multiple_output = True)]
+        for wflowptr in wflowpointers:
+            pointer =  wflowptr.resolve(forstep)['$wflowpointer']
+            wflowptr.set(forstep,outputReference(pointer['step'],jsonpointer.JsonPointer(pointer['result'])))
+        singlesteppars.append(forstep)
+        log.info(forstep)
+
+    for i, pars in enumerate(singlesteppars):
+        singlename = '{}_{}'.format(stage.name, i)
+        step = step_or_init(name=singlename, spec=spec, context=stage.context)
+        ctx = step.context if hasattr(step, 'context') else stage.context
+        ctx = ctx.copy()
+        ctx.update(index=i)
+        finalized = finalize_input(stage.view, step, pars, ctx)
+        addStepOrWorkflow(singlename, stage, step.s(**finalized), spec)
+
+

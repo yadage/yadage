@@ -19,12 +19,11 @@ def pointerize(jsondata, asref=False, stepid=None):
     useful to track access to leaf nodes later on.
     '''
     allleafs = jq.jq('leaf_paths').transform(jsondata, multiple_output=True)
-    leafpointers = [jsonpointer.JsonPointer.from_parts(
-        x).path for x in allleafs]
+    leafpointers = [jsonpointer.JsonPointer.from_parts(x).path for x in allleafs]
     jsondata_proxy = copy.deepcopy(jsondata)
     for leaf in leafpointers:
         x = jsonpointer.JsonPointer(leaf)
-        x.set(jsondata_proxy, outputReference(stepid, x) if asref else x.path)
+        x.set(jsondata_proxy, outputReference(stepid, x) if asref else {'$wflowpointer': {'step': stepid,'result': x.path}} if stepid else x.path)
     return jsondata_proxy
 
 
