@@ -3,8 +3,6 @@ import adage.backends
 import os
 import json
 import workflow_loader
-from yadage.controllers import setup_controller_fromstring
-from yadage.wflow import YadageWorkflow
 import clihelpers
 import visualize
 import serialize
@@ -13,7 +11,11 @@ import shutil
 import logging
 import packtivity.statecontexts.posixfs_context as statecontext
 
+from yadage.controllers import setup_controller_fromstring
+from yadage.wflow import YadageWorkflow
+
 log = logging.getLogger(__name__)
+
 class YadageSteering():
     def __init__(self,loggername = __name__):
         self.log = logging.getLogger(loggername)

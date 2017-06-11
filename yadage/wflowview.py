@@ -156,7 +156,6 @@ class WorkflowView(object):
         '''
         add a DAG extensloaderion rule, possibly with a scope offset
         '''
-        print 'OFFSETTTT',offset
         thisoffset = jsonpointer.JsonPointer(offset)
         offsetrule = offsetRule(rule, self._makeoffset(offset))
         self.rules += [offsetrule]

@@ -22,11 +22,9 @@ def test_deserialize():
     wflow = YadageWorkflow.fromJSON(data)
     assert data == wflow.json()
 
-def test_create_from_data():
-    data  = yadage.workflow_loader.workflow('workflow.yml','testspecs/local-helloworld')
-    wflow = YadageWorkflow.createFromJSON(data,statecontext.make_new_context('/workdir'))
+def test_create_from_data(local_helloworld_wflow):
+    pass
 
-def test_serialize_deserialize():
-    data  = yadage.workflow_loader.workflow('workflow.yml','testspecs/local-helloworld')
-    wflow = YadageWorkflow.createFromJSON(data,statecontext.make_new_context('/workdir'))
+def test_serialize_deserialize(local_helloworld_wflow):
+    wflow = local_helloworld_wflow
     assert YadageWorkflow.fromJSON(wflow.json()).json() == wflow.json()

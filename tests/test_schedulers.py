@@ -26,10 +26,9 @@ def test_multistepstage_schedule_wflows(nested_mapreduce_wflow):
     assert len(wflow.view('/map/0').rules) == 3 + 2*len(inputdata) # 3x init and stage rules
 
 
-def test_multistepstage_zip_schedule_steps():
-    data  = yadage.workflow_loader.workflow('workflow.yml','testspecs/mapreduce')
-    wflow = YadageWorkflow.createFromJSON(data,statecontext.make_new_context('/workdir'))
-
+def test_multistepstage_zip_schedule_steps(simple_mapreduce):
+    wflow = simple_mapreduce
+    
     inputdata = [1,2,3]
     wflow.view().init({'input':inputdata})
     assert wflow.rules[0].applicable(wflow) == False
@@ -41,9 +40,8 @@ def test_multistepstage_zip_schedule_steps():
     wflow.rules[0].apply(wflow)
     assert len(wflow.dag.nodes()) == 1 + len(inputdata)  
 
-def test_multistepstage_cartesian_schedule_steps():
-    data  = yadage.workflow_loader.workflow('workflow.yml','testspecs/cartesian_mapreduce')
-    wflow = YadageWorkflow.createFromJSON(data,statecontext.make_new_context('/workdir'))
+def test_multistepstage_cartesian_schedule_steps(cartesian_mapreduce):
+    wflow = cartesian_mapreduce
 
     factor_one = [1,2,3]
     factor_two = [4,5]
