@@ -4,10 +4,8 @@ from yadage.wflow import YadageWorkflow
 import packtivity.statecontexts.posixfs_context as statecontext
 from yadage.helpers import process_refs
 
-def test_multistepstage_schedule_wflows():
-    data  = yadage.workflow_loader.workflow('workflow.yml','testspecs/nestedmapreduce')
-    wflow = YadageWorkflow.createFromJSON(data,statecontext.make_new_context('/workdir'))
-
+def test_stage_output_selector(nested_mapreduce_wflow):
+    wflow = nested_mapreduce_wflow
     inputdata = [1,2,3]
     view = wflow.view()
     view.init({'input':inputdata})

@@ -6,11 +6,8 @@ import shutil
 import yadagemodels
 import visualize
 import logging
-from yadagestep import outputReference
 from handlers.expression_handlers import handlers as exh
 from helpers import set_trivial_backend, process_refs
-
-
 
 
 def printRef(ref, dag, indent=''):

@@ -2,18 +2,16 @@ import yadage.workflow_loader
 from yadage.wflow import YadageWorkflow
 import packtivity.statecontexts.posixfs_context as statecontext
 
-def test_singlestepstage_schedule_steps():
-    data  = yadage.workflow_loader.workflow('workflow.yml','testspecs/local-helloworld')
-    wflow = YadageWorkflow.createFromJSON(data,statecontext.make_new_context('/workdir'))
+def test_singlestepstage_schedule_steps(local_helloworld_wflow):
+    wflow = local_helloworld_wflow
     assert wflow.rules[0].applicable(wflow) == True
     assert wflow.rules[0].rule.stageinfo['scheduler_type'] == 'singlestep-stage'
     wflow.rules[0].apply(wflow)
     assert len(wflow.dag.nodes()) == 1
 
 
-def test_multistepstage_schedule_wflows():
-    data  = yadage.workflow_loader.workflow('workflow.yml','testspecs/nestedmapreduce')
-    wflow = YadageWorkflow.createFromJSON(data,statecontext.make_new_context('/workdir'))
+def test_multistepstage_schedule_wflows(nested_mapreduce_wflow):
+    wflow = nested_mapreduce_wflow
 
     inputdata = [1,2,3]
     wflow.view().init({'input':inputdata})
