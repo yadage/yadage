@@ -3,9 +3,10 @@ import json
 import click
 import tempfile
 import shutil
-import yadagemodels
 import visualize
 import logging
+
+from wflow import YadageWorkflow
 from handlers.expression_handlers import handlers as exh
 from helpers import set_trivial_backend, process_refs
 
@@ -22,7 +23,7 @@ def printRef(ref, dag, indent=''):
 
 
 def wflow_with_trivial_backend(instance,results):
-    wflow = yadagemodels.YadageWorkflow.fromJSON(
+    wflow = YadageWorkflow.fromJSON(
         json.load(open(instance))
     )
     set_trivial_backend(wflow.dag, json.load(open(results)))
