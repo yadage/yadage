@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 from contextlib import contextmanager
 from steering_object import YadageSteering
 import logging

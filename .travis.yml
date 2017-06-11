@@ -11,6 +11,7 @@ install:
 - sudo apt-get install -y imagemagick
 script:
 - pyflakes yadage
+- cd tests; pytest --cov;cd ..
 - yadage-validate rootflow.yml from-github/higgsmcproduction
 - 'echo ''nevents: 100'' > input.yml'
 - yadage-run -t from-github/phenochain workdir_pheno_delphes madgraph_delphes.yml
