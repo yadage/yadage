@@ -23,6 +23,6 @@ def test_filediscovery(tmpdir):
 	initdata = {'key1':'afile','key2':'bfile*','key3':'nofile','nested':{'file':'cfile'}}
 	data = yadage.clihelpers.discover_initfiles(initdata,str(tmpdir))
 	assert data['key1'] == os.path.join(str(tmpdir),'afile')
-	assert data['key2'] == [os.path.join(str(tmpdir),'bfile1'),os.path.join(str(tmpdir),'bfile2')]
+	assert set(data['key2']) == set([os.path.join(str(tmpdir),'bfile1'),os.path.join(str(tmpdir),'bfile2')])
 	assert data['key3'] == 'nofile'
 	assert data['nested']['file'] == os.path.join(str(tmpdir),'cfile')
