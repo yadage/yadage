@@ -1,10 +1,6 @@
 import copy
-import yadage.workflow_loader
-import yadage.yadagemodels
-import yadage.visualize
-import yadage.interactive
 import jsonpointer
-
+from wflow import YadageWorkflow
 
 def rule_steps_indices(workflow):
     rule_to_steps_index = {}
@@ -35,7 +31,7 @@ def stepsofrule(workflow, offset, name):
     return rule, [x['_nodeid'] for x in p.resolve(workflow.stepsbystage)]
 
 def preview_rule(wflow, name = None, identifier=None):
-    newflow = yadage.yadagemodels.YadageWorkflow.fromJSON(
+    newflow = YadageWorkflow.fromJSON(
         copy.deepcopy(wflow.json())
     )
 

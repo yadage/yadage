@@ -3,12 +3,15 @@ import logging
 import click
 import os
 import manualutils
-import yadage.workflow_loader
 import clihelpers
 import packtivity.statecontexts.posixfs_context as statecontext
 from steering_object import YadageSteering
 from visualize import write_prov_graph
 from controllers import create_model_fromstring, PersistentController
+from stages import jsonStage
+import interactive
+import reset as reset_module
+import workflow_loader
 
 log = logging.getLogger(__name__)
 logging.basicConfig(level = logging.INFO)
@@ -174,7 +177,7 @@ def step(statetype, verbosity, nsteps, update_interval):
     model   = create_model_fromstring(statetype)
     backend = clihelpers.setupbackend_fromstring('celery')
 
-    extend, submit = yadage.interactive.interactive_deciders(idbased = True)
+    extend, submit = interactive.interactive_deciders(idbased = True)
     ys = YadageSteering()
     ys.adage_argument()
     ys.controller = PersistentController(model)
@@ -199,15 +202,14 @@ def add(statetype, verbosity, offset, toplevel, workdir, workflow):
     model      = create_model_fromstring(statetype)
     controller = PersistentController(model)
 
-    import yadage.yadagemodels
-    workflow_json = yadage.workflow_loader.workflow(
+    workflow_json = workflow_loader.workflow(
         workflow,
         toplevel=toplevel,
         validate=True
     )
 
     context = statecontext.make_new_context(workdir)
-    rules = [yadage.yadagemodels.jsonStage(json, context) for json in workflow_json['stages']]
+    rules = [jsonStage(json, context) for json in workflow_json['stages']]
     with controller.transaction():
         controller.adageobj.view().addWorkflow(rules)
 
@@ -239,7 +241,7 @@ def reset(statetype, name):
     r2s, _ = manualutils.rule_steps_indices(controller.adageobj)
     steps_of_rule = r2s[rule.identifier]
 
-    to_reset = steps_of_rule + yadage.reset.collective_downstream(controller.adageobj, steps_of_rule)
+    to_reset = steps_of_rule + reset_module.collective_downstream(controller.adageobj, steps_of_rule)
 
     controller.reset_nodes(to_reset)
 
