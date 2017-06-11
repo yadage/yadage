@@ -8,22 +8,9 @@ import visualize
 import logging
 from yadagestep import outputReference
 from handlers.expression_handlers import handlers as exh
-from helpers import set_trivial_backend
+from helpers import set_trivial_backend, process_refs
 
 
-def process(x, dag):
-    if type(x) == dict:
-        for k, v in x.iteritems():
-            x[k] = process(v, dag)
-        return x
-    elif type(x) == list:
-        for i, e in enumerate(x):
-            x[i] = process(e, dag)
-        return x
-    elif type(x) == outputReference:
-        return x.pointer.resolve(dag.getNode(x.stepid).result)
-    else:
-        return x
 
 
 def printRef(ref, dag, indent=''):
@@ -69,7 +56,7 @@ def testsel(instance, results, selection,verbosity):
         return
 
     click.secho(json.dumps(
-        process(selresult, wflow.dag),
+        process_refs(selresult, wflow.dag),
         sort_keys=True,
         indent=4,
         separators=(',', ': ')),

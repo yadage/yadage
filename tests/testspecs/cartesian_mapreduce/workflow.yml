@@ -1,0 +1,20 @@
+stages:
+  - name: map
+    dependencies: [init]
+    scheduler:
+      scheduler_type: multistep-stage
+      parameters:
+        input: {stages: init, output: factor_one, unwrap: true}
+        avalue: {stages: init, output: factor_two, unwrap: true}
+      step: {$ref: steps.yml#/stepA}
+      scatter:
+        method: cartesian
+        parameters: [input,avalue]
+  - name: reduce
+    dependencies: [map]
+    scheduler:
+      scheduler_type: singlestep-stage
+      parameters:
+        input: {stages: 'map', output: outputA}
+        avalue: 'ok'
+      step: {$ref: steps.yml#/stepA}

@@ -1,0 +1,17 @@
+stages:
+  - name: hello_world
+    scheduler:
+      scheduler_type: singlestep-stage
+      parameters:
+        parone: {stages: init, output: par, unwrap: true}
+        outputfile: '{workdir}/hello_world.txt'
+      step:
+        process:
+          process_type: 'string-interpolated-cmd'
+          cmd: 'echo Hello {parone} | tee {outputfile}'
+        publisher:
+          publisher_type: 'frompar-pub'
+          outputmap:
+            outputfile: outputfile
+        environment:
+          environment_type: 'localproc-env'

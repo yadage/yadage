@@ -2,12 +2,11 @@ import logging
 import utils
 import itertools
 import copy
-
 import packtivity.statecontexts.posixfs_context as statecontext
 
 from expression_handlers import handlers as exprhandlers
 from yadage.yadagestep import yadagestep, initstep, outputReference
-from yadage.yadagemodels import jsonStage
+from ..stages import jsonStage
 from yadage.helpers import leaf_iterator
 
 log = logging.getLogger(__name__)
@@ -166,7 +165,7 @@ def scatter(parameters, scatter):
 
     if scatter['method'] == 'cartesian':
         for what in itertools.product(*[to_scatter[k] for k in scatter['parameters']]):
-            individualpars = dict(zip(scatter['keys'], what))
+            individualpars = dict(zip(scatter['parameters'], what))
             pars = commonpars.copy()
             pars.update(**individualpars)
             singlesteppars += [pars]

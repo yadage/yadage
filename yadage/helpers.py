@@ -5,6 +5,7 @@ import os
 import jsonref
 import copy
 from backends.trivialbackend import TrivialProxy, TrivialBackend
+from yadagestep import outputReference
 
 import logging
 import jsonpointer
@@ -32,6 +33,19 @@ def leaf_iterator(jsonlike, path = None):
     else:
         yield jsonpointer.JsonPointer.from_parts(path),jsonlike
 
+def process_refs(x, dag):
+    if type(x) == dict:
+        for k, v in x.iteritems():
+            x[k] = process_refs(v, dag)
+        return x
+    elif type(x) == list:
+        for i, e in enumerate(x):
+            x[i] = process_refs(e, dag)
+        return x
+    elif type(x) == outputReference:
+        return x.pointer.resolve(dag.getNode(x.stepid).result)
+    else:
+        return x
 
 def set_backend(dag, backend, proxymaker):
     '''

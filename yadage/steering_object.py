@@ -4,7 +4,7 @@ import os
 import json
 import workflow_loader
 from yadage.controllers import setup_controller_fromstring
-from yadage.yadagemodels import YadageWorkflow
+from yadage.wflow import YadageWorkflow
 import clihelpers
 import visualize
 import serialize

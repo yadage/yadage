@@ -20,7 +20,7 @@ class outputReference(object):
             'pointer_path': self.pointer.path
         }
 
-class stepbase(object):
+class StepBase(object):
 
     def __init__(self, name):
         self.name = name
@@ -40,7 +40,7 @@ class stepbase(object):
             'inputs': [x.json() for x in self.inputs]
         }
 
-class initstep(stepbase):
+class initstep(StepBase):
 
     def __init__(self, name, initdata=None):
         super(initstep, self).__init__(name)
@@ -68,7 +68,7 @@ class initstep(stepbase):
         return data
 
 
-class yadagestep(stepbase):
+class yadagestep(StepBase):
 
     def __init__(self, name, spec, context):
         super(yadagestep, self).__init__(name)

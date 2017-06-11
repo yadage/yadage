@@ -6,7 +6,7 @@ import functools
 import yadage.reset
 import adage.controllerutils as ctrlutils
 from adage.wflowcontroller import BaseController, InMemoryController
-from yadage.yadagemodels import YadageWorkflow
+from yadage.wflow import YadageWorkflow
 
 
 log = logging.getLogger(__name__)

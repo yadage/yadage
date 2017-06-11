@@ -52,6 +52,7 @@ def jsonpath_ready(flowview, depspec):
     for x in dependencies:
         depmatches = flowview.query(x, flowview.steps)
         if not depmatches:
+            log.debug('no query matches, not ready')
             return False
         issubwork = '_nodeid' not in depmatches[0].value[0]
         if issubwork:
