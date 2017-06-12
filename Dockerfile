@@ -1,3 +1,6 @@
+ARG VCS_REF
+LABEL org.label-schema.vcs-ref=$VCS_REF \
+      org.label-schema.vcs-url="https://github.com/diana-hep/yadage"
 FROM fedora
 RUN dnf install -y gcc gcc-c++ graphviz-devel ImageMagick python-devel libffi-devel openssl openssl-devel unzip nano autoconf automake libtool redhat-rpm-config; dnf clean all 
 COPY . /yadage

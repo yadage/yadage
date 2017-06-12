@@ -17,7 +17,7 @@ script:
 - yadage-run -t from-github/phenochain workdir_pheno_delphes madgraph_delphes.yml
   input.yml
 - find workdir_pheno_delphes
-- docker build -t "yadage/yadage:git-${TRAVIS_BRANCH}" .
+- docker build --build-arg VCS_REF=`git rev-parse --short HEAD` -t "yadage/yadage:git-${TRAVIS_BRANCH}" .
 - docker login -u $DOCKERLOGIN -p $DOCKERPW
 - docker push "yadage/yadage:git-${TRAVIS_BRANCH}"
 after_success:
