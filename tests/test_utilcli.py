@@ -3,7 +3,7 @@ import yadage.utilcli
 import yadage.steering
 import os
 
-def test_testsel(tmpdir):
+def test_clis(tmpdir):
     runner = CliRunner()
 
     result = runner.invoke(yadage.steering.main,[str(tmpdir.join('workdir')),'workflow.yml','-t','testspecs/local-helloworld'])
@@ -11,13 +11,25 @@ def test_testsel(tmpdir):
 
 
     result = runner.invoke(yadage.utilcli.testsel,[
-		str(tmpdir.join('workdir/_yadage/yadage_snapshot_workflow.json')),
-		str(tmpdir.join('workdir/_yadage/yadage_snapshot_backend.json')),
-		'{stages: hello_world, output: outputfile}'
+        str(tmpdir.join('workdir/_yadage/yadage_snapshot_workflow.json')),
+        str(tmpdir.join('workdir/_yadage/yadage_snapshot_backend.json')),
+        '{stages: hello_world, output: outputfile}'
     ])
     assert result.exit_code == 0
 
 
-def test_viz():
-    runner = CliRunner()
-    result = runner.invoke(yadage.utilcli.viz)
+    result = runner.invoke(yadage.utilcli.testsel,[
+        str(tmpdir.join('workdir/_yadage/yadage_snapshot_workflow.json')),
+        str(tmpdir.join('workdir/_yadage/yadage_snapshot_backend.json')),
+        '{stages: nonexistent, output: nonexistent}'
+    ])
+    assert result.exit_code == 0
+
+
+    result = runner.invoke(yadage.utilcli.viz,[
+        str(tmpdir.join('workdir/_yadage/yadage_snapshot_workflow.json')),
+        str(tmpdir.join('workdir/_yadage/yadage_snapshot_backend.json')),
+        str(tmpdir.join('viz.pdf'))
+    ])
+    tmpdir.join('viz.pdf').check()
+    assert result.exit_code == 0
