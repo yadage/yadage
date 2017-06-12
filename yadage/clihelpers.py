@@ -2,7 +2,7 @@ import yaml
 import os
 import click
 import zipfile
-import urllib
+import urllib2
 import logging
 import jsonpointer
 import jq
@@ -61,7 +61,9 @@ def prepare_workdir_from_archive(workdir, inputarchive):
     initdir = os.path.join(workdir,'init')
     os.makedirs(initdir)
     localzipfile = '{}/inputarchive.zip'.format(workdir)
-    urllib.urlretrieve(inputarchive, localzipfile)
+    f = urllib2.urlopen(inputarchive)
+    with open(localzipfile,'w') as lf:
+        lf.write(f.read())
     with zipfile.ZipFile(localzipfile) as zf:
         zf.extractall(path=initdir)
     os.remove(localzipfile)

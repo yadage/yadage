@@ -7,14 +7,7 @@ import workflow_loader
 import yadageschemas
 import json
 import jsonref
-
-
-class ref(json.JSONEncoder):
-
-    def default(self, obj):
-        if isinstance(obj, jsonref.JsonRef):
-            return obj.copy()
-        return json.JSONEncoder.default(self, obj)
+from helpers import WithJsonRefEncoder
 
 
 logging.basicConfig(level=logging.ERROR)
@@ -36,7 +29,7 @@ def main(workflow, toplevel, schemadir, stdout):
         data = workflow_loader.workflow(
             workflow, toplevel=toplevel, schemadir=schemadir, validate=True)
         if stdout:
-            print json.dumps(data, cls=ref)
+            print json.dumps(data, cls=WithJsonRefEncoder)
         else:
             click.secho('workflow validates against schema', fg='green')
         rc = 0

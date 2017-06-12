@@ -26,3 +26,4 @@ def test_filediscovery(tmpdir):
 	assert set(data['key2']) == set([os.path.join(str(tmpdir),'bfile1'),os.path.join(str(tmpdir),'bfile2')])
 	assert data['key3'] == 'nofile'
 	assert data['nested']['file'] == os.path.join(str(tmpdir),'cfile')
+

@@ -17,18 +17,6 @@ def rule_steps_indices(workflow):
             steps_to_rule_index[step] = rule.identifier
     return rule_to_steps_index, steps_to_rule_index
 
-def select_rule(workflow, offset, name):
-    for x in workflow.applied_rules:
-        if x.offset == offset and x.rule.name == name:
-            return x
-    raise RuntimeError('rule not found')
-
-def stepsofrule(workflow, offset, name):
-    rule = select_rule(workflow, offset, name)
-    path = '/'.join([rule.offset, rule.rule.name])
-    p = jsonpointer.JsonPointer(path)
-    return rule, [x['_nodeid'] for x in p.resolve(workflow.stepsbystage)]
-
 def preview_rule(wflow, name = None, identifier=None):
     newflow = YadageWorkflow.fromJSON(
         copy.deepcopy(wflow.json())

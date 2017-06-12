@@ -118,8 +118,8 @@ class CacheBuilder(object):
         return cacheid in self.cache and 'result' in self.cache[cacheid]
 
     def cachevalid(self, cacheid):
-        raise RuntimeError('implement cache validation')
-
+        raise NotImplementedError
+        
     def cacheddata(self, task, remove_invalid = True):
         '''
         returns results from a valid cache entry if it exists, else None

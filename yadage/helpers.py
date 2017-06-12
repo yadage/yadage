@@ -76,16 +76,6 @@ def set_trivial_backend(dag, jsondata):
     return backend
 
 
-def stepindex(wflow):
-    ''''
-    build an index mapping step id's to rule id's
-    '''
-    index = {}
-    for r in wflow.applied_rules + wflow.rules:
-        for s in wflow.view(r.offset).getSteps(r.rule.name):
-            index[s.identifier] = r.identifier
-    return index
-
 DEFAULT_ID_METHOD = 'jsonhash'
 
 

@@ -108,7 +108,7 @@ def submit(nodeid, allof, offset, statetype, verbosity):
         nodes_to_submit = [nodeid] if nodeid in controller.submittable_nodes() else []
     if allof:
         offset, name = allof.split('/')
-        rule = manualutils.select_rule(controller.adageobj, offset, name)
+        rule = controller.adageobj.view().getRule(name = name, offset = offset)
         if not rule:
             click.secho('stage not found!', fg = 'red')
             return
