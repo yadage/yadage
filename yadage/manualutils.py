@@ -23,7 +23,6 @@ def select_rule(workflow, offset, name):
             return x
     raise RuntimeError('rule not found')
 
-
 def stepsofrule(workflow, offset, name):
     rule = select_rule(workflow, offset, name)
     path = '/'.join([rule.offset, rule.rule.name])

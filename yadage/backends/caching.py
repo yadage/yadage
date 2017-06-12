@@ -24,16 +24,12 @@ class CachedBackend(federatedbackend.FederatedBackend):
             'primary': backend
         })
         configparts  = cacheconfig.split(':')
-        if len(configparts) == 1:
-            log.info('default caching strategy')
-            self.cache = CacheBuilder(configparts[0])
+        strategy, configfile = configparts
+        if strategy == 'checksums':
+            log.info('checksums caching strategy')
+            self.cache = ChecksumCache(configfile)
         else:
-            strategy, configfile = configparts
-            if strategy == 'checksums':
-                log.info('checksums caching strategy')
-                self.cache = ChecksumCache(configfile)
-            else:
-                raise RuntimeError('unknown caching config')
+            raise RuntimeError('unknown caching config')
 
 
     def ready(self, proxy):
