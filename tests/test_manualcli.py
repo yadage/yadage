@@ -19,6 +19,11 @@ def test_manual(tmpdir):
     result = runner.invoke(yadage.manualcli.show,['-s','filebacked:'+statefile])
     assert result.exit_code == 0
 
+    result = runner.invoke(yadage.manualcli.visualize,['-s','filebacked:'+statefile,'-w',str(tmpdir)])
+    assert result.exit_code == 0
+
+    assert tmpdir.join('yadage_workflow_instance.pdf').check()
+
 def test_submit():
     runner = CliRunner()
     result = runner.invoke(yadage.manualcli.submit)
