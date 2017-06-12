@@ -21,14 +21,14 @@ def mancli():
     pass
 
 @mancli.command()
-@click.option('-s', '--statectrl', default='filebacked:helloworld.json')
+@click.option('-s', '--statectrl', default='filebacked:yadage_state.json')
 @click.option('-t', '--toplevel', default=os.getcwd())
 @click.option('-a', '--inputarchive', default=None)
 @click.option('-d','--initdir', default='init', help = "relative path (to workdir) to initialiation data directory")
 @click.option('--parameter', '-p', multiple=True)
 @click.argument('workdir')
 @click.argument('workflow')
-@click.argument('initfiles', default='')
+@click.argument('initfiles', nargs = -1)
 def init(workdir, workflow, initfiles, statectrl, initdir, toplevel, parameter, inputarchive):
     initdata = clihelpers.getinit_data(initfiles, parameter)
 
@@ -59,7 +59,7 @@ def click_print_submittable_nodes(controller):
 
 @mancli.command()
 @click.option('-n','--name', default=None)
-@click.option('-s', '--statetype', default='filebacked:helloworld.json')
+@click.option('-s', '--statetype', default='filebacked:yadage_state.json')
 @click.option('-v', '--verbosity', default='ERROR')
 def apply(name, statetype, verbosity):
     logging.basicConfig(level=getattr(logging, verbosity))
@@ -90,7 +90,7 @@ def apply(name, statetype, verbosity):
 @click.option('-n','--nodeid', default=None)
 @click.option('-a','--allof', default=None)
 @click.option('-o', '--offset', default='')
-@click.option('-s', '--statetype', default='filebacked:helloworld.json')
+@click.option('-s', '--statetype', default='filebacked:yadage_state.json')
 @click.option('-v', '--verbosity', default='ERROR')
 def submit(nodeid, allof, offset, statetype, verbosity):
     logging.basicConfig(level=getattr(logging, verbosity))
@@ -126,7 +126,7 @@ def submit(nodeid, allof, offset, statetype, verbosity):
     click.secho('submitted: {}'.format(nodes_to_submit), fg = 'green')
 
 @mancli.command()
-@click.option('-s', '--statetype', default='filebacked:helloworld.json')
+@click.option('-s', '--statetype', default='filebacked:yadage_state.json')
 def show(statetype):
     model      = create_model_fromstring(statetype)
     controller = PersistentController(model)
@@ -153,7 +153,7 @@ valid: {valid}
 
 @mancli.command()
 @click.argument('name')
-@click.option('-s', '--statetype', default='filebacked:helloworld.json')
+@click.option('-s', '--statetype', default='filebacked:yadage_state.json')
 def preview(name,statetype):
     model      = create_model_fromstring(statetype)
     controller = PersistentController(model)
@@ -166,7 +166,7 @@ def preview(name,statetype):
         click.secho(
             '-> new node "{}" with {} upstream dependencies'.format(n['name'], len(n['parents'])))
 @mancli.command()
-@click.option('-s', '--statetype', default='filebacked:helloworld.json')
+@click.option('-s', '--statetype', default='filebacked:yadage_state.json')
 @click.option('-v', '--verbosity', default='ERROR')
 @click.option('-n', '--nsteps', default=-1, help = 'number of steps to process. use -1 to for no limit (will run workflow to completion)')
 @click.option('-u', '--update-interval', default=1)
@@ -190,7 +190,7 @@ def step(statetype, verbosity, nsteps, update_interval):
     )
 
 @mancli.command()
-@click.option('-s', '--statetype', default='filebacked:helloworld.json')
+@click.option('-s', '--statetype', default='filebacked:yadage_state.json')
 @click.option('-v', '--verbosity', default='ERROR')
 @click.option('-o', '--offset')
 @click.option('-t', '--toplevel', default = os.curdir)
@@ -214,7 +214,7 @@ def add(statetype, verbosity, offset, toplevel, workdir, workflow):
         controller.adageobj.view().addWorkflow(rules)
 
 @mancli.command()
-@click.option('-s', '--statetype', default='filebacked:helloworld.json')
+@click.option('-s', '--statetype', default='filebacked:yadage_state.json')
 @click.option('-f', '--fileformat', default='pdf')
 @click.option('-w', '--workdir', default=os.curdir)
 def visualize(statetype, workdir, fileformat):
@@ -228,7 +228,7 @@ def visualize(statetype, workdir, fileformat):
 
 @mancli.command()
 @click.argument('name')
-@click.option('-s', '--statetype', default='filebacked:helloworld.json')
+@click.option('-s', '--statetype', default='filebacked:yadage_state.json')
 def reset(statetype, name):
     model   = create_model_fromstring(statetype)
     controller = PersistentController(model)

@@ -44,6 +44,7 @@ def getinit_data(initfiles, parameters):
     strings as they are passed in the command line <pvalue> is assumed to be a
     YAML parsable string.
     '''
+
     initdata = {}
     for initfile in initfiles:
         log.info('loading initialization data from file %s',initfile)

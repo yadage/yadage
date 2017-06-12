@@ -27,3 +27,10 @@ def test_filediscovery(tmpdir):
 	assert data['key3'] == 'nofile'
 	assert data['nested']['file'] == os.path.join(str(tmpdir),'cfile')
 
+
+def test_getinit(tmpdir):
+	tmpdir.join('input.yml').write('input: [1,2,3]\n')
+
+
+	data = yadage.clihelpers.getinit_data([str(tmpdir.join('input.yml'))],['another=parameter'])
+	assert {'another':'parameter','input':[1,2,3]} == data
