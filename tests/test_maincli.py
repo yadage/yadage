@@ -11,13 +11,20 @@ def test_maincli(tmpdir):
     assert result.exit_code == 0
 
 
-def test_maincli_interactive(tmpdir):
+def test_maincli_interactive_all_yes(tmpdir):
     runner = CliRunner()
     result = runner.invoke(yadage.steering.main,[
         os.path.join(str(tmpdir),'workdir'),'workflow.yml','-t','testspecs/local-helloworld','--interactive'], input = 'y\ny\n'
     )
+    assert tmpdir.join('workdir/hello_world/hello_world.txt').check()
+    assert result.exit_code == 0
 
 
+def test_maincli_interactive_no_yes(tmpdir):
+    runner = CliRunner()
+    result = runner.invoke(yadage.steering.main,[
+        os.path.join(str(tmpdir),'workdir'),'workflow.yml','-t','testspecs/local-helloworld','--interactive'], input = '\nn\ny\nn\ny\n'
+    )
     assert tmpdir.join('workdir/hello_world/hello_world.txt').check()
     assert result.exit_code == 0
 
