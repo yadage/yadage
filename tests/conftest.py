@@ -39,3 +39,9 @@ def simple_mapreduce(tmpdir):
 def multiproc_backend():
     backend = setupbackend_fromstring('multiproc:4')
     return backend
+
+@pytest.fixture()
+def checksum_cached_multiproc(tmpdir):
+    cache   = str(tmpdir.join('cache.json'))
+    backend = setupbackend_fromstring('multiproc:4', cacheconfig = 'checksums:'+cache)
+    return backend

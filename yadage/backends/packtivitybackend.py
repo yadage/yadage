@@ -1,5 +1,6 @@
 import federatedbackend
 import logging
+import caching
 import yadage.yadagestep
 from trivialbackend import TrivialProxy, TrivialBackend
 from packtivity.backendutils import backend_from_string
@@ -28,7 +29,6 @@ class PacktivityBackend(federatedbackend.FederatedBackend):
             raise RuntimeError('need backend or backendstring')
         if cacheconfig:
             self.cached = True
-            import caching
             backend = caching.CachedBackend(
                 backend,
                 cacheconfig=cacheconfig

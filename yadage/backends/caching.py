@@ -67,12 +67,16 @@ class CacheBuilder(object):
     def __init__(self, cachefile):
         self.cachefile = cachefile
         if not os.path.exists(self.cachefile):
+            log.info('fresh cache as file does not exist yet.')
             self.cache = {}
         else:
             log.info('reading cache from %s',self.cachefile)
             self.cache = json.load(open(self.cachefile))
 
     def __del__(self):
+        self.todisk()
+
+    def todisk(self):
         log.info('writing cache to %s',self.cachefile)
         json.dump(self.cache, open(self.cachefile, 'w'), indent=4, sort_keys=True)
 
