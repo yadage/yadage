@@ -6,7 +6,6 @@ import logging
 import workflow_loader
 import yadageschemas
 import json
-import jsonref
 from helpers import WithJsonRefEncoder
 
 
