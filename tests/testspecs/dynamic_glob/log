@@ -1,0 +1,76 @@
+INFO:yadage.backends.caching:resultexists caching strategy
+INFO:yadage.backends.caching:reading cache from cache.json
+INFO:yadage.steering_api:running yadage workflow workflow.yml
+INFO:yadage.steering_api:yadage meta directory exists.. will remove and remake
+INFO:adage:preparing adage coroutine.
+INFO:adage:starting state loop.
+INFO:adage:we could update this with rule: < offset: "" rule: <yadage.yadagemodels.initStage object at 0x10fbd02d0> >
+INFO:adage:say yes to graph extension by rule: < offset: "" rule: <yadage.yadagemodels.initStage object at 0x10fbd02d0> > state: <yadage.yadagemodels.YadageWorkflow object at 0x10fb602d0>
+INFO:adage:extending graph.
+INFO:adage:we could update this with rule: < offset: "" rule: <jsonStage: acquisition> >
+INFO:adage:say yes to graph extension by rule: < offset: "" rule: <jsonStage: acquisition> > state: <yadage.yadagemodels.YadageWorkflow object at 0x10fb602d0>
+INFO:adage:extending graph.
+INFO:adage:we applied a change, so we will recurse to see if we can apply anything else give updated state
+INFO:adage:say yes to node submission of: <YadageNode init DEFINED lifetime: 0:00:00.539914  runtime: None (id: 5c8c7fb80238e197b36a8eb6e225dd62c0167c4b) has result: True>
+INFO:adage:submitting <YadageNode init DEFINED lifetime: 0:00:00.540725  runtime: None (id: 5c8c7fb80238e197b36a8eb6e225dd62c0167c4b) has result: True> job
+INFO:yadage.backends.caching:checking cache for task init
+INFO:yadage.backends.caching:returning cached result {u'status': u'SUCCESS', u'checksums': None, u'result': {u'sourcefile': u'https://github.com/lukasheinrich/yadage-workflows/raw/master/testing/dynamic_glob/inputs/three_files.zip'}, u'cachingtime': 1481035287.914125}
+INFO:yadage.backends.caching:use cached result for task: init
+INFO:adage.node:node finished <YadageNode init SUCCESS lifetime: 0:00:00.542710  runtime: 0:00:00.000161 (id: 5c8c7fb80238e197b36a8eb6e225dd62c0167c4b) has result: True> finished
+INFO:adage:say yes to node submission of: <YadageNode acquisition DEFINED lifetime: 0:00:00.249506  runtime: None (id: e6b8f5db09d04a4706e9efa12939f3fa824fa598) has result: False>
+INFO:adage:submitting <YadageNode acquisition DEFINED lifetime: 0:00:00.249902  runtime: None (id: e6b8f5db09d04a4706e9efa12939f3fa824fa598) has result: False> job
+INFO:yadage.backends.caching:checking cache for task acquisition
+INFO:yadage.backends.caching:checksums comparison: True
+INFO:yadage.backends.caching:all file refs in result exist already.
+INFO:yadage.backends.caching:returning cached result {u'status': u'SUCCESS', u'checksums': [], u'result': {u'unzipped': [u'/Users/lukas/Code/yadagedev/yadage-workflows/testing/dynamic_glob/work/acquisition/1.txt', u'/Users/lukas/Code/yadagedev/yadage-workflows/testing/dynamic_glob/work/acquisition/2.txt', u'/Users/lukas/Code/yadagedev/yadage-workflows/testing/dynamic_glob/work/acquisition/3.txt']}, u'cachingtime': 1481036183.826087}
+INFO:yadage.backends.caching:use cached result for task: acquisition
+INFO:adage.node:node finished <YadageNode acquisition SUCCESS lifetime: 0:00:00.268470  runtime: 0:00:00.000231 (id: e6b8f5db09d04a4706e9efa12939f3fa824fa598) has result: True> finished
+INFO:adage:notrun: 0 | running: 0 | successful: 2 | failed: 0 | total: 2 | open rules: 2 | applied rules: 2
+INFO:adage:we could update this with rule: < offset: "" rule: <jsonStage: map> >
+INFO:adage:say yes to graph extension by rule: < offset: "" rule: <jsonStage: map> > state: <yadage.yadagemodels.YadageWorkflow object at 0x10fb602d0>
+INFO:adage:extending graph.
+INFO:adage:we applied a change, so we will recurse to see if we can apply anything else give updated state
+INFO:adage:we could update this with rule: < offset: "" rule: <jsonStage: reduce> >
+INFO:adage:say yes to graph extension by rule: < offset: "" rule: <jsonStage: reduce> > state: <yadage.yadagemodels.YadageWorkflow object at 0x10fb602d0>
+INFO:adage:extending graph.
+INFO:adage:we applied a change, so we will recurse to see if we can apply anything else give updated state
+INFO:adage:say yes to node submission of: <YadageNode map_2 DEFINED lifetime: 0:00:00.405805  runtime: None (id: 7897ecfdd485e938722e48b2400f4a088e852595) has result: True>
+INFO:adage:submitting <YadageNode map_2 DEFINED lifetime: 0:00:00.406040  runtime: None (id: 7897ecfdd485e938722e48b2400f4a088e852595) has result: True> job
+INFO:yadage.backends.caching:checking cache for task map_2
+INFO:yadage.backends.caching:checksums comparison: True
+INFO:yadage.backends.caching:all file refs in result exist already.
+INFO:yadage.backends.caching:returning cached result {u'status': u'SUCCESS', u'checksums': [u'301e7dc826967952bc0f2675691206c7'], u'result': {u'mapout': u'/Users/lukas/Code/yadagedev/yadage-workflows/testing/dynamic_glob/work/map_2/mapout.txt'}, u'cachingtime': 1481035892.998429}
+INFO:yadage.backends.caching:use cached result for task: map_2
+INFO:adage:say yes to node submission of: <YadageNode map_0 DEFINED lifetime: 0:00:00.424809  runtime: None (id: bf02bdc3f3485e753d219ab9edada03583a3b851) has result: True>
+INFO:adage:submitting <YadageNode map_0 DEFINED lifetime: 0:00:00.425083  runtime: None (id: bf02bdc3f3485e753d219ab9edada03583a3b851) has result: True> job
+INFO:yadage.backends.caching:checking cache for task map_0
+INFO:yadage.backends.caching:checksums comparison: True
+INFO:yadage.backends.caching:all file refs in result exist already.
+INFO:yadage.backends.caching:returning cached result {u'status': u'SUCCESS', u'checksums': [u'301e7dc826967952bc0f2675691206c7'], u'result': {u'mapout': u'/Users/lukas/Code/yadagedev/yadage-workflows/testing/dynamic_glob/work/map_0/mapout.txt'}, u'cachingtime': 1481036210.700357}
+INFO:yadage.backends.caching:use cached result for task: map_0
+INFO:adage:say yes to node submission of: <YadageNode map_1 DEFINED lifetime: 0:00:00.438314  runtime: None (id: 451323e4124d88907e905b0be19f6f07e6fd853b) has result: True>
+INFO:adage:submitting <YadageNode map_1 DEFINED lifetime: 0:00:00.438594  runtime: None (id: 451323e4124d88907e905b0be19f6f07e6fd853b) has result: True> job
+INFO:yadage.backends.caching:checking cache for task map_1
+INFO:yadage.backends.caching:checksums comparison: True
+INFO:yadage.backends.caching:all file refs in result exist already.
+INFO:yadage.backends.caching:returning cached result {u'status': u'SUCCESS', u'checksums': [u'301e7dc826967952bc0f2675691206c7'], u'result': {u'mapout': u'/Users/lukas/Code/yadagedev/yadage-workflows/testing/dynamic_glob/work/map_1/mapout.txt'}, u'cachingtime': 1481035893.004295}
+INFO:yadage.backends.caching:use cached result for task: map_1
+INFO:adage.node:node finished <YadageNode map_1 SUCCESS lifetime: 0:00:00.461293  runtime: 0:00:00.000209 (id: 451323e4124d88907e905b0be19f6f07e6fd853b) has result: True> finished
+INFO:adage.node:node finished <YadageNode map_0 SUCCESS lifetime: 0:00:00.462498  runtime: 0:00:00.023675 (id: bf02bdc3f3485e753d219ab9edada03583a3b851) has result: True> finished
+INFO:adage.node:node finished <YadageNode map_2 SUCCESS lifetime: 0:00:00.461546  runtime: 0:00:00.038322 (id: 7897ecfdd485e938722e48b2400f4a088e852595) has result: True> finished
+INFO:adage:say yes to node submission of: <YadageNode reduce DEFINED lifetime: 0:00:00.057391  runtime: None (id: b0414d50d735c83c55934812d6d974934382d3f3) has result: True>
+INFO:adage:submitting <YadageNode reduce DEFINED lifetime: 0:00:00.057721  runtime: None (id: b0414d50d735c83c55934812d6d974934382d3f3) has result: True> job
+INFO:yadage.backends.caching:checking cache for task reduce
+INFO:yadage.backends.caching:checksums comparison: True
+INFO:yadage.backends.caching:all file refs in result exist already.
+INFO:yadage.backends.caching:returning cached result {u'status': u'SUCCESS', u'checksums': [u'74822c95b14161f5e6ad59bb8295cb29', u'50f2940c5316b14d2dca4e7ec907e21b', u'74575213e5959544ef60ab5d4a45ed61'], u'result': {u'reduceout': u'/Users/lukas/Code/yadagedev/yadage-workflows/testing/dynamic_glob/work/reduce/out.txt'}, u'cachingtime': 1481036210.773615}
+INFO:yadage.backends.caching:use cached result for task: reduce
+INFO:adage.node:node finished <YadageNode reduce SUCCESS lifetime: 0:00:00.082497  runtime: 0:00:00.000482 (id: b0414d50d735c83c55934812d6d974934382d3f3) has result: True> finished
+INFO:adage:no nodes can be run anymore
+INFO:adage:all running jobs are finished.
+INFO:adage:track last time
+INFO:adage:notrun: 0 | running: 0 | successful: 6 | failed: 0 | total: 6 | open rules: 0 | applied rules: 4
+INFO:adage:validating execution
+INFO:adage:execution valid. (in terms of execution order)
+INFO:yadage.steering_api:finished yadage workflow <yadage.yadagemodels.YadageWorkflow object at 0x10fb602d0>, returning rc: 0
+INFO:yadage.backends.caching:writing cache to cache.json

@@ -1,0 +1,30 @@
+acquire:
+  process:
+    process_type: string-interpolated-cmd
+    cmd: 'curl -L -o {localname} {source} && unzip {localname}'
+  environment:
+    environment_type: 'localproc-env'
+  publisher:
+    publisher_type: fromglob-pub
+    globexpression: '*.txt'
+    outputkey: 'unzipped'
+mapstep:
+  process:
+    process_type: string-interpolated-cmd
+    cmd: 'date > {outputfile}; cat  {inputfile} | tr "[:lower:]" "[:upper:]" >> {outputfile};'
+  environment:
+    environment_type: 'localproc-env'
+  publisher:
+    publisher_type: 'frompar-pub'
+    outputmap:
+      mapout: outputfile
+reducestep:
+  process:
+    process_type: string-interpolated-cmd
+    cmd: 'cat {mapoutputs} > {combinedfile}'
+  environment:
+    environment_type: 'localproc-env'
+  publisher:
+    publisher_type: 'frompar-pub'
+    outputmap:
+      reduceout: combinedfile

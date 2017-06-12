@@ -1,0 +1,316 @@
+{
+    "451323e4124d88907e905b0be19f6f07e6fd853b": {
+        "result": {
+            "cachingtime": 1481035893.004295, 
+            "checksums": [
+                "301e7dc826967952bc0f2675691206c7"
+            ], 
+            "result": {
+                "mapout": "/Users/lukas/Code/yadagedev/yadage-workflows/testing/dynamic_glob/work/map_1/mapout.txt"
+            }, 
+            "status": "SUCCESS"
+        }, 
+        "task": {
+            "attributes": {
+                "inputfile": "/Users/lukas/Code/yadagedev/yadage-workflows/testing/dynamic_glob/work/acquisition/2.txt", 
+                "outputfile": "/Users/lukas/Code/yadagedev/yadage-workflows/testing/dynamic_glob/work/map_1/mapout.txt"
+            }, 
+            "context": {
+                "depwrites": [
+                    "/Users/lukas/Code/yadagedev/yadage-workflows/testing/dynamic_glob/work/acquisition"
+                ], 
+                "nametag": "map_1", 
+                "readonly": [
+                    "/Users/lukas/Code/yadagedev/yadage-workflows/testing/dynamic_glob/work"
+                ], 
+                "readwrite": [
+                    "/Users/lukas/Code/yadagedev/yadage-workflows/testing/dynamic_glob/work/map_1"
+                ]
+            }, 
+            "inputs": [
+                {
+                    "pointer_path": "/unzipped/1", 
+                    "stepid": "e6b8f5db09d04a4706e9efa12939f3fa824fa598"
+                }
+            ], 
+            "name": "map_1", 
+            "prepublished": {
+                "mapout": "/Users/lukas/Code/yadagedev/yadage-workflows/testing/dynamic_glob/work/map_1/mapout.txt"
+            }, 
+            "spec": {
+                "environment": {
+                    "environment_type": "localproc-env"
+                }, 
+                "process": {
+                    "cmd": "date > {outputfile}; cat  {inputfile} | tr \"[:lower:]\" \"[:upper:]\" >> {outputfile};", 
+                    "process_type": "string-interpolated-cmd"
+                }, 
+                "publisher": {
+                    "outputmap": {
+                        "mapout": "outputfile"
+                    }, 
+                    "publisher_type": "frompar-pub"
+                }
+            }, 
+            "type": "yadagestep"
+        }
+    }, 
+    "5c8c7fb80238e197b36a8eb6e225dd62c0167c4b": {
+        "result": {
+            "cachingtime": 1481035287.914125, 
+            "checksums": null, 
+            "result": {
+                "sourcefile": "https://github.com/lukasheinrich/yadage-workflows/raw/master/testing/dynamic_glob/inputs/three_files.zip"
+            }, 
+            "status": "SUCCESS"
+        }, 
+        "task": {
+            "attributes": {
+                "sourcefile": "https://github.com/lukasheinrich/yadage-workflows/raw/master/testing/dynamic_glob/inputs/three_files.zip"
+            }, 
+            "inputs": [], 
+            "name": "init", 
+            "prepublished": {
+                "sourcefile": "https://github.com/lukasheinrich/yadage-workflows/raw/master/testing/dynamic_glob/inputs/three_files.zip"
+            }, 
+            "type": "initstep"
+        }
+    }, 
+    "7897ecfdd485e938722e48b2400f4a088e852595": {
+        "result": {
+            "cachingtime": 1481035892.998429, 
+            "checksums": [
+                "301e7dc826967952bc0f2675691206c7"
+            ], 
+            "result": {
+                "mapout": "/Users/lukas/Code/yadagedev/yadage-workflows/testing/dynamic_glob/work/map_2/mapout.txt"
+            }, 
+            "status": "SUCCESS"
+        }, 
+        "task": {
+            "attributes": {
+                "inputfile": "/Users/lukas/Code/yadagedev/yadage-workflows/testing/dynamic_glob/work/acquisition/3.txt", 
+                "outputfile": "/Users/lukas/Code/yadagedev/yadage-workflows/testing/dynamic_glob/work/map_2/mapout.txt"
+            }, 
+            "context": {
+                "depwrites": [
+                    "/Users/lukas/Code/yadagedev/yadage-workflows/testing/dynamic_glob/work/acquisition"
+                ], 
+                "nametag": "map_2", 
+                "readonly": [
+                    "/Users/lukas/Code/yadagedev/yadage-workflows/testing/dynamic_glob/work"
+                ], 
+                "readwrite": [
+                    "/Users/lukas/Code/yadagedev/yadage-workflows/testing/dynamic_glob/work/map_2"
+                ]
+            }, 
+            "inputs": [
+                {
+                    "pointer_path": "/unzipped/2", 
+                    "stepid": "e6b8f5db09d04a4706e9efa12939f3fa824fa598"
+                }
+            ], 
+            "name": "map_2", 
+            "prepublished": {
+                "mapout": "/Users/lukas/Code/yadagedev/yadage-workflows/testing/dynamic_glob/work/map_2/mapout.txt"
+            }, 
+            "spec": {
+                "environment": {
+                    "environment_type": "localproc-env"
+                }, 
+                "process": {
+                    "cmd": "date > {outputfile}; cat  {inputfile} | tr \"[:lower:]\" \"[:upper:]\" >> {outputfile};", 
+                    "process_type": "string-interpolated-cmd"
+                }, 
+                "publisher": {
+                    "outputmap": {
+                        "mapout": "outputfile"
+                    }, 
+                    "publisher_type": "frompar-pub"
+                }
+            }, 
+            "type": "yadagestep"
+        }
+    }, 
+    "b0414d50d735c83c55934812d6d974934382d3f3": {
+        "result": {
+            "cachingtime": 1481036210.773615, 
+            "checksums": [
+                "74822c95b14161f5e6ad59bb8295cb29", 
+                "50f2940c5316b14d2dca4e7ec907e21b", 
+                "74575213e5959544ef60ab5d4a45ed61"
+            ], 
+            "result": {
+                "reduceout": "/Users/lukas/Code/yadagedev/yadage-workflows/testing/dynamic_glob/work/reduce/out.txt"
+            }, 
+            "status": "SUCCESS"
+        }, 
+        "task": {
+            "attributes": {
+                "combinedfile": "/Users/lukas/Code/yadagedev/yadage-workflows/testing/dynamic_glob/work/reduce/out.txt", 
+                "mapoutputs": [
+                    "/Users/lukas/Code/yadagedev/yadage-workflows/testing/dynamic_glob/work/map_0/mapout.txt", 
+                    "/Users/lukas/Code/yadagedev/yadage-workflows/testing/dynamic_glob/work/map_1/mapout.txt", 
+                    "/Users/lukas/Code/yadagedev/yadage-workflows/testing/dynamic_glob/work/map_2/mapout.txt"
+                ]
+            }, 
+            "context": {
+                "depwrites": [
+                    "/Users/lukas/Code/yadagedev/yadage-workflows/testing/dynamic_glob/work/map_0", 
+                    "/Users/lukas/Code/yadagedev/yadage-workflows/testing/dynamic_glob/work/map_1", 
+                    "/Users/lukas/Code/yadagedev/yadage-workflows/testing/dynamic_glob/work/map_2"
+                ], 
+                "nametag": "reduce", 
+                "readonly": [
+                    "/Users/lukas/Code/yadagedev/yadage-workflows/testing/dynamic_glob/work"
+                ], 
+                "readwrite": [
+                    "/Users/lukas/Code/yadagedev/yadage-workflows/testing/dynamic_glob/work/reduce"
+                ]
+            }, 
+            "inputs": [
+                {
+                    "pointer_path": "/mapout", 
+                    "stepid": "bf02bdc3f3485e753d219ab9edada03583a3b851"
+                }, 
+                {
+                    "pointer_path": "/mapout", 
+                    "stepid": "451323e4124d88907e905b0be19f6f07e6fd853b"
+                }, 
+                {
+                    "pointer_path": "/mapout", 
+                    "stepid": "7897ecfdd485e938722e48b2400f4a088e852595"
+                }
+            ], 
+            "name": "reduce", 
+            "prepublished": {
+                "reduceout": "/Users/lukas/Code/yadagedev/yadage-workflows/testing/dynamic_glob/work/reduce/out.txt"
+            }, 
+            "spec": {
+                "environment": {
+                    "environment_type": "localproc-env"
+                }, 
+                "process": {
+                    "cmd": "cat {mapoutputs} > {combinedfile}", 
+                    "process_type": "string-interpolated-cmd"
+                }, 
+                "publisher": {
+                    "outputmap": {
+                        "reduceout": "combinedfile"
+                    }, 
+                    "publisher_type": "frompar-pub"
+                }
+            }, 
+            "type": "yadagestep"
+        }
+    }, 
+    "bf02bdc3f3485e753d219ab9edada03583a3b851": {
+        "result": {
+            "cachingtime": 1481036210.700357, 
+            "checksums": [
+                "301e7dc826967952bc0f2675691206c7"
+            ], 
+            "result": {
+                "mapout": "/Users/lukas/Code/yadagedev/yadage-workflows/testing/dynamic_glob/work/map_0/mapout.txt"
+            }, 
+            "status": "SUCCESS"
+        }, 
+        "task": {
+            "attributes": {
+                "inputfile": "/Users/lukas/Code/yadagedev/yadage-workflows/testing/dynamic_glob/work/acquisition/1.txt", 
+                "outputfile": "/Users/lukas/Code/yadagedev/yadage-workflows/testing/dynamic_glob/work/map_0/mapout.txt"
+            }, 
+            "context": {
+                "depwrites": [
+                    "/Users/lukas/Code/yadagedev/yadage-workflows/testing/dynamic_glob/work/acquisition"
+                ], 
+                "nametag": "map_0", 
+                "readonly": [
+                    "/Users/lukas/Code/yadagedev/yadage-workflows/testing/dynamic_glob/work"
+                ], 
+                "readwrite": [
+                    "/Users/lukas/Code/yadagedev/yadage-workflows/testing/dynamic_glob/work/map_0"
+                ]
+            }, 
+            "inputs": [
+                {
+                    "pointer_path": "/unzipped/0", 
+                    "stepid": "e6b8f5db09d04a4706e9efa12939f3fa824fa598"
+                }
+            ], 
+            "name": "map_0", 
+            "prepublished": {
+                "mapout": "/Users/lukas/Code/yadagedev/yadage-workflows/testing/dynamic_glob/work/map_0/mapout.txt"
+            }, 
+            "spec": {
+                "environment": {
+                    "environment_type": "localproc-env"
+                }, 
+                "process": {
+                    "cmd": "date > {outputfile}; cat  {inputfile} | tr \"[:lower:]\" \"[:upper:]\" >> {outputfile};", 
+                    "process_type": "string-interpolated-cmd"
+                }, 
+                "publisher": {
+                    "outputmap": {
+                        "mapout": "outputfile"
+                    }, 
+                    "publisher_type": "frompar-pub"
+                }
+            }, 
+            "type": "yadagestep"
+        }
+    }, 
+    "e6b8f5db09d04a4706e9efa12939f3fa824fa598": {
+        "result": {
+            "cachingtime": 1481036183.826087, 
+            "checksums": [], 
+            "result": {
+                "unzipped": [
+                    "/Users/lukas/Code/yadagedev/yadage-workflows/testing/dynamic_glob/work/acquisition/1.txt", 
+                    "/Users/lukas/Code/yadagedev/yadage-workflows/testing/dynamic_glob/work/acquisition/2.txt", 
+                    "/Users/lukas/Code/yadagedev/yadage-workflows/testing/dynamic_glob/work/acquisition/3.txt"
+                ]
+            }, 
+            "status": "SUCCESS"
+        }, 
+        "task": {
+            "attributes": {
+                "localname": "/Users/lukas/Code/yadagedev/yadage-workflows/testing/dynamic_glob/work/acquisition/mydata.zip", 
+                "source": "https://github.com/lukasheinrich/yadage-workflows/raw/master/testing/dynamic_glob/inputs/three_files.zip"
+            }, 
+            "context": {
+                "depwrites": [], 
+                "nametag": "acquisition", 
+                "readonly": [
+                    "/Users/lukas/Code/yadagedev/yadage-workflows/testing/dynamic_glob/work"
+                ], 
+                "readwrite": [
+                    "/Users/lukas/Code/yadagedev/yadage-workflows/testing/dynamic_glob/work/acquisition"
+                ]
+            }, 
+            "inputs": [
+                {
+                    "pointer_path": "/sourcefile", 
+                    "stepid": "5c8c7fb80238e197b36a8eb6e225dd62c0167c4b"
+                }
+            ], 
+            "name": "acquisition", 
+            "prepublished": null, 
+            "spec": {
+                "environment": {
+                    "environment_type": "localproc-env"
+                }, 
+                "process": {
+                    "cmd": "curl -L -o {localname} {source} && unzip {localname}", 
+                    "process_type": "string-interpolated-cmd"
+                }, 
+                "publisher": {
+                    "globexpression": "*.txt", 
+                    "outputkey": "unzipped", 
+                    "publisher_type": "fromglob-pub"
+                }
+            }, 
+            "type": "yadagestep"
+        }
+    }
+}

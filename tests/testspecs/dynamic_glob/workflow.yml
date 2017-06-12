@@ -1,0 +1,28 @@
+stages:
+  - name: acquisition
+    dependencies: ['init']
+    scheduler:
+      scheduler_type: singlestep-stage
+      parameters:
+        source: {stages: init, output: sourcefile, unwrap: true}
+        localname: '{workdir}/mydata.zip'
+      step: {$ref: 'steps.yml#/acquire'}
+  - name: map
+    dependencies: ['acquisition']
+    scheduler:
+      scheduler_type: multistep-stage
+      parameters:
+        inputfile: {stages: 'acquisition', output: 'unzipped', unwrap: true}
+        outputfile: '{workdir}/mapout.txt'
+      scatter:
+        method: zip
+        parameters: ['inputfile']
+      step: {$ref: 'steps.yml#/mapstep'}
+  - name: reduce
+    dependencies: ['map']
+    scheduler:
+      scheduler_type: singlestep-stage
+      parameters:
+        mapoutputs: {stages: map, output: mapout}
+        combinedfile: '{workdir}/out.txt'
+      step: {$ref: 'steps.yml#/reducestep'}
