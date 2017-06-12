@@ -7,7 +7,7 @@ def test_manual_helloworld(tmpdir):
     runner = CliRunner()
     workdir   = os.path.join(str(tmpdir),'workdir')
     statefile = os.path.join(str(tmpdir),'state.json')
-    result = runner.invoke(yadage.manualcli.init,[workdir,'workflow.yml','-t','testspecs/local-helloworld','-s','filebacked:'+statefile])
+    result = runner.invoke(yadage.manualcli.init,[workdir,'workflow.yml','-t','tests/testspecs/local-helloworld','-s','filebacked:'+statefile])
     assert result.exit_code == 0
 
     result = runner.invoke(yadage.manualcli.preview,['-s','filebacked:'+statefile,'/hello_world'])
@@ -37,9 +37,9 @@ def test_manual_dynamicglob(tmpdir):
     statefile = os.path.join(str(tmpdir),'state.json')
     result = runner.invoke(yadage.manualcli.init,[
         workdir,'workflow_frominit.yml',
-        '-t','testspecs/dynamic_glob',
+        '-t','tests/testspecs/dynamic_glob',
         '-s','filebacked:'+statefile,
-        '-a','file://{}/testspecs/dynamic_glob/inputs/three_files.zip'.format(os.path.abspath(os.curdir)),
+        '-a','file://{}/tests/testspecs/dynamic_glob/inputs/three_files.zip'.format(os.path.abspath(os.curdir)),
         '-p','inputfiles="*.txt"'
     ])
     assert result.exit_code == 0
@@ -50,5 +50,5 @@ def test_manual_add(tmpdir):
 
     runner = CliRunner()
     statefile = os.path.join(str(tmpdir),'state.json')
-    result = runner.invoke(yadage.manualcli.init,[workdir_one,'workflow.yml','-t','testspecs/local-helloworld','-s','filebacked:'+statefile])
-    result = runner.invoke(yadage.manualcli.add,[workdir_two,'workflow.yml','-t','testspecs/mapreduce','-s','filebacked:'+statefile])
+    result = runner.invoke(yadage.manualcli.init,[workdir_one,'workflow.yml','-t','tests/testspecs/local-helloworld','-s','filebacked:'+statefile])
+    result = runner.invoke(yadage.manualcli.add,[workdir_two,'workflow.yml','-t','tests/testspecs/mapreduce','-s','filebacked:'+statefile])

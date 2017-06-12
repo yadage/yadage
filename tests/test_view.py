@@ -4,7 +4,7 @@ from yadage.wflowview import offsetRule
 import packtivity.statecontexts.posixfs_context as statecontext
 
 def test_init():
-    data  = yadage.workflow_loader.workflow('workflow.yml','testspecs/nestedmapreduce')
+    data  = yadage.workflow_loader.workflow('workflow.yml','tests/testspecs/nestedmapreduce')
     wflow = YadageWorkflow.createFromJSON(data,statecontext.make_new_context('/workdir'))
     view  = wflow.view()
 
@@ -18,14 +18,14 @@ def test_init():
     assert len(matches) == 1
 
 def test_serialize_offsetrule():
-    data  = yadage.workflow_loader.workflow('workflow.yml','testspecs/nestedmapreduce')
+    data  = yadage.workflow_loader.workflow('workflow.yml','tests/testspecs/nestedmapreduce')
     wflow = YadageWorkflow.createFromJSON(data,statecontext.make_new_context('/workdir'))
     wflow.view().init({'input':[1,2,3]})
     for x in wflow.rules:
         assert offsetRule.fromJSON(x.json()).json() == x.json()
 
 def test_getRule():
-    data  = yadage.workflow_loader.workflow('workflow.yml','testspecs/nestedmapreduce')
+    data  = yadage.workflow_loader.workflow('workflow.yml','tests/testspecs/nestedmapreduce')
     wflow = YadageWorkflow.createFromJSON(data,statecontext.make_new_context('/workdir'))
     wflow.view().init({'input':[1,2,3]})
 

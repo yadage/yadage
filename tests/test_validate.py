@@ -6,13 +6,13 @@ import pytest
 
 def test_validator():
     runner = CliRunner()
-    result = runner.invoke(yadage.validator_workflow.main,['workflow.yml','testspecs/local-helloworld'])
+    result = runner.invoke(yadage.validator_workflow.main,['workflow.yml','tests/testspecs/local-helloworld'])
     assert result.exit_code == 0
 
-    result = runner.invoke(yadage.validator_workflow.main,['workflow.yml','testspecs/local-helloworld','-s'])
+    result = runner.invoke(yadage.validator_workflow.main,['workflow.yml','tests/testspecs/local-helloworld','-s'])
     assert result.exit_code == 0
 
-    result = runner.invoke(yadage.validator_workflow.main,['workflow.yml','testspecs/nestedmapreduce','-s'])
+    result = runner.invoke(yadage.validator_workflow.main,['workflow.yml','tests/testspecs/nestedmapreduce','-s'])
     assert result.exit_code == 0
 
 def test_validator_noteven():
