@@ -1,5 +1,6 @@
 # yadage - yaml based adage
 
+[![arXiv](https://img.shields.io/badge/arXiv-1706.01878-orange.svg)](https://arxiv.org/abs/1706.01878)
 [![DOI](https://zenodo.org/badge/53543066.svg)](https://zenodo.org/badge/latestdoi/53543066)
 [![PyPI version](https://badge.fury.io/py/yadage.svg)](https://badge.fury.io/py/yadage)
 [![Build Status](https://travis-ci.org/diana-hep/yadage.svg?branch=master)](https://travis-ci.org/diana-hep/yadage)
@@ -7,6 +8,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/diana-hep/yadage/badge.svg)](https://coveralls.io/github/diana-hep/yadage)
 [![Documentation Status](https://readthedocs.org/projects/pip/badge/?version=latest)](http://yadage.readthedocs.org/en/latest/?badge=latest)
 [![](https://images.microbadger.com/badges/version/yadage/yadage.svg)](https://microbadger.com/images/yadage/yadage "Get your own version badge on microbadger.com")
+
 
 A declarative way to define [adage](https://github.com/diana-hep/adage.git) workflows using a JSON schema (but we'll always write it as YAML)
 

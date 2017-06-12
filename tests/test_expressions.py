@@ -1,9 +1,6 @@
-import yadage.handlers.expression_handlers as exh
-import yadage.workflow_loader
-from yadage.wflow import YadageWorkflow
-import packtivity.statecontexts.posixfs_context as statecontext
-from yadage.helpers import process_refs
 import pytest
+import yadage.handlers.expression_handlers as exh
+from yadage.helpers import process_refs
 
 def test_stage_output_selector(nested_mapreduce_wflow):
     wflow = nested_mapreduce_wflow
