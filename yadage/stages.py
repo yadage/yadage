@@ -36,7 +36,6 @@ class StageBase(object):
         dependencies = [self.view.dag.getNode(k.stepid) for k in step.inputs]
 
         try:
-            depwrites = []
             for d in dependencies:
                 try:
                     step.context.add_dependency(d.task.context)
