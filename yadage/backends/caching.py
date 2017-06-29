@@ -3,11 +3,10 @@ import json
 import time
 import os
 import logging
-import checksumdir
-import shutil
 
 from yadage.helpers import get_obj_id
 from trivialbackend import TrivialProxy, TrivialBackend
+from packtivity.statecontexts import load_state
 
 log = logging.getLogger(__name__)
 
@@ -30,7 +29,6 @@ class CachedBackend(federatedbackend.FederatedBackend):
             self.cache = ChecksumCache(configfile)
         else:
             raise RuntimeError('unknown caching config')
-
 
     def ready(self, proxy):
         isready = super(CachedBackend, self).ready(proxy)
@@ -134,7 +132,6 @@ class CacheBuilder(object):
             log.info('cache non-existent for task %s (%s)',task.name,cacheid)
             return None
         if not self.cachevalid(cacheid):
-            log.info('cache non-valid for task %s (%s)',task.name,cacheid)
             self.remove(cacheid)
             self.cache[cacheid] = {'task' : task.json()}
             return None
@@ -153,34 +150,18 @@ class ChecksumCache(CacheBuilder):
 
     def remove(self,cacheid):
         task = self.cache[cacheid]['task']
-        log.debug('removing cache entry %s',cacheid)
-        workdir = task['context']['readwrite'][0]
-        log.debug('deleting rw location %s',workdir)
-        if os.path.exists(workdir):
-            shutil.rmtree(workdir)
+        log.debug('removing cache entry %s and resetting state',cacheid)
+        load_state(task['context']).reset()
         super(ChecksumCache, self).remove(cacheid)
 
 
     def generate_validation_data(self,cacheid):
-        validation_data = {}
-
-
-        depwrites = [deprw for dep in self.cache[cacheid]['task']['context']['dependencies'] for deprw in dep['readwrite']]
-
-        log.debug('compute dep checksums for %s',depwrites)
-        dep_checksums = [checksumdir.dirhash(d) for d in depwrites if os.path.isdir(d)]
-
-        log.debug('compute checksums for %s',self.cache[cacheid]['task']['context']['readwrite'])
-        state_checksums = [checksumdir.dirhash(d) for d in self.cache[cacheid]['task']['context']['readwrite'] if os.path.isdir(d)]
-
         validation_data = {
-            'depstate_checksums': dep_checksums,
-            'state_checksums': state_checksums
+            'state_hash': load_state(self.cache[cacheid]['task']['context']).state_hash()
         }
 
-        log.debug('validation data is are %s',validation_data)
+        log.debug('validation data is %s',validation_data)
         return validation_data
-
 
     def cachevalid(self, cacheid):
         task = self.cache[cacheid]['task']
@@ -190,15 +171,8 @@ class ChecksumCache(CacheBuilder):
         stored_validation_data = self.cache[cacheid]['result']['validation_data']
         validation_data_now = self.generate_validation_data(cacheid)
 
-        valid_depstate = (validation_data_now['depstate_checksums'] == stored_validation_data['depstate_checksums'])
-        valid_state = (validation_data_now['state_checksums'] == stored_validation_data['state_checksums'])
-        log.debug('checksums comparison: %s',validation_data_now == stored_validation_data)
-        if not valid_depstate:
-            log.info('cache invalid due to changed input state')
+        if not stored_validation_data == validation_data_now:
+            log.info('cache invalid')
             return False
-        if not valid_state:
-            log.debug('cache invalid due to changed data in output state')
-            return False
-
         log.info('cache valid')
         return True
