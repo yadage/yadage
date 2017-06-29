@@ -1,2 +1,6 @@
 *.pyc
 *egg-info*
+htmlcov
+dist
+.coverage.*
+docs/_build
