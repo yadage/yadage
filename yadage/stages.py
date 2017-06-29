@@ -34,15 +34,11 @@ class StageBase(object):
 
     def addStep(self, step):
         dependencies = [self.view.dag.getNode(k.stepid) for k in step.inputs]
-
-        try:
-            for d in dependencies:
-                try:
-                    step.context.add_dependency(d.task.context)
-                except AttributeError:
-                    pass
-        except AttributeError:
-            pass
+        for d in dependencies:
+            try:
+                step.context.add_dependency(d.task.context)
+            except AttributeError:
+                pass
         return self.view.addStep(step, stage = self.name, depends_on=dependencies)
 
     def addWorkflow(self, rules, initstep):
@@ -101,6 +97,7 @@ class jsonStage(StageBase):
         return '<jsonStage: {}>'.format(self.name)
 
     def schedule(self):
+        #imported here to avoid circular dependency
         from handlers.scheduler_handlers import handlers as sched_handlers
         scheduler = sched_handlers[self.stageinfo['scheduler_type']]
         scheduler(self, self.stageinfo)
