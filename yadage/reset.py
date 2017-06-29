@@ -1,5 +1,4 @@
 import networkx as nx
-import packtivity.statecontexts.posixfs_context as statecontext
 
 def reset_node_state(node):
     node.submit_time = None
@@ -11,7 +10,7 @@ def reset_step(workflow, step):
     s = workflow.dag.getNode(step)
     reset_node_state(s)
     try:
-        statecontext.reset_state(s.task.context)
+        s.task.context.reset()
     except AttributeError:
         pass
 

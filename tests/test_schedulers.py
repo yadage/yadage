@@ -1,6 +1,5 @@
 import yadage.workflow_loader
 from yadage.wflow import YadageWorkflow
-import packtivity.statecontexts.posixfs_context as statecontext
 
 def test_singlestepstage_schedule_steps(local_helloworld_wflow):
     wflow = local_helloworld_wflow

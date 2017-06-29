@@ -93,8 +93,8 @@ class CacheBuilder(object):
         saves a result and its status under a unique identifier and includes
         validation data to verify the cache validity at a later point in time
         '''
-        log.info('caching result for cacheid: %s',cacheid)
-        log.info('caching result for process: %s',self.cache[cacheid]['task']['spec']['process'])
+        log.debug('caching result for cacheid: %s',cacheid)
+        log.debug('caching result for process: %s',self.cache[cacheid]['task']['spec']['process'])
         self.cache[cacheid]['result'] = {
             'status': 'SUCCESS' if status else 'FAILED',
             'result': result,
@@ -127,7 +127,7 @@ class CacheBuilder(object):
         '''
         cacheid = self.cacheid(task)
         #register this task with the cacheid if we don't know about it yet
-        log.info('checking cache for task %s',task.name)
+        log.debug('checking cache for task %s',task.name)
         if cacheid not in self.cache:
             self.cache[cacheid] = {'task' : task.json()}
         if not self.cacheexists(cacheid):
@@ -140,7 +140,7 @@ class CacheBuilder(object):
             return None
         #return a cached result if we have one if not, return None
         result =  self.cachedresult(cacheid, silent = True)
-        log.info('returning cached result %s',result)
+        log.debug('returning cached result %s',result)
         return result
 
 class ChecksumCache(CacheBuilder):
@@ -153,9 +153,9 @@ class ChecksumCache(CacheBuilder):
 
     def remove(self,cacheid):
         task = self.cache[cacheid]['task']
-        log.info('removing cache entry %s',cacheid)
+        log.debug('removing cache entry %s',cacheid)
         workdir = task['context']['readwrite'][0]
-        log.info('deleting rw location %s',workdir)
+        log.debug('deleting rw location %s',workdir)
         if os.path.exists(workdir):
             shutil.rmtree(workdir)
         super(ChecksumCache, self).remove(cacheid)
@@ -164,10 +164,13 @@ class ChecksumCache(CacheBuilder):
     def generate_validation_data(self,cacheid):
         validation_data = {}
 
-        log.info('compute dep checksums for %s',self.cache[cacheid]['task']['context']['depwrites'])
-        dep_checksums = [checksumdir.dirhash(d) for d in self.cache[cacheid]['task']['context']['depwrites'] if os.path.isdir(d)]
 
-        log.info('compute checksums for %s',self.cache[cacheid]['task']['context']['readwrite'])
+        depwrites = [deprw for dep in self.cache[cacheid]['task']['context']['dependencies'] for deprw in dep['readwrite']]
+
+        log.debug('compute dep checksums for %s',depwrites)
+        dep_checksums = [checksumdir.dirhash(d) for d in depwrites if os.path.isdir(d)]
+
+        log.debug('compute checksums for %s',self.cache[cacheid]['task']['context']['readwrite'])
         state_checksums = [checksumdir.dirhash(d) for d in self.cache[cacheid]['task']['context']['readwrite'] if os.path.isdir(d)]
 
         validation_data = {
@@ -175,7 +178,7 @@ class ChecksumCache(CacheBuilder):
             'state_checksums': state_checksums
         }
 
-        log.info('validation data is are %s',validation_data)
+        log.debug('validation data is are %s',validation_data)
         return validation_data
 
 
@@ -189,12 +192,12 @@ class ChecksumCache(CacheBuilder):
 
         valid_depstate = (validation_data_now['depstate_checksums'] == stored_validation_data['depstate_checksums'])
         valid_state = (validation_data_now['state_checksums'] == stored_validation_data['state_checksums'])
-        log.info('checksums comparison: %s',validation_data_now == stored_validation_data)
+        log.debug('checksums comparison: %s',validation_data_now == stored_validation_data)
         if not valid_depstate:
             log.info('cache invalid due to changed input state')
             return False
         if not valid_state:
-            log.info('cache invalid due to changed data in output state')
+            log.debug('cache invalid due to changed data in output state')
             return False
 
         log.info('cache valid')

@@ -1,6 +1,7 @@
+import yadagestep
 import logging
 from handlers.predicate_handlers import handlers as pred_handlers
-import yadagestep
+from packtivity.statecontexts import load_provider
 
 log = logging.getLogger(__name__)
 
@@ -12,10 +13,10 @@ class StageBase(object):
     method that is called upon apply
     '''
 
-    def __init__(self, name, context, dependencies=None):
+    def __init__(self, name, state_provider, dependencies=None):
         self.view = None
         self.name = name
-        self.context = context
+        self.state_provider = state_provider
         self.depspec = dependencies
 
     def applicable(self, flowview):
@@ -38,10 +39,9 @@ class StageBase(object):
             depwrites = []
             for d in dependencies:
                 try:
-                    depwrites += d.task.context['readwrite']
+                    step.context.add_dependency(d.task.context)
                 except AttributeError:
                     pass
-            step.context['depwrites'] = depwrites
         except AttributeError:
             pass
         return self.view.addStep(step, stage = self.name, depends_on=dependencies)
@@ -53,7 +53,7 @@ class StageBase(object):
     def json(self):
         return {
             'name': self.name,
-            'context': self.context,
+            'state_provider': self.state_provider.json() if self.state_provider else None,
             'dependencies': self.depspec
         }
 
@@ -63,8 +63,8 @@ class initStage(StageBase):
     simple stage that just adds a initializer step to the DAG
     '''
 
-    def __init__(self, step, context, dependencies):
-        super(initStage, self).__init__('init', context, dependencies)
+    def __init__(self, step, state_provider, dependencies):
+        super(initStage, self).__init__('init', state_provider, dependencies)
         self.step = step
 
     def schedule(self):
@@ -76,9 +76,9 @@ class initStage(StageBase):
     @classmethod
     def fromJSON(cls, data):
         instance = cls(
-            step=yadagestep.initstep.fromJSON(data['step']),
-            context=data['context'],
-            dependencies=data['dependencies']
+            step = yadagestep.initstep.fromJSON(data['step']),
+            state_provider = load_provider(data['state_provider']),
+            dependencies = data['dependencies']
         )
         return instance
 
@@ -93,10 +93,10 @@ class jsonStage(StageBase):
     A stage that is defined via the JSON scheduler schemas
     '''
 
-    def __init__(self, json, context):
+    def __init__(self, json, state_provider):
         self.stageinfo = json['scheduler']
         super(jsonStage, self).__init__(
-            json['name'], context, json['dependencies'])
+            json['name'], state_provider, json['dependencies'])
 
     def __repr__(self):
         return '<jsonStage: {}>'.format(self.name)
@@ -109,11 +109,14 @@ class jsonStage(StageBase):
     #(de-)serialization
     @classmethod
     def fromJSON(cls, data):
-        return cls(json={
-            'scheduler': data['info'],
-            'name': data['name'],
-            'dependencies': data['dependencies']
-        }, context=data['context'])
+        return cls(
+            json={
+                'scheduler': data['info'],
+                'name': data['name'],
+                'dependencies': data['dependencies']
+            },
+            state_provider=load_provider(data['state_provider'])
+        )
 
     def json(self):
         data = super(jsonStage, self).json()

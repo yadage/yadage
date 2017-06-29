@@ -49,8 +49,8 @@ class YadageWorkflow(adage.adageobject):
         return instance
 
     @classmethod
-    def createFromJSON(cls, jsondata, context):
+    def createFromJSON(cls, jsondata, state_provider):
         instance = cls()
-        rules = [jsonStage(stagedata, context) for stagedata in jsondata['stages']]
+        rules = [jsonStage(stagedata, state_provider) for stagedata in jsondata['stages']]
         instance.view().addWorkflow(rules)
         return instance

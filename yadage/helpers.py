@@ -105,5 +105,7 @@ class WithJsonRefEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, jsonref.JsonRef):
             return {k: v for k, v in obj.iteritems()}
-        else:
+        try:
             super(WithJsonRefEncoder, self).default(obj)
+        except TypeError:
+            return obj.json()

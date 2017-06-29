@@ -1,8 +1,5 @@
 from yadage.wflow import YadageWorkflow
-import packtivity.statecontexts.posixfs_context as statecontext
 import json
-import yadage.workflow_loader
-
 
 def test_create():
     wflow = YadageWorkflow()

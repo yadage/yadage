@@ -1,11 +1,11 @@
 import yadage.workflow_loader
 from yadage.wflow import YadageWorkflow
 from yadage.wflowview import offsetRule
-import packtivity.statecontexts.posixfs_context as statecontext
+from packtivity.statecontexts.posixfs_context import LocalFSProvider,LocalFSState
 
 def test_init():
     data  = yadage.workflow_loader.workflow('workflow.yml','tests/testspecs/nestedmapreduce')
-    wflow = YadageWorkflow.createFromJSON(data,statecontext.make_new_context('/workdir'))
+    wflow = YadageWorkflow.createFromJSON(data,LocalFSProvider(LocalFSState(['/workdir']), ensure = False))
     view  = wflow.view()
 
     nrules_before = len(wflow.rules)
@@ -19,14 +19,14 @@ def test_init():
 
 def test_serialize_offsetrule():
     data  = yadage.workflow_loader.workflow('workflow.yml','tests/testspecs/nestedmapreduce')
-    wflow = YadageWorkflow.createFromJSON(data,statecontext.make_new_context('/workdir'))
+    wflow = YadageWorkflow.createFromJSON(data,LocalFSProvider(LocalFSState(['/workdir']), ensure = False))
     wflow.view().init({'input':[1,2,3]})
     for x in wflow.rules:
         assert offsetRule.fromJSON(x.json()).json() == x.json()
 
 def test_getRule():
     data  = yadage.workflow_loader.workflow('workflow.yml','tests/testspecs/nestedmapreduce')
-    wflow = YadageWorkflow.createFromJSON(data,statecontext.make_new_context('/workdir'))
+    wflow = YadageWorkflow.createFromJSON(data,LocalFSProvider(LocalFSState(['/workdir']), ensure = False))
     wflow.view().init({'input':[1,2,3]})
 
     assert wflow.view().getRule(identifier = wflow.rules[0].identifier) == wflow.rules[0]

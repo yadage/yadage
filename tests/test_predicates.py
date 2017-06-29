@@ -1,10 +1,10 @@
 import yadage.workflow_loader
 from yadage.wflow import YadageWorkflow
 from yadage.wflowview import offsetRule
-import packtivity.statecontexts.posixfs_context as statecontext
+from packtivity.statecontexts.posixfs_context import LocalFSProvider,LocalFSState
 def test_multistepstage_schedule_wflows():
     data  = yadage.workflow_loader.workflow('workflow.yml','tests/testspecs/nestedmapreduce')
-    wflow = YadageWorkflow.createFromJSON(data,statecontext.make_new_context('/workdir'))
+    wflow = YadageWorkflow.createFromJSON(data,LocalFSProvider(LocalFSState(['/workdir']), ensure = False))
 
 
     inputdata = [1,2,3]

@@ -4,10 +4,10 @@ import click
 import os
 import manualutils
 import clihelpers
-import packtivity.statecontexts.posixfs_context as statecontext
 from steering_object import YadageSteering
 from visualize import write_prov_graph
 from controllers import create_model_fromstring, PersistentController
+from packtivity.statecontexts.posixfs_context import LocalFSProvider,LocalFSState
 from stages import jsonStage
 import interactive
 import reset as reset_module
@@ -208,8 +208,8 @@ def add(statetype, verbosity, offset, toplevel, workdir, workflow):
         validate=True
     )
 
-    context = statecontext.make_new_context(workdir)
-    rules = [jsonStage(json, context) for json in workflow_json['stages']]
+    state_provider = LocalFSProvider(LocalFSState([workdir]))
+    rules = [jsonStage(json, state_provider) for json in workflow_json['stages']]
     with controller.transaction():
         controller.adageobj.view().addWorkflow(rules)
 

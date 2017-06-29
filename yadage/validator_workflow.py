@@ -34,6 +34,7 @@ def main(workflow, toplevel, schemadir, stdout):
         rc = 0
     except jsonschema.exceptions.ValidationError:
         click.secho('workflow does not validate against schema', fg='red')
+        raise
     except:
         log.exception('')
         click.secho(

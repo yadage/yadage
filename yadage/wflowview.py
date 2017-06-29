@@ -181,7 +181,7 @@ class WorkflowView(object):
 
     def addWorkflow(self, rules, initstep=None, stage=None):
         if initstep:
-            rules += [initStage(initstep, {}, None)]
+            rules += [initStage(initstep,{},None)]
         newsteps = {}
         if stage in self.steps:
             self.steps[stage] += [newsteps]

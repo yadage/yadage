@@ -3,36 +3,48 @@ import pytest
 import os
 import yadage.workflow_loader
 from yadage.wflow import YadageWorkflow
-import packtivity.statecontexts.posixfs_context as statecontext
-
+from packtivity.statecontexts.posixfs_context import LocalFSProvider,LocalFSState
+import packtivity.utils
 from yadage.clihelpers import setupbackend_fromstring
 
 @pytest.fixture()
-def nested_mapreduce_wflow(tmpdir):
+def localfs_state(tmpdir):
+    return LocalFSState(tmpdir.dirname)
+
+@pytest.fixture()
+def localfs_state_provider(tmpdir):
+    return LocalFSProvider(LocalFSState(tmpdir.dirname))
+
+@pytest.fixture()
+def basic_packtivity_spec(tmpdir):
+    return packtivity.utils.load_packtivity('tests/testspecs/local-helloworld/workflow.yml#/stages/0/scheduler/step')
+
+@pytest.fixture()
+def nested_mapreduce_wflow(tmpdir,localfs_state_provider):
     '''a workflow object with horizontally scalable map stage scheduling sub-workflows'''
     data  = yadage.workflow_loader.workflow('workflow.yml','tests/testspecs/nestedmapreduce')
-    wflow = YadageWorkflow.createFromJSON(data,statecontext.make_new_context(tmpdir.dirname))
+    wflow = YadageWorkflow.createFromJSON(data,localfs_state_provider)
     return wflow
 
 @pytest.fixture()
-def local_helloworld_wflow(tmpdir):
+def local_helloworld_wflow(tmpdir,localfs_state_provider):
     '''a workflow object with horizontally scalable map stage scheduling sub-workflows'''
     data  = yadage.workflow_loader.workflow('workflow.yml','tests/testspecs/local-helloworld')
-    wflow = YadageWorkflow.createFromJSON(data,statecontext.make_new_context(tmpdir.dirname))
+    wflow = YadageWorkflow.createFromJSON(data,localfs_state_provider)
     return wflow
 
 @pytest.fixture()
-def cartesian_mapreduce(tmpdir):
+def cartesian_mapreduce(tmpdir,localfs_state_provider):
     '''a workflow object with horizontally scalable map stage scheduling sub-workflows'''
     data  = yadage.workflow_loader.workflow('workflow.yml','tests/testspecs/cartesian_mapreduce')
-    wflow = YadageWorkflow.createFromJSON(data,statecontext.make_new_context(tmpdir.dirname))
+    wflow = YadageWorkflow.createFromJSON(data,localfs_state_provider)
     return wflow
 
 @pytest.fixture()
-def simple_mapreduce(tmpdir):
+def simple_mapreduce(tmpdir,localfs_state_provider):
     '''a workflow object with horizontally scalable map stage scheduling sub-workflows'''
     data  = yadage.workflow_loader.workflow('workflow.yml','tests/testspecs/mapreduce')
-    wflow = YadageWorkflow.createFromJSON(data,statecontext.make_new_context(tmpdir.dirname))
+    wflow = YadageWorkflow.createFromJSON(data,localfs_state_provider)
     return wflow
 
 @pytest.fixture()

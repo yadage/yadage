@@ -83,6 +83,5 @@ def main(workdir,
             click.style("Workflow failed", fg='red'))
         exc.exit_code = rc
         raise exc
-
 if __name__ == '__main__':
     main()

@@ -1,6 +1,8 @@
 import packtivity
 import logging
 import jsonpointer
+from packtivity.statecontexts import load_state
+
 log = logging.getLogger(__name__)
 
 class outputReference(object):
@@ -79,8 +81,7 @@ class yadagestep(StepBase):
         self.attributes.update(**attributes)
         # attempt to prepublish output data merely from inputs
         # will still be None if not possible
-        self.prepublished = packtivity.prepublish_default(
-            self.spec, self.attributes, self.context)
+        self.prepublished = packtivity.prepublish_default(self.spec, self.attributes, self.context)
         log.debug('parameters for yadagestep set to %s. prepublished result, if any: %s',
                     self.attributes,
                     self.prepublished
@@ -90,7 +91,7 @@ class yadagestep(StepBase):
     #(de-)serialization
     @classmethod
     def fromJSON(cls, data):
-        instance = cls(data['name'], data['spec'], data['context'])
+        instance = cls(data['name'], data['spec'], load_state(data['context']))
         instance.attributes = data['attributes']
         instance.prepublished = data['prepublished']
         instance.inputs = map(outputReference.fromJSON, data['inputs'])
@@ -101,6 +102,6 @@ class yadagestep(StepBase):
         data.update(
             type='yadagestep',
             spec=self.spec,
-            context=self.context,
+            context=self.context.json(),
         )
         return data

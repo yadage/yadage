@@ -2,7 +2,6 @@ import logging
 import utils
 import itertools
 import copy
-import packtivity.statecontexts.posixfs_context as statecontext
 
 from expression_handlers import handlers as exprhandlers
 from yadage.yadagestep import yadagestep, initstep, outputReference
@@ -37,7 +36,7 @@ def select_parameter(wflowview, parameter):
         value = handler(wflowview, parameter)
     return value
 
-def finalize_value(wflowview, step, value, context):
+def finalize_value(wflowview, step, value, state):
     '''
     finalize a value by recursively resolving references and
     contextualizing it for the passed state context
@@ -45,17 +44,20 @@ def finalize_value(wflowview, step, value, context):
     :param wflowview: the workflow view against which to resolve upstream references
     :param step: the step for which to track usage of upstream references
     :param value: the parameter value. May be a output reference, or a JSON value type
-    :param context: the state context used to contextualize parameter values
+    :param state: the state context used to contextualize parameter values
     :return: finalized parameter value
     '''
     if type(value) == outputReference:
         step.used_input(value)
         v = value.pointer.resolve(wflowview.dag.getNode(value.stepid).result)
-        return finalize_value(wflowview, step, v, context)
-    return statecontext.contextualize_data(value,context)
+        return finalize_value(wflowview, step, v, state)
+    if state:
+        return state.contextualize_data(value)
+    else:
+        return value
 
 
-def finalize_input(wflowview, step, jsondata, context):
+def finalize_input(wflowview, step, jsondata, state):
     '''
     evaluate final values of step parameters by either resolving a
     reference to a upstream output and contextualizing stateful
@@ -64,28 +66,28 @@ def finalize_input(wflowview, step, jsondata, context):
     :param wflowview: the workflow view view against which to resolve any upstream references
     :param step: the step that for which to track usage of upstream references
     :param jsondata: the prospective step parameters
-    :param context: the state context 
+    :param state: the state context 
 
     :return: finalized step parameters
     '''
     result = copy.deepcopy(jsondata)
     for leaf_pointer, leaf_value in leaf_iterator(jsondata):
-        leaf_pointer.set(result,finalize_value(wflowview, step, leaf_value, context))
+        leaf_pointer.set(result,finalize_value(wflowview, step, leaf_value, state))
     return result
 
-def step_or_init(name, spec, context):
+def step_or_init(name, spec, state_provider):
     '''
     create a named yadagestep of sub-workflow initstep object based on stage spec
 
     :param name: name of the eventual (init-)step
     :param spec: the stage spec
-    :param context: the stage's state context
+    :param state_provider: the stage's state provider
 
     :return: yadage or init step object
     '''
     if 'step' in spec:
-        stepcontext = statecontext.make_new_context(name, context, subdir=True)
-        return yadagestep(name=name, spec=spec['step'], context=stepcontext)
+        step_state = state_provider.new_state(name)
+        return yadagestep(name=name, spec=spec['step'], context=step_state)
     elif 'workflow' in spec:
         return initstep('init {}'.format(name))
 
@@ -101,9 +103,8 @@ def addStepOrWorkflow(name, stage, step, spec):
     :return: None
     '''
     if type(step) == initstep:
-        newcontext = statecontext.make_new_context(name, stage.context, subdir=True)
-        subrules = [jsonStage(yml, newcontext)
-                    for yml in spec['workflow']['stages']]
+        new_provider = stage.state_provider.new_provider(name)
+        subrules = [jsonStage(yml, new_provider) for yml in spec['workflow']['stages']]
         stage.addWorkflow(subrules, initstep=step)
     else:
         stage.addStep(step)
@@ -130,8 +131,8 @@ def singlestep_stage(stage, spec):
     '''
     log.debug('scheduling singlestep stage with spec:\n%s', spec)
 
-    step = step_or_init(name=stage.name, spec=spec, context=stage.context)
-    ctx = step.context if hasattr(step, 'context') else stage.context
+    step = step_or_init(name=stage.name, spec=spec, state_provider=stage.state_provider)
+    ctx = step.context if hasattr(step, 'context') else stage.state_provider
 
     parameters = {
         k: select_parameter(stage.view, v) for k, v in get_parameters(spec).iteritems()
@@ -198,9 +199,7 @@ def multistep_stage(stage, spec):
     singlesteppars = scatter(parameters, spec['scatter'])
     for i, pars in enumerate(singlesteppars):
         singlename = '{}_{}'.format(stage.name, i)
-        step = step_or_init(name=singlename, spec=spec, context=stage.context)
-        ctx = step.context if hasattr(step, 'context') else stage.context
-        ctx = ctx.copy()
-        ctx.update(index=i)
+        step = step_or_init(name=singlename, spec=spec, state_provider = stage.state_provider)
+        ctx = step.context if hasattr(step, 'context') else None
         finalized = finalize_input(stage.view, step, pars, ctx)
         addStepOrWorkflow(singlename, stage, step.s(**finalized), spec)

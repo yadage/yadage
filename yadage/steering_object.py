@@ -9,7 +9,7 @@ import serialize
 import yadageschemas
 import shutil
 import logging
-import packtivity.statecontexts.posixfs_context as statecontext
+from packtivity.statecontexts.posixfs_context import LocalFSProvider, LocalFSState
 
 from yadage.controllers import setup_controller_fromstring
 from yadage.wflow import YadageWorkflow
@@ -22,7 +22,7 @@ class YadageSteering():
         self.workdir = None
         self.yadagedir = None
         self.controller = None
-        self.rootcontext = None
+        self.rootprovider = None
         self.adage_kwargs = {}
 
     @property
@@ -31,8 +31,11 @@ class YadageSteering():
 
     def prepare_workdir(self, workdir, accept_existing_workdir = False, contextinit = None):
         self.workdir = workdir
-        self.rootcontext = contextinit or {}
-        self.rootcontext = statecontext.merge_contexts(self.rootcontext,statecontext.make_new_context(workdir))
+
+
+        writable_context  = LocalFSState([workdir])
+        self.rootprovider = LocalFSProvider(contextinit,writable_context)
+
         self.yadagedir = '{}/_yadage/'.format(workdir)
 
         if os.path.exists(self.yadagedir):
@@ -55,7 +58,7 @@ class YadageSteering():
         )
         with open('{}/yadage_template.json'.format(self.yadagedir), 'w') as f:
             json.dump(workflow_json, f)
-        workflowobj = YadageWorkflow.createFromJSON(workflow_json, self.rootcontext)
+        workflowobj = YadageWorkflow.createFromJSON(workflow_json, self.rootprovider)
         if initdata:
             log.info('initializing workflow with %s',initdata)
             workflowobj.view().init(initdata)
