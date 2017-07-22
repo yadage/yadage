@@ -36,7 +36,7 @@ class StageBase(object):
         dependencies = [self.view.dag.getNode(k.stepid) for k in step.inputs]
         for d in dependencies:
             try:
-                step.context.add_dependency(d.task.context)
+                step.state.add_dependency(d.task.state)
             except AttributeError:
                 pass
         return self.view.addStep(step, stage = self.name, depends_on=dependencies)

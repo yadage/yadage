@@ -50,7 +50,7 @@ class CachedBackend(federatedbackend.FederatedBackend):
             #create id for this task using the cache builder, with which
             #we will store the result with once it's ready
             cacheid = self.cache.cacheid(task)
-            primaryproxy = self.backends['primary'].submit(task.spec, task.attributes, task.context)
+            primaryproxy = self.backends['primary'].submit(task.spec, task.parameters, task.state)
             primaryproxy.cacheid = cacheid
             return primaryproxy
 
@@ -151,13 +151,13 @@ class ChecksumCache(CacheBuilder):
     def remove(self,cacheid):
         task = self.cache[cacheid]['task']
         log.debug('removing cache entry %s and resetting state',cacheid)
-        load_state(task['context']).reset()
+        load_state(task['state']).reset()
         super(ChecksumCache, self).remove(cacheid)
 
 
     def generate_validation_data(self,cacheid):
         validation_data = {
-            'state_hash': load_state(self.cache[cacheid]['task']['context']).state_hash()
+            'state_hash': load_state(self.cache[cacheid]['task']['state']).state_hash()
         }
 
         log.debug('validation data is %s',validation_data)

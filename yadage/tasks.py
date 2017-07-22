@@ -27,7 +27,7 @@ class TaskBase(object):
     def __init__(self, name):
         self.name = name
         self.inputs = []
-        self.attributes = {}
+        self.parameters = {}
         self.prepublished = None
 
     def used_input(self, reference):
@@ -37,7 +37,7 @@ class TaskBase(object):
     def json(self):
         return {
             'name': self.name,
-            'attributes': self.attributes,
+            'parameters': self.parameters,
             'prepublished': self.prepublished,
             'inputs': [x.json() for x in self.inputs]
         }
@@ -50,16 +50,16 @@ class init_task(TaskBase):
         if initdata is not None:
             self.s(**initdata)
 
-    def s(self, **attributes):
-        self.attributes = attributes
-        self.prepublished = self.attributes
+    def s(self, **parameters):
+        self.parameters = parameters
+        self.prepublished = self.parameters
         return self
 
     #(de-)serialization
     @classmethod
     def fromJSON(cls, data):
         instance = cls(data['name'])
-        instance.attributes = data['attributes']
+        instance.parameters = data['parameters']
         instance.prepublished = data['prepublished']
         instance.inputs = map(outputReference.fromJSON, data['inputs'])
         return instance
@@ -72,18 +72,18 @@ class init_task(TaskBase):
 
 class packtivity_task(TaskBase):
 
-    def __init__(self, name, spec, context):
+    def __init__(self, name, spec, state):
         super(packtivity_task, self).__init__(name)
         self.spec = spec
-        self.context = context
+        self.state = state
 
-    def s(self, **attributes):
-        self.attributes.update(**attributes)
+    def s(self, **parameters):
+        self.parameters.update(**parameters)
         # attempt to prepublish output data merely from inputs
         # will still be None if not possible
-        self.prepublished = packtivity.prepublish_default(self.spec, self.attributes, self.context)
+        self.prepublished = packtivity.prepublish_default(self.spec, self.parameters, self.state)
         log.debug('parameters for packtivity_task set to %s. prepublished result, if any: %s',
-                    self.attributes,
+                    self.parameters,
                     self.prepublished
                   )
         return self
@@ -91,8 +91,8 @@ class packtivity_task(TaskBase):
     #(de-)serialization
     @classmethod
     def fromJSON(cls, data):
-        instance = cls(data['name'], data['spec'], load_state(data['context']))
-        instance.attributes = data['attributes']
+        instance = cls(data['name'], data['spec'], load_state(data['state']))
+        instance.parameters = data['parameters']
         instance.prepublished = data['prepublished']
         instance.inputs = map(outputReference.fromJSON, data['inputs'])
         return instance
@@ -102,6 +102,6 @@ class packtivity_task(TaskBase):
         data.update(
             type='packtivity_task',
             spec=self.spec,
-            context=self.context.json(),
+            state=self.state.json(),
         )
         return data

@@ -47,18 +47,18 @@ class PacktivityBackend(federatedbackend.FederatedBackend):
             #take unrolled spec/parameters/context while the adage API
             #takes generalized task objects
             #possibly could use Munch on the packtivity side to
-            #dynammicaly create .task/.attributes/.context-able objects
+            #dynammicaly create .task/.parameters/.state-able objects
             if self.cached:
                 #Cached backends adhere to the task-based API
                 return self.backends['packtivity'].submit(task)
             else:
                 #primary packtivity backends adhere to the unrolled API
                 return self.backends['packtivity'].submit(
-                    task.spec, task.attributes, task.context
+                    task.spec, task.parameters, task.state
                 )
         elif tasktype == init_task:
             #init steps are by definition successful
-            return InitProxy(status = 'SUCCESS', result = task.attributes)
+            return InitProxy(status = 'SUCCESS', result = task.parameters)
 
     def routeproxy(self, proxy):
         if type(proxy) == InitProxy:

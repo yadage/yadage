@@ -16,7 +16,7 @@ handlers, scheduler = utils.handler_decorator()
 #   - attached new nodes to the DAG
 # - for each added step
 #     - the step is given a name
-#     - the step attributes are determined using the scheduler spec and context
+#     - the step parameters are determined using the scheduler spec and context
 #     - a list of used inputs (in the form of [stepname,outputkey,index])
 
 
@@ -87,7 +87,7 @@ def step_or_init(name, spec, state_provider):
     '''
     if 'step' in spec:
         step_state = state_provider.new_state(name)
-        return packtivity_task(name=name, spec=spec['step'], context=step_state)
+        return packtivity_task(name=name, spec=spec['step'], state=step_state)
     elif 'workflow' in spec:
         return init_task('init {}'.format(name))
 
@@ -131,12 +131,13 @@ def singlestep_stage(stage, spec):
     '''
     log.debug('scheduling singlestep stage with spec:\n%s', spec)
 
-    step = step_or_init(name=stage.name, spec=spec, state_provider=stage.state_provider)
-    ctx = step.context if hasattr(step, 'context') else None
+    step = step_or_init(stage.name,spec,stage.state_provider)
 
     parameters = {
         k: select_parameter(stage.view, v) for k, v in get_parameters(spec).iteritems()
     }
+
+    ctx = step.state if hasattr(step, 'state') else None
     finalized = finalize_input(stage.view, step, parameters, ctx)
     addStepOrWorkflow(stage.name, stage, step.s(**finalized), spec)
 
@@ -199,7 +200,7 @@ def multistep_stage(stage, spec):
     singlesteppars = scatter(parameters, spec['scatter'])
     for i, pars in enumerate(singlesteppars):
         singlename = '{}_{}'.format(stage.name, i)
-        step = step_or_init(name=singlename, spec=spec, state_provider = stage.state_provider)
-        ctx = step.context if hasattr(step, 'context') else None
+        step = step_or_init(singlename,spec,stage.state_provider)
+        ctx = step.state if hasattr(step, 'state') else None
         finalized = finalize_input(stage.view, step, pars, ctx)
         addStepOrWorkflow(singlename, stage, step.s(**finalized), spec)

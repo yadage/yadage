@@ -10,7 +10,7 @@ def reset_step(workflow, step):
     s = workflow.dag.getNode(step)
     reset_node_state(s)
     try:
-        s.task.context.reset()
+        s.task.state.reset()
     except AttributeError:
         pass
 
