@@ -27,6 +27,13 @@ def nested_mapreduce_wflow(tmpdir,localfs_state_provider):
     return wflow
 
 @pytest.fixture()
+def nested_wflow(tmpdir,localfs_state_provider):
+    '''a workflow object with horizontally scalable map stage scheduling sub-workflows'''
+    data  = yadage.workflow_loader.workflow('workflow.yml','tests/testspecs/nested')
+    wflow = YadageWorkflow.createFromJSON(data,localfs_state_provider)
+    return wflow
+
+@pytest.fixture()
 def local_helloworld_wflow(tmpdir,localfs_state_provider):
     '''a workflow object with horizontally scalable map stage scheduling sub-workflows'''
     data  = yadage.workflow_loader.workflow('workflow.yml','tests/testspecs/local-helloworld')

@@ -1,0 +1,8 @@
+stages:
+  - name: stage1
+    dependencies: ['init']
+    scheduler:
+      scheduler_type: singlestep-stage
+      parameters:
+        input: {stages: init, output: inputpar, unwrap: true}
+      step: {$ref: steps.yml#/stepA}

@@ -1,0 +1,8 @@
+stages:
+  - name: morenested
+    dependencies: ['init']
+    scheduler:
+      scheduler_type: singlestep-stage
+      parameters:
+        inputpar: {stages: init, output: inputpar, unwrap: true}
+      workflow: {$ref: subsubflow.yml}

@@ -9,6 +9,22 @@ def test_singlestepstage_schedule_steps(local_helloworld_wflow):
     assert len(wflow.dag.nodes()) == 1
 
 
+def test_nested_wflow(nested_wflow):
+    wflow = nested_wflow
+
+    inputdata = 'world'
+    wflow.view().init({'input':inputdata})
+    assert wflow.rules[0].applicable(wflow) == False
+
+    wflow.view().rules[-1].apply(wflow)
+    assert len(wflow.dag.nodes()) == 1 
+    assert wflow.rules[0].applicable(wflow) == True
+    assert wflow.rules[0].rule.stageinfo['scheduler_type'] == 'singlestep-stage'
+    assert len(wflow.view('').rules) == 3 # init nested higherscope
+    wflow.rules[0].apply(wflow)
+        # assert len(wflow.view('/nested/0').rules) == 3 + 2*len(inputdata) # 3x init and stage rules
+
+
 def test_multistepstage_schedule_wflows(nested_mapreduce_wflow):
     wflow = nested_mapreduce_wflow
 

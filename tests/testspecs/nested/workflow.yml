@@ -1,0 +1,15 @@
+stages:
+  - name: nested
+    dependencies: [init]
+    scheduler:
+      scheduler_type: singlestep-stage
+      parameters:
+        inputpar: {stages: init, output: input, unwrap: true}
+      workflow: {$ref: subflow.yml}
+  - name: higherscope
+    dependencies: [nested]
+    scheduler:
+      scheduler_type: singlestep-stage
+      parameters:
+        input: {stages: 'nested[0].morenested[0].stage1', output: outputA}
+      step: {$ref: steps.yml#/stepA}
