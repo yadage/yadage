@@ -22,7 +22,7 @@ class outputReference(object):
             'pointer_path': self.pointer.path
         }
 
-class StepBase(object):
+class TaskBase(object):
 
     def __init__(self, name):
         self.name = name
@@ -42,10 +42,10 @@ class StepBase(object):
             'inputs': [x.json() for x in self.inputs]
         }
 
-class initstep(StepBase):
+class init_task(TaskBase):
 
     def __init__(self, name, initdata=None):
-        super(initstep, self).__init__(name)
+        super(init_task, self).__init__(name)
         self.prepublished = None
         if initdata is not None:
             self.s(**initdata)
@@ -65,15 +65,15 @@ class initstep(StepBase):
         return instance
 
     def json(self):
-        data = super(initstep, self).json()
-        data.update(type='initstep')
+        data = super(init_task, self).json()
+        data.update(type='init_task')
         return data
 
 
-class yadagestep(StepBase):
+class packtivity_task(TaskBase):
 
     def __init__(self, name, spec, context):
-        super(yadagestep, self).__init__(name)
+        super(packtivity_task, self).__init__(name)
         self.spec = spec
         self.context = context
 
@@ -82,7 +82,7 @@ class yadagestep(StepBase):
         # attempt to prepublish output data merely from inputs
         # will still be None if not possible
         self.prepublished = packtivity.prepublish_default(self.spec, self.attributes, self.context)
-        log.debug('parameters for yadagestep set to %s. prepublished result, if any: %s',
+        log.debug('parameters for packtivity_task set to %s. prepublished result, if any: %s',
                     self.attributes,
                     self.prepublished
                   )
@@ -98,9 +98,9 @@ class yadagestep(StepBase):
         return instance
 
     def json(self):
-        data = super(yadagestep, self).json()
+        data = super(packtivity_task, self).json()
         data.update(
-            type='yadagestep',
+            type='packtivity_task',
             spec=self.spec,
             context=self.context.json(),
         )

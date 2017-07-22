@@ -1,7 +1,7 @@
 import federatedbackend
 import logging
 import caching
-import yadage.yadagestep
+from ..tasks import packtivity_task, init_task
 from trivialbackend import TrivialProxy, TrivialBackend
 from packtivity.backendutils import backend_from_string
 
@@ -42,7 +42,7 @@ class PacktivityBackend(federatedbackend.FederatedBackend):
 
     def routedsubmit(self, task):
         tasktype = type(task)
-        if tasktype == yadage.yadagestep.yadagestep:
+        if tasktype == packtivity_task:
             #this is a little hacky, because the packtivity backends
             #take unrolled spec/parameters/context while the adage API
             #takes generalized task objects
@@ -56,7 +56,7 @@ class PacktivityBackend(federatedbackend.FederatedBackend):
                 return self.backends['packtivity'].submit(
                     task.spec, task.attributes, task.context
                 )
-        elif tasktype == yadage.yadagestep.initstep:
+        elif tasktype == init_task:
             #init steps are by definition successful
             return InitProxy(status = 'SUCCESS', result = task.attributes)
 

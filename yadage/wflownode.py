@@ -1,8 +1,7 @@
 import adage.node
 import os
 import jsonpointer
-from yadagestep import outputReference
-import yadagestep
+import tasks
 import datetime
 import time
 
@@ -48,14 +47,16 @@ class YadageNode(adage.node.Node):
             raise RuntimeError('attempt')
         pointer = jsonpointer.JsonPointer(pointerpath)
         if whoisreading:
-            whoisreading.inputs.append(outputReference(self.identifier,pointer))
+            whoisreading.inputs.append(tasks.outputReference(self.identifier,pointer))
         v = pointer.resolve(self.result)
         return v
 
     @classmethod
     def fromJSON(cls, data):
-        if data['task']['type'] == 'initstep':
-            task = yadagestep.initstep.fromJSON(data['task'])
-        elif data['task']['type'] == 'yadagestep':
-            task = yadagestep.yadagestep.fromJSON(data['task'])
+        if data['task']['type'] == 'init_task':
+            task = tasks.init_task.fromJSON(data['task'])
+        elif data['task']['type'] == 'packtivity_task':
+            task = tasks.packtivity_task.fromJSON(data['task'])
+        else:
+            raise RuntimeError('unknown task type',data['task']['type'])
         return cls(data['name'], task, data['id'])

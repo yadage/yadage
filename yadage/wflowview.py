@@ -1,11 +1,10 @@
 import logging
 import jsonpointer
 import jsonpath_rw
-from helpers import get_id_fromjson, get_obj_id
+from utils import get_id_fromjson, get_obj_id
 from wflownode import YadageNode
 from stages import initStage,jsonStage
-
-import yadagestep
+import tasks
 
 log = logging.getLogger(__name__)
 
@@ -149,7 +148,7 @@ class WorkflowView(object):
 
         :param inidata: initialization JSON data
         '''
-        step = yadagestep.initstep(name, initdata)
+        step = tasks.init_task(name, initdata)
         self.addRule(initStage(step, {}, None), self.offset)
 
     def addRule(self, rule, offset=''):

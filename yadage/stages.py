@@ -1,4 +1,4 @@
-import yadagestep
+import tasks
 import logging
 from handlers.predicate_handlers import handlers as pred_handlers
 from packtivity.statecontexts import load_provider
@@ -71,7 +71,7 @@ class initStage(StageBase):
     @classmethod
     def fromJSON(cls, data):
         instance = cls(
-            step = yadagestep.initstep.fromJSON(data['step']),
+            step = tasks.init_task.fromJSON(data['step']),
             state_provider = load_provider(data['state_provider']),
             dependencies = data['dependencies']
         )

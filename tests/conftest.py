@@ -5,7 +5,7 @@ import yadage.workflow_loader
 from yadage.wflow import YadageWorkflow
 from packtivity.statecontexts.posixfs_context import LocalFSProvider,LocalFSState
 import packtivity.utils
-from yadage.clihelpers import setupbackend_fromstring
+from yadage.utils import setupbackend_fromstring
 
 @pytest.fixture()
 def localfs_state(tmpdir):

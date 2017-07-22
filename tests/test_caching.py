@@ -1,6 +1,6 @@
 import os
 import pytest
-from yadage.clihelpers import setupbackend_fromstring
+from yadage.utils import setupbackend_fromstring
 from yadage.steering_api import steering_ctx
 
 def test_cached(tmpdir,checksum_cached_multiproc):

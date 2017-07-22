@@ -4,7 +4,7 @@ import time
 import os
 import logging
 
-from yadage.helpers import get_obj_id
+from yadage.utils import get_obj_id
 from trivialbackend import TrivialProxy, TrivialBackend
 from packtivity.statecontexts import load_state
 
@@ -165,7 +165,7 @@ class ChecksumCache(CacheBuilder):
 
     def cachevalid(self, cacheid):
         task = self.cache[cacheid]['task']
-        if task['type'] == 'initstep':
+        if task['type'] == 'init_task':
             return True
 
         stored_validation_data = self.cache[cacheid]['result']['validation_data']

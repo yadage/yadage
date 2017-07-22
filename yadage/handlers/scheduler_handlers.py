@@ -4,9 +4,9 @@ import itertools
 import copy
 
 from expression_handlers import handlers as exprhandlers
-from yadage.yadagestep import yadagestep, initstep, outputReference
+from ..tasks import packtivity_task, init_task, outputReference
 from ..stages import jsonStage
-from yadage.helpers import leaf_iterator
+from yadage.utils import leaf_iterator_jsonlike
 
 log = logging.getLogger(__name__)
 
@@ -71,13 +71,13 @@ def finalize_input(wflowview, step, jsondata, state):
     :return: finalized step parameters
     '''
     result = copy.deepcopy(jsondata)
-    for leaf_pointer, leaf_value in leaf_iterator(jsondata):
+    for leaf_pointer, leaf_value in leaf_iterator_jsonlike(jsondata):
         leaf_pointer.set(result,finalize_value(wflowview, step, leaf_value, state))
     return result
 
 def step_or_init(name, spec, state_provider):
     '''
-    create a named yadagestep of sub-workflow initstep object based on stage spec
+    create a named packtivity_task of sub-workflow init_task object based on stage spec
 
     :param name: name of the eventual (init-)step
     :param spec: the stage spec
@@ -87,9 +87,9 @@ def step_or_init(name, spec, state_provider):
     '''
     if 'step' in spec:
         step_state = state_provider.new_state(name)
-        return yadagestep(name=name, spec=spec['step'], context=step_state)
+        return packtivity_task(name=name, spec=spec['step'], context=step_state)
     elif 'workflow' in spec:
-        return initstep('init {}'.format(name))
+        return init_task('init {}'.format(name))
 
 def addStepOrWorkflow(name, stage, step, spec):
     '''
@@ -97,12 +97,12 @@ def addStepOrWorkflow(name, stage, step, spec):
     
     :param str name: the name of the step or sub-workflow
     :param stage: the stage from which to use state context and workflow view
-    :param step: either a yadagestep (for normal workflow steps) initstep object (for sub-workflows)
+    :param step: either a packtivity_task (for normal workflow steps) initstep object (for sub-workflows)
     :param spec: the stage spec
 
     :return: None
     '''
-    if type(step) == initstep:
+    if type(step) == init_task:
         new_provider = stage.state_provider.new_provider(name)
         subrules = [jsonStage(yml, new_provider) for yml in spec['workflow']['stages']]
         stage.addWorkflow(subrules, initstep=step)
@@ -132,7 +132,7 @@ def singlestep_stage(stage, spec):
     log.debug('scheduling singlestep stage with spec:\n%s', spec)
 
     step = step_or_init(name=stage.name, spec=spec, state_provider=stage.state_provider)
-    ctx = step.context if hasattr(step, 'context') else stage.state_provider
+    ctx = step.context if hasattr(step, 'context') else None
 
     parameters = {
         k: select_parameter(stage.view, v) for k, v in get_parameters(spec).iteritems()

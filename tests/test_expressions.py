@@ -1,6 +1,6 @@
 import pytest
 import yadage.handlers.expression_handlers as exh
-from yadage.helpers import process_refs
+from yadage.utils import process_refs
 
 def test_stage_output_selector(nested_mapreduce_wflow):
     wflow = nested_mapreduce_wflow

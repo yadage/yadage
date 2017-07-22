@@ -3,7 +3,7 @@ import adage.backends
 import os
 import json
 import workflow_loader
-import clihelpers
+import utils
 import visualize
 import serialize
 import yadageschemas
@@ -11,7 +11,7 @@ import shutil
 import logging
 from packtivity.statecontexts.posixfs_context import LocalFSProvider, LocalFSState
 
-from yadage.controllers import setup_controller_fromstring
+from yadage.controllers import setup_controller_from_statestring
 from yadage.wflow import YadageWorkflow
 
 log = logging.getLogger(__name__)
@@ -45,10 +45,10 @@ class YadageSteering():
             shutil.rmtree(self.yadagedir)
         os.makedirs(self.yadagedir)
     
-    def init_workflow(self, workflow, toplevel, initdata, ctrlsetup = 'inmem', initdir = None, search_initdir = True, validate = True, schemadir = yadageschemas.schemadir):
+    def init_workflow(self, workflow, toplevel, initdata, statesetup = 'inmem', initdir = None, search_initdir = True, validate = True, schemadir = yadageschemas.schemadir):
         ##check input data
         if search_initdir and initdir:
-            clihelpers.discover_initfiles(initdata,os.path.realpath(initdir))
+            utils.discover_initfiles(initdata,os.path.realpath(initdir))
 
         workflow_json = workflow_loader.workflow(
             workflow,
@@ -65,7 +65,7 @@ class YadageSteering():
         else:
             log.info('no initialization data')
 
-        self.controller = setup_controller_fromstring(workflowobj, ctrlsetup)
+        self.controller = setup_controller_from_statestring(workflowobj, statestr = statesetup)
 
     def adage_argument(self,**kwargs):
         self.adage_kwargs.update(**kwargs)

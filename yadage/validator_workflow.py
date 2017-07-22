@@ -6,7 +6,7 @@ import logging
 import workflow_loader
 import yadageschemas
 import json
-from helpers import WithJsonRefEncoder
+from utils import WithJsonRefEncoder
 
 
 logging.basicConfig(level=logging.ERROR)

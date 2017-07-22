@@ -1,12 +1,11 @@
-import yadage.helpers
-import yadage.clihelpers
+import yadage.utils
 import os
 
 def test_leafit():
 	data = {'hello': 'world', 'list': [1,2,3], 'nested':{'dict':['like','structure']}}
-	assert len(list(yadage.helpers.leaf_iterator(data))) == 6
+	assert len(list(yadage.utils.leaf_iterator(data))) == 6
 
-	assert set((x.path,y) for x,y in yadage.helpers.leaf_iterator(data)) == {
+	assert set((x.path,y) for x,y in yadage.utils.leaf_iterator(data)) == {
 		('/hello','world'),
 		('/list/0',1),
 		('/list/1',2),
@@ -21,7 +20,7 @@ def test_filediscovery(tmpdir):
 	tmpdir.join('bfile2').ensure()
 	tmpdir.join('cfile').ensure()
 	initdata = {'key1':'afile','key2':'bfile*','key3':'nofile','nested':{'file':'cfile'}}
-	data = yadage.clihelpers.discover_initfiles(initdata,str(tmpdir))
+	data = yadage.utils.discover_initfiles(initdata,str(tmpdir))
 	assert data['key1'] == os.path.join(str(tmpdir),'afile')
 	assert set(data['key2']) == set([os.path.join(str(tmpdir),'bfile1'),os.path.join(str(tmpdir),'bfile2')])
 	assert data['key3'] == 'nofile'
@@ -32,5 +31,5 @@ def test_getinit(tmpdir):
 	tmpdir.join('input.yml').write('input: [1,2,3]\n')
 
 
-	data = yadage.clihelpers.getinit_data([str(tmpdir.join('input.yml'))],['another=parameter'])
+	data = yadage.utils.getinit_data([str(tmpdir.join('input.yml'))],['another=parameter'])
 	assert {'another':'parameter','input':[1,2,3]} == data

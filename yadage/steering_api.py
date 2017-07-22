@@ -42,11 +42,11 @@ def steering_ctx(
     validate=True,
     doviz=True,
     accept_existing_workdir = False,
-    ctrlsetup = 'inmem'):
+    statesetup = 'inmem'):
     
     ys = YadageSteering()
     ys.prepare_workdir(workdir, accept_existing_workdir, contextinit = read)
-    ys.init_workflow(workflow, loadtoplevel, initdata, ctrlsetup = ctrlsetup, initdir = initdir, validate = validate, schemadir = schemadir)
+    ys.init_workflow(workflow, loadtoplevel, initdata, statesetup = statesetup, initdir = initdir, validate = validate, schemadir = schemadir)
     
     custom_tracker = os.environ.get('YADAGE_CUSTOM_TRACKER',None)
     if custom_tracker:

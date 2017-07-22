@@ -1,4 +1,4 @@
-from yadage.clihelpers import setupbackend_fromstring
+from yadage.utils import setupbackend_fromstring
 from yadage.backends.packtivitybackend import PacktivityBackend
 
 def test_mytest():

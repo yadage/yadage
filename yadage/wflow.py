@@ -1,5 +1,4 @@
 import adage
-from backends import NoneProxy
 from adage.serialize import obj_to_json
 from wflowview import WorkflowView, offsetRule
 from wflownode import YadageNode
@@ -33,7 +32,7 @@ class YadageWorkflow(adage.adageobject):
         return data
 
     @classmethod
-    def fromJSON(cls, data, proxyclass=NoneProxy, backend=None):
+    def fromJSON(cls, data, proxydeserializer = lambda data: None, backend=None):
         instance = cls()
         instance.rules = [offsetRule.fromJSON(x) for x in data['rules'] ]
         instance.applied_rules = [offsetRule.fromJSON(x) for x in data['applied'] ]
@@ -42,8 +41,8 @@ class YadageWorkflow(adage.adageobject):
 
         instance.dag = adage.serialize.dag_from_json(
             data['dag'],
-            YadageNode,
-            proxyclass,
+            YadageNode.fromJSON,
+            proxydeserializer,
             backend
         )
         return instance

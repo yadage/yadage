@@ -8,7 +8,7 @@ import logging
 
 from wflow import YadageWorkflow
 from handlers.expression_handlers import handlers as exh
-from helpers import set_trivial_backend, process_refs
+from utils import set_trivial_backend, process_refs
 
 
 def printRef(ref, dag, indent=''):

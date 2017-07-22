@@ -5,7 +5,7 @@ import steering_api
 import logging
 import yadageschemas
 import yaml
-import clihelpers
+import utils
 
 log = logging.getLogger(__name__)
 
@@ -17,7 +17,7 @@ log = logging.getLogger(__name__)
 @click.option('-m', '--schemasource', default=yadageschemas.schemadir, help = 'schema directory for workflow validation')
 @click.option('-b', '--backend', default='multiproc:auto', help = 'packtivity backend string')
 @click.option('-c', '--cache', default='')
-@click.option('-s', '--statectrl', default='inmem')
+@click.option('-s', '--statesetup', default='inmem', help = 'wflow state spec')
 @click.option('-d','--initdir', default='init', help = "relative path (to workdir) to initialiation data directory")
 @click.option('--interactive/--not-interactive', default=False, help = 'en-/disable user interactio (sign-off graph extensions and packtivity submissions)')
 @click.option('--validate/--no-validate', default=True, help = 'en-/disable workflow spec validation')
@@ -46,7 +46,7 @@ def main(workdir,
          read,
          visualize,
          inputarchive,
-         statectrl,
+         statesetup,
          cache,
          accept_workdir,
          initdir):
@@ -54,12 +54,12 @@ def main(workdir,
     logging.basicConfig(level=getattr(logging, verbosity), format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
     if inputarchive:
-        initdir = clihelpers.prepare_workdir_from_archive(workdir, inputarchive)
+        initdir = utils.prepare_workdir_from_archive(workdir, inputarchive)
     else:
         initdir = os.path.join(workdir,initdir)
 
-    initdata = clihelpers.getinit_data(initfiles, parameter)
-    backend  = clihelpers.setupbackend_fromstring(backend, cacheconfig=cache)
+    initdata = utils.getinit_data(initfiles, parameter)
+    backend  = utils.setupbackend_fromstring(backend, cacheconfig=cache)
 
     rc = steering_api.run_workflow(
         workdir,
@@ -76,7 +76,7 @@ def main(workdir,
         schemadir = schemasource,
         user_interaction = interactive,
         accept_existing_workdir = accept_workdir,
-        ctrlsetup = statectrl
+        statesetup = statesetup
     )
     if rc:
         exc = click.exceptions.ClickException(

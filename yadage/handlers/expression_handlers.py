@@ -3,8 +3,8 @@ import utils
 import jq
 import jsonpointer
 import copy
-from yadage.yadagestep import outputReference
 import jsonpath_rw
+from ..tasks import outputReference
 
 
 log = logging.getLogger(__name__)

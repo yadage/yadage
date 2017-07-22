@@ -3,10 +3,11 @@ import logging
 import click
 import os
 import manualutils
-import clihelpers
+import utils
 from steering_object import YadageSteering
 from visualize import write_prov_graph
-from controllers import create_model_fromstring, PersistentController
+from controllers import PersistentController
+from wflowstate import load_model_fromstring
 from packtivity.statecontexts.posixfs_context import LocalFSProvider,LocalFSState
 from stages import jsonStage
 import interactive
@@ -21,7 +22,7 @@ def mancli():
     pass
 
 @mancli.command()
-@click.option('-s', '--statectrl', default='filebacked:yadage_state.json')
+@click.option('-s', '--statesetup', default='filebacked:yadage_state.json')
 @click.option('-t', '--toplevel', default=os.getcwd())
 @click.option('-a', '--inputarchive', default=None)
 @click.option('-d','--initdir', default='init', help = "relative path (to workdir) to initialiation data directory")
@@ -29,17 +30,17 @@ def mancli():
 @click.argument('workdir')
 @click.argument('workflow')
 @click.argument('initfiles', nargs = -1)
-def init(workdir, workflow, initfiles, statectrl, initdir, toplevel, parameter, inputarchive):
-    initdata = clihelpers.getinit_data(initfiles, parameter)
+def init(workdir, workflow, initfiles, statesetup, initdir, toplevel, parameter, inputarchive):
+    initdata = utils.getinit_data(initfiles, parameter)
 
     if inputarchive:
-        initdir = clihelpers.prepare_workdir_from_archive(workdir, inputarchive)
+        initdir = utils.prepare_workdir_from_archive(workdir, inputarchive)
     else:
         initdir = os.path.join(workdir,initdir)
 
     ys = YadageSteering()
     ys.prepare_workdir(workdir)
-    ys.init_workflow(workflow, toplevel, initdata, ctrlsetup = statectrl, initdir = initdir)
+    ys.init_workflow(workflow, toplevel, initdata, statesetup = statesetup, initdir = initdir)
 
 
 def click_print_applicable_stages(controller):
@@ -64,7 +65,7 @@ def click_print_submittable_nodes(controller):
 def apply(name, statetype, verbosity):
     logging.basicConfig(level=getattr(logging, verbosity))
 
-    model      = create_model_fromstring(statetype)
+    model      = load_model_fromstring(statetype)
     controller = PersistentController(model)
 
     if not name:
@@ -95,9 +96,9 @@ def apply(name, statetype, verbosity):
 def submit(nodeid, allof, offset, statetype, verbosity):
     logging.basicConfig(level=getattr(logging, verbosity))
 
-    model   = create_model_fromstring(statetype)
+    model   = load_model_fromstring(statetype)
     controller = PersistentController(model)
-    controller.backend = clihelpers.setupbackend_fromstring('celery')
+    controller.backend = utils.setupbackend_fromstring('celery')
 
 
     if not (allof or nodeid):
@@ -128,9 +129,9 @@ def submit(nodeid, allof, offset, statetype, verbosity):
 @mancli.command()
 @click.option('-s', '--statetype', default='filebacked:yadage_state.json')
 def show(statetype):
-    model      = create_model_fromstring(statetype)
+    model      = load_model_fromstring(statetype)
     controller = PersistentController(model)
-    controller.backend = clihelpers.setupbackend_fromstring('celery')
+    controller.backend = utils.setupbackend_fromstring('celery')
     click.secho('''
 Workflow:
 ---------
@@ -155,9 +156,9 @@ valid: {valid}
 @click.argument('name')
 @click.option('-s', '--statetype', default='filebacked:yadage_state.json')
 def preview(name,statetype):
-    model      = create_model_fromstring(statetype)
+    model      = load_model_fromstring(statetype)
     controller = PersistentController(model)
-    controller.backend = clihelpers.setupbackend_fromstring('celery')
+    controller.backend = utils.setupbackend_fromstring('celery')
 
     new_rules, new_nodes = manualutils.preview_rule(controller.adageobj, name)
     click.secho('Preview of Stage: # new rules: {} # new nodes {}'.format(
@@ -174,8 +175,8 @@ def step(statetype, verbosity, nsteps, update_interval):
     logging.basicConfig(level=getattr(logging, verbosity))
 
     maxsteps = nsteps if nsteps >= 0 else None
-    model   = create_model_fromstring(statetype)
-    backend = clihelpers.setupbackend_fromstring('celery')
+    model   = load_model_fromstring(statetype)
+    backend = utils.setupbackend_fromstring('celery')
 
     extend, submit = interactive.interactive_deciders(idbased = True)
     ys = YadageSteering()
@@ -199,7 +200,7 @@ def step(statetype, verbosity, nsteps, update_interval):
 def add(statetype, verbosity, offset, toplevel, workdir, workflow):
     logging.basicConfig(level=getattr(logging, verbosity))
 
-    model      = create_model_fromstring(statetype)
+    model      = load_model_fromstring(statetype)
     controller = PersistentController(model)
 
     workflow_json = workflow_loader.workflow(
@@ -219,7 +220,7 @@ def add(statetype, verbosity, offset, toplevel, workdir, workflow):
 @click.option('-w', '--workdir', default=os.curdir)
 def visualize(statetype, workdir, fileformat):
 
-    model      = create_model_fromstring(statetype)
+    model      = load_model_fromstring(statetype)
     controller = PersistentController(model)
 
     write_prov_graph(workdir, controller.adageobj, fileformat)
@@ -230,7 +231,7 @@ def visualize(statetype, workdir, fileformat):
 @click.argument('name')
 @click.option('-s', '--statetype', default='filebacked:yadage_state.json')
 def reset(statetype, name):
-    model   = create_model_fromstring(statetype)
+    model   = load_model_fromstring(statetype)
     controller = PersistentController(model)
 
     offset, name = name.split('/')
