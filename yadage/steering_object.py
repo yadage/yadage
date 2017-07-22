@@ -29,12 +29,12 @@ class YadageSteering():
     def workflow(self):
         return self.controller.adageobj
 
-    def prepare_workdir(self, workdir, accept_existing_workdir = False, contextinit = None):
+    def prepare_workdir(self, workdir, accept_existing_workdir = False, stateinit = None):
         self.workdir = workdir
 
 
-        writable_context  = LocalFSState([workdir])
-        self.rootprovider = LocalFSProvider(contextinit,writable_context)
+        writable_state  = LocalFSState([workdir])
+        self.rootprovider = LocalFSProvider(stateinit,writable_state)
 
         self.yadagedir = '{}/_yadage/'.format(workdir)
 
