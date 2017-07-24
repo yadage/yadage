@@ -23,7 +23,6 @@ class outputReference(object):
         }
 
 class TaskBase(object):
-
     def __init__(self, name):
         self.name = name
         self.inputs = []
@@ -43,7 +42,10 @@ class TaskBase(object):
         }
 
 class init_task(TaskBase):
-
+    '''
+    initialization task
+    '''
+ 
     def __init__(self, name, initdata=None):
         super(init_task, self).__init__(name)
         self.prepublished = None
@@ -71,6 +73,9 @@ class init_task(TaskBase):
 
 
 class packtivity_task(TaskBase):
+    '''
+    packtivity task
+    '''
 
     def __init__(self, name, spec, state):
         super(packtivity_task, self).__init__(name)

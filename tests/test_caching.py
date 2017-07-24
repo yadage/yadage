@@ -24,4 +24,5 @@ def test_cached(tmpdir,checksum_cached_multiproc):
 
 def test_nonexisting_cache():
     with pytest.raises(RuntimeError):
-        setupbackend_fromstring('multiproc:4', cacheconfig = 'nonexistent:config')
+        backend = setupbackend_fromstring('multiproc:4')
+        backend.enable_cache('nonexistent:config')

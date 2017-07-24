@@ -17,6 +17,10 @@ from wflow import YadageWorkflow
 log = logging.getLogger(__name__)
 
 class YadageSteering():
+    '''
+    high level steering object to manage worklfow execution
+    '''
+
     def __init__(self,loggername = __name__):
         self.log = logging.getLogger(loggername)
         self.metadir = None
@@ -36,12 +40,13 @@ class YadageSteering():
         if os.path.exists(self.metadir):
             if not accept_existing_workdir:
                 raise RuntimeError('yadage meta directory exists. explicitly accept')
-            self.log.info('yadage meta directory exists.. will remove and remake')
-            shutil.rmtree(self.metadir)
-        os.makedirs(self.metadir)
+        else:
+            os.makedirs(self.metadir)
     
-    def init_workflow(self, workflow, toplevel, initdata, statesetup = 'inmem', initdir = None, search_initdir = True, validate = True, schemadir = yadageschemas.schemadir):
+    def init_workflow(self, workflow, toplevel, initdata = None, statesetup = 'inmem', initdir = None, search_initdir = True, validate = True, schemadir = yadageschemas.schemadir):
         ##check input data
+        if not initdata:
+            initdata = {}
         if search_initdir and initdir:
             utils.discover_initfiles(initdata,os.path.realpath(initdir))
 

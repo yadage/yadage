@@ -59,7 +59,7 @@ def main(workdir,
         initdir = os.path.join(workdir,initdir)
 
     initdata = utils.getinit_data(initfiles, parameter)
-    backend  = utils.setupbackend_fromstring(backend, cacheconfig=cache)
+    backend  = utils.setupbackend_fromstring(backend)
 
     rc = steering_api.run_workflow(
         workdir,
@@ -67,6 +67,7 @@ def main(workdir,
         initdata,
         toplevel,
         backend = backend,
+        cacheconfigstring = cache,
         initdir = initdir,
         updateinterval = updateinterval,
         loginterval = loginterval,

@@ -75,5 +75,6 @@ def foregroundasync_backend():
 @pytest.fixture()
 def checksum_cached_multiproc(tmpdir):
     cache   = str(tmpdir.join('cache.json'))
-    backend = setupbackend_fromstring('multiproc:4', cacheconfig = 'checksums:'+cache)
+    backend = setupbackend_fromstring('multiproc:4')
+    backend.enable_cache('checksums:'+cache)
     return backend

@@ -91,6 +91,7 @@ def step_or_init(name, spec, state_provider):
         return packtivity_task(name=name, spec=spec['step'], state=step_state)
     elif 'workflow' in spec:
         return init_task('init {}'.format(name))
+    raise RuntimeError('do not know what kind of stage spec we are dealing with.')
 
 def addStepOrWorkflow(name, stage, step, spec):
     '''

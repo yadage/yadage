@@ -1,10 +1,13 @@
 from contextlib import contextmanager
-from steering_object import YadageSteering
 import logging
 import importlib
 import interactive
 import yadageschemas
 import os
+
+from steering_object import YadageSteering
+from utils import setupbackend_fromstring
+
 log = logging.getLogger(__name__)
 
 RC_FAILED = 1
@@ -12,9 +15,9 @@ RC_SUCCEEDED = 0
 
 
 def run_workflow(*args, **kwargs):
-    """
+    '''
     Main entry point to run a Yadage workflow
-    """
+    '''
     # let's be conservative and just assume we're going to fail. will set
     # success RC explicityly
     return_value = RC_FAILED
@@ -30,9 +33,10 @@ def run_workflow(*args, **kwargs):
 def steering_ctx(
     workdir,
     workflow,
-    initdata,
-    loadtoplevel,
-    backend,
+    initdata = None,
+    loadtoplevel = os.getcwd(),
+    backend = setupbackend_fromstring('multiproc:auto'),
+    cacheconfigstring = None,
     read = None,
     initdir = None,
     updateinterval = 0.02,
@@ -43,8 +47,18 @@ def steering_ctx(
     doviz=True,
     accept_existing_workdir = False,
     statesetup = 'inmem'):
-    
+    '''
+    context manage around yadage steering object.
+
+    param workdir: work directory of workflow
+    param workflow: workflow spec source
+    '''
+
     ys = YadageSteering()
+
+    if cacheconfigstring:
+        accept_existing_workdir = True
+
     ys.prepare_workdir(workdir, accept_existing_workdir, stateinit = read)
     ys.init_workflow(workflow, loadtoplevel, initdata, statesetup = statesetup, initdir = initdir, validate = validate, schemadir = schemadir)
     
@@ -70,6 +84,12 @@ def steering_ctx(
     yield ys
 
     log.info('running yadage workflow %s on backend %s', workflow, backend)
+    if cacheconfigstring:
+        if cacheconfigstring == 'checksums':
+            backend.enable_cache(':'.join([cacheconfigstring,os.path.join(ys.metadir,'cache.json')]))
+        else:
+            backend.enable_cache(cacheconfigstring)
+
     try:
         ys.run_adage(backend)
     finally:

@@ -96,9 +96,9 @@ class WorkflowView(object):
         '''
         returns steps related to the JSONPath query.
         if a query points to a stage (say 'stagename'):
-            will return all toplevel steps.. no recursion into subworkflows
+        will return all toplevel steps.. no recursion into subworkflows
         if a query points to steps (e.g. 'stagename[*]')
-            will return a steps directly
+        will return a steps directly
 
         '''
         nodeids = []

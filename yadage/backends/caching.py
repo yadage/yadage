@@ -10,6 +10,16 @@ from packtivity.statecontexts import load_state
 
 log = logging.getLogger(__name__)
 
+def setupcache_fromstring(configstring):
+    configparts  = configstring.split(':',1)
+    strategy, specificconf = configparts
+    if strategy == 'checksums':
+        configfile = specificconf
+        log.info('checksums caching strategy')
+        return ChecksumCache(configfile)
+    else:
+        raise RuntimeError('unknown caching config')
+
 class CachedBackend(federatedbackend.FederatedBackend):
     '''
     A caching backend that takes an existing backend and a cache configuration.
@@ -17,18 +27,12 @@ class CachedBackend(federatedbackend.FederatedBackend):
     returned directly via a trivial proxy. If not submission proceeds as normal
     '''
 
-    def __init__(self, backend, cacheconfig):
+    def __init__(self, backend, cache):
         super(CachedBackend, self).__init__({
             'cache': TrivialBackend(),
             'primary': backend
         })
-        configparts  = cacheconfig.split(':')
-        strategy, configfile = configparts
-        if strategy == 'checksums':
-            log.info('checksums caching strategy')
-            self.cache = ChecksumCache(configfile)
-        else:
-            raise RuntimeError('unknown caching config')
+        self.cache = cache
 
     def ready(self, proxy):
         isready = super(CachedBackend, self).ready(proxy)
@@ -65,7 +69,7 @@ class CacheBuilder(object):
     def __init__(self, cachefile):
         self.cachefile = cachefile
         if not os.path.exists(self.cachefile):
-            log.info('fresh cache as file does not exist yet.')
+            log.info('fresh cache as file at %s does not exist yet.',self.cachefile)
             self.cache = {}
         else:
             log.info('reading cache from %s',self.cachefile)

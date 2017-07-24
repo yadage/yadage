@@ -176,7 +176,6 @@ def prepare_workdir_from_archive(workdir, inputarchive):
     os.remove(localzipfile)
     return initdir
 
-def setupbackend_fromstring(backend, name = 'backendname', cacheconfig=None):
+def setupbackend_fromstring(backend, name = 'backendname'):
     import backends.packtivitybackend as pb
-    backend = pb.PacktivityBackend(packtivity_backendstring = backend, cacheconfig = cacheconfig)
-    return backend
+    return pb.PacktivityBackend(packtivity_backendstring = backend)
