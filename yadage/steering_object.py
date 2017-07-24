@@ -13,6 +13,7 @@ from packtivity.statecontexts.posixfs_context import LocalFSProvider, LocalFSSta
 
 from controllers import setup_controller_from_statestring
 from wflow import YadageWorkflow
+from utils import setupbackend_fromstring
 
 log = logging.getLogger(__name__)
 
@@ -30,21 +31,44 @@ class YadageSteering():
 
     @property
     def workflow(self):
+        '''
+        :return: the workflow object (from the controller)
+        '''
         return self.controller.adageobj
 
-    def prepare_workdir(self, workdir, accept_existing_workdir = False, stateinit = None, metadir = None):
-        writable_state    = LocalFSState([workdir])
-        self.rootprovider = LocalFSProvider(stateinit,writable_state, ensure = True, nest = True)
-        self.metadir = metadir or '{}/_yadage/'.format(workdir)
+    def prepare_meta(self,metadir,accept=False):
+        '''
+        prepare workflow meta-data directory
 
+        :param metadir: the meta-data directory name
+        '''
+        assert metadir
+        self.metadir = metadir
         if os.path.exists(self.metadir):
-            if not accept_existing_workdir:
+            if not accept:
                 raise RuntimeError('yadage meta directory exists. explicitly accept')
         else:
             os.makedirs(self.metadir)
-    
-    def init_workflow(self, workflow, toplevel, initdata = None, statesetup = 'inmem', initdir = None, search_initdir = True, validate = True, schemadir = yadageschemas.schemadir):
-        ##check input data
+
+    def prepare(self, workdir = None, accept_existing_metadir = False, stateinit = None, metadir = None,  rootprovider = None):
+        if workdir:
+            writable_state    = LocalFSState([workdir])
+            self.rootprovider = LocalFSProvider(stateinit,writable_state, ensure = True, nest = True)
+            self.prepare_meta(metadir or '{}/_yadage/'.format(workdir), accept_existing_metadir)
+        elif rootprovider:
+            self.rootprovider = rootprovider
+            self.prepare_meta(metadir)
+        else:
+            raise RuntimeError('must provide local work directory or root state provider')
+        
+    def init_workflow(self, workflow, toplevel = os.getcwd(), initdata = None, statesetup = 'inmem', initdir = None, search_initdir = True, validate = True, schemadir = yadageschemas.schemadir):
+        '''
+        load workflow from spec and initialize it
+        
+        :param workflow: the workflow spec source
+        :param toplevel: base URI against which to resolve JSON references in the spec
+        :param initdata: initialization data for workflow 
+        '''
         if not initdata:
             initdata = {}
         if search_initdir and initdir:
@@ -68,14 +92,24 @@ class YadageSteering():
         self.controller = setup_controller_from_statestring(workflowobj, statestr = statesetup)
 
     def adage_argument(self,**kwargs):
+        '''
+        add keyword arguments for workflow execution (adage)
+        :param kwargs: adage keyword arguments (see adage documentation for options)
+        '''
         self.adage_kwargs.update(**kwargs)
 
-    def run_adage(self, backend, **adage_kwargs):
+    def run_adage(self, backend = setupbackend_fromstring('multiproc:auto'), **adage_kwargs):
+        '''
+        execution workflow with adage based against given backend
+        '''
         self.controller.backend = backend
         self.adage_argument(**adage_kwargs)
         adage.rundag(controller = self.controller, **self.adage_kwargs)
 
     def serialize(self):
+        '''
+        serialized workflow and backend states (stored in meta directory)
+        '''
         serialize.snapshot(
             self.workflow,
             '{}/yadage_snapshot_workflow.json'.format(self.metadir),
@@ -83,6 +117,9 @@ class YadageSteering():
         )
 
     def visualize(self):
+        '''
+        generate workflow visualization (stored in meta directory)
+        '''
         visualize.write_prov_graph(self.metadir, self.workflow, vizformat='png')
         visualize.write_prov_graph(self.metadir, self.workflow, vizformat='pdf')
 

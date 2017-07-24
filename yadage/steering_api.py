@@ -16,18 +16,11 @@ RC_SUCCEEDED = 0
 
 def run_workflow(*args, **kwargs):
     '''
-    Main entry point to run a Yadage workflow
+    convenience function around steering context, when no additional settings
+    are desired.
     '''
-    # let's be conservative and just assume we're going to fail. will set
-    # success RC explicityly
-    return_value = RC_FAILED
-    try:
-        with steering_ctx(*args, **kwargs):
-            pass
-        return_value = RC_SUCCEEDED
-    except:
-        log.exception('Unfortunately we failed. :(')
-    return return_value
+    with steering_ctx(*args, **kwargs):
+        pass
 
 @contextmanager
 def steering_ctx(
@@ -46,7 +39,7 @@ def steering_ctx(
     user_interaction=False,
     validate=True,
     doviz=True,
-    accept_existing_workdir = False,
+    accept_existing_metadir = False,
     statesetup = 'inmem'):
     '''
     context manage around yadage steering object.
@@ -58,14 +51,15 @@ def steering_ctx(
     ys = YadageSteering()
 
     if cacheconfigstring:
-        accept_existing_workdir = True
+        accept_existing_metadir = True
 
-    ys.prepare_workdir(workdir, accept_existing_workdir, stateinit = read, metadir = metadir)
+    ys.prepare(workdir, accept_existing_metadir, stateinit = read, metadir = metadir)
     ys.init_workflow(workflow, loadtoplevel, initdata,
         statesetup = statesetup,
         initdir = initdir,
         validate = validate,
-        schemadir = schemadir)
+        schemadir = schemadir
+    )
     
     custom_tracker = os.environ.get('YADAGE_CUSTOM_TRACKER',None)
     if custom_tracker:

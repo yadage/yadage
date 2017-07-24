@@ -9,6 +9,9 @@ import utils
 
 log = logging.getLogger(__name__)
 
+RC_FAILED = 1
+RC_SUCCEEDED = 0
+
 
 @click.command()
 @click.argument('workdir')
@@ -29,7 +32,7 @@ log = logging.getLogger(__name__)
 @click.option('--schemasource', default=yadageschemas.schemadir, help = 'schema directory for workflow validation')
 @click.option('--interactive/--not-interactive', default=False, help = 'en-/disable user interactio (sign-off graph extensions and packtivity submissions)')
 @click.option('--validate/--no-validate', default=True, help = 'en-/disable workflow spec validation')
-@click.option('--accept-workdir/--no-accept-workdir', default=False)
+@click.option('--accept-metadir/--no-accept-metadir', default=False)
 @click.option('--visualize/--no-visualize', default=True, help = 'visualize workflow graph')
 def main(workdir,
          workflow,
@@ -49,7 +52,7 @@ def main(workdir,
          inputarchive,
          statesetup,
          cache,
-         accept_workdir,
+         accept_metadir,
          initdir):
 
     logging.basicConfig(level=getattr(logging, verbosity), format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -62,29 +65,37 @@ def main(workdir,
     initdata = utils.getinit_data(initfiles, parameter)
     backend  = utils.setupbackend_fromstring(backend)
 
-    rc = steering_api.run_workflow(
-        workdir,
-        workflow,
-        initdata,
-        toplevel,
-        backend = backend,
-        cacheconfigstring = cache,
-        initdir = initdir,
-        updateinterval = updateinterval,
-        loginterval = loginterval,
-        read = yaml.load(open(read)) if read else None,
-        validate = validate,
-        doviz = visualize,
-        metadir = metadir,
-        schemadir = schemasource,
-        user_interaction = interactive,
-        accept_existing_workdir = accept_workdir,
-        statesetup = statesetup
-    )
-    if rc:
+
+    rc = RC_FAILED
+
+    try:
+        steering_api.run_workflow(
+            workdir,
+            workflow,
+            initdata,
+            toplevel,
+            backend = backend,
+            cacheconfigstring = cache,
+            initdir = initdir,
+            updateinterval = updateinterval,
+            loginterval = loginterval,
+            read = yaml.load(open(read)) if read else None,
+            validate = validate,
+            doviz = visualize,
+            metadir = metadir,
+            schemadir = schemasource,
+            user_interaction = interactive,
+            accept_existing_metadir = accept_metadir,
+            statesetup = statesetup
+        )
+        rc = RC_SUCCEEDED
+    except:
+        log.exception('workflow failed')
+    if rc != RC_SUCCEEDED:
         exc = click.exceptions.ClickException(
             click.style("Workflow failed", fg='red'))
         exc.exit_code = rc
         raise exc
+
 if __name__ == '__main__':
     main()
