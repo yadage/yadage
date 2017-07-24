@@ -32,10 +32,10 @@ class YadageSteering():
     def workflow(self):
         return self.controller.adageobj
 
-    def prepare_workdir(self, workdir, accept_existing_workdir = False, stateinit = None):
+    def prepare_workdir(self, workdir, accept_existing_workdir = False, stateinit = None, metadir = None):
         writable_state    = LocalFSState([workdir])
         self.rootprovider = LocalFSProvider(stateinit,writable_state, ensure = True, nest = True)
-        self.metadir = '{}/_yadage/'.format(workdir)
+        self.metadir = metadir or '{}/_yadage/'.format(workdir)
 
         if os.path.exists(self.metadir):
             if not accept_existing_workdir:

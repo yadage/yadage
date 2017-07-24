@@ -19,3 +19,6 @@ Code Reference
 .. automodule:: yadage.stages
    :members:
 
+.. automodule:: yadage.backends.caching
+   :members:
+

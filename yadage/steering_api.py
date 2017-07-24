@@ -42,6 +42,7 @@ def steering_ctx(
     updateinterval = 0.02,
     loginterval = 30,
     schemadir = yadageschemas.schemadir,
+    metadir = None,
     user_interaction=False,
     validate=True,
     doviz=True,
@@ -59,8 +60,12 @@ def steering_ctx(
     if cacheconfigstring:
         accept_existing_workdir = True
 
-    ys.prepare_workdir(workdir, accept_existing_workdir, stateinit = read)
-    ys.init_workflow(workflow, loadtoplevel, initdata, statesetup = statesetup, initdir = initdir, validate = validate, schemadir = schemadir)
+    ys.prepare_workdir(workdir, accept_existing_workdir, stateinit = read, metadir = metadir)
+    ys.init_workflow(workflow, loadtoplevel, initdata,
+        statesetup = statesetup,
+        initdir = initdir,
+        validate = validate,
+        schemadir = schemadir)
     
     custom_tracker = os.environ.get('YADAGE_CUSTOM_TRACKER',None)
     if custom_tracker:

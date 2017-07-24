@@ -11,26 +11,26 @@ log = logging.getLogger(__name__)
 
 
 @click.command()
-@click.option('-v', '--verbosity', default='INFO', help = 'logging verbosity')
-@click.option('-i', '--loginterval', default=30, help = 'adage tracking interval in seconds')
-@click.option('-u', '--updateinterval', default=0.02, help = 'adage graph inspection interval in seconds')
-@click.option('-m', '--schemasource', default=yadageschemas.schemadir, help = 'schema directory for workflow validation')
-@click.option('-b', '--backend', default='multiproc:auto', help = 'packtivity backend string')
-@click.option('-c', '--cache', default='')
-@click.option('-s', '--statesetup', default='inmem', help = 'wflow state spec')
-@click.option('-d','--initdir', default='init', help = "relative path (to workdir) to initialiation data directory")
-@click.option('--interactive/--not-interactive', default=False, help = 'en-/disable user interactio (sign-off graph extensions and packtivity submissions)')
-@click.option('--validate/--no-validate', default=True, help = 'en-/disable workflow spec validation')
-@click.option('--accept-workdir/--no-accept-workdir', default=False)
-# v below this we should only have options/arg available also in yadage-manual
-@click.option('--visualize/--no-visualize', default=True, help = 'visualize workflow graph')
-@click.option('-t', '--toplevel', default=os.getcwd(), help = 'toplevel uri to be used to resolve workflow name and references from')
-@click.option('-r', '--read', default=None, help = 'YAML file to initialize the state context')
-@click.option('-a', '--inputarchive', default=None, help = 'initial data to stage as input')
-@click.option('--parameter', '-p', multiple=True, help = '<parameter name>=<yaml string> input parameter specifcations ')
 @click.argument('workdir')
 @click.argument('workflow')
 @click.argument('initfiles', nargs=-1)
+@click.option('-p','--parameter', multiple=True, help = '<parameter name>=<yaml string> input parameter specifcations ')
+@click.option('-b', '--backend', default='multiproc:auto', help = 'packtivity backend string')
+@click.option('-t', '--toplevel', default=os.getcwd(), help = 'toplevel uri to be used to resolve workflow name and references from')
+@click.option('-a', '--inputarchive', default=None, help = 'initial data to stage as input')
+@click.option('-c', '--cache', default='')
+@click.option('-v', '--verbosity', default='INFO', help = 'logging verbosity')
+@click.option('-i', '--loginterval', default=30, help = 'adage tracking interval in seconds')
+@click.option('-u', '--updateinterval', default=0.02, help = 'adage graph inspection interval in seconds')
+@click.option('-s', '--statesetup', default='inmem', help = 'wflow state spec')
+@click.option('-d','--initdir', default='init', help = "relative path (to workdir) to initialiation data directory")
+@click.option('-r', '--read', default=None, help = 'YAML file to initialize the state context')
+@click.option('--metadir', default=None, help = 'directory to store workflow metadata')
+@click.option('--schemasource', default=yadageschemas.schemadir, help = 'schema directory for workflow validation')
+@click.option('--interactive/--not-interactive', default=False, help = 'en-/disable user interactio (sign-off graph extensions and packtivity submissions)')
+@click.option('--validate/--no-validate', default=True, help = 'en-/disable workflow spec validation')
+@click.option('--accept-workdir/--no-accept-workdir', default=False)
+@click.option('--visualize/--no-visualize', default=True, help = 'visualize workflow graph')
 def main(workdir,
          workflow,
          initfiles,
@@ -41,6 +41,7 @@ def main(workdir,
          schemasource,
          backend,
          interactive,
+         metadir,
          parameter,
          validate,
          read,
@@ -74,6 +75,7 @@ def main(workdir,
         read = yaml.load(open(read)) if read else None,
         validate = validate,
         doviz = visualize,
+        metadir = metadir,
         schemadir = schemasource,
         user_interaction = interactive,
         accept_existing_workdir = accept_workdir,

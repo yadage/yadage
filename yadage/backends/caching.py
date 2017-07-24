@@ -11,6 +11,16 @@ from packtivity.statecontexts import load_state
 log = logging.getLogger(__name__)
 
 def setupcache_fromstring(configstring):
+    '''
+    generate cache from a string configuration (such as those passed from CLIs).
+    valid strings are:
+
+    - checksums:<path to cache file (JSON)>
+
+    :param configstring: the configuration string 
+    :return: a cache object
+    '''
+
     configparts  = configstring.split(':',1)
     strategy, specificconf = configparts
     if strategy == 'checksums':
@@ -66,6 +76,10 @@ class CachedBackend(federatedbackend.FederatedBackend):
 
 
 class CacheBuilder(object):
+    '''
+    Cache base class. Implementations need to provide cachevalid and 
+    generate_validation_data methods
+    '''
     def __init__(self, cachefile):
         self.cachefile = cachefile
         if not os.path.exists(self.cachefile):
@@ -85,9 +99,6 @@ class CacheBuilder(object):
     def remove(self,cacheid):
         self.cache.pop(cacheid)
 
-
-    def generate_validation_data(self,cacheid):
-        raise NotImplementedError
 
 
     def cacheresult(self, cacheid, status, result):
@@ -119,9 +130,6 @@ class CacheBuilder(object):
     def cacheexists(self,cacheid):
         return cacheid in self.cache and 'result' in self.cache[cacheid]
 
-    def cachevalid(self, cacheid):
-        raise NotImplementedError
-        
     def cacheddata(self, task, remove_invalid = True):
         '''
         returns results from a valid cache entry if it exists, else None
@@ -144,15 +152,26 @@ class CacheBuilder(object):
         log.debug('returning cached result %s',result)
         return result
 
+    def cachevalid(self, cacheid):
+        raise NotImplementedError
+        
+    def generate_validation_data(self,cacheid):
+        raise NotImplementedError
+
 class ChecksumCache(CacheBuilder):
     '''
-    This is a cache that attempts checks for file paths in result object
-    leaves and checks if they already exist. If yes
+    This is a cache that based on state hashes
     '''
+
     def __init__(self, cachefile):
         super(ChecksumCache, self).__init__(cachefile)
 
     def remove(self,cacheid):
+        '''
+        removes entry from the cache and reset its state
+
+        :param cachid: the cache entry identifier
+        '''
         task = self.cache[cacheid]['task']
         log.debug('removing cache entry %s and resetting state',cacheid)
         load_state(task['state']).reset()
@@ -160,6 +179,11 @@ class ChecksumCache(CacheBuilder):
 
 
     def generate_validation_data(self,cacheid):
+        '''
+        calculate validation data (checksums in SHA1 hash form)
+
+        :param cachid: the cache entry identifier
+        '''
         validation_data = {
             'state_hash': load_state(self.cache[cacheid]['task']['state']).state_hash()
         }
@@ -168,6 +192,11 @@ class ChecksumCache(CacheBuilder):
         return validation_data
 
     def cachevalid(self, cacheid):
+        '''
+        validate cache entry
+
+        :param cachid: the cache entry identifier
+        '''
         task = self.cache[cacheid]['task']
         if task['type'] == 'init_task':
             return True
