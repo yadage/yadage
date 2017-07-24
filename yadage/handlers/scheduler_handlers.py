@@ -5,8 +5,8 @@ import copy
 
 from expression_handlers import handlers as exprhandlers
 from ..tasks import packtivity_task, init_task, outputReference
-from ..stages import jsonStage
-from yadage.utils import leaf_iterator_jsonlike
+from ..stages import JsonStage
+from ..utils import leaf_iterator_jsonlike
 
 log = logging.getLogger(__name__)
 
@@ -105,7 +105,7 @@ def addStepOrWorkflow(name, stage, step, spec):
     '''
     if type(step) == init_task:
         new_provider = stage.state_provider.new_provider(name)
-        subrules = [jsonStage(yml, new_provider) for yml in spec['workflow']['stages']]
+        subrules = [JsonStage(yml, new_provider) for yml in spec['workflow']['stages']]
         stage.addWorkflow(subrules, initstep=step)
     else:
         stage.addStep(step)

@@ -7,15 +7,18 @@ log = logging.getLogger(__name__)
 
 class ViewStageBase(object):
     '''
-    base class for workflow stages based on workflow views that provides common datastructures.
+    base class for workflow stages operating on workflow views, that may
+    expose only a partial slice of an overall workflow.
+    The class also provides common methods to ease modifying the workflow.
+    
     Implementations are required to provide
     * a ready() method to implement the predicate method
     * a schedule() method that is called upon apply
     '''
     def __init__(self, name, state_provider):
-        self.view = None
         self.name = name
         self.state_provider = state_provider
+        self.view = None
 
     def schedule(self):
         raise NotImplementedError()
@@ -50,13 +53,13 @@ class ViewStageBase(object):
             'state_provider': self.state_provider.json() if self.state_provider else None
         }
 
-class initStage(ViewStageBase):
+class InitStage(ViewStageBase):
     '''
     simple stage that just adds a initializer step to the DAG
     '''
 
-    def __init__(self, step, state_provider):
-        super(initStage, self).__init__('init', state_provider)
+    def __init__(self, step):
+        super(InitStage, self).__init__('init', None)
         self.step = step
 
     def applicable(self, flowview):
@@ -71,18 +74,17 @@ class initStage(ViewStageBase):
     @classmethod
     def fromJSON(cls, data):
         instance = cls(
-            step = tasks.init_task.fromJSON(data['step']),
-            state_provider = load_provider(data['state_provider'])
+            step = tasks.init_task.fromJSON(data['step'])
         )
         return instance
 
     def json(self):
-        data = super(initStage, self).json()
-        data.update(type='initStage', info='', step=self.step.json())
+        data = super(InitStage, self).json()
+        data.update(type='InitStage', info='', step=self.step.json())
         return data
 
 
-class jsonStage(ViewStageBase):
+class JsonStage(ViewStageBase):
     '''
     A stage that is defined via the JSON scheduler schemas
     '''
@@ -90,10 +92,10 @@ class jsonStage(ViewStageBase):
     def __init__(self, json, state_provider):
         self.stageinfo = json['scheduler']
         self.depspec = json['dependencies']
-        super(jsonStage, self).__init__(json['name'], state_provider)
+        super(JsonStage, self).__init__(json['name'], state_provider)
 
     def __repr__(self):
-        return '<jsonStage: {}>'.format(self.name)
+        return '<JsonStage: {}>'.format(self.name)
 
     def ready(self):
         if not self.depspec:
@@ -120,6 +122,6 @@ class jsonStage(ViewStageBase):
         )
 
     def json(self):
-        data = super(jsonStage, self).json()
-        data.update(type='jsonStage', info=self.stageinfo, dependencies = self.depspec)
+        data = super(JsonStage, self).json()
+        data.update(type='JsonStage', info=self.stageinfo, dependencies = self.depspec)
         return data

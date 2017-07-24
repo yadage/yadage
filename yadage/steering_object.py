@@ -11,8 +11,8 @@ import shutil
 import logging
 from packtivity.statecontexts.posixfs_context import LocalFSProvider, LocalFSState
 
-from yadage.controllers import setup_controller_from_statestring
-from yadage.wflow import YadageWorkflow
+from controllers import setup_controller_from_statestring
+from wflow import YadageWorkflow
 
 log = logging.getLogger(__name__)
 

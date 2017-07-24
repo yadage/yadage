@@ -9,7 +9,7 @@ from visualize import write_prov_graph
 from controllers import PersistentController
 from wflowstate import load_model_fromstring
 from packtivity.statecontexts.posixfs_context import LocalFSProvider,LocalFSState
-from stages import jsonStage
+from stages import JsonStage
 import interactive
 import reset as reset_module
 import workflow_loader
@@ -215,7 +215,7 @@ def add(statetype, verbosity, offset, toplevel, workdir, workflow):
     )
 
     state_provider = LocalFSProvider(LocalFSState([workdir]))
-    rules = [jsonStage(json, state_provider) for json in workflow_json['stages']]
+    rules = [JsonStage(json, state_provider) for json in workflow_json['stages']]
     with controller.transaction():
         controller.adageobj.view().addWorkflow(rules)
 

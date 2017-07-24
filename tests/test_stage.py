@@ -1,6 +1,6 @@
 import yadage.workflow_loader
 from yadage.wflow import YadageWorkflow
-from yadage.stages import jsonStage,initStage
+from yadage.stages import JsonStage,InitStage
 from packtivity.statecontexts.posixfs_context import LocalFSProvider,LocalFSState
 
 def test_applicable():
@@ -25,5 +25,5 @@ def test_serialize_deserialize():
     assert wflow.rules[0].rule.json()
     assert wflow.rules[1].rule.json()
 
-    assert jsonStage.fromJSON(wflow.rules[0].rule.json()).json() == wflow.rules[0].rule.json()
-    assert initStage.fromJSON(wflow.rules[1].rule.json()).json() == wflow.rules[1].rule.json()
+    assert JsonStage.fromJSON(wflow.rules[0].rule.json()).json() == wflow.rules[0].rule.json()
+    assert InitStage.fromJSON(wflow.rules[1].rule.json()).json() == wflow.rules[1].rule.json()

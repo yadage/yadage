@@ -2,7 +2,7 @@ import adage
 from adage.serialize import obj_to_json
 from wflowview import WorkflowView, offsetRule
 from wflownode import YadageNode
-from stages import jsonStage
+from stages import JsonStage
 
 def json_or_nil(x):
     return None if x is None else x.json()
@@ -50,6 +50,6 @@ class YadageWorkflow(adage.adageobject):
     @classmethod
     def createFromJSON(cls, jsondata, state_provider):
         instance = cls()
-        rules = [jsonStage(stagedata, state_provider) for stagedata in jsondata['stages']]
+        rules = [JsonStage(stagedata, state_provider) for stagedata in jsondata['stages']]
         instance.view().addWorkflow(rules)
         return instance

@@ -1,9 +1,9 @@
 import logging
-import jsonpointer
+from jsonpointer import JsonPointer
 import jsonpath_rw
 from utils import get_id_fromjson, get_obj_id
 from wflownode import YadageNode
-from stages import initStage,jsonStage
+from stages import InitStage,JsonStage
 import tasks
 
 log = logging.getLogger(__name__)
@@ -50,10 +50,10 @@ class offsetRule(object):
     #(de-)serialization
     @classmethod
     def fromJSON(cls, data):
-        if data['rule']['type'] == 'initStage':
-            rule = initStage.fromJSON(data['rule'])
-        elif data['rule']['type'] == 'jsonStage':
-            rule = jsonStage.fromJSON(data['rule'])
+        if data['rule']['type'] == 'InitStage':
+            rule = InitStage.fromJSON(data['rule'])
+        elif data['rule']['type'] == 'JsonStage':
+            rule = JsonStage.fromJSON(data['rule'])
         return cls(
             rule=rule,
             identifier=data['id'],
@@ -80,10 +80,8 @@ class WorkflowView(object):
         self.rules = workflowobj.rules
         self.applied_rules = workflowobj.applied_rules
         self.offset = offset
-        self.steps = jsonpointer.JsonPointer(
-            self.offset).resolve(workflowobj.stepsbystage)
-        self.bookkeeper = jsonpointer.JsonPointer(
-            self.offset).resolve(workflowobj.bookkeeping)
+        self.steps = JsonPointer(self.offset).resolve(workflowobj.stepsbystage)
+        self.bookkeeper = JsonPointer(self.offset).resolve(workflowobj.bookkeeping)
 
     def query(self, query, collection):
         '''
@@ -126,10 +124,9 @@ class WorkflowView(object):
 
         :param offset: the relative offset
         '''
-        thisoffset = jsonpointer.JsonPointer(offset)
+        thisoffset = JsonPointer(offset)
         if self.offset:
-            fulloffset = jsonpointer.JsonPointer.from_parts(
-                jsonpointer.JsonPointer(self.offset).parts + thisoffset.parts).path
+            fulloffset = JsonPointer.from_parts(JsonPointer(self.offset).parts + thisoffset.parts).path
         else:
             fulloffset = thisoffset.path
         return fulloffset
@@ -149,13 +146,13 @@ class WorkflowView(object):
         :param inidata: initialization JSON data
         '''
         step = tasks.init_task(name, initdata)
-        self.addRule(initStage(step, {}), self.offset)
+        self.addRule(InitStage(step), self.offset)
 
     def addRule(self, rule, offset=''):
         '''
         add a DAG extensloaderion rule, possibly with a scope offset
         '''
-        thisoffset = jsonpointer.JsonPointer(offset)
+        thisoffset = JsonPointer(offset)
         offsetrule = offsetRule(rule, self._makeoffset(offset))
         self.rules += [offsetrule]
         createOffsetMeta(thisoffset.path, self.bookkeeper)
@@ -180,14 +177,14 @@ class WorkflowView(object):
 
     def addWorkflow(self, rules, initstep=None, stage=None):
         if initstep:
-            rules += [initStage(initstep,{})]
+            rules += [InitStage(initstep)]
         newsteps = {}
         if stage in self.steps:
             self.steps[stage] += [newsteps]
         elif stage is not None:
             self.steps[stage] = [newsteps]
 
-        offset = jsonpointer.JsonPointer.from_parts(
+        offset = JsonPointer.from_parts(
             [stage, len(self.steps[stage]) - 1]).path if stage else ''
         if stage is not None:
             self.steps[stage][-1]['_offset'] = offset
@@ -199,7 +196,7 @@ def createOffsetMeta(offset, bookkeeping):
     '''
     sets up a location to track rule and step ids for a given scope offset
     '''
-    pointer = jsonpointer.JsonPointer(offset)
+    pointer = JsonPointer(offset)
     view = bookkeeping
     for x in pointer.parts:
         if x not in view:

@@ -1,5 +1,4 @@
 import json
-import contextlib
 import logging
 from wflow import YadageWorkflow
 from backends import load_proxy
@@ -83,17 +82,3 @@ class FileBackedModel(object):
         with open(self.filename) as statefile:
             return self.deserializer(json.load(statefile))
 
-@contextlib.contextmanager
-def model_transaction(self):
-    '''
-    session context to handle data updates. Ensures data is committed on context exit.
-    '''
-
-    self.adageobj = self.model.load()
-    yield
-
-    isvalid = self.validate()
-    if not isvalid:
-        #raise RuntimeError('was about to commit invalid data!')
-        log.warning('commit is in valid %s', isvalid)
-    self.model.commit(self.adageobj)

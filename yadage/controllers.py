@@ -1,8 +1,10 @@
 import logging
-import yadage.reset
+import contextlib
 import adage.controllerutils as ctrlutils
 from adage.wflowcontroller import BaseController
-from wflowstate import FileBackedModel, MongoBackedModel, model_transaction, load_model
+from wflowstate import FileBackedModel, MongoBackedModel, load_model
+from reset import reset_steps
+
 log = logging.getLogger(__name__)
 
 def setup_controller_from_statestring(workflowobj, statestr = 'inmem'):
@@ -36,8 +38,17 @@ class PersistentController(BaseController):
         self.model = model
         super(PersistentController, self).__init__(self.model.load(),backend)
 
+
+    @contextlib.contextmanager
     def transaction(self):
-        return model_transaction(self)
+        self.adageobj = self.model.load()
+        yield
+
+        isvalid = self.validate()
+        if not isvalid:
+            #raise RuntimeError('was about to commit invalid data!')
+            log.warning('commit is in valid %s', isvalid)
+        self.model.commit(self.adageobj)
 
     def submit_nodes(self, nodeids):
         '''

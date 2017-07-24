@@ -1,5 +1,4 @@
 import click
-# import IPython
 
 def decide_rule(rule, controller, idbased):
     click.secho('we could extend DAG with rule', fg='blue')
