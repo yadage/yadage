@@ -53,7 +53,7 @@ def steering_ctx(
     if cacheconfigstring:
         accept_existing_metadir = True
 
-    ys.prepare(workdir, accept_existing_metadir, stateinit = read, metadir = metadir)
+    ys.prepare(workdir, stateinit = read, accept_existing_metadir = accept_existing_metadir, metadir = metadir)
     ys.init_workflow(workflow, loadtoplevel, initdata,
         statesetup = statesetup,
         initdir = initdir,
@@ -72,7 +72,6 @@ def steering_ctx(
         default_trackers = doviz,
         trackevery = loginterval,
         update_interval = updateinterval,
-        workdir='{}/adage'.format(ys.metadir)
     )
     if user_interaction:
         extend, submit = interactive.interactive_deciders()

@@ -49,8 +49,9 @@ class YadageSteering():
                 raise RuntimeError('yadage meta directory exists. explicitly accept')
         else:
             os.makedirs(self.metadir)
+        self.adage_argument(workdir = os.path.join(self.metadir,'adage'))
 
-    def prepare(self, workdir = None, accept_existing_metadir = False, stateinit = None, metadir = None,  rootprovider = None):
+    def prepare(self, workdir = None, stateinit = None, accept_existing_metadir = False, metadir = None,  rootprovider = None):
         if workdir:
             writable_state    = LocalFSState([workdir])
             self.rootprovider = LocalFSProvider(stateinit,writable_state, ensure = True, nest = True)
