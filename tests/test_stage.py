@@ -25,11 +25,5 @@ def test_serialize_deserialize():
     assert wflow.rules[0].rule.json()
     assert wflow.rules[1].rule.json()
 
-    assert jsonStage.fromJSON(wflow.rules[0].rule.json())
-    assert jsonStage.fromJSON(wflow.rules[1].rule.json())
-
-    assert jsonStage.fromJSON(wflow.rules[0].rule.json()).json()
-    assert jsonStage.fromJSON(wflow.rules[1].rule.json()).json()
-
-    # assert jsonStage.fromJSON(wflow.rules[0].rule.json()).json() == wflow.rules[0].rule.json()
-    # assert initStage.fromJSON(wflow.rules[1].rule.json()).json() == wflow.rules[1].rule.json()
+    assert jsonStage.fromJSON(wflow.rules[0].rule.json()).json() == wflow.rules[0].rule.json()
+    assert initStage.fromJSON(wflow.rules[1].rule.json()).json() == wflow.rules[1].rule.json()

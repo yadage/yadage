@@ -5,32 +5,31 @@ from packtivity.statecontexts import load_provider
 
 log = logging.getLogger(__name__)
 
-class StageBase(object):
+class ViewStageBase(object):
     '''
-    Base class for workflow stages (i.e. extension rules)
-    provides common datastructures and the extension predicate.
-    Implementations are required to provide a schedule()
-    method that is called upon apply
+    base class for workflow stages based on workflow views that provides common datastructures.
+    Implementations are required to provide
+    * a ready() method to implement the predicate method
+    * a schedule() method that is called upon apply
     '''
-
-    def __init__(self, name, state_provider, dependencies=None):
+    def __init__(self, name, state_provider):
         self.view = None
         self.name = name
         self.state_provider = state_provider
-        self.depspec = dependencies
+
+    def schedule(self):
+        raise NotImplementedError()
+
+    def ready(self):
+        raise NotImplementedError()
 
     def applicable(self, flowview):
-        if not self.depspec:
-            return True
-        predicate = pred_handlers[self.depspec['dependency_type']]
-        return predicate(flowview, self.depspec)
+        self.view = flowview
+        return self.ready()
 
     def apply(self, flowview):
         self.view = flowview
         self.schedule()
-
-    def schedule(self):
-        raise NotImplementedError()
 
     def addStep(self, step):
         dependencies = [self.view.dag.getNode(k.stepid) for k in step.inputs]
@@ -48,19 +47,20 @@ class StageBase(object):
     def json(self):
         return {
             'name': self.name,
-            'state_provider': self.state_provider.json() if self.state_provider else None,
-            'dependencies': self.depspec
+            'state_provider': self.state_provider.json() if self.state_provider else None
         }
 
-
-class initStage(StageBase):
+class initStage(ViewStageBase):
     '''
     simple stage that just adds a initializer step to the DAG
     '''
 
-    def __init__(self, step, state_provider, dependencies):
-        super(initStage, self).__init__('init', state_provider, dependencies)
+    def __init__(self, step, state_provider):
+        super(initStage, self).__init__('init', state_provider)
         self.step = step
+
+    def applicable(self, flowview):
+        return True
 
     def schedule(self):
         log.debug('initializing a scope with init step: %s',
@@ -72,8 +72,7 @@ class initStage(StageBase):
     def fromJSON(cls, data):
         instance = cls(
             step = tasks.init_task.fromJSON(data['step']),
-            state_provider = load_provider(data['state_provider']),
-            dependencies = data['dependencies']
+            state_provider = load_provider(data['state_provider'])
         )
         return instance
 
@@ -83,18 +82,24 @@ class initStage(StageBase):
         return data
 
 
-class jsonStage(StageBase):
+class jsonStage(ViewStageBase):
     '''
     A stage that is defined via the JSON scheduler schemas
     '''
 
     def __init__(self, json, state_provider):
         self.stageinfo = json['scheduler']
-        super(jsonStage, self).__init__(
-            json['name'], state_provider, json['dependencies'])
+        self.depspec = json['dependencies']
+        super(jsonStage, self).__init__(json['name'], state_provider)
 
     def __repr__(self):
         return '<jsonStage: {}>'.format(self.name)
+
+    def ready(self):
+        if not self.depspec:
+            return True
+        predicate = pred_handlers[self.depspec['dependency_type']]
+        return predicate(self, self.depspec)
 
     def schedule(self):
         #imported here to avoid circular dependency
@@ -116,5 +121,5 @@ class jsonStage(StageBase):
 
     def json(self):
         data = super(jsonStage, self).json()
-        data.update(type='jsonStage', info=self.stageinfo)
+        data.update(type='jsonStage', info=self.stageinfo, dependencies = self.depspec)
         return data

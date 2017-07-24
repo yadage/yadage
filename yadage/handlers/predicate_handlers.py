@@ -42,7 +42,7 @@ def scope_done(scope, flowview):
 
 
 @scheduler('jsonpath_ready')
-def jsonpath_ready(flowview, depspec):
+def jsonpath_ready(stage, depspec):
     '''
     the main predicate for yadage. for a list of jsonpath expressions
     determine whether the stage or workflow scope is ready (i.e. has a result)
@@ -50,17 +50,17 @@ def jsonpath_ready(flowview, depspec):
     log.debug('checking jsonpath ready predicate\n%s', depspec)
     dependencies = depspec['expressions']
     for x in dependencies:
-        depmatches = flowview.query(x, flowview.steps)
+        depmatches = stage.view.query(x, stage.view.steps)
         if not depmatches:
             log.debug('no query matches, not ready')
             return False
         issubwork = '_nodeid' not in depmatches[0].value[0]
         if issubwork:
             log.debug('dependency is a subworkflow. determine if scope is done')
-            if not all([scope_done(scope['_offset'], flowview) for match in depmatches for scope in match.value]):
+            if not all([scope_done(scope['_offset'], stage.view) for match in depmatches for scope in match.value]):
                 return False
         else:
-            if not all([x.has_result() for x in flowview.getSteps(x)]):
+            if not all([x.has_result() for x in stage.view.getSteps(x)]):
                 return False
     log.debug('all checks ok, predicate is True')
     return True

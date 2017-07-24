@@ -149,7 +149,7 @@ class WorkflowView(object):
         :param inidata: initialization JSON data
         '''
         step = tasks.init_task(name, initdata)
-        self.addRule(initStage(step, {}, None), self.offset)
+        self.addRule(initStage(step, {}), self.offset)
 
     def addRule(self, rule, offset=''):
         '''
@@ -180,7 +180,7 @@ class WorkflowView(object):
 
     def addWorkflow(self, rules, initstep=None, stage=None):
         if initstep:
-            rules += [initStage(initstep,{},None)]
+            rules += [initStage(initstep,{})]
         newsteps = {}
         if stage in self.steps:
             self.steps[stage] += [newsteps]
