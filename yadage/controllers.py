@@ -1,7 +1,7 @@
 import logging
 import yadage.reset
 import adage.controllerutils as ctrlutils
-from adage.wflowcontroller import BaseController, InMemoryController
+from adage.wflowcontroller import BaseController
 from wflowstate import FileBackedModel, MongoBackedModel, model_transaction, load_model
 log = logging.getLogger(__name__)
 
@@ -9,10 +9,10 @@ def setup_controller_from_statestring(workflowobj, statestr = 'inmem'):
     '''
     return controller instance based on state configuration. For
     transaction-based states, returns PersistentController, for in-
-    memory states returns in InMemoryController
+    memory states returns in BaseController
     '''
     if statestr == 'inmem':
-        return InMemoryController(workflowobj)
+        return BaseController(workflowobj)
     elif statestr.startswith('filebacked'):
         filename = statestr.split(':')[-1]
         model   = FileBackedModel(

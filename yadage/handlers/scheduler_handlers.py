@@ -57,19 +57,20 @@ def finalize_value(wflowview, step, value, state):
         return value
 
 
-def finalize_input(wflowview, step, jsondata, state):
+def finalize_input(wflowview, step, jsondata):
     '''
-    evaluate final values of step parameters by either resolving a
-    reference to a upstream output and contextualizing stateful
+    evaluate final values of step parameters by resolving 
+    references to a upstream output and contextualizing stateful
     parameters. Also tracks usage of upstream references for the step
 
     :param wflowview: the workflow view view against which to resolve any upstream references
     :param step: the step that for which to track usage of upstream references
     :param jsondata: the prospective step parameters
-    :param state: the state context 
 
     :return: finalized step parameters
     '''
+
+    state =  step.state if hasattr(step, 'state') else None
     result = copy.deepcopy(jsondata)
     for leaf_pointer, leaf_value in leaf_iterator_jsonlike(jsondata):
         leaf_pointer.set(result,finalize_value(wflowview, step, leaf_value, state))
@@ -137,7 +138,7 @@ def singlestep_stage(stage, spec):
         k: select_parameter(stage.view, v) for k, v in get_parameters(spec).iteritems()
     }
 
-    finalized = finalize_input(stage.view, step, parameters, step.state if hasattr(step, 'state') else None)
+    finalized = finalize_input(stage.view, step, parameters)
     addStepOrWorkflow(stage.name, stage, step.s(**finalized), spec)
 
 def scatter(parameters, scatter):
@@ -200,5 +201,5 @@ def multistep_stage(stage, spec):
     for i, pars in enumerate(singlesteppars):
         singlename = '{}_{}'.format(stage.name, i)
         step = step_or_init(singlename,spec,stage.state_provider)
-        finalized = finalize_input(stage.view, step, pars, step.state if hasattr(step, 'state') else None)
+        finalized = finalize_input(stage.view, step, pars)
         addStepOrWorkflow(singlename, stage, step.s(**finalized), spec)
