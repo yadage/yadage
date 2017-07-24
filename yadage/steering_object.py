@@ -19,8 +19,7 @@ log = logging.getLogger(__name__)
 class YadageSteering():
     def __init__(self,loggername = __name__):
         self.log = logging.getLogger(loggername)
-        self.workdir = None
-        self.yadagedir = None
+        self.metadir = None
         self.controller = None
         self.rootprovider = None
         self.adage_kwargs = {}
@@ -30,20 +29,16 @@ class YadageSteering():
         return self.controller.adageobj
 
     def prepare_workdir(self, workdir, accept_existing_workdir = False, stateinit = None):
-        self.workdir = workdir
+        writable_state    = LocalFSState([workdir])
+        self.rootprovider = LocalFSProvider(stateinit,writable_state, ensure = True, nest = True)
+        self.metadir = '{}/_yadage/'.format(workdir)
 
-
-        writable_state  = LocalFSState([workdir])
-        self.rootprovider = LocalFSProvider(stateinit,writable_state)
-
-        self.yadagedir = '{}/_yadage/'.format(workdir)
-
-        if os.path.exists(self.yadagedir):
+        if os.path.exists(self.metadir):
             if not accept_existing_workdir:
                 raise RuntimeError('yadage meta directory exists. explicitly accept')
             self.log.info('yadage meta directory exists.. will remove and remake')
-            shutil.rmtree(self.yadagedir)
-        os.makedirs(self.yadagedir)
+            shutil.rmtree(self.metadir)
+        os.makedirs(self.metadir)
     
     def init_workflow(self, workflow, toplevel, initdata, statesetup = 'inmem', initdir = None, search_initdir = True, validate = True, schemadir = yadageschemas.schemadir):
         ##check input data
@@ -56,7 +51,7 @@ class YadageSteering():
             schemadir=schemadir,
             validate=validate
         )
-        with open('{}/yadage_template.json'.format(self.yadagedir), 'w') as f:
+        with open('{}/yadage_template.json'.format(self.metadir), 'w') as f:
             json.dump(workflow_json, f)
         workflowobj = YadageWorkflow.createFromJSON(workflow_json, self.rootprovider)
         if initdata:
@@ -78,11 +73,11 @@ class YadageSteering():
     def serialize(self):
         serialize.snapshot(
             self.workflow,
-            '{}/yadage_snapshot_workflow.json'.format(self.yadagedir),
-            '{}/yadage_snapshot_backend.json'.format(self.yadagedir)
+            '{}/yadage_snapshot_workflow.json'.format(self.metadir),
+            '{}/yadage_snapshot_backend.json'.format(self.metadir)
         )
 
     def visualize(self):
-        visualize.write_prov_graph(self.yadagedir, self.workflow, vizformat='png')
-        visualize.write_prov_graph(self.yadagedir, self.workflow, vizformat='pdf')
+        visualize.write_prov_graph(self.metadir, self.workflow, vizformat='png')
+        visualize.write_prov_graph(self.metadir, self.workflow, vizformat='pdf')
 

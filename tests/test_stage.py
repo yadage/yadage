@@ -6,11 +6,15 @@ from packtivity.statecontexts.posixfs_context import LocalFSProvider,LocalFSStat
 def test_applicable():
     data  = yadage.workflow_loader.workflow('workflow.yml','tests/testspecs/local-helloworld')
     wflow = YadageWorkflow.createFromJSON(data,LocalFSProvider(LocalFSState(['/workdir']), ensure = False))
-    assert wflow.rules[0].applicable(wflow) == True
+    wflow.view().init({'par': 'value'})
+    assert wflow.rules[-1].applicable(wflow) == True
 
 def test_apply():
     data  = yadage.workflow_loader.workflow('workflow.yml','tests/testspecs/local-helloworld')
     wflow = YadageWorkflow.createFromJSON(data,LocalFSProvider(LocalFSState(['/workdir']), ensure = False))
+    wflow.view().init({'par': 'value'})
+    assert wflow.rules[-1].applicable(wflow) == True
+    wflow.rules[-1].apply(wflow)
     assert wflow.rules[0].applicable(wflow) == True
     wflow.rules[0].apply(wflow)
 

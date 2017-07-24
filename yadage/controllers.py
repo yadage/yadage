@@ -17,13 +17,11 @@ def setup_controller_from_statestring(workflowobj, statestr = 'inmem'):
         filename = statestr.split(':')[-1]
         model   = FileBackedModel(
             filename = filename,
-            deserializer = load_model,
             initdata = workflowobj
         )
         return PersistentController(model)
     elif statestr == 'mongo':
         model = MongoBackedModel(
-            deserializer = load_model,
             initdata = workflowobj
         )
         return PersistentController(model)
@@ -75,14 +73,15 @@ class PersistentController(BaseController):
         '''
         :return: a list of rules whose predicate is fulfilled
         '''
-        a = [x.identifier for x in ctrlutils.applicable_rules(self.adageobj)]
-        return a
+        applicable_rules = super(PersistentController,self).applicable_rules()
+        return [x.identifier for x in applicable_rules]
 
     def submittable_nodes(self):
         '''
         :return: a list of nodes with sucessfull and completed upstream
         '''
-        return [x.identifier for x in ctrlutils.submittable_nodes(self.adageobj)]
+        submittable_nodes = super(PersistentController,self).submittable_nodes()
+        return [x.identifier for x in submittable_nodes]
 
     def reset_nodes(self, nodeids):
         '''

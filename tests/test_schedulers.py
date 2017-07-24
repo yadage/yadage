@@ -3,9 +3,9 @@ from yadage.wflow import YadageWorkflow
 
 def test_singlestepstage_schedule_steps(local_helloworld_wflow):
     wflow = local_helloworld_wflow
-    assert wflow.rules[0].applicable(wflow) == True
-    assert wflow.rules[0].rule.stageinfo['scheduler_type'] == 'singlestep-stage'
-    wflow.rules[0].apply(wflow)
+    assert wflow.rules[-1].applicable(wflow) == False
+    assert wflow.rules[-1].rule.stageinfo['scheduler_type'] == 'singlestep-stage'
+    wflow.rules[-1].apply(wflow)
     assert len(wflow.dag.nodes()) == 1
 
 

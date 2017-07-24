@@ -1,20 +1,10 @@
 import json
 import contextlib
 import logging
-from yadage.wflow import YadageWorkflow
+from wflow import YadageWorkflow
+from backends import load_proxy
 
 log = logging.getLogger(__name__)
-
-
-def load_proxy(data):
-        import packtivity.asyncbackends
-        import yadage.backends.packtivitybackend
-        if data['proxyname']=='InitProxy':
-            return yadage.backends.packtivitybackend.InitProxy.fromJSON(data)
-        elif data['proxyname']=='CeleryProxy':
-            return packtivity.asyncbackends.CeleryProxy.fromJSON(data)
-        else:
-            raise RuntimeError('only celery support for now... found proxy with name: {}'.format(data['proxyname']))
 
 def load_model(jsondata):
     workflow = YadageWorkflow.fromJSON(
@@ -38,7 +28,10 @@ def load_model_fromstring(modelidstring):
     raise RuntimeError('unknown model string')
 
 class MongoBackedModel(object):
-    def __init__(self, deserializer, connect_string = 'mongodb://localhost:27017/', initdata = None, wflowid = None):
+    '''
+    model that holds the workflow state in a MongoDB database.
+    '''
+    def __init__(self, deserializer = load_model, connect_string = 'mongodb://localhost:27017/', initdata = None, wflowid = None):
         from pymongo import MongoClient
         from bson.objectid import ObjectId
         self.deserializer = deserializer
@@ -53,13 +46,24 @@ class MongoBackedModel(object):
             self.wflowid = ObjectId(wflowid)
 
     def commit(self, data):
+        '''
+        :param data: data to commit to disk. needs to have '.json()' method
+        return: None
+        '''
         self.collection.replace_one({'_id':self.wflowid}, data.json())
 
     def load(self):
+        '''
+        param load: load data from database
+        return: yadage workflow object
+        '''
         return self.deserializer(self.collection.find_one({'_id':self.wflowid}))
 
 class FileBackedModel(object):
-    def __init__(self, filename, deserializer, initdata = None):
+    '''
+    model that holds data on disk in a JSON file
+    '''
+    def __init__(self, filename, deserializer = load_model, initdata = None):
         self.filename = filename
         self.deserializer = deserializer
         if initdata:
@@ -68,7 +72,6 @@ class FileBackedModel(object):
     def commit(self, data):
         '''
         :param data: data to commit to disk. needs to have '.json()' method
-        commits data (possibly to persistent storage)
         '''
         with open(self.filename,'w') as statefile:
             json.dump(data.json(), statefile)
@@ -83,8 +86,9 @@ class FileBackedModel(object):
 @contextlib.contextmanager
 def model_transaction(self):
     '''
-    param: model: a model object with .load() and .commit(data) methods
+    session context to handle data updates. Ensures data is committed on context exit.
     '''
+
     self.adageobj = self.model.load()
     yield
 

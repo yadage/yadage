@@ -4,7 +4,7 @@ import os
 
 def test_maincli(tmpdir):
     runner = CliRunner()
-    result = runner.invoke(yadage.steering.main,[os.path.join(str(tmpdir),'workdir'),'workflow.yml','-t','tests/testspecs/local-helloworld'])
+    result = runner.invoke(yadage.steering.main,[os.path.join(str(tmpdir),'workdir'),'workflow.yml','-t','tests/testspecs/local-helloworld','-p','par=value'])
 
 
     assert tmpdir.join('workdir/hello_world/hello_world.txt').check()
@@ -24,7 +24,7 @@ def test_maincli_initfile(tmpdir):
 def test_maincli_interactive_all_yes(tmpdir):
     runner = CliRunner()
     result = runner.invoke(yadage.steering.main,[
-        os.path.join(str(tmpdir),'workdir'),'workflow.yml','-t','tests/testspecs/local-helloworld','--interactive'], input = 'y\ny\n'
+        os.path.join(str(tmpdir),'workdir'),'workflow.yml','-t','tests/testspecs/local-helloworld','--interactive','-p','par=value'], input = 'y\ny\ny\ny\ny\ny\n'
     )
     assert tmpdir.join('workdir/hello_world/hello_world.txt').check()
     assert result.exit_code == 0
@@ -33,7 +33,7 @@ def test_maincli_interactive_all_yes(tmpdir):
 def test_maincli_interactive_no_yes(tmpdir):
     runner = CliRunner()
     result = runner.invoke(yadage.steering.main,[
-        os.path.join(str(tmpdir),'workdir'),'workflow.yml','-t','tests/testspecs/local-helloworld','--interactive'], input = '\nn\ny\nn\ny\n'
+        os.path.join(str(tmpdir),'workdir'),'workflow.yml','-t','tests/testspecs/local-helloworld','--interactive','-p','par=value'], input = 'y\ny\ny\ny\ny\ny\n'
     )
     assert tmpdir.join('workdir/hello_world/hello_world.txt').check()
     assert result.exit_code == 0

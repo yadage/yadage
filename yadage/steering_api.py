@@ -59,7 +59,7 @@ def steering_ctx(
         default_trackers = doviz,
         trackevery = loginterval,
         update_interval = updateinterval,
-        workdir='{}/_adage'.format(ys.workdir)
+        workdir='{}/adage'.format(ys.metadir)
     )
     if user_interaction:
         extend, submit = interactive.interactive_deciders()

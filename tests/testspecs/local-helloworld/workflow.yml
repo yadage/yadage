@@ -1,5 +1,6 @@
 stages:
   - name: hello_world
+    dependencies: [init]
     scheduler:
       scheduler_type: singlestep-stage
       parameters:

@@ -41,6 +41,14 @@ def local_helloworld_wflow(tmpdir,localfs_state_provider):
     return wflow
 
 @pytest.fixture()
+def local_helloworld_wflow_w_init(tmpdir,localfs_state_provider):
+    '''a workflow object with horizontally scalable map stage scheduling sub-workflows'''
+    data  = yadage.workflow_loader.workflow('workflow.yml','tests/testspecs/local-helloworld')
+    wflow = YadageWorkflow.createFromJSON(data,localfs_state_provider)
+    wflow.view().init({'par': 'hello'})
+    return wflow
+
+@pytest.fixture()
 def cartesian_mapreduce(tmpdir,localfs_state_provider):
     '''a workflow object with horizontally scalable map stage scheduling sub-workflows'''
     data  = yadage.workflow_loader.workflow('workflow.yml','tests/testspecs/cartesian_mapreduce')
@@ -57,6 +65,11 @@ def simple_mapreduce(tmpdir,localfs_state_provider):
 @pytest.fixture()
 def multiproc_backend():
     backend = setupbackend_fromstring('multiproc:4')
+    return backend
+
+@pytest.fixture()
+def foregroundasync_backend():
+    backend = setupbackend_fromstring('foregroundasync')
     return backend
 
 @pytest.fixture()

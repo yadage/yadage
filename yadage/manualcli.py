@@ -56,7 +56,7 @@ def click_print_submittable_nodes(controller):
         node = controller.adageobj.dag.getNode(x)
         rule = controller.adageobj.view().getRule(identifier = s2r[node.identifier])
         if node.identifier in controller.submittable_nodes():
-            click.secho('node: {}({}) part of stage {}'.format(node.name, node.identifier,  '/'.join([rule.offset,rule.rule.name])))
+            click.secho('node: {} ({}) part of stage {}'.format(node.name, node.identifier,  '/'.join([rule.offset,rule.rule.name])))
 
 @mancli.command()
 @click.option('-n','--name', default=None)
@@ -93,13 +93,13 @@ def apply(name, statetype, verbosity):
 @click.option('-o', '--offset', default='')
 @click.option('-s', '--statetype', default='filebacked:yadage_state.json')
 @click.option('-v', '--verbosity', default='ERROR')
-def submit(nodeid, allof, offset, statetype, verbosity):
+@click.option('-b', '--backend', default='celery')
+def submit(nodeid, allof, offset, statetype, verbosity, backend):
     logging.basicConfig(level=getattr(logging, verbosity))
 
     model   = load_model_fromstring(statetype)
     controller = PersistentController(model)
-    controller.backend = utils.setupbackend_fromstring('celery')
-
+    controller.backend = utils.setupbackend_fromstring(backend)
 
     if not (allof or nodeid):
         click_print_submittable_nodes(controller)
@@ -128,10 +128,12 @@ def submit(nodeid, allof, offset, statetype, verbosity):
 
 @mancli.command()
 @click.option('-s', '--statetype', default='filebacked:yadage_state.json')
-def show(statetype):
+@click.option('-b', '--backend', default='celery')
+def show(statetype, backend):
     model      = load_model_fromstring(statetype)
     controller = PersistentController(model)
-    controller.backend = utils.setupbackend_fromstring('celery')
+    controller.backend = utils.setupbackend_fromstring(backend)
+
     click.secho('''
 Workflow:
 ---------
@@ -152,13 +154,15 @@ valid: {valid}
     click_print_applicable_stages(controller)
     click_print_submittable_nodes(controller)
 
+
 @mancli.command()
 @click.argument('name')
 @click.option('-s', '--statetype', default='filebacked:yadage_state.json')
-def preview(name,statetype):
+@click.option('-b', '--backend', default='celery')
+def preview(name,statetype,backend):
     model      = load_model_fromstring(statetype)
     controller = PersistentController(model)
-    controller.backend = utils.setupbackend_fromstring('celery')
+    controller.backend = utils.setupbackend_fromstring(backend)
 
     new_rules, new_nodes = manualutils.preview_rule(controller.adageobj, name)
     click.secho('Preview of Stage: # new rules: {} # new nodes {}'.format(
@@ -171,12 +175,13 @@ def preview(name,statetype):
 @click.option('-v', '--verbosity', default='ERROR')
 @click.option('-n', '--nsteps', default=-1, help = 'number of steps to process. use -1 to for no limit (will run workflow to completion)')
 @click.option('-u', '--update-interval', default=1)
-def step(statetype, verbosity, nsteps, update_interval):
+@click.option('-b', '--backend', default='celery')
+def step(statetype, verbosity, nsteps, update_interval,backend):
     logging.basicConfig(level=getattr(logging, verbosity))
 
     maxsteps = nsteps if nsteps >= 0 else None
     model   = load_model_fromstring(statetype)
-    backend = utils.setupbackend_fromstring('celery')
+    backend = utils.setupbackend_fromstring(backend)
 
     extend, submit = interactive.interactive_deciders(idbased = True)
     ys = YadageSteering()
