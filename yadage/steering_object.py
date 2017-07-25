@@ -7,7 +7,6 @@ import utils
 import visualize
 import serialize
 import yadageschemas
-import shutil
 import logging
 from packtivity.statecontexts.posixfs_context import LocalFSProvider, LocalFSState
 

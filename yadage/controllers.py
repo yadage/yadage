@@ -1,8 +1,7 @@
 import logging
 import contextlib
-import adage.controllerutils as ctrlutils
 from adage.wflowcontroller import BaseController
-from wflowstate import FileBackedModel, MongoBackedModel, load_model
+from wflowstate import FileBackedModel, MongoBackedModel
 from reset import reset_steps
 
 log = logging.getLogger(__name__)
@@ -100,4 +99,4 @@ class PersistentController(BaseController):
         :return: None
         '''
         with self.transaction():
-            yadage.reset.reset_steps(self.adageobj,nodeids)
+            reset_steps(self.adageobj,nodeids)
