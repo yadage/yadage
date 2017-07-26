@@ -64,7 +64,6 @@ def main(workdir,
     rc = RC_FAILED
     try:
         steering_api.run_workflow(
-            workdir = workdir,
             workflow = workflow,
             toplevel = toplevel,
             validate = validate,
@@ -75,6 +74,7 @@ def main(workdir,
             backend = backend,
             cache = cache,
 
+            workdir = workdir,
             read = read,
             initdir = initdir,
             inputarchive = inputarchive,
