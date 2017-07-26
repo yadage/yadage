@@ -59,6 +59,7 @@ def main(workdir,
 
     initdata = utils.getinit_data(initfiles, parameter)
     backend  = utils.setupbackend_fromstring(backend)
+    read     = yaml.load(open(read)) if read else None
 
     rc = RC_FAILED
     try:
@@ -69,16 +70,16 @@ def main(workdir,
             toplevel = toplevel,
             backend = backend,
             cache = cache,
-
-            read = yaml.load(open(read)) if read else None,
+            
+            read = read,
             initdir = initdir,
             inputarchive = inputarchive,
-
+            
             metadir = metadir,
             accept_metadir = accept_metadir,            
-
+            
             statesetup = statesetup,
-
+            
             updateinterval = updateinterval,
             loginterval = loginterval,
             validate = validate,
