@@ -72,7 +72,6 @@ def apply(name, statetype, verbosity):
         click_print_applicable_stages(controller)
         return
 
-
     offset, name = name.split('/')
     rule = controller.adageobj.view(offset).getRule(name)
     if not rule:
@@ -82,6 +81,10 @@ def apply(name, statetype, verbosity):
 
     if rule in controller.adageobj.applied_rules:
         click.secho('Already applied.', fg = 'yellow')
+        return
+
+    if rule.identifier not in controller.applicable_rules():
+        click.secho('Rule not yet appilcable', fg = 'red')
         return
 
     controller.apply_rules([rule.identifier])
