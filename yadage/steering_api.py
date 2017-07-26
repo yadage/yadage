@@ -1,12 +1,12 @@
 from contextlib import contextmanager
 import logging
 import importlib
-import interactive
 import yadageschemas
 import os
 
 from steering_object import YadageSteering
 from utils import setupbackend_fromstring
+from interactive import interactive_deciders
 
 log = logging.getLogger(__name__)
 
@@ -27,19 +27,20 @@ def steering_ctx(
     workdir,
     workflow,
     initdata = None,
-    loadtoplevel = os.getcwd(),
+    toplevel = os.getcwd(),
     backend = setupbackend_fromstring('multiproc:auto'),
-    cacheconfigstring = None,
+    cache = None,
     read = None,
-    initdir = None,
+    initdir = 'init',
+    inputarchive = None,
     updateinterval = 0.02,
     loginterval = 30,
     schemadir = yadageschemas.schemadir,
     metadir = None,
-    user_interaction=False,
+    interactive=False,
     validate=True,
-    doviz=True,
-    accept_existing_metadir = False,
+    visualize=True,
+    accept_metadir = False,
     statesetup = 'inmem'):
     '''
     context manage around yadage steering object.
@@ -50,15 +51,18 @@ def steering_ctx(
 
     ys = YadageSteering()
 
-    if cacheconfigstring:
-        accept_existing_metadir = True
+    if cache:
+        accept_metadir = True
 
-    ys.prepare(workdir, stateinit = read, accept_existing_metadir = accept_existing_metadir, metadir = metadir)
-    ys.init_workflow(workflow, loadtoplevel, initdata,
+    ys.prepare(
+        initdata = initdata,
+        workdir = workdir, read = read, initdir = initdir, inputarchive = inputarchive,
+        metadir = metadir, accept_existing_metadir = accept_metadir
+    )
+    ys.init_workflow(
+        workflow = workflow, toplevel = toplevel, validate = validate, schemadir = schemadir,
+        initdata = initdata,
         statesetup = statesetup,
-        initdir = initdir,
-        validate = validate,
-        schemadir = schemadir
     )
     
     custom_tracker = os.environ.get('YADAGE_CUSTOM_TRACKER',None)
@@ -69,29 +73,29 @@ def steering_ctx(
         ys.adage_argument(additional_trackers = [trackerclass()])
 
     ys.adage_argument(
-        default_trackers = doviz,
+        default_trackers = visualize,
         trackevery = loginterval,
         update_interval = updateinterval,
     )
-    if user_interaction:
-        extend, submit = interactive.interactive_deciders()
+    if interactive:
+        extend, submit = interactive_deciders()
         ys.adage_argument(
             extend_decider = extend,
             submit_decider = submit
         )
+
     yield ys
 
     log.info('running yadage workflow %s on backend %s', workflow, backend)
-    if cacheconfigstring:
-        if cacheconfigstring == 'checksums':
-            backend.enable_cache(':'.join([cacheconfigstring,os.path.join(ys.metadir,'cache.json')]))
+    if cache:
+        if cache == 'checksums':
+            backend.enable_cache(':'.join([cache,os.path.join(ys.metadir,'cache.json')]))
         else:
-            backend.enable_cache(cacheconfigstring)
+            backend.enable_cache(cache)
 
     try:
         ys.run_adage(backend)
     finally:
         ys.serialize()
-    if doviz:
+    if visualize:
         ys.visualize()
-

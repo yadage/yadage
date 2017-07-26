@@ -13,13 +13,13 @@ def test_cached(tmpdir,checksum_cached_multiproc):
     checksum_cached_multiproc.backends['packtivity'].cache.todisk()
 
 
-    with steering_ctx(workdir, 'workflow.yml', {'par':'value'}, 'tests/testspecs/local-helloworld', checksum_cached_multiproc, accept_existing_metadir = True) as ys:
+    with steering_ctx(workdir, 'workflow.yml', {'par':'value'}, 'tests/testspecs/local-helloworld', checksum_cached_multiproc, accept_metadir = True) as ys:
         ys.adage_argument(default_trackers = False)
 
     assert tmpdir.join('workdir/hello_world/hello_world.txt').check()
     tmpdir.join('workdir/hello_world/hello_world.txt').remove()
 
-    with steering_ctx(workdir, 'workflow.yml', {'par':'value'}, 'tests/testspecs/local-helloworld', checksum_cached_multiproc, accept_existing_metadir = True) as ys:
+    with steering_ctx(workdir, 'workflow.yml', {'par':'value'}, 'tests/testspecs/local-helloworld', checksum_cached_multiproc, accept_metadir = True) as ys:
         ys.adage_argument(default_trackers = False)
 
 def test_nonexisting_cache():

@@ -7,7 +7,7 @@ from yadage.reset import reset_steps, collective_downstream
 def test_steer(tmpdir,multiproc_backend):
     ys = YadageSteering()
     ys.prepare(os.path.join(str(tmpdir),'workdir'))
-    ys.init_workflow('workflow.yml', 'tests/testspecs/nestedmapreduce',{'input': [1,2,3]})
+    ys.init_workflow('workflow.yml', {'input': [1,2,3]}, 'tests/testspecs/nestedmapreduce')
 
     ys.adage_argument(default_trackers = False)
     ys.run_adage(multiproc_backend)
@@ -19,15 +19,16 @@ def test_context(tmpdir,multiproc_backend):
 
 def test_inparchive(tmpdir,multiproc_backend):
     workdir = os.path.join(str(tmpdir),'workdir')
-    initdir = prepare_workdir_from_archive(workdir, 'file://{}/tests/testspecs/dynamic_glob/inputs/three_files.zip'.format(os.path.abspath(os.curdir)))
-    with steering_ctx(workdir, 'workflow_frominit.yml', {'inputfiles':'*.txt'}, 'tests/testspecs/dynamic_glob', multiproc_backend, initdir = initdir) as ys:
+    inputarchive = 'file://{}/tests/testspecs/dynamic_glob/inputs/three_files.zip'.format(os.path.abspath(os.curdir))
+    with steering_ctx(workdir, 'workflow_frominit.yml', {'inputfiles':'*.txt'}, 'tests/testspecs/dynamic_glob', multiproc_backend,
+                      inputarchive = inputarchive) as ys:
         ys.adage_argument(default_trackers = False)
 
 
 def test_reset(tmpdir,multiproc_backend):
     ys = YadageSteering()
-    ys.prepare(os.path.join(str(tmpdir),'workdir'))
-    ys.init_workflow('workflow.yml', 'tests/testspecs/nestedmapreduce',{'input': [1,2,3]})
+    ys.prepare(os.path.join(str(tmpdir),'workdir'),{'input': [1,2,3]})
+    ys.init_workflow('workflow.yml', {'input': [1,2,3]}, 'tests/testspecs/nestedmapreduce')
 
     ys.adage_argument(default_trackers = False)
     ys.run_adage(multiproc_backend)

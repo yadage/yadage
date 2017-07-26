@@ -20,12 +20,12 @@ class YadageSteering():
     '''
     high level steering object to manage worklfow execution
     '''
-
     def __init__(self,loggername = __name__):
         self.log = logging.getLogger(loggername)
         self.metadir = None
         self.controller = None
         self.rootprovider = None
+        self.initdata = {}
         self.adage_kwargs = {}
 
     @property
@@ -50,18 +50,27 @@ class YadageSteering():
             os.makedirs(self.metadir)
         self.adage_argument(workdir = os.path.join(self.metadir,'adage'))
 
-    def prepare(self, workdir = None, stateinit = None, accept_existing_metadir = False, metadir = None,  rootprovider = None):
+    def prepare(self, workdir = None, initdata = None, inputarchive = None, initdir = 'init', read = None, accept_existing_metadir = False, metadir = None,  rootprovider = None):
+        '''
+        prepares initialization data (such as ) and sets up stateprovider used for workflow stages
+        if initialization data is provided, it may be mutated to reflect automatic data discovery
+        '''
         if workdir:
-            writable_state    = LocalFSState([workdir])
-            self.rootprovider = LocalFSProvider(stateinit,writable_state, ensure = True, nest = True)
             self.prepare_meta(metadir or '{}/_yadage/'.format(workdir), accept_existing_metadir)
+            initdir = os.path.join(workdir,initdir)
+            if inputarchive:
+                initdir = utils.prepare_workdir_from_archive(initdir, inputarchive)
+            if initdata:
+                utils.discover_initfiles(initdata,os.path.realpath(initdir))
+            writable_state    = LocalFSState([workdir])
+            self.rootprovider = LocalFSProvider(read,writable_state, ensure = True, nest = True)
         elif rootprovider:
-            self.rootprovider = rootprovider
             self.prepare_meta(metadir)
+            self.rootprovider = rootprovider
         else:
             raise RuntimeError('must provide local work directory or root state provider')
         
-    def init_workflow(self, workflow, toplevel = os.getcwd(), initdata = None, statesetup = 'inmem', initdir = None, search_initdir = True, validate = True, schemadir = yadageschemas.schemadir):
+    def init_workflow(self, workflow, initdata = None, toplevel = os.getcwd(), statesetup = 'inmem', validate = True, schemadir = yadageschemas.schemadir):
         '''
         load workflow from spec and initialize it
         
@@ -69,11 +78,6 @@ class YadageSteering():
         :param toplevel: base URI against which to resolve JSON references in the spec
         :param initdata: initialization data for workflow 
         '''
-        if not initdata:
-            initdata = {}
-        if search_initdir and initdir:
-            utils.discover_initfiles(initdata,os.path.realpath(initdir))
-
         workflow_json = workflow_loader.workflow(
             workflow,
             toplevel=toplevel,
@@ -88,7 +92,6 @@ class YadageSteering():
             workflowobj.view().init(initdata)
         else:
             log.info('no initialization data')
-
         self.controller = setup_controller_from_statestring(workflowobj, statestr = statesetup)
 
     def adage_argument(self,**kwargs):

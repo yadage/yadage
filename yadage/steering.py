@@ -29,7 +29,7 @@ RC_SUCCEEDED = 0
 @click.option('-d','--initdir', default='init', help = "relative path (to workdir) to initialiation data directory")
 @click.option('-r', '--read', default=None, help = 'YAML file to initialize the state context')
 @click.option('--metadir', default=None, help = 'directory to store workflow metadata')
-@click.option('--schemasource', default=yadageschemas.schemadir, help = 'schema directory for workflow validation')
+@click.option('--schemadir', default=yadageschemas.schemadir, help = 'schema directory for workflow validation')
 @click.option('--interactive/--not-interactive', default=False, help = 'en-/disable user interactio (sign-off graph extensions and packtivity submissions)')
 @click.option('--validate/--no-validate', default=True, help = 'en-/disable workflow spec validation')
 @click.option('--accept-metadir/--no-accept-metadir', default=False)
@@ -41,7 +41,7 @@ def main(workdir,
          verbosity,
          loginterval,
          updateinterval,
-         schemasource,
+         schemadir,
          backend,
          interactive,
          metadir,
@@ -57,36 +57,34 @@ def main(workdir,
 
     logging.basicConfig(level=getattr(logging, verbosity), format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
-    if inputarchive:
-        initdir = utils.prepare_workdir_from_archive(workdir, inputarchive)
-    else:
-        initdir = os.path.join(workdir,initdir)
-
     initdata = utils.getinit_data(initfiles, parameter)
     backend  = utils.setupbackend_fromstring(backend)
 
-
     rc = RC_FAILED
-
     try:
         steering_api.run_workflow(
-            workdir,
-            workflow,
-            initdata,
-            toplevel,
+            workdir = workdir,
+            workflow = workflow,
+            initdata = initdata,
+            toplevel = toplevel,
             backend = backend,
-            cacheconfigstring = cache,
+            cache = cache,
+
+            read = yaml.load(open(read)) if read else None,
             initdir = initdir,
+            inputarchive = inputarchive,
+
+            metadir = metadir,
+            accept_metadir = accept_metadir,            
+
+            statesetup = statesetup,
+
             updateinterval = updateinterval,
             loginterval = loginterval,
-            read = yaml.load(open(read)) if read else None,
             validate = validate,
-            doviz = visualize,
-            metadir = metadir,
-            schemadir = schemasource,
-            user_interaction = interactive,
-            accept_existing_metadir = accept_metadir,
-            statesetup = statesetup
+            visualize = visualize,
+            schemadir = schemadir,
+            interactive = interactive,
         )
         rc = RC_SUCCEEDED
     except:

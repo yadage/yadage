@@ -161,13 +161,12 @@ def getinit_data(initfiles, parameters):
         initdata[key] = yaml.load(value)
     return initdata
 
-def prepare_workdir_from_archive(workdir, inputarchive):
-    if os.path.exists(workdir):
+def prepare_workdir_from_archive(initdir, inputarchive):
+    if os.path.exists(initdir):
         raise click.exceptions.ClickException(click.style(
-            "workdirectory exists and input archive give. Can't have both", fg='red'))
-    initdir = os.path.join(workdir,'init')
+            "initialization directory exists and input archive give. Can't have both", fg='red'))
     os.makedirs(initdir)
-    localzipfile = '{}/inputarchive.zip'.format(workdir)
+    localzipfile = '{}/.yadage_inputarchive.zip'.format(initdir)
     f = urllib2.urlopen(inputarchive)
     with open(localzipfile,'w') as lf:
         lf.write(f.read())

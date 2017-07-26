@@ -39,8 +39,8 @@ def init(workdir, workflow, initfiles, statesetup, initdir, toplevel, parameter,
         initdir = os.path.join(workdir,initdir)
 
     ys = YadageSteering()
-    ys.prepare(workdir)
-    ys.init_workflow(workflow, toplevel, initdata, statesetup = statesetup, initdir = initdir)
+    ys.prepare(workdir,initdir = initdir, initdata = initdata)
+    ys.init_workflow(workflow, initdata, toplevel, statesetup = statesetup)
 
 
 def click_print_applicable_stages(controller):
