@@ -23,6 +23,6 @@ def load_proxy(data):
         elif data['proxyname']=='CachedProxy':
             return CachedProxy.fromJSON(data)
         elif data['proxyname']=='TrivialProxy':
-            return trivialbackend.TrivialProxy.fromJSON(data)
+            return yadage.backends.trivialbackend.TrivialProxy.fromJSON(data)
         else:
             raise RuntimeError('unknown proxy found with name: {}'.format(data['proxyname']))
