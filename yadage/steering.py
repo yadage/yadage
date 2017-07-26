@@ -66,25 +66,27 @@ def main(workdir,
         steering_api.run_workflow(
             workdir = workdir,
             workflow = workflow,
-            initdata = initdata,
             toplevel = toplevel,
+            validate = validate,
+            schemadir = schemadir,
+
+            initdata = initdata,
+
             backend = backend,
             cache = cache,
-            
+
             read = read,
             initdir = initdir,
             inputarchive = inputarchive,
-            
+
             metadir = metadir,
             accept_metadir = accept_metadir,            
-            
+
             statesetup = statesetup,
-            
+
             updateinterval = updateinterval,
             loginterval = loginterval,
-            validate = validate,
             visualize = visualize,
-            schemadir = schemadir,
             interactive = interactive,
         )
         rc = RC_SUCCEEDED

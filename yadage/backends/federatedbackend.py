@@ -17,17 +17,17 @@ class FederatedBackend(object):
         return self.routedsubmit(task)
 
     def result(self, proxy):
-        b = self.routeproxy(proxy)
-        return self.backends[b].result(proxy)
+        b,p = self.routeproxy(proxy)
+        return self.backends[b].result(p)
 
     def ready(self, proxy):
-        b = self.routeproxy(proxy)
-        return self.backends[b].ready(proxy)
+        b,p = self.routeproxy(proxy)
+        return self.backends[b].ready(p)
 
     def successful(self, proxy):
-        b = self.routeproxy(proxy)
-        return self.backends[b].successful(proxy)
+        b,p = self.routeproxy(proxy)
+        return self.backends[b].successful(p)
 
     def fail_info(self, proxy):
-        b = self.routeproxy(proxy)
-        return self.backends[b].fail_info(proxy)
+        b,p = self.routeproxy(proxy)
+        return self.backends[b].fail_info(p)

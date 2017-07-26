@@ -6,6 +6,7 @@ import logging
 
 from yadage.utils import get_obj_id
 from trivialbackend import TrivialProxy, TrivialBackend
+from ..backends import CachedProxy
 from packtivity.statecontexts import load_state
 
 log = logging.getLogger(__name__)
@@ -65,14 +66,14 @@ class CachedBackend(federatedbackend.FederatedBackend):
             #we will store the result with once it's ready
             cacheid = self.cache.cacheid(task)
             primaryproxy = self.backends['primary'].submit(task.spec, task.parameters, task.state)
-            primaryproxy.cacheid = cacheid
-            return primaryproxy
+            cachedproxy = CachedProxy(primaryproxy, cacheid)
+            return cachedproxy
 
     def routeproxy(self, proxy):
         if type(proxy) == TrivialProxy:
-            return 'cache'
+            return 'cache', proxy
         else:
-            return 'primary'
+            return 'primary', proxy.proxy
 
 
 class CacheBuilder(object):

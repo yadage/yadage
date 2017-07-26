@@ -65,7 +65,7 @@ class PacktivityBackend(federatedbackend.FederatedBackend):
 
     def routeproxy(self, proxy):
         if type(proxy) == InitProxy:
-            return 'init'
+            return 'init', proxy
         else:
-            return 'packtivity'
+            return 'packtivity', proxy
         raise NotImplementedError('needs implementation')

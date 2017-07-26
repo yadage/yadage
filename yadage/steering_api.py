@@ -85,7 +85,7 @@ def steering_ctx(
         )
 
     yield ys
-
+    
     log.info('running yadage workflow %s on backend %s', workflow, backend)
     if cache:
         if cache == 'checksums':
