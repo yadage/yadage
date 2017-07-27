@@ -50,7 +50,7 @@ class YadageSteering():
             os.makedirs(self.metadir)
         self.adage_argument(workdir = os.path.join(self.metadir,'adage'))
 
-    def prepare_localstate(self, dataarg, dataopts, initdata = None, metadir = None):
+    def prepare_localstate(self, dataarg, dataopts, initdata = None):
         workdir = dataarg
         initdir = os.path.join(workdir,dataopts.get('initdir','init'))
         inputarchive = dataopts.get('inputarchive',None)
@@ -62,9 +62,11 @@ class YadageSteering():
             initdir = utils.prepare_workdir_from_archive(initdir, inputarchive)
         if initdata:
             utils.discover_initfiles(initdata,os.path.realpath(initdir))
-        writable_state    = LocalFSState([workdir])
-        self.rootprovider = LocalFSProvider(read,writable_state, ensure = ensure, nest = nest)
-        self.metadir = self.metadir or metadir or '{}/_yadage/'.format(workdir)
+        writable_state = LocalFSState([workdir])
+        rootprovider = LocalFSProvider(read,writable_state, ensure = ensure, nest = nest)
+
+        self.rootprovider = rootprovider
+        self.metadir = self.metadir or '{}/_yadage/'.format(workdir)
 
 
     def prepare(self, dataarg, dataopts = None, initdata = None, accept_existing_metadir = False, metadir = None):
@@ -72,11 +74,12 @@ class YadageSteering():
         prepares workflow data state, with  possible initialization and sets up stateprovider used for workflow stages.
         if initialization data is provided, it may be mutated to reflect automatic data discovery
         '''
+        self.metadir = metadir
         dataopts = dataopts or {}
         split_dataarg = dataarg.split(':',1)
         if len(split_dataarg) == 1:
             statearg = split_dataarg[0]
-            self.prepare_localstate(statearg,dataopts,initdata,metadir)
+            self.prepare_localstate(statearg,dataopts,initdata)
         else:
             datatype, dataopts = split_dataarg
             raise RuntimeError('unknown state type %s', datatype)            

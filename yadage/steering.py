@@ -4,7 +4,6 @@ import os
 import steering_api
 import logging
 import yadageschemas
-import yaml
 import utils
 
 log = logging.getLogger(__name__)
