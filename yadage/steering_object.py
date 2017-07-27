@@ -35,14 +35,14 @@ class YadageSteering():
         '''
         return self.controller.adageobj
 
-    def prepare_meta(self,metadir,accept=False):
+    def prepare_meta(self,metadir = None,accept=False):
         '''
         prepare workflow meta-data directory
 
         :param metadir: the meta-data directory name
         '''
-        assert metadir
-        self.metadir = metadir
+        self.metadir = self.metadir or metadir #maybe it's already set
+        assert self.metadir
         if os.path.exists(self.metadir):
             if not accept:
                 raise RuntimeError('yadage meta directory exists. explicitly accept')
@@ -50,25 +50,37 @@ class YadageSteering():
             os.makedirs(self.metadir)
         self.adage_argument(workdir = os.path.join(self.metadir,'adage'))
 
-    def prepare(self, workdir = None, initdata = None, inputarchive = None, initdir = 'init', read = None, accept_existing_metadir = False, metadir = None,  rootprovider = None):
+    def prepare_localstate(self, dataarg, dataopts, initdata = None, metadir = None):
+        workdir = dataarg
+        initdir = os.path.join(workdir,dataopts.get('initdir','init'))
+        inputarchive = dataopts.get('inputarchive',None)
+        read = dataopts.get('read',None)
+        nest = dataopts.get('nest',True)
+        ensure = dataopts.get('ensure',True)
+
+        if inputarchive:
+            initdir = utils.prepare_workdir_from_archive(initdir, inputarchive)
+        if initdata:
+            utils.discover_initfiles(initdata,os.path.realpath(initdir))
+        writable_state    = LocalFSState([workdir])
+        self.rootprovider = LocalFSProvider(read,writable_state, ensure = ensure, nest = nest)
+        self.metadir = self.metadir or metadir or '{}/_yadage/'.format(workdir)
+
+
+    def prepare(self, dataarg, dataopts = None, initdata = None, accept_existing_metadir = False, metadir = None):
         '''
-        prepares initialization data (such as ) and sets up stateprovider used for workflow stages
+        prepares workflow data state, with  possible initialization and sets up stateprovider used for workflow stages.
         if initialization data is provided, it may be mutated to reflect automatic data discovery
         '''
-        if workdir:
-            self.prepare_meta(metadir or '{}/_yadage/'.format(workdir), accept_existing_metadir)
-            initdir = os.path.join(workdir,initdir)
-            if inputarchive:
-                initdir = utils.prepare_workdir_from_archive(initdir, inputarchive)
-            if initdata:
-                utils.discover_initfiles(initdata,os.path.realpath(initdir))
-            writable_state    = LocalFSState([workdir])
-            self.rootprovider = LocalFSProvider(read,writable_state, ensure = True, nest = True)
-        elif rootprovider:
-            self.prepare_meta(metadir)
-            self.rootprovider = rootprovider
+        dataopts = dataopts or {}
+        split_dataarg = dataarg.split(':',1)
+        if len(split_dataarg) == 1:
+            statearg = split_dataarg[0]
+            self.prepare_localstate(statearg,dataopts,initdata,metadir)
         else:
-            raise RuntimeError('must provide local work directory or root state provider')
+            datatype, dataopts = split_dataarg
+            raise RuntimeError('unknown state type %s', datatype)            
+        self.prepare_meta(accept = accept_existing_metadir)
         
     def init_workflow(self, workflow, initdata = None, toplevel = os.getcwd(), statesetup = 'inmem', validate = True, schemadir = yadageschemas.schemadir):
         '''

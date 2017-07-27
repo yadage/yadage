@@ -144,6 +144,13 @@ def discover_initfiles(initdata,sourcedir):
             pointer.set(initdata,globresult)
     return initdata
 
+def getdata_options(dataopts):
+    dataoptdict = {}
+    for x in dataopts:
+        key, value = x.split('=')
+        dataoptdict[key] = yaml.load(value)
+    return dataoptdict
+
 def getinit_data(initfiles, parameters):
     '''
     get initial data from both a list of files and a list of 'pname=pvalue'

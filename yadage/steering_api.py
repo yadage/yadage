@@ -13,7 +13,6 @@ log = logging.getLogger(__name__)
 RC_FAILED = 1
 RC_SUCCEEDED = 0
 
-
 def run_workflow(*args, **kwargs):
     '''
     convenience function around steering context, when no additional settings
@@ -24,15 +23,13 @@ def run_workflow(*args, **kwargs):
 
 @contextmanager
 def steering_ctx(
-    workdir,
+    dataarg,
     workflow,
     initdata = None,
     toplevel = os.getcwd(),
     backend = setupbackend_fromstring('multiproc:auto'),
     cache = None,
-    read = None,
-    initdir = 'init',
-    inputarchive = None,
+    dataopts = None,
     updateinterval = 0.02,
     loginterval = 30,
     schemadir = yadageschemas.schemadir,
@@ -55,10 +52,12 @@ def steering_ctx(
         accept_metadir = True
 
     ys.prepare(
+        dataarg = dataarg,
         initdata = initdata,
-        workdir = workdir, read = read, initdir = initdir, inputarchive = inputarchive,
-        metadir = metadir, accept_existing_metadir = accept_metadir
+        metadir = metadir, accept_existing_metadir = accept_metadir,
+        dataopts = dataopts
     )
+
     ys.init_workflow(
         workflow = workflow, toplevel = toplevel, validate = validate, schemadir = schemadir,
         initdata = initdata,
@@ -83,7 +82,7 @@ def steering_ctx(
             extend_decider = extend,
             submit_decider = submit
         )
-        
+            
     yield ys
     
     log.info('running yadage workflow %s on backend %s', workflow, backend)

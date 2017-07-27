@@ -21,13 +21,13 @@ def test_inparchive(tmpdir,multiproc_backend):
     workdir = os.path.join(str(tmpdir),'workdir')
     inputarchive = 'file://{}/tests/testspecs/dynamic_glob/inputs/three_files.zip'.format(os.path.abspath(os.curdir))
     with steering_ctx(workdir, 'workflow_frominit.yml', {'inputfiles':'*.txt'}, 'tests/testspecs/dynamic_glob', multiproc_backend,
-                      inputarchive = inputarchive) as ys:
+                      dataopts = dict(inputarchive = inputarchive)) as ys:
         ys.adage_argument(default_trackers = False)
 
 
 def test_reset(tmpdir,multiproc_backend):
     ys = YadageSteering()
-    ys.prepare(os.path.join(str(tmpdir),'workdir'),{'input': [1,2,3]})
+    ys.prepare(os.path.join(str(tmpdir),'workdir'),initdata = {'input': [1,2,3]})
     ys.init_workflow('workflow.yml', {'input': [1,2,3]}, 'tests/testspecs/nestedmapreduce')
 
     ys.adage_argument(default_trackers = False)

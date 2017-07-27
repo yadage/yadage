@@ -39,7 +39,7 @@ def init(workdir, workflow, initfiles, statesetup, initdir, toplevel, parameter,
         initdir = os.path.join(workdir,initdir)
 
     ys = YadageSteering()
-    ys.prepare(workdir,initdir = initdir, initdata = initdata)
+    ys.prepare(workdir,dataopts = dict(initdir = initdir, initdata = initdata))
     ys.init_workflow(workflow, initdata, toplevel, statesetup = statesetup)
 
 
