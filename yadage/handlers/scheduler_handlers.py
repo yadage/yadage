@@ -19,7 +19,6 @@ handlers, scheduler = utils.handler_decorator()
 #     - the step parameters are determined using the scheduler spec and context
 #     - a list of used inputs (in the form of [stepname,outputkey,index])
 
-
 def select_parameter(wflowview, parameter):
     '''
     Evaluates parameter expressions (if needed) in the context of a workflow view

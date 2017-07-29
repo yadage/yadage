@@ -54,7 +54,7 @@ def steering_ctx(
     ys.prepare(
         dataarg = dataarg,
         initdata = initdata,
-        metadir = metadir, accept_existing_metadir = accept_metadir,
+        metadir = metadir, accept_metadir = accept_metadir,
         dataopts = dataopts
     )
 

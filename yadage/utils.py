@@ -12,6 +12,7 @@ import uuid
 import jsonref
 import copy
 import glob2 as glob
+import importlib
 
 from tasks import outputReference
 from backends.trivialbackend import TrivialProxy, TrivialBackend
@@ -185,3 +186,10 @@ def prepare_workdir_from_archive(initdir, inputarchive):
 def setupbackend_fromstring(backend, name = 'backendname'):
     import backends.packtivitybackend as pb
     return pb.PacktivityBackend(packtivity_backendstring = backend)
+
+def setupstateprovider(datatype,dataarg,dataopts):
+    if datatype == 'fromenv':
+        module = importlib.import_module(os.environ['PACKTIVITY_STATEPROVIDER'])
+        return module.setup_provider(dataarg,dataopts)
+    raise RuntimeError('unknown data type %s', datatype)
+

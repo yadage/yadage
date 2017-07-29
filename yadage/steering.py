@@ -24,9 +24,7 @@ RC_SUCCEEDED = 0
 @click.option('-i', '--loginterval', default=30, help = 'adage tracking interval in seconds')
 @click.option('-u', '--updateinterval', default=0.02, help = 'adage graph inspection interval in seconds')
 @click.option('-s', '--statesetup', default='inmem', help = 'wflow state spec')
-
 @click.option('-d', '--dataopt', multiple=True, default=None, help = 'options for the workflow data state')
-
 @click.option('--metadir', default=None, help = 'directory to store workflow metadata')
 @click.option('--schemadir', default=yadageschemas.schemadir, help = 'schema directory for workflow validation')
 @click.option('--interactive/--not-interactive', default=False, help = 'en-/disable user interactio (sign-off graph extensions and packtivity submissions)')
@@ -59,7 +57,6 @@ def main(dataarg,
     initdata = utils.getinit_data(initfiles, parameter)
     dataopts = utils.getdata_options(dataopt)
     backend  = utils.setupbackend_fromstring(backend)
-
     rc = RC_FAILED
     try:
         steering_api.run_workflow(
@@ -89,7 +86,8 @@ def main(dataarg,
         log.exception('workflow failed')
     if rc != RC_SUCCEEDED:
         exc = click.exceptions.ClickException(
-            click.style("Workflow failed", fg='red'))
+            click.style("Workflow failed", fg='red')
+        )
         exc.exit_code = rc
         raise exc
 

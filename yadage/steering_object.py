@@ -10,6 +10,7 @@ import yadageschemas
 import logging
 from packtivity.statecontexts.posixfs_context import LocalFSProvider, LocalFSState
 
+
 from controllers import setup_controller_from_statestring
 from wflow import YadageWorkflow
 from utils import setupbackend_fromstring
@@ -35,11 +36,12 @@ class YadageSteering():
         '''
         return self.controller.adageobj
 
-    def prepare_meta(self,metadir = None,accept=False):
+    def prepare_meta(self,metadir = None, accept=False):
         '''
         prepare workflow meta-data directory
 
         :param metadir: the meta-data directory name
+        :param accept: whether to accept an existing metadata directory
         '''
         self.metadir = self.metadir or metadir #maybe it's already set
         assert self.metadir
@@ -51,6 +53,13 @@ class YadageSteering():
         self.adage_argument(workdir = os.path.join(self.metadir,'adage'))
 
     def prepare_localstate(self, dataarg, dataopts, initdata = None):
+        '''
+        prepare default local state provider
+        
+        :param dataarg: the workdirectory under which all packtivity data will be stored
+        :param dataopts: dictionary 
+        :param initdata: initdata tempalte that is mutated based on initialization data on disk
+        '''
         workdir = dataarg
         initdir = os.path.join(workdir,dataopts.get('initdir','init'))
         inputarchive = dataopts.get('inputarchive',None)
@@ -69,22 +78,29 @@ class YadageSteering():
         self.metadir = self.metadir or '{}/_yadage/'.format(workdir)
 
 
-    def prepare(self, dataarg, dataopts = None, initdata = None, accept_existing_metadir = False, metadir = None):
+    def prepare(self, dataarg, dataopts = None, initdata = None, accept_metadir = False, metadir = None):
         '''
         prepares workflow data state, with  possible initialization and sets up stateprovider used for workflow stages.
         if initialization data is provided, it may be mutated to reflect automatic data discovery
+
+        :param dataarg: mandatory state provider setup. generally <datatype>:<argument>. For 
+        :param dataopts: optional settings for state provider
+        :param initdata: optional workflow init parameters to process against data setup
+        :param accept_metadir: 
+        :param metadir: meta-data directory
         '''
         self.metadir = metadir
         dataopts = dataopts or {}
         split_dataarg = dataarg.split(':',1)
         if len(split_dataarg) == 1:
-            statearg = split_dataarg[0]
-            self.prepare_localstate(statearg,dataopts,initdata)
+            dataarg = split_dataarg[0]
+            self.prepare_localstate(dataarg,dataopts,initdata)
         else:
-            datatype, dataopts = split_dataarg
-            raise RuntimeError('unknown state type %s', datatype)            
-        self.prepare_meta(accept = accept_existing_metadir)
-        
+            assert self.metadir #for non-default provider, require metadir to be set 
+            datatype, dataarg = split_dataarg
+            self.rootprovider = utils.setupstateprovider(datatype, dataarg, dataopts)
+        self.prepare_meta(accept = accept_metadir)
+                
     def init_workflow(self, workflow, initdata = None, toplevel = os.getcwd(), statesetup = 'inmem', validate = True, schemadir = yadageschemas.schemadir):
         '''
         load workflow from spec and initialize it
@@ -112,6 +128,7 @@ class YadageSteering():
     def adage_argument(self,**kwargs):
         '''
         add keyword arguments for workflow execution (adage)
+
         :param kwargs: adage keyword arguments (see adage documentation for options)
         '''
         self.adage_kwargs.update(**kwargs)
@@ -119,6 +136,8 @@ class YadageSteering():
     def run_adage(self, backend = setupbackend_fromstring('multiproc:auto'), **adage_kwargs):
         '''
         execution workflow with adage based against given backend
+
+        :param backend: backend to use for packtivity processing.
         '''
         self.controller.backend = backend
         self.adage_argument(**adage_kwargs)
@@ -127,7 +146,7 @@ class YadageSteering():
     def serialize(self):
         '''
         serialized workflow and backend states (stored in meta directory)
-        '''
+        ''' 
         serialize.snapshot(
             self.workflow,
             '{}/yadage_snapshot_workflow.json'.format(self.metadir),
