@@ -11,7 +11,7 @@ def checkmeta(flowview, metainfo):
     log.debug('checking meta %s on view with offset %s',
               metainfo, flowview.offset)
     applied_ids = [rl.identifier for rl in flowview.applied_rules]
-    rulesok = all([x in applied_ids for x in metainfo['rules']])
+    rulesok = all([x in applied_ids for x in metainfo['stages']])
 
     stepsok = all([flowview.dag.getNode(x).has_result()
                    for x in metainfo['steps']])
@@ -23,7 +23,7 @@ def checkmeta(flowview, metainfo):
 def scope_done(scope, flowview):
     '''
     walks recursively all scopes starting at some initial scope to determine if
-    all steps and rules under this scope have been executed / applied. Will indicate
+    all steps and stages under this scope have been executed / applied. Will indicate
     that it's save to reference any result of the workflow within that scope.
     '''
     log.debug('checking scope %s on view with offset %s',

@@ -3,68 +3,11 @@ from jsonpointer import JsonPointer
 import jsonpath_rw
 from utils import get_id_fromjson, get_obj_id
 from wflownode import YadageNode
-from stages import InitStage,JsonStage
+from stages import InitStage,JsonStage,OffsetStage
 import tasks
 
 log = logging.getLogger(__name__)
 
-class offsetRule(object):
-    '''
-    A wrapper object around a scoped rule, so that it can be applied from
-    a global p.o.v., i.e. as adage expects its rules.
-    '''
-
-    def __init__(self, rule, offset=None, identifier=None):
-        '''
-        initializes a scoped rule. scope is defined by a JSONPointer, e.g.
-        one[0]two.three
-
-        '''
-
-        self.rule = rule
-        self.offset = offset
-        self.identifier = identifier or get_id_fromjson({
-            'rule': rule.json(),
-            'offset': offset
-        })
-
-    def __repr__(self):
-        return '<offsetStage {}/{} >'.format(self.offset,self.rule.name)
-
-    def applicable(self, adageobj):
-        '''
-        determin whether the rule is applicable. Evaluated within the offset.
-        :param adageobj: the workflow object
-        '''
-        x = self.rule.applicable(WorkflowView(adageobj, self.offset))
-        return x
-
-    def apply(self, adageobj):
-        '''
-        applies a rule within the scope set by offset
-
-        :param adageobj: the workflow object
-        '''
-        self.rule.apply(WorkflowView(adageobj, self.offset))
-
-    #(de-)serialization
-    @classmethod
-    def fromJSON(cls, data):
-        if data['rule']['type'] == 'InitStage':
-            rule = InitStage.fromJSON(data['rule'])
-        elif data['rule']['type'] == 'JsonStage':
-            rule = JsonStage.fromJSON(data['rule'])
-        return cls(
-            rule=rule,
-            identifier=data['id'],
-            offset=data['offset']
-        )
-
-    def json(self):
-        return {'type': 'offset',
-                'id': self.identifier,
-                'offset': self.offset,
-                'rule': self.rule.json()}
 
 
 class WorkflowView(object):
@@ -153,12 +96,11 @@ class WorkflowView(object):
         add a DAG extensloaderion rule, possibly with a scope offset
         '''
         thisoffset = JsonPointer(offset)
-        offsetrule = offsetRule(rule, self._makeoffset(offset))
-        self.rules += [offsetrule]
+        offsetstage = OffsetStage(rule, self._makeoffset(offset))
+        self.rules += [offsetstage]
         createOffsetMeta(thisoffset.path, self.bookkeeper)
-        thisoffset.resolve(self.bookkeeper)['_meta'][
-            'rules'] += [offsetrule.identifier]
-        return offsetrule.identifier
+        thisoffset.resolve(self.bookkeeper)['_meta']['stages'] += [offsetstage.identifier]
+        return offsetstage.identifier
 
     def addStep(self, task, stage, depends_on=None):
         '''
@@ -204,4 +146,4 @@ def createOffsetMeta(offset, bookkeeping):
         view = view[x]
     scoped = pointer.resolve(bookkeeping)
     if '_meta' not in scoped:
-        scoped['_meta'] = {'rules': [], 'steps': []}
+        scoped['_meta'] = {'stages': [], 'steps': []}

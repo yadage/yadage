@@ -2,8 +2,71 @@ import tasks
 import logging
 from handlers.predicate_handlers import handlers as pred_handlers
 from packtivity.statecontexts import load_provider
+from utils import get_id_fromjson, get_obj_id
 
 log = logging.getLogger(__name__)
+
+
+class OffsetStage(object):
+    '''
+    A wrapper object around a scoped rule, so that it can be applied from
+    a global p.o.v., i.e. as adage expects its rules.
+    '''
+
+    def __init__(self, rule, offset=None, identifier=None):
+        '''
+        initializes a scoped rule. scope is defined by a JSONPointer, e.g.
+        one[0]two.three
+
+        '''
+
+        self.rule = rule
+        self.offset = offset
+        self.identifier = identifier or get_id_fromjson({
+            'rule': rule.json(),
+            'offset': offset
+        })
+
+    def __repr__(self):
+        return '<OffsetStage {}/{} >'.format(self.offset,self.rule.name)
+
+    def applicable(self, adageobj):
+        '''
+        determin whether the rule is applicable. Evaluated within the offset.
+        :param adageobj: the workflow object
+        '''
+        from wflowview import WorkflowView #importing here to avoid circdep
+        x = self.rule.applicable(WorkflowView(adageobj, self.offset))
+        return x
+
+    def apply(self, adageobj):
+        '''
+        applies a rule within the scope set by offset
+
+        :param adageobj: the workflow object
+        '''
+        from wflowview import WorkflowView #importing here to avoid circdep
+        self.rule.apply(WorkflowView(adageobj, self.offset))
+
+    #(de-)serialization
+    @classmethod
+    def fromJSON(cls, data):
+        if data['rule']['type'] == 'InitStage':
+            rule = InitStage.fromJSON(data['rule'])
+        elif data['rule']['type'] == 'JsonStage':
+            rule = JsonStage.fromJSON(data['rule'])
+        return cls(
+            rule=rule,
+            identifier=data['id'],
+            offset=data['offset']
+        )
+
+    def json(self):
+        return {'type': 'offset',
+                'id': self.identifier,
+                'offset': self.offset,
+                'rule': self.rule.json()}
+
 
 class ViewStageBase(object):
     '''

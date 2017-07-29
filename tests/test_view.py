@@ -1,6 +1,6 @@
 import yadage.workflow_loader
 from yadage.wflow import YadageWorkflow
-from yadage.wflowview import offsetRule
+from yadage.stages import OffsetStage
 from packtivity.statecontexts.posixfs_context import LocalFSProvider,LocalFSState
 
 def test_init():
@@ -17,12 +17,12 @@ def test_init():
     matches = view.query('init',view.steps)
     assert len(matches) == 1
 
-def test_serialize_offsetrule():
+def test_serialize_offsetstage():
     data  = yadage.workflow_loader.workflow('workflow.yml','tests/testspecs/nestedmapreduce')
     wflow = YadageWorkflow.createFromJSON(data,LocalFSProvider(LocalFSState(['/workdir']), ensure = False))
     wflow.view().init({'input':[1,2,3]})
     for x in wflow.rules:
-        assert offsetRule.fromJSON(x.json()).json() == x.json()
+        assert OffsetStage.fromJSON(x.json()).json() == x.json()
 
 def test_getRule():
     data  = yadage.workflow_loader.workflow('workflow.yml','tests/testspecs/nestedmapreduce')
