@@ -23,8 +23,8 @@ class outputReference(object):
         }
 
 class TaskBase(object):
-    def __init__(self, name):
-        self.name = name
+    def __init__(self, **metadata):
+        self.metadata = metadata
         self.inputs = []
         self.parameters = {}
         self.prepublished = None
@@ -35,7 +35,7 @@ class TaskBase(object):
     #(de-)serialization
     def json(self):
         return {
-            'name': self.name,
+            'metadata': self.metadata,
             'parameters': self.parameters,
             'prepublished': self.prepublished,
             'inputs': [x.json() for x in self.inputs]
@@ -47,7 +47,7 @@ class init_task(TaskBase):
     '''
  
     def __init__(self, name, initdata=None):
-        super(init_task, self).__init__(name)
+        super(init_task, self).__init__(name = name)
         self.prepublished = None
         if initdata is not None:
             self.s(**initdata)
@@ -60,7 +60,7 @@ class init_task(TaskBase):
     #(de-)serialization
     @classmethod
     def fromJSON(cls, data):
-        instance = cls(data['name'])
+        instance = cls(data['metadata']['name'])
         instance.parameters = data['parameters']
         instance.prepublished = data['prepublished']
         instance.inputs = map(outputReference.fromJSON, data['inputs'])
@@ -78,7 +78,7 @@ class packtivity_task(TaskBase):
     '''
 
     def __init__(self, name, spec, state):
-        super(packtivity_task, self).__init__(name)
+        super(packtivity_task, self).__init__(name = name)
         self.spec = spec
         self.state = state
 
@@ -96,7 +96,7 @@ class packtivity_task(TaskBase):
     #(de-)serialization
     @classmethod
     def fromJSON(cls, data):
-        instance = cls(data['name'], data['spec'], load_state(data['state']))
+        instance = cls(data['metadata']['name'], data['spec'], load_state(data['state']))
         instance.parameters = data['parameters']
         instance.prepublished = data['prepublished']
         instance.inputs = map(outputReference.fromJSON, data['inputs'])

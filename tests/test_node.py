@@ -26,7 +26,7 @@ def test_result_prepub(basic_packtivity_spec,localfs_state):
 
 def test_serialize_desrialize(basic_packtivity_spec,localfs_state):
 	data = {
-		'task': {'type': 'init_task', 'name': 'aname', 'parameters': {},'prepublished':{},'inputs':[]},
+		'task': {'type': 'init_task', 'metadata': {'name': 'aname'}, 'parameters': {},'prepublished':{},'inputs':[]},
 		'name': '',
 		'id': 'anid'
 	}

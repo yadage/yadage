@@ -160,12 +160,12 @@ class WorkflowView(object):
             'rules'] += [offsetrule.identifier]
         return offsetrule.identifier
 
-    def addStep(self, step, stage, depends_on=None):
+    def addStep(self, task, stage, depends_on=None):
         '''
         adds a node to the DAG connecting it to the passed depending nodes
         while tracking that it was added by the specified stage
         '''
-        node = YadageNode(step.name, step, identifier=get_obj_id(step))
+        node = YadageNode(task.metadata['name'], task, identifier=get_obj_id(task))
         self.dag.addNode(node, depends_on=depends_on)
 
         log.debug('added node %s', node)

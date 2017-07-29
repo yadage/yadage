@@ -58,10 +58,10 @@ class CachedBackend(federatedbackend.FederatedBackend):
     def routedsubmit(self, task):
         cached = self.cache.cacheddata(task)
         if cached:
-            log.info('use cached result for task: %s',task.name)
+            log.info('use cached result for task: %s',task.metadata['name'])
             return TrivialProxy(status=cached['status'], result = cached['result'])
         else:
-            log.info('do proper submit for task: %s',task.name)
+            log.info('do proper submit for task: %s',task.metadata['name'])
             #create id for this task using the cache builder, with which
             #we will store the result with once it's ready
             cacheid = self.cache.cacheid(task)
@@ -138,11 +138,11 @@ class CacheBuilder(object):
         '''
         cacheid = self.cacheid(task)
         #register this task with the cacheid if we don't know about it yet
-        log.debug('checking cache for task %s',task.name)
+        log.debug('checking cache for task %s',task.metadata['name'])
         if cacheid not in self.cache:
             self.cache[cacheid] = {'task' : task.json()}
         if not self.cacheexists(cacheid):
-            log.info('cache non-existent for task %s (%s)',task.name,cacheid)
+            log.info('cache non-existent for task %s (%s)',task.metadata['name'],cacheid)
             return None
         if not self.cachevalid(cacheid):
             self.remove(cacheid)
