@@ -145,8 +145,10 @@ def scatter(parameters, scatter):
     '''
     convert a parameter set and scatter definition into a list
     of single parameter sets.
+
     :param parameters: the parameter definition
     :param scatter: scattering method. One of 'zip' or 'cartesian'
+
     :return: list of parameter sets
     '''
     commonpars = parameters.copy()

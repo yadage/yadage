@@ -15,7 +15,6 @@ import glob2 as glob
 import importlib
 
 from tasks import outputReference
-from backends.trivialbackend import TrivialProxy, TrivialBackend
 
 log = logging.getLogger(__name__)
 
@@ -24,37 +23,27 @@ def set_backend(dag, backend, proxymaker):
     sets backend and proxies for each node in the DAG.
     proxymaker is a 1-ary function that takes the node object and
     returns a suitable result proxy
+
+    :param dag: the dag object (par of the workflow object)
+    :param backend: the backend to associate with the nodes 
+    :param proxymaker: function object with signature f(node) to create result proxies    
     '''
     for nodename in dag.nodes():
         n = dag.getNode(nodename)
         n.backend = backend
         n.resultproxy = proxymaker(n)
 
-
-def set_trivial_backend(dag, jsondata):
-    '''
-    sets the backend for the case of a static backend
-    Proxies are set using the node identifier
-    '''
-    backend = TrivialBackend()
-    set_backend(
-        dag,
-        backend,
-        proxymaker=lambda n: TrivialProxy(
-            status=jsondata[n.identifier]['status'],
-            result=jsondata[n.identifier]['result']
-        )
-    )
-    return backend
-
-
 DEFAULT_ID_METHOD = 'jsonhash'
 
 
 def json_hash(jsonable):
-    # log.info('hashing: %s',json.dumps(jsonable, cls=WithJsonRefEncoder, sort_keys=True))
+    '''
+    returns a content-based hash of a json-able structure (serialized with WithJsonRefEncoder)
+
+    :param jsonable: a json-serializable object
+    :return: the hash
+    '''
     the_hash  = hashlib.sha1(json.dumps(jsonable, cls=WithJsonRefEncoder, sort_keys=True)).hexdigest()
-    # log.info('got %s',hash)
     return the_hash
 
 
@@ -101,6 +90,7 @@ def leaf_iterator(jsonable):
     generator function to yield leafs items of a JSON-like structure alongside
     their position in the structure as determined by a JSONPointer.
     
+    :param jsonable: a json-serializable object
     :return: tuples (jsonpointer, leaf value)
     '''
     allleafs = jq.jq('leaf_paths').transform(jsonable, multiple_output = True)

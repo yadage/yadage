@@ -22,3 +22,5 @@ Code Reference
 .. automodule:: yadage.backends.caching
    :members:
 
+.. automodule:: yadage.utils
+   :members:

@@ -34,12 +34,19 @@ class PersistentController(BaseController):
     workflow controller, that explicltly calls transaction methods on non read-only operations on the workflow state
     '''
     def __init__(self, model, backend = None):
+        '''
+        :param model: the model on whih the controller will operate
+        :param backend: the backend to against which to check workflow state.
+        
+        :return: the controller instance
+        '''
         self.model = model
         super(PersistentController, self).__init__(self.model.load(),backend)
 
 
     @contextlib.contextmanager
     def transaction(self):
+        '''the transaction context. will commit model to persistent store on exit.'''
         self.adageobj = self.model.load()
         yield
 

@@ -8,8 +8,8 @@ import logging
 
 from wflow import YadageWorkflow
 from handlers.expression_handlers import handlers as exh
-from utils import set_trivial_backend, process_refs
-
+from utils import set_backend, process_refs
+from backends.trivialbackend import TrivialProxy, TrivialBackend
 
 def printRef(ref, dag, indent=''):
     click.secho('{}name: {} position: {}, value: {}, id: {}'.format(
@@ -26,7 +26,15 @@ def wflow_with_trivial_backend(instance,results):
     wflow = YadageWorkflow.fromJSON(
         json.load(open(instance))
     )
-    set_trivial_backend(wflow.dag, json.load(open(results)))
+    resultdata = json.load(open(results))
+    set_backend(
+        wflow.dag,
+        TrivialBackend(),
+        proxymaker=lambda n: TrivialProxy(
+            status=resultdata[n.identifier]['status'],
+            result=resultdata[n.identifier]['result']
+        )
+    )
     return wflow
 
 @click.group()
