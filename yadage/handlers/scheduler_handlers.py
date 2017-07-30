@@ -3,7 +3,6 @@ import utils
 import itertools
 import copy
 
-import json
 import jq
 import jsonpointer
 
@@ -238,7 +237,6 @@ def jq_stage(stage, spec):
 
     singlesteppars = []
     for forstep in stageres:
-        used_refs = []
         wflowpointers = [jsonpointer.JsonPointer.from_parts(x) for x in jq.jq('paths(if objects then has("$wflowpointer") else false end)').transform(forstep, multiple_output = True)]
         for wflowptr in wflowpointers:
             pointer =  wflowptr.resolve(forstep)['$wflowpointer']

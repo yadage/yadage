@@ -1,10 +1,6 @@
 import logging
 import utils
-import jq
-import jsonpointer
-import copy
 import jsonpath_rw
-from ..tasks import outputReference
 from ..utils import pointerize
 
 log = logging.getLogger(__name__)
