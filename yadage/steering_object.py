@@ -133,13 +133,12 @@ class YadageSteering():
         '''
         self.adage_kwargs.update(**kwargs)
 
-    def run_adage(self, backend = setupbackend_fromstring('multiproc:auto'), **adage_kwargs):
+    def run_adage(self, backend = None, **adage_kwargs):
         '''
         execution workflow with adage based against given backend
-
         :param backend: backend to use for packtivity processing.
         '''
-        self.controller.backend = backend
+        self.controller.backend = backend or setupbackend_fromstring('multiproc:auto')
         self.adage_argument(**adage_kwargs)
         adage.rundag(controller = self.controller, **self.adage_kwargs)
 

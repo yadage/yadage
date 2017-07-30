@@ -40,7 +40,6 @@ def scope_done(scope, flowview):
                 result = result and scope_done(childscope, flowview)
     return result
 
-
 @scheduler('jsonpath_ready')
 def jsonpath_ready(stage, depspec):
     '''
