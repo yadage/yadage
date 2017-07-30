@@ -153,7 +153,7 @@ class JsonStage(ViewStageBase):
     '''
 
     def __init__(self, json, state_provider):
-        self.stageinfo = json['scheduler']
+        self.stagespec = json['scheduler']
         self.depspec = json['dependencies']
         super(JsonStage, self).__init__(json['name'], state_provider)
 
@@ -164,20 +164,20 @@ class JsonStage(ViewStageBase):
         if not self.depspec:
             return True
         predicate = pred_handlers[self.depspec['dependency_type']]
-        return predicate(self, self.depspec)
+        return predicate(self, self.depspec, self.stagespec)
 
     def schedule(self):
         #imported here to avoid circular dependency
         from handlers.scheduler_handlers import handlers as sched_handlers
-        scheduler = sched_handlers[self.stageinfo['scheduler_type']]
-        scheduler(self, self.stageinfo)
+        scheduler = sched_handlers[self.stagespec['scheduler_type']]
+        scheduler(self, self.stagespec)
 
     #(de-)serialization
     @classmethod
     def fromJSON(cls, data):
         return cls(
             json={
-                'scheduler': data['info'],
+                'scheduler': data['scheduler'],
                 'name': data['name'],
                 'dependencies': data['dependencies']
             },
@@ -186,5 +186,5 @@ class JsonStage(ViewStageBase):
 
     def json(self):
         data = super(JsonStage, self).json()
-        data.update(type='JsonStage', info=self.stageinfo, dependencies = self.depspec)
+        data.update(type='JsonStage', scheduler=self.stagespec, dependencies = self.depspec)
         return data

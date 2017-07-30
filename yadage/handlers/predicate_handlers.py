@@ -41,7 +41,7 @@ def scope_done(scope, flowview):
     return result
 
 @scheduler('jsonpath_ready')
-def jsonpath_ready(stage, depspec):
+def jsonpath_ready(stage, depspec,stagespec):
     '''
     the main predicate for yadage. for a list of jsonpath expressions
     determine whether the stage or workflow scope is ready (i.e. has a result)
@@ -63,3 +63,10 @@ def jsonpath_ready(stage, depspec):
                 return False
     log.debug('all checks ok, predicate is True')
     return True
+
+@scheduler('autodep')
+def autodep(stage, depspec,stagespec):
+    '''
+    automatic dependency discovery based on stage spec
+    '''
+    raise NotImplementedError('automatic dependency not implemented yet')
