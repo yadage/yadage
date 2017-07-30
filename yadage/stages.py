@@ -2,7 +2,7 @@ import tasks
 import logging
 from handlers.predicate_handlers import handlers as pred_handlers
 from packtivity.statecontexts import load_provider
-from utils import get_id_fromjson, get_obj_id
+from utils import get_id_fromjson
 
 log = logging.getLogger(__name__)
 
