@@ -3,10 +3,15 @@ import utils
 import itertools
 import copy
 
+import json
+import jq
+import jsonpointer
+
 from expression_handlers import handlers as exprhandlers
 from ..tasks import packtivity_task, init_task, outputReference
 from ..stages import JsonStage
-from ..utils import leaf_iterator_jsonlike
+from ..utils import leaf_iterator_jsonlike, pointerize
+
 
 log = logging.getLogger(__name__)
 
@@ -205,3 +210,46 @@ def multistep_stage(stage, spec):
         step = step_or_init(singlename,spec,stage.state_provider)
         finalized = finalize_input(stage.view, step, pars)
         addStepOrWorkflow(singlename, stage, step.s(**finalized), spec)
+
+
+@scheduler('jq-stage')
+def jq_stage(stage, spec):
+    '''
+
+    :param stage: common stage parent object 
+    :param spec: stage JSON-like spec
+    
+    :return: None
+    '''
+
+    binds = spec['bindings']
+    wflowrefs = [jsonpointer.JsonPointer.from_parts(x) for x in jq.jq('paths(if objects then has("$wflowref") else false end)').transform(binds, multiple_output = True)]
+
+    for wflowref in wflowrefs:
+        nodeselector, resultscript = wflowref.resolve(binds)['$wflowref']
+
+        view = stage.view
+        nodes   = [view.dag.getNode(n.get('_nodeid')) for n in jq.jq(nodeselector).transform(view.steps, multiple_output = True)]
+        results = [jq.jq(resultscript).transform(pointerize(n.result,False,n.identifier), multiple_output = True) for n in nodes]
+        wflowref.set(binds,results)
+
+    stagescript = spec['stepscript']
+    stageres = jq.jq(stagescript).transform(binds,multiple_output = False)
+
+    singlesteppars = []
+    for forstep in stageres:
+        used_refs = []
+        wflowpointers = [jsonpointer.JsonPointer.from_parts(x) for x in jq.jq('paths(if objects then has("$wflowpointer") else false end)').transform(forstep, multiple_output = True)]
+        for wflowptr in wflowpointers:
+            pointer =  wflowptr.resolve(forstep)['$wflowpointer']
+            wflowptr.set(forstep,outputReference(pointer['step'],jsonpointer.JsonPointer(pointer['result'])))
+        singlesteppars.append(forstep)
+        log.info(forstep)
+
+    for i, pars in enumerate(singlesteppars):
+        singlename = '{}_{}'.format(stage.name, i)
+        step = step_or_init(singlename,spec,stage.state_provider)
+        finalized = finalize_input(stage.view, step, pars)
+        addStepOrWorkflow(singlename, stage, step.s(**finalized), spec)
+
+

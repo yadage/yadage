@@ -1,0 +1,45 @@
+stages:
+  - name: map
+    dependencies:
+      dependency_type: jsonpath_ready
+      expressions: [init]
+    scheduler:
+      scheduler_type: jq-stage
+      bindings:
+        parone: {'$wflowref': ['.init[]','.parone']}
+      stepscript: >
+        .parone[0][0] | map({parone: ., outputfile: "{workdir}/what.txt"})
+      step: {$ref: 'steps.yml#/stepA'}
+  - name: continue
+    dependencies:
+      dependency_type: jsonpath_ready
+      expressions: [map]
+    scheduler:
+      scheduler_type: jq-stage
+      bindings:
+        outputfiles: {'$wflowref': ['.map[]','.outputfile']}
+      stepscript: >
+        [.outputfiles[]|.[0]] | map({parone: ., outputfile: "{workdir}/here.txt"})
+      step: {$ref: 'steps.yml#/stepA'}
+  - name: further
+    dependencies:
+      dependency_type: jsonpath_ready
+      expressions: [continue]
+    scheduler:
+      scheduler_type: jq-stage
+      bindings:
+        outputfiles: {'$wflowref': ['.continue[]','.outputfile']}
+      stepscript: >
+        [.outputfiles[]|.[0]] | map({parone: ., outputfile: "{workdir}/here.txt"})
+      step: {$ref: 'steps.yml#/stepA'}
+  - name: reduce
+    dependencies:
+      dependency_type: jsonpath_ready
+      expressions: [continue]
+    scheduler:
+      scheduler_type: jq-stage
+      bindings:
+        outputfiles: {'$wflowref': ['.continue[]','.outputfile']}
+      stepscript: >
+        [{parone: [.outputfiles[]|.[0]], outputfile: "{workdir}/here.txt"}]
+      step: {$ref: 'steps.yml#/stepA'}

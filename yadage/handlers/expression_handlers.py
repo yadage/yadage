@@ -5,27 +5,12 @@ import jsonpointer
 import copy
 import jsonpath_rw
 from ..tasks import outputReference
-
+from ..utils import pointerize
 
 log = logging.getLogger(__name__)
 
 handlers, scheduler = utils.handler_decorator()
 
-
-def pointerize(jsondata, asref=False, stepid=None):
-    '''
-    a helper method that replaces leaf nodes in a JSON object with
-    a outputReference objects (~ a JSONPath) pointing to that leaf position
-    useful to track access to leaf nodes later on.
-    '''
-    allleafs = jq.jq('leaf_paths').transform(jsondata, multiple_output=True)
-    leafpointers = [jsonpointer.JsonPointer.from_parts(
-        x).path for x in allleafs]
-    jsondata_proxy = copy.deepcopy(jsondata)
-    for leaf in leafpointers:
-        x = jsonpointer.JsonPointer(leaf)
-        x.set(jsondata_proxy, outputReference(stepid, x) if asref else x.path)
-    return jsondata_proxy
 
 
 def select_reference(step, selection):

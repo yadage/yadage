@@ -120,6 +120,20 @@ def leaf_iterator_jsonlike(jsonlike, path = None):
         yield jsonpointer.JsonPointer.from_parts(path),jsonlike
 
 
+def pointerize(jsondata, asref=False, stepid=None):
+    '''
+    a helper method that replaces leaf nodes in a JSON object with
+    a outputReference objects (~ a JSONPath) pointing to that leaf position
+    useful to track access to leaf nodes later on.
+    '''
+    allleafs = jq.jq('leaf_paths').transform(jsondata, multiple_output=True)
+    leafpointers = [jsonpointer.JsonPointer.from_parts(x).path for x in allleafs]
+    jsondata_proxy = copy.deepcopy(jsondata)
+    for leaf in leafpointers:
+        x = jsonpointer.JsonPointer(leaf)
+        x.set(jsondata_proxy, outputReference(stepid, x) if asref else {'$wflowpointer': {'step': stepid,'result': x.path}} if stepid else x.path)
+    return jsondata_proxy
+
 def discover_initfiles(initdata,sourcedir):
     '''inspect sourcedir, first tries exact path match, and then (possbly recursive) glob'''
     log.info('inspecting %s to discover referenced input files',sourcedir)
