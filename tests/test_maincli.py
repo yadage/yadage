@@ -29,7 +29,6 @@ def test_maincli_interactive_all_yes(tmpdir):
     assert tmpdir.join('workdir/hello_world/hello_world.txt').check()
     assert result.exit_code == 0
 
-
 def test_maincli_interactive_no_yes(tmpdir):
     runner = CliRunner()
     result = runner.invoke(yadage.steering.main,[

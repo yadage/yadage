@@ -40,6 +40,20 @@ def test_multistepstage_schedule_wflows(nested_mapreduce_wflow):
     wflow.rules[0].apply(wflow)
     assert len(wflow.view('/map/0').rules) == 3 + 2*len(inputdata) # 3x init and stage rules
 
+def test_jq_stage(jqworkflow):
+    wflow = jqworkflow
+    
+    inputdata = [1,2,3]
+    wflow.view().init({'parone':inputdata})
+    assert wflow.rules[0].applicable(wflow) == False
+
+    wflow.view().rules[-1].apply(wflow)
+    assert len(wflow.dag.nodes()) == 1 
+    assert wflow.rules[0].applicable(wflow) == True
+    assert wflow.rules[0].rule.stageinfo['scheduler_type'] == 'jq-stage'
+    wflow.rules[0].apply(wflow)
+    assert len(wflow.dag.nodes()) == 1 + len(inputdata)  
+
 
 def test_multistepstage_zip_schedule_steps(simple_mapreduce):
     wflow = simple_mapreduce
