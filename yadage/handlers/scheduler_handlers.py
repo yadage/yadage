@@ -140,7 +140,7 @@ def singlestep_stage(stage, spec):
     step = step_or_init(stage.name,spec,stage.state_provider)
 
     parameters = {
-        k: select_parameter(stage.view, v) for k, v in get_parameters(spec).iteritems()
+        k: select_parameter(stage.view, v) for k, v in get_parameters(spec).items()
     }
 
     finalized = finalize_input(stage.view, step, parameters)
@@ -164,7 +164,7 @@ def scatter(parameters, scatter):
     singlesteppars = []
     if scatter['method'] == 'zip':
         keys, zippable = zip(
-            *[(k, v) for i, (k, v) in enumerate(to_scatter.iteritems())])
+            *[(k, v) for i, (k, v) in enumerate(to_scatter.items())])
 
         for zipped in zip(*zippable):
             individualpars = dict(zip(keys, zipped))
@@ -202,7 +202,7 @@ def multistep_stage(stage, spec):
     '''
     log.debug('scheduling multistep stage with spec:\n%s', spec)
     parameters = {
-        k: select_parameter(stage.view, v) for k, v in get_parameters(spec).iteritems()
+        k: select_parameter(stage.view, v) for k, v in get_parameters(spec).items()
     }
     singlesteppars = scatter(parameters, spec['scatter'])
     for i, pars in enumerate(singlesteppars):

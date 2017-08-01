@@ -65,7 +65,7 @@ class WithJsonRefEncoder(json.JSONEncoder):
 
     def default(self, obj):
         if isinstance(obj, jsonref.JsonRef):
-            return {k: v for k, v in obj.iteritems()}
+            return {k: v for k, v in obj.items()}
         try:
             super(WithJsonRefEncoder, self).default(obj)
         except TypeError:
@@ -73,7 +73,7 @@ class WithJsonRefEncoder(json.JSONEncoder):
 
 def process_refs(x, dag):
     if type(x) == dict:
-        for k, v in x.iteritems():
+        for k, v in x.items():
             x[k] = process_refs(v, dag)
         return x
     elif type(x) == list:
@@ -111,7 +111,7 @@ def leaf_iterator_jsonlike(jsonlike, path = None):
             for leaf in leaf_iterator_jsonlike(x, path = thispath):
                 yield leaf
     elif type(jsonlike) == dict:
-        for k,v in jsonlike.iteritems():
+        for k,v in jsonlike.items():
             thispath = copy.deepcopy(path)
             thispath.append(k)
             for leaf in leaf_iterator_jsonlike(v, path = thispath):

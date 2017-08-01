@@ -31,8 +31,8 @@ def scope_done(scope, flowview):
     result = True
 
     bookkeeper = jsonpointer.JsonPointer(scope).resolve(flowview.bookkeeper)
-    for k, v in bookkeeper.iteritems():
-        for k, v in bookkeeper.iteritems():
+    for k, v in bookkeeper.items():
+        for k, v in bookkeeper.items():
             if k == '_meta':
                 result = result and checkmeta(flowview, v)
             else:

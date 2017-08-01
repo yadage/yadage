@@ -23,7 +23,7 @@ def fillscope(cluster, workflow, scope='', subcluster=True):
         scopecluster = cluster
     scopeptr = jsonpointer.JsonPointer(scope)
     scoped = scopeptr.resolve(workflow.stepsbystage)
-    for stage, elements in scoped.iteritems():
+    for stage, elements in scoped.items():
         stagescopeprts = scopeptr.parts + [stage]
 
         if subcluster:
