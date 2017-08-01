@@ -1,7 +1,7 @@
 import logging
-import caching
 from packtivity.backendutils import backend_from_string
 
+import yadage.backends.caching as caching
 import yadage.backends.federatedbackend as federatedbackend
 from ..tasks import packtivity_task, init_task
 from .trivialbackend import TrivialProxy, TrivialBackend

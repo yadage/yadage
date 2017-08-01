@@ -1,6 +1,7 @@
 import logging
-import utils
 import jsonpointer
+
+import yadage.handlers.utils as utils
 
 log = logging.getLogger(__name__)
 

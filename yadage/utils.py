@@ -3,7 +3,6 @@ import yaml
 import os
 import click
 import zipfile
-import urllib2
 import logging
 import jsonpointer
 import jq
@@ -15,6 +14,13 @@ import glob2 as glob
 import importlib
 
 from .tasks import outputReference
+
+try:
+    # For Python 3.0 and later
+    from urllib.request import urlopen
+except ImportError:
+    # Fall back to Python 2's urllib2
+    from urllib2 import urlopen
 
 log = logging.getLogger(__name__)
 
@@ -179,7 +185,7 @@ def prepare_workdir_from_archive(initdir, inputarchive):
             "initialization directory exists and input archive give. Can't have both", fg='red'))
     os.makedirs(initdir)
     localzipfile = '{}/.yadage_inputarchive.zip'.format(initdir)
-    f = urllib2.urlopen(inputarchive)
+    f = urlopen(inputarchive)
     with open(localzipfile,'w') as lf:
         lf.write(f.read())
     with zipfile.ZipFile(localzipfile) as zf:

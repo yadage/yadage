@@ -29,7 +29,7 @@ def main(workflow, toplevel, schemadir, stdout):
         data = workflow_loader.workflow(
             workflow, toplevel=toplevel, schemadir=schemadir, validate=True)
         if stdout:
-            print json.dumps(data, cls=WithJsonRefEncoder)
+            print(json.dumps(data, cls=WithJsonRefEncoder))
         else:
             click.secho('workflow validates against schema', fg='green')
         rc = 0
