@@ -2,7 +2,6 @@ import os
 from setuptools import setup, find_packages
 
 deps = [
-    'functools32',
     'adage',
     'packtivity',
     'yadage-schemas',
@@ -22,7 +21,6 @@ deps = [
 
 if 'READTHEDOCS' in os.environ:
   deps = [
-    'functools32',
     'yadage-schemas',
     'click',
     'psutil',
