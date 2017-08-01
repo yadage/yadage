@@ -1,5 +1,5 @@
 import logging
-import utils
+import yadage.handlers.utils as utils
 import jsonpath_rw
 from ..utils import pointerize
 

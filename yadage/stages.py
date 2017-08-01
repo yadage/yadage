@@ -1,8 +1,9 @@
-import tasks
 import logging
-from handlers.predicate_handlers import handlers as pred_handlers
 from packtivity.statecontexts import load_provider
-from utils import get_id_fromjson
+
+from .handlers.predicate_handlers import handlers as pred_handlers
+from .utils import get_id_fromjson
+import yadage.tasks as tasks
 
 log = logging.getLogger(__name__)
 

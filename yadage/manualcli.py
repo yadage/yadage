@@ -2,17 +2,18 @@
 import logging
 import click
 import os
-import manualutils
-import utils
-from steering_object import YadageSteering
-from visualize import write_prov_graph
-from controllers import PersistentController
-from wflowstate import load_model_fromstring
 from packtivity.statecontexts.posixfs_context import LocalFSProvider,LocalFSState
-from stages import JsonStage
-import interactive
-import reset as reset_module
-import workflow_loader
+
+from .steering_object import YadageSteering
+from .visualize import write_prov_graph
+from .controllers import PersistentController
+from .wflowstate import load_model_fromstring
+from .stages import JsonStage
+import yadage.manualutils as manualutils
+import yadage.utils as utils
+import yadage.interactive as interactive
+import yadage.reset as reset_module
+import yadage.workflow_loader as workflow_loader
 
 log = logging.getLogger(__name__)
 logging.basicConfig(level = logging.INFO)

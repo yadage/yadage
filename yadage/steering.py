@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 import click
 import os
-import steering_api
 import logging
 import yadageschemas
-import utils
+import yadage.utils as utils
+import yadage.steering_api as steering_api
 
 log = logging.getLogger(__name__)
 

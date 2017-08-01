@@ -1,12 +1,13 @@
 import logging
-import utils
 import itertools
 import copy
 
 import jq
 import jsonpointer
 
-from expression_handlers import handlers as exprhandlers
+
+import yadage.handlers.utils as utils
+from .expression_handlers import handlers as exprhandlers
 from ..tasks import packtivity_task, init_task, outputReference
 from ..stages import JsonStage
 from ..utils import leaf_iterator_jsonlike, pointerize

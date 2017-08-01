@@ -1,7 +1,7 @@
 import json
 import logging
-from wflow import YadageWorkflow
-from backends import load_proxy
+from .wflow import YadageWorkflow
+from .backends import load_proxy
 
 log = logging.getLogger(__name__)
 

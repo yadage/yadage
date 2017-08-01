@@ -1,13 +1,13 @@
-import federatedbackend
 import json
 import time
 import os
 import logging
-
-from yadage.utils import get_obj_id
-from trivialbackend import TrivialProxy, TrivialBackend
-from ..backends import CachedProxy
 from packtivity.statecontexts import load_state
+
+import yadage.backends.federatedbackend as federatedbackend
+from yadage.utils import get_obj_id
+from .trivialbackend import TrivialProxy, TrivialBackend
+from ..backends import CachedProxy
 
 log = logging.getLogger(__name__)
 

@@ -1,9 +1,10 @@
 import adage.node
 import os
 import jsonpointer
-import tasks
 import datetime
 import time
+
+import yadage.tasks as tasks
 
 class YadageNode(adage.node.Node):
     '''

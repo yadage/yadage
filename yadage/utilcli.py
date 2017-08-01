@@ -3,13 +3,13 @@ import json
 import click
 import tempfile
 import shutil
-import visualize
 import logging
 
-from wflow import YadageWorkflow
-from handlers.expression_handlers import handlers as exh
-from utils import set_backend, process_refs
-from backends.trivialbackend import TrivialProxy, TrivialBackend
+import yadage.visualize as visualize
+from .wflow import YadageWorkflow
+from .handlers.expression_handlers import handlers as exh
+from .utils import set_backend, process_refs
+from .backends.trivialbackend import TrivialProxy, TrivialBackend
 
 def printRef(ref, dag, indent=''):
     click.secho('{}name: {} position: {}, value: {}, id: {}'.format(

@@ -2,18 +2,17 @@ import adage
 import adage.backends
 import os
 import json
-import workflow_loader
-import utils
-import visualize
-import serialize
 import yadageschemas
 import logging
 from packtivity.statecontexts.posixfs_context import LocalFSProvider, LocalFSState
 
-
-from controllers import setup_controller_from_statestring
-from wflow import YadageWorkflow
-from utils import setupbackend_fromstring
+import yadage.workflow_loader as workflow_loader
+import yadage.utils as utils
+import yadage.visualize as visualize
+import yadage.serialize as serialize
+from .controllers import setup_controller_from_statestring
+from .wflow import YadageWorkflow
+from .utils import setupbackend_fromstring
 
 log = logging.getLogger(__name__)
 

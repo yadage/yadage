@@ -3,10 +3,11 @@ import os
 import click
 import jsonschema
 import logging
-import workflow_loader
 import yadageschemas
 import json
-from utils import WithJsonRefEncoder
+
+import yadage.workflow_loader as workflow_loader
+from .utils import WithJsonRefEncoder
 
 
 logging.basicConfig(level=logging.ERROR)

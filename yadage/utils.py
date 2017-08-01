@@ -14,7 +14,7 @@ import copy
 import glob2 as glob
 import importlib
 
-from tasks import outputReference
+from .tasks import outputReference
 
 log = logging.getLogger(__name__)
 
@@ -188,7 +188,7 @@ def prepare_workdir_from_archive(initdir, inputarchive):
     return initdir
 
 def setupbackend_fromstring(backend, name = 'backendname'):
-    import backends.packtivitybackend as pb
+    import yadage.backends.packtivitybackend as pb
     return pb.PacktivityBackend(packtivity_backendstring = backend)
 
 def setupstateprovider(datatype,dataarg,dataopts):

@@ -4,9 +4,9 @@ import importlib
 import yadageschemas
 import os
 
-from steering_object import YadageSteering
-from utils import setupbackend_fromstring
-from interactive import interactive_deciders
+from .steering_object import YadageSteering
+from .utils import setupbackend_fromstring
+from .interactive import interactive_deciders
 
 log = logging.getLogger(__name__)
 
@@ -27,7 +27,7 @@ def steering_ctx(
     workflow,
     initdata = None,
     toplevel = os.getcwd(),
-    backend = setupbackend_fromstring('multiproc:auto'),
+    backend = None,
     cache = None,
     dataopts = None,
     updateinterval = 0.02,
@@ -84,7 +84,8 @@ def steering_ctx(
         )
             
     yield ys
-    
+ 
+    backend = backend or setupbackend_fromstring('multiproc:auto')   
     log.info('running yadage workflow %s on backend %s', workflow, backend)
     if cache:
         if cache == 'checksums':

@@ -1,6 +1,6 @@
 import copy
 import jsonpointer
-from wflow import YadageWorkflow
+from yadage.wflow import YadageWorkflow
 
 def rule_steps_indices(workflow):
     rule_to_steps_index = {}
