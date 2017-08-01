@@ -36,7 +36,7 @@ class OffsetStage(object):
         determin whether the rule is applicable. Evaluated within the offset.
         :param adageobj: the workflow object
         '''
-        from wflowview import WorkflowView #importing here to avoid circdep
+        from .wflowview import WorkflowView #importing here to avoid circdep
         x = self.rule.applicable(WorkflowView(adageobj, self.offset))
         return x
 
@@ -46,7 +46,7 @@ class OffsetStage(object):
 
         :param adageobj: the workflow object
         '''
-        from wflowview import WorkflowView #importing here to avoid circdep
+        from .wflowview import WorkflowView #importing here to avoid circdep
         self.rule.apply(WorkflowView(adageobj, self.offset))
 
     #(de-)serialization
@@ -169,7 +169,7 @@ class JsonStage(ViewStageBase):
 
     def schedule(self):
         #imported here to avoid circular dependency
-        from handlers.scheduler_handlers import handlers as sched_handlers
+        from .handlers.scheduler_handlers import handlers as sched_handlers
         scheduler = sched_handlers[self.stagespec['scheduler_type']]
         scheduler(self, self.stagespec)
 

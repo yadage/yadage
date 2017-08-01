@@ -8,7 +8,11 @@ def decide_rule(rule, controller, idbased):
     click.secho('rule: {}/{} ({})'.format(rule.offset,
                                           rule.rule.name, rule.identifier))
     # IPython.embed()
-    resp = raw_input(click.style("Shall we? (y/N) ", fg='blue'))
+    try:
+        resp = raw_input(click.style("Shall we? (y/N) ", fg='blue'))
+    except NameError:
+        resp = input(click.style("Shall we? (y/N) ", fg='blue'))
+
     shall = resp.lower() == 'y'
     if shall:
         click.secho('ok we will extend.', fg='green')
@@ -26,7 +30,11 @@ def decide_step(node, controller, idbased):
 
     click.echo('we could submit a DAG node {}'.format(node))
     # IPython.embed()
-    resp = raw_input(click.style("Shall we? (y/N) ", fg='magenta'))
+    try:
+        resp = raw_input(click.style("Shall we? (y/N) ", fg='magenta'))
+    except NameError:
+        resp = input(click.style("Shall we? (y/N) ", fg='magenta'))
+
     shall = resp.lower() == 'y'
     if shall:
         click.secho('ok we will submit.', fg='green')
@@ -44,6 +52,12 @@ def custom_decider(decide_func, idbased):
             data = yield decide_func(*data, idbased = idbased)
     return decider
 
+def advance_coroutine(coroutine):
+    try:
+        return coroutine.next()
+    except AttributeError:
+        return coroutine.__next__()
+   
 
 def interactive_deciders(idbased = False):
     '''
@@ -51,9 +65,9 @@ def interactive_deciders(idbased = False):
     extension and submission
     '''
     extend_decider = custom_decider(decide_rule, idbased)()
-    extend_decider.next()  # prime decider
+    advance_coroutine(extend_decider)  # prime decider
 
     submit_decider = custom_decider(decide_step, idbased)()
-    submit_decider.next()  # prime decider
+    advance_coroutine(submit_decider)  # prime decider
 
     return extend_decider, submit_decider

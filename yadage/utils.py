@@ -8,6 +8,7 @@ import jsonpointer
 import jq
 import hashlib
 import uuid
+import io
 import jsonref
 import copy
 import glob2 as glob
@@ -49,7 +50,7 @@ def json_hash(jsonable):
     :param jsonable: a json-serializable object
     :return: the hash
     '''
-    the_hash  = hashlib.sha1(json.dumps(jsonable, cls=WithJsonRefEncoder, sort_keys=True)).hexdigest()
+    the_hash  = hashlib.sha1(json.dumps(jsonable, cls=WithJsonRefEncoder, sort_keys=True).encode('utf-8')).hexdigest()
     return the_hash
 
 
@@ -72,6 +73,8 @@ class WithJsonRefEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, jsonref.JsonRef):
             return {k: v for k, v in obj.items()}
+        elif type(obj)==map:
+            return list(obj)
         try:
             super(WithJsonRefEncoder, self).default(obj)
         except TypeError:
@@ -146,7 +149,13 @@ def discover_initfiles(initdata,sourcedir):
 
     # filled_initdata = copy.deepcopy(initdata)
     for pointer,value in leaf_iterator(initdata):
-        if type(value) not in [str,unicode]: continue
+
+        try:
+            if type(value) not in [str,unicode]: continue #python2
+        except NameError:
+            if type(value) not in [str]: continue #python3
+
+
         within_sourcedir = os.path.join(sourcedir,value)
         globresult = glob.glob(os.path.join(sourcedir,value))
         if os.path.exists(within_sourcedir):
@@ -186,7 +195,7 @@ def prepare_workdir_from_archive(initdir, inputarchive):
     os.makedirs(initdir)
     localzipfile = '{}/.yadage_inputarchive.zip'.format(initdir)
     f = urlopen(inputarchive)
-    with open(localzipfile,'w') as lf:
+    with open(localzipfile,'wb') as lf:
         lf.write(f.read())
     with zipfile.ZipFile(localzipfile) as zf:
         zf.extractall(path=initdir)
