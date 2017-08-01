@@ -8,7 +8,6 @@ import jsonpointer
 import jq
 import hashlib
 import uuid
-import io
 import jsonref
 import copy
 import glob2 as glob
