@@ -106,9 +106,16 @@ class WorkflowView(object):
         '''
         adds a node to the DAG connecting it to the passed depending nodes
         while tracking that it was added by the specified stage
+        
+        :param task: the task object for the step
+        :param stage: the stage name
+        :param depends_on: dependencies of this step
         '''
         node = YadageNode(task.metadata['name'], task, identifier=get_obj_id(task))
         self.dag.addNode(node, depends_on=depends_on)
+        node.task.metadata['wflow_node_id'] = node.identifier
+        node.task.metadata['wflow_offset'] = self.offset
+        node.task.metadata['wflow_stage'] = stage
 
         log.debug('added node %s', node)
 
