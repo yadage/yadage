@@ -5,7 +5,6 @@ import tempfile
 import shutil
 import logging
 
-import yadage.visualize as visualize
 from .wflow import YadageWorkflow
 from .handlers.expression_handlers import handlers as exh
 from .utils import set_backend, process_refs
@@ -75,6 +74,7 @@ def testsel(instance, results, selection,verbosity):
 @click.argument('results')
 @click.argument('vizpdf')
 def viz(instance, results, vizpdf):
+    import yadage.visualize as visualize
     wflow = wflow_with_trivial_backend(instance,results)
 
     dirpath = tempfile.mkdtemp()
