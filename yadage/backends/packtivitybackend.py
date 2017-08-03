@@ -58,7 +58,7 @@ class PacktivityBackend(federatedbackend.FederatedBackend):
             else:
                 #primary packtivity backends adhere to the unrolled API
                 return self.backends['packtivity'].submit(
-                    task.spec, task.parameters, task.state
+                    task.spec, task.parameters, task.state, task.metadata
                 )
         elif tasktype == init_task:
             #init steps are by definition successful

@@ -30,11 +30,8 @@ if 'READTHEDOCS' in os.environ:
     'jsonschema',
     'jsonpointer>=1.10',
     'jsonpath_rw',
-    # 'packtivity',
-    # 'adage',
     'checksumdir',
     'glob2',
-    # 'jq'
   ]
 
 setup(
@@ -48,7 +45,17 @@ setup(
   include_package_data = True,
   install_requires = deps,
   extras_require = {
-    'celery' : ['celery','redis']
+    'celery' : [
+       'celery',
+       'redis'
+    ],
+    'viz': [
+        #manually adding extras of adage[extra] because of pip 
+        #issue https://github.com/pypa/pip/issues/3189
+        'pydot2',
+        'pygraphviz',
+        'pydotplus'
+    ]
   },
   entry_points = {
       'console_scripts': [

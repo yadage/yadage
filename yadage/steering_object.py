@@ -8,7 +8,6 @@ from packtivity.statecontexts.posixfs_context import LocalFSProvider, LocalFSSta
 
 import yadage.workflow_loader as workflow_loader
 import yadage.utils as utils
-import yadage.visualize as visualize
 import yadage.serialize as serialize
 from .controllers import setup_controller_from_statestring
 from .wflow import YadageWorkflow
@@ -155,6 +154,7 @@ class YadageSteering():
         '''
         generate workflow visualization (stored in meta directory)
         '''
+        import yadage.visualize as visualize
         visualize.write_prov_graph(self.metadir, self.workflow, vizformat='png')
         visualize.write_prov_graph(self.metadir, self.workflow, vizformat='pdf')
 
