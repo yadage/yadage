@@ -5,7 +5,6 @@ import os
 from packtivity.statecontexts.posixfs_context import LocalFSProvider,LocalFSState
 
 from .steering_object import YadageSteering
-from .visualize import write_prov_graph
 from .controllers import PersistentController
 from .wflowstate import load_model_fromstring
 from .stages import JsonStage
@@ -228,6 +227,7 @@ def add(statetype, verbosity, offset, toplevel, workdir, workflow):
 @click.option('-f', '--fileformat', default='pdf')
 @click.option('-w', '--workdir', default=os.curdir)
 def visualize(statetype, workdir, fileformat):
+    from .visualize import write_prov_graph
 
     model      = load_model_fromstring(statetype)
     controller = PersistentController(model)
