@@ -10,7 +10,7 @@ install:
 - sudo apt-get install -y imagemagick
 - sudo apt-get install -y graphviz
 - sudo apt-get install -y python-logilab-common
-- pip install pyflakes pytest pytest-cov python-coveralls celery
+- pip install pyflakes pytest pytest-cov python-coveralls celery logilab-devtools
 - pip install --process-dependency-links -e .[viz]
 script:
 - pyflakes yadage
