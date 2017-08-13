@@ -227,12 +227,13 @@ def jq_stage(stage, spec):
 
     for wflowref in wflowrefs:
         nodeselector, resultscript = wflowref.resolve(binds)['$wflowref']
-
         view = stage.view
         nodes   = [view.dag.getNode(n.get('_nodeid')) for n in jq.jq(nodeselector).transform(view.steps, multiple_output = True)]
         results = [jq.jq(resultscript).transform(pointerize(n.result,False,n.identifier), multiple_output = True) for n in nodes]
         wflowref.set(binds,results)
 
+
+    log.info('transforming binds: %s', binds)
     stagescript = spec['stepscript']
     stageres = jq.jq(stagescript).transform(binds,multiple_output = False)
 
@@ -245,10 +246,16 @@ def jq_stage(stage, spec):
         singlesteppars.append(forstep)
         log.info(forstep)
 
+    postscript = spec['postscript']
     for i, pars in enumerate(singlesteppars):
         singlename = '{}_{}'.format(stage.name, i)
         step = step_or_init(singlename,spec,stage.state_provider)
         finalized = finalize_input(stage.view, step, pars)
-        addStepOrWorkflow(singlename, stage, step.s(**finalized), spec)
+
+        log.info('postscripting: %s',finalized)
+        after_post = jq.jq(postscript).transform(finalized,multiple_output = False)
+
+        log.info('finalized to: %s',after_post)
+        addStepOrWorkflow(singlename, stage, step.s(**after_post), spec)
 
 
