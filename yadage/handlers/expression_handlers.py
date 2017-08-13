@@ -11,7 +11,12 @@ handlers, scheduler = utils.handler_decorator()
 
 def select_reference(step, selection):
     '''
-    resolves a jsonpath selection and returns JSONPointerized matches
+    resolves a jsonpath selection on a step's result data and returns JSONPointerized matches
+
+    :param step: the step holding the result data
+    :param selection: a JSONPath expression
+
+    :return: the first (and single) match of the expression as a JSON pointer
     '''
     log.debug('selecting output from step %s', step)
     pointerized = pointerize(step['result'], asref=True, stepid=step['id'])
@@ -32,6 +37,9 @@ def combine_outputs(outputs, flatten, unwrapsingle):
     combines the result of multiple reference selections into a single outputs.
     non-list values will just be combined into a list while lists will be concatenated
     optinally we can return the sole element of a single-value list (argument: unwrapsingle)
+
+    :param outputs: 
+
     '''
     combined = []
     for reference in outputs:
@@ -52,6 +60,11 @@ def select_steps(stageview, query):
     '''
     selects the step objects from the stage view based on a query and converts them to simple
     dictionaries with id,result keys
+    
+    :param stageview: the view object on which to perform the query
+    :param query: a slection query (JSONPath expression)
+    
+    :return: list of {id: xx, result: yy} dictionaries
     '''
     return [{'id': s.identifier, 'result': s.result} for s in stageview.getSteps(query)]
 

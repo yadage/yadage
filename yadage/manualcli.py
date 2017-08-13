@@ -188,7 +188,6 @@ def step(statetype, verbosity, nsteps, update_interval,backend):
 
     extend, submit = interactive.interactive_deciders(idbased = True)
     ys = YadageSteering()
-    ys.adage_argument()
     ys.controller = PersistentController(model)
     ys.run_adage(backend,
         maxsteps = maxsteps,

@@ -42,7 +42,7 @@ def steering_ctx(
     '''
     context manage around yadage steering object.
 
-    param workdir: work directory of workflow
+    param dataarg: primary data argument (e.g. workdir) of the workflow
     param workflow: workflow spec source
     '''
 

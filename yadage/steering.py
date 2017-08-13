@@ -30,7 +30,7 @@ RC_SUCCEEDED = 0
 @click.option('--interactive/--not-interactive', default=False, help = 'en-/disable user interactio (sign-off graph extensions and packtivity submissions)')
 @click.option('--validate/--no-validate', default=True, help = 'en-/disable workflow spec validation')
 @click.option('--accept-metadir/--no-accept-metadir', default=False)
-@click.option('--visualize/--no-visualize', default=True, help = 'visualize workflow graph')
+@click.option('--visualize/--no-visualize', default=False, help = 'visualize workflow graph')
 def main(dataarg,
          workflow,
          initfiles,

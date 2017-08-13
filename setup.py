@@ -55,6 +55,11 @@ setup(
         'pydot2',
         'pygraphviz',
         'pydotplus'
+    ],
+    'develop': [
+       'pytest',
+       'pytest-cov',
+       'python-coveralls'
     ]
   },
   entry_points = {
