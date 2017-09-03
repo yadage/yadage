@@ -30,6 +30,7 @@ Yadage can run on various backends such as multiprocessing pools, ipython cluste
 
     stages:
       - name: hello_world
+        dependencies: [init]
         scheduler:
           scheduler_type: singlestep-stage
           parameters:
