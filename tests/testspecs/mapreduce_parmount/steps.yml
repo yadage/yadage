@@ -1,0 +1,26 @@
+map:
+  process:
+    process_type: string-interpolated-cmd
+    cmd: echo {input} > {output}
+  environment:
+    environment_type: docker-encapsulated
+    image: busybox
+  publisher:
+    publisher_type: 'frompar-pub'
+    outputmap:
+      output: 'output'
+reduce:
+  process:
+    process_type: interpolated-script-cmd
+    script: |
+      cat /parmounts/inputs|sed 's|"||g' |xargs cat > {output}
+  environment:
+    environment_type: docker-encapsulated
+    image: busybox
+    par_mounts:
+      - mountpath: '/parmounts/inputs'
+        jqscript: '.inputs[]'
+  publisher:
+    publisher_type: 'frompar-pub'
+    outputmap:
+      output: 'output'

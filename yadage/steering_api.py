@@ -10,9 +10,6 @@ from .interactive import interactive_deciders
 
 log = logging.getLogger(__name__)
 
-RC_FAILED = 1
-RC_SUCCEEDED = 0
-
 def run_workflow(*args, **kwargs):
     '''
     convenience function around steering context, when no additional settings

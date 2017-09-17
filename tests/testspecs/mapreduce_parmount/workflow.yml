@@ -1,0 +1,20 @@
+stages:
+  - name: map
+    dependencies: [init]
+    scheduler:
+      scheduler_type: multistep-stage
+      parameters:
+        input: {stages: init, output: input, unwrap: true}
+        output: '{workdir}/ouput.txt'
+      step: {$ref: steps.yml#/map}
+      scatter:
+        method: zip
+        parameters: [input]
+  - name: reduce
+    dependencies: [map]
+    scheduler:
+      scheduler_type: singlestep-stage
+      parameters:
+        inputs: {stages: 'map', output: output}
+        output: '{workdir}/hello.merged.txt'
+      step: {$ref: steps.yml#/reduce}
