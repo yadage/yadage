@@ -5,25 +5,26 @@ language: python
 python:
 - '2.7'
 - '3.5'
+install:
+- sudo apt-get install -y imagemagick
+- sudo apt-get install -y graphviz
+- sudo apt-get install -y python-logilab-common
+- pip install pyflakes pytest pytest-cov python-coveralls celery logilab-devtools
+- pip install --process-dependency-links -e .[viz]
+- pip install sphinx
+script:
+- pyflakes yadage
+- pytest --cov=yadage
+#- yadage-run -t from-github/phenochain workdir_pheno_delphes madgraph_delphes.yml -p nevents=100
+#- find workdir_pheno_delphes
+- docker build --build-arg VCS_REF=`git rev-parse --short HEAD` -t "yadage/yadage:git-${TRAVIS_BRANCH}" .
+- docker login -u $DOCKERLOGIN -p $DOCKERPW
+- docker push "yadage/yadage:git-${TRAVIS_BRANCH}"
+after_success:
+- coveralls 
+
 jobs:
   include:
-    - install:
-      - sudo apt-get install -y imagemagick
-      - sudo apt-get install -y graphviz
-      - sudo apt-get install -y python-logilab-common
-      - pip install pyflakes pytest pytest-cov python-coveralls celery logilab-devtools
-      - pip install --process-dependency-links -e .[viz]
-      - pip install sphinx
-      script:
-      - pyflakes yadage
-      - pytest --cov=yadage
-      #- yadage-run -t from-github/phenochain workdir_pheno_delphes madgraph_delphes.yml -p nevents=100
-      #- find workdir_pheno_delphes
-      - docker build --build-arg VCS_REF=`git rev-parse --short HEAD` -t "yadage/yadage:git-${TRAVIS_BRANCH}" .
-      - docker login -u $DOCKERLOGIN -p $DOCKERPW
-      - docker push "yadage/yadage:git-${TRAVIS_BRANCH}"
-      after_success:
-      - coveralls 
     - stage: docs
       script:
       - cd docs && make html && cd -
