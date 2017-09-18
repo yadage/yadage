@@ -26,6 +26,7 @@ jobs:
   - stage: docs
     script:
     - cd docs && make html && cd -
+    - touch docs/_build/html/.nojekyll
     deploy:
       provider: pages
       skip_cleanup: true
