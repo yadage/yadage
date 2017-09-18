@@ -17,7 +17,7 @@ script:
 - pytest --cov=yadage
 #- yadage-run -t from-github/phenochain workdir_pheno_delphes madgraph_delphes.yml -p nevents=100
 #- find workdir_pheno_delphes
-- cd docs && make html
+- cd docs && make html && cd -
 - docker build --build-arg VCS_REF=`git rev-parse --short HEAD` -t "yadage/yadage:git-${TRAVIS_BRANCH}" .
 - docker login -u $DOCKERLOGIN -p $DOCKERPW
 - docker push "yadage/yadage:git-${TRAVIS_BRANCH}"
