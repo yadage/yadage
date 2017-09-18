@@ -5,16 +5,27 @@ stages:
       scheduler_type: multistep-stage
       parameters:
         input: {stages: init, output: input, unwrap: true}
-        output: '{workdir}/ouput.txt'
+        output: '{workdir}/output_one.txt'
+      step: {$ref: steps.yml#/map}
+      scatter:
+        method: zip
+        parameters: [input]
+  - name: mapmore
+    dependencies: [map]
+    scheduler:
+      scheduler_type: multistep-stage
+      parameters:
+        input: {stages: map, output: output, unwrap: true}
+        output: '{workdir}/output_two.txt'
       step: {$ref: steps.yml#/map}
       scatter:
         method: zip
         parameters: [input]
   - name: reduce
-    dependencies: [map]
+    dependencies: [mapmore]
     scheduler:
       scheduler_type: singlestep-stage
       parameters:
-        inputs: {stages: 'map', output: output}
+        inputs: {stages: 'mapmore', output: output}
         output: '{workdir}/hello.merged.txt'
       step: {$ref: steps.yml#/reduce}
