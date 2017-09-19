@@ -233,7 +233,7 @@ def multistep_stage(stage, spec):
     parameters = {
         k: select_parameter(stage.view, v) for k, v in get_parameters(spec).items()
     }
-    singlesteppars = scatter(parameters, spec['scatter'], spec['batchsize'], spec['partitionsize'])
+    singlesteppars = scatter(parameters, spec['scatter'], spec.get('batchsize'), spec.get('partitionsize'))
     for i, pars in enumerate(singlesteppars):
         singlename = '{}_{}'.format(stage.name, i)
         step = step_or_init(singlename,spec,stage.state_provider)
