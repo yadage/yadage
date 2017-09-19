@@ -6,7 +6,7 @@
 [![Build Status](https://travis-ci.org/diana-hep/yadage.svg?branch=master)](https://travis-ci.org/diana-hep/yadage)
 [![Code Health](https://landscape.io/github/diana-hep/yadage/master/landscape.svg?style=flat)](https://landscape.io/github/diana-hep/yadage/master)
 [![Coverage Status](https://coveralls.io/repos/github/diana-hep/yadage/badge.svg?branch=master)](https://coveralls.io/github/diana-hep/yadage?branch=master)
-[![Documentation Status](https://readthedocs.org/projects/pip/badge/?version=latest)](http://yadage.readthedocs.org/en/latest/?badge=latest)
+[![Documentation Status](https://readthedocs.org/projects/yadage/badge/?version=latest)](http://yadage.readthedocs.io/en/latest/?badge=latest)
 [![](https://images.microbadger.com/badges/version/yadage/yadage.svg)](https://microbadger.com/images/yadage/yadage "Get your own version badge on microbadger.com")
 
 
