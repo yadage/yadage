@@ -148,10 +148,12 @@ def singlestep_stage(stage, spec):
 
 
 def chunk(alist, chunksize):
+    '''split a list into equal-sized chunks of size chunksize'''
     return [alist[x:x+chunksize] for x in range(0, len(alist), chunksize)]
 
 
 def partition(alist, partitionsize):
+    '''split a list into partitionsize parts'''
     total_len = len(alist)
     if partitionsize > total_len:
         partitionsize = total_len
