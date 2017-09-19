@@ -146,7 +146,35 @@ def singlestep_stage(stage, spec):
     finalized = finalize_input(stage.view, step, parameters)
     addStepOrWorkflow(stage.name, stage, step.s(**finalized), spec)
 
-def scatter(parameters, scatter):
+
+def chunk(alist, chunksize):
+    '''split a list into equal-sized chunks of size chunksize'''
+    return [alist[x:x+chunksize] for x in range(0, len(alist), chunksize)]
+
+
+def partition(alist, partitionsize):
+    '''split a list into partitionsize parts'''
+    total_len = len(alist)
+    if partitionsize > total_len:
+        partitionsize = total_len
+    assert partitionsize <= total_len
+    end = 0 
+    partitioned = []
+    for k in range(partitionsize):
+        begin = end
+        end =  end + (total_len+k)//partitionsize
+        partitioned.append(alist[begin:end])
+    return partitioned
+
+def groupmany(iterable,batchsize = None, partitionsize = None):
+    if batchsize:
+        return chunk(list(iterable), batchsize)
+    if partitionsize:
+        return partition(list(iterable), partitionsize)
+    return iterable
+
+
+def scatter(parameters, scatter, batchsize = None, partitionsize = None):
     '''
     convert a parameter set and scatter definition into a list
     of single parameter sets.
@@ -156,15 +184,16 @@ def scatter(parameters, scatter):
 
     :return: list of parameter sets
     '''
+
     commonpars = parameters.copy()
     to_scatter = {}
     for scatpar in scatter['parameters']:
-        to_scatter[scatpar] = commonpars.pop(scatpar)
+        to_scatter[scatpar] = groupmany(commonpars.pop(scatpar), batchsize, partitionsize)
 
     singlesteppars = []
     if scatter['method'] == 'zip':
-        keys, zippable = zip(
-            *[(k, v) for i, (k, v) in enumerate(to_scatter.items())])
+        keys, zippable = zip(*[(k, v) for k, v in to_scatter.items()])
+
 
         for zipped in zip(*zippable):
             individualpars = dict(zip(keys, zipped))
@@ -204,7 +233,7 @@ def multistep_stage(stage, spec):
     parameters = {
         k: select_parameter(stage.view, v) for k, v in get_parameters(spec).items()
     }
-    singlesteppars = scatter(parameters, spec['scatter'])
+    singlesteppars = scatter(parameters, spec['scatter'], spec['batchsize'], spec['partitionsize'])
     for i, pars in enumerate(singlesteppars):
         singlename = '{}_{}'.format(stage.name, i)
         step = step_or_init(singlename,spec,stage.state_provider)

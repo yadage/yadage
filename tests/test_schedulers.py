@@ -52,6 +52,20 @@ def test_jq_stage(jqworkflow):
     assert len(wflow.dag.nodes()) == 1 + len(inputdata)  
 
 
+def test_multistepstage_zip_schedule_steps(batched_zip_mapreduce):
+    wflow = batched_zip_mapreduce
+    
+    inputdata = [1,2,3,4,5]
+    wflow.view().init({'input':inputdata})
+    assert wflow.rules[0].applicable(wflow) == False
+
+    wflow.view().rules[-1].apply(wflow)
+    assert len(wflow.dag.nodes()) == 1 
+    assert wflow.rules[0].applicable(wflow) == True
+    assert wflow.rules[0].rule.stagespec['scheduler_type'] == 'multistep-stage'
+    wflow.rules[0].apply(wflow)
+    assert len(wflow.dag.nodes()) == 1 + 3 # init + 3 batches (2,2,1)
+
 def test_multistepstage_zip_schedule_steps(simple_mapreduce):
     wflow = simple_mapreduce
     
