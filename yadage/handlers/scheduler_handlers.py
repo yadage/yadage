@@ -148,7 +148,7 @@ def singlestep_stage(stage, spec):
 
 
 def chunk(alist, chunksize):
-    return [alist[x:x+chunksize] for x in xrange(0, len(alist), chunksize)]
+    return [alist[x:x+chunksize] for x in range(0, len(alist), chunksize)]
 
 
 def partition(alist, partitionsize):
