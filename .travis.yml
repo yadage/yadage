@@ -15,10 +15,6 @@ install:
 script:
 - pyflakes yadage
 - pytest --cov=yadage
-- docker build --build-arg VCS_REF=`git rev-parse --short HEAD` -t "yadage/yadage:git-${TRAVIS_BRANCH}"
-  .
-- docker login -u $DOCKERLOGIN -p $DOCKERPW
-- docker push "yadage/yadage:git-${TRAVIS_BRANCH}"
 after_success:
 - coveralls
 jobs:
@@ -43,6 +39,15 @@ jobs:
           secure: m97JA4GN3/ARvE5IHZe3d1OFxXErhPpsyzWbtwemPEc7f5YNxjDXfvgNJ4hbMYS79uiown3Bb0WaBsPv2ebf8cZrJnYduR+whetfgdODHELo8aAuZPZub70orRyGEzkZg+AgajzlRMMbWqgWWC7IzaKj1P8j+Iaz0L1CR8+1KP/vbzWVdl43Q3ETuantPcEaOk088DuF+K2OMX83uyoSJpvgXhyD+w0+M6DNA2raQrEV6gX4RrFSwN93p9amWnI7cJ/l+6G/ISrz8O8ap/hwstCj/xbdFJ4yAdpMCHb2xuY9T2pWqIjK3pDPOkFI4QHjQrea8T4uY5SnAaMLnQmKD4Hv4avcJ23ZmWB2iymwawSwPZF+ChUr9+K4nfhDY+4DIoobtXQ73BpJYsF97YkxdgBxR4Ij6IvGzDFU2f9vDRuxr341XFExypkK2c4fUFWgdqAhp8zLnkGXQRPFhEHFZeyemYlsbatPD8YTDPEIxrNACaDq1DF4OvUaQWpqjYvp0OwNxrng1KtD40wtgQCRPUoNSm2CZheMhAmUuRtzf7R40qTYtFVxlP7sLGm/DUc2LOgIxhW8oIFcmNL4YPWmbQJegyDbIuTDiQkQ0X3LW4mc/pMEnLj9TJOzfbRKSvg997t45wDN1onXVeGdIk9qOdBsNDb5J8bJLSY1dhOLuEo=
         password:
           secure: ABo/JVs9Xg2+d4PxHsRS0TXOFKIFDifW5TwerlM03AEYHqmADfOiOicm0DTK7e+P0oI2JUHZYuwvQeuNj+dkUwYsNVKuzxkLxOBqaJCJOUAdpugXZD7KHFWRxB5VfZcorsgy17+oHqRcnxs0nHOj1KhG4UmEx0HpY2vfFkXfp/vtJtdUBwoXor6ZsmSD9NOdoASdYcYhZebHCEj9DAxZQChhj7Q1iLnbWuJiUbxoYPhPbyO6ytS6eq/kaxyO7em0+37KnzYPM4vdBucULC4dddHCW3JdYeuj+y+785UpPQ9j7GX+mSAXRVaqcU7ULQONR5xVIlOSu3FSFlnynmMYVi/usCqi7aZsoblTl1NwZYS/JVOGrw5tlikPXljuxM76Rfp6TllH/SOsRWVxFsh6VyfyRBa1EnNNATLyAgJpfl/ixy6Hm58wPg7ttvvL+6WTCWtnCtk8XzdDneiUDZL89EmLm4XB23QLGvnzjMrKukS/HZzJlIOTm7CIvTWQpio+FXpGZUfQ0NH9fWpd00yQqEN57w/8lvpAHbVcgQ+8k0sSD/7+cKwjtYKIlmV96AOV2B/U5v8WOLwv52uZYqp3Y4AseAhg0RuJf/kL6Jj6IOsh1+3hsS/XZakiN/HHocn0R0FP7yN237jmgnnXzGPEv16HW91YC1mSpC7uxUPcWiI=
+    - stage: docker
+      deploy:
+        provider: script
+        script:
+        - docker build --build-arg VCS_REF=`git rev-parse --short HEAD` -t "yadage/yadage:git-${TRAVIS_BRANCH}"
+        - docker login -u $DOCKERLOGIN -p $DOCKERPW
+        - docker push "yadage/yadage:git-${TRAVIS_BRANCH}"
+        on:
+          tags: true
 env:
   global:
   - secure: CzMADlzpQj7vGLOhGYHa8KZXJs69r/e85tPFBAFGl3E+q4dmTazLp9eBgYXe/KW/fnSZIM6PQLFst3lUc0SyQJCyOnUNbja3NRTrKRyzNfYr+yDXIkTiAuS7uF241YuF8WXAjcOYlNLpazVHBu95xroa5k3L6wtKkMi2bIs47EEHYhoTsZcRD5LDXf3d+ULpSYfiydsX3H/4CFa1u79wD26BTv2Ba2vT7lwwzX6hsZv6qGWFbLW2vKRw6zasBqnPfQe4wOhUp0oXF7TusM2/9rTyD0OiwE4pWeJ/B88ZFnUL7pdxPVFhPWmV2vSFdRd7P417vTEGqErEqzTm4csQUbu3PtbLFXbsTfgmIsbJyVIaU1upSo3oxeK1fyje5Yx31zUzgrUzYlKzsMM815F76sfoIAyTBLzyFBWCnM5mK2X5he/y2e0lxuuxxrVgOh1WnabUA6xn1+F7XCBO1BOIjVzGTySYZoi/TcK+TwokI/ZgVKXUrrQGYfeRSXZOIghB6/YoUAwL8Ju2dQaI1g6BQzRtViZ/61PpXzUK2rLQd6dtgUC90WR9q+0lXJ/SPoF774QpUjJFgsy47mc3mdMVL+fiLl6mvuSHrfW0PlrO4mTMY17AV0xQ9E+l4uT2Q0VEnIeMU3Z0dKFa/RFuZTWW5kTGxeTput13cM4GJd6KyCk=
