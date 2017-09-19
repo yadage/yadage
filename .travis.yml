@@ -33,7 +33,7 @@ jobs:
       github_token: $GITHUB_TOKEN
       local_dir: docs/_build/html
       on:
-        branch: master
+        tags: true
   - stage: deploy
     script: []
     deploy:
