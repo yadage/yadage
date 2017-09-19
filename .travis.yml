@@ -10,7 +10,7 @@ install:
 - sudo apt-get install -y graphviz
 - sudo apt-get install -y python-logilab-common
 - pip install pyflakes pytest pytest-cov python-coveralls celery logilab-devtools
-- pip install --process-dependency-links -e .[viz]
+- pip install --process-dependency-links -e .[viz,develop,celery]
 - pip install sphinx
 script:
 - pyflakes yadage
