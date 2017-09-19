@@ -23,7 +23,6 @@ after_success:
 - coveralls
 jobs:
   include:
-    matrix:
     - stage: docs
       script:
       - cd docs && make html && cd -
