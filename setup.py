@@ -36,7 +36,7 @@ if 'READTHEDOCS' in os.environ:
 
 setup(
   name = 'yadage',
-  version = '0.12.5',
+  version = '0.12.6',
   description = 'yadage - YAML based adage',
   url = '',
   author = 'Lukas Heinrich',
