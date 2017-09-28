@@ -76,7 +76,7 @@ def test_jqnodestruct_stage(jqnodestruct):
 
     pars =  wflow.dag.getNodeByName('reduce_complex_0').task.parameters
 
-    assert pars.keys() == ['grouped_inputs']
+    assert list(pars.keys()) == ['grouped_inputs']
     assert set(pars['grouped_inputs'].keys()) == {'one','two'}
 
     assert pars['grouped_inputs']['one'] == [wflow.dag.getNodeByName('map_one_{}'.format(i)).result['outputfile'] for i in range(3)]
