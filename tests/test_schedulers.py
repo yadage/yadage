@@ -51,6 +51,38 @@ def test_jq_stage(jqworkflow):
     wflow.rules[0].apply(wflow)
     assert len(wflow.dag.nodes()) == 1 + len(inputdata)  
 
+def test_jqnodestruct_stage(jqnodestruct):
+    wflow = jqnodestruct
+    
+    inputdata = {'scatterone': ['a','b','c'], 'scatertwo': [1,2,3]}
+
+    wflow.view().init(inputdata)
+    assert wflow.rules[0].applicable(wflow) == False
+
+    wflow.view().rules[-1].apply(wflow)
+    assert len(wflow.dag.nodes()) == 1 
+    assert wflow.rules[0].applicable(wflow) == True
+    assert wflow.rules[1].applicable(wflow) == True
+    # assert wflow.rules[0].rule.stagespec['scheduler_type'] == 'jq-stage'
+    wflow.rules[0].apply(wflow)
+    wflow.rules[1].apply(wflow)
+
+    assert len(wflow.dag.nodes()) == 7
+
+    assert wflow.rules[2].applicable(wflow) == True
+    wflow.rules[2].apply(wflow)
+
+    assert len(wflow.dag.nodes()) == 8
+
+    pars =  wflow.dag.getNodeByName('reduce_complex_0').task.parameters
+
+    assert pars.keys() == ['grouped_inputs']
+    assert set(pars['grouped_inputs'].keys()) == {'one','two'}
+
+    assert pars['grouped_inputs']['one'] == [wflow.dag.getNodeByName('map_one_{}'.format(i)).result['outputfile'] for i in range(3)]
+    assert pars['grouped_inputs']['two'] == [wflow.dag.getNodeByName('map_two_{}'.format(i)).result['outputfile'] for i in range(3)]
+
+
 
 def test_multistepstage_zip_schedule_steps(batched_zip_mapreduce):
     wflow = batched_zip_mapreduce
