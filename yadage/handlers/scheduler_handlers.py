@@ -257,10 +257,14 @@ def jq_stage(stage, spec):
     for wflowref in wflowrefs:
         nodeselector, resultscript = wflowref.resolve(binds)['$wflowref']
         view = stage.view
-        nodes   = [view.dag.getNode(n.get('_nodeid')) for n in jq.jq(nodeselector).transform(view.steps, multiple_output = True)]
-        results = [jq.jq(resultscript).transform(pointerize(n.result,False,n.identifier), multiple_output = True) for n in nodes]
-        wflowref.set(binds,results)
+        nodestruct = jq.jq(nodeselector).transform(view.steps, multiple_output = True)
 
+        noderefs = [jsonpointer.JsonPointer.from_parts(x) for x in jq.jq('paths(if objects then has("_nodeid") else false end)').transform(nodestruct, multiple_output = True)]
+        for nr in noderefs:
+            n = view.dag.getNode(nr.resolve(nodestruct)['_nodeid'])
+            r = jq.jq(resultscript).transform(pointerize(n.result,False,n.identifier), multiple_output = True)
+            nr.set(nodestruct,r)
+        wflowref.set(binds,nodestruct)
 
     log.info('transforming binds: %s', binds)
     stagescript = spec['stepscript']
