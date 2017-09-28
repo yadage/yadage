@@ -1,0 +1,30 @@
+stages:
+  - name: map_one
+    dependencies: [init]
+    scheduler:
+      scheduler_type: jq-stage
+      bindings:
+        parone: {'$wflowref': ['.init[]','.scatterone']}
+      stepscript: >
+        .parone[][] | map({parone: ., outputfile: "{workdir}/what.txt"})
+      step: {$ref: 'steps.yml#/stepA'}
+  - name: map_two
+    dependencies: [init]
+    scheduler:
+      scheduler_type: jq-stage
+      bindings:
+        parone: {'$wflowref': ['.init[]','.scatertwo']}
+      stepscript: >
+        .parone[][] | map({parone: ., outputfile: "{workdir}/what.txt"})
+      step: {$ref: 'steps.yml#/stepA'}
+  - name: reduce_complex
+    dependencies: [map_one,map_two]
+    scheduler:
+      scheduler_type: jq-stage
+      bindings:
+        grouped: {'$wflowref': ['{one: [.map_one[]], two: [.map_two[]]}','.outputfile']}
+      stepscript: >
+        [{
+          grouped_inputs: [.grouped[]|to_entries[]|{key: .key, value: [.value[]|.[]]}]|from_entries
+        }]
+      step: {$ref: 'steps.yml#/stepB'}

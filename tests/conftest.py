@@ -70,6 +70,12 @@ def jqworkflow(tmpdir,localfs_state_provider):
     return wflow
 
 @pytest.fixture()
+def jqnodestruct(tmpdir,localfs_state_provider):
+    '''a workflow object with horizontally scalable map stage scheduling sub-workflows'''
+    data  = yadage.workflow_loader.workflow('workflow.yml','tests/testspecs/jqnodestruct')
+    wflow = YadageWorkflow.createFromJSON(data,localfs_state_provider)
+    return wflow
+@pytest.fixture()
 def simple_mapreduce(tmpdir,localfs_state_provider):
     '''a workflow object with horizontally scalable map stage scheduling sub-workflows'''
     data  = yadage.workflow_loader.workflow('workflow.yml','tests/testspecs/mapreduce')
