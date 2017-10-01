@@ -1,5 +1,6 @@
 import pytest
 import os
+import jsonschema.exceptions
 import yadage.workflow_loader
 from yadage.steering_object import YadageSteering
 from yadage.steering_api import steering_ctx
@@ -50,6 +51,13 @@ def test_directjson(tmpdir,multiproc_backend):
     ys.run_adage(multiproc_backend)
 
     assert tmpdir.join('workdir/hello_world/hello_world.txt').check()
+
+def test_invalid_directjson():
+    wflowjson = yadage.workflow_loader.workflow('workflow.yml','tests/testspecs/local-helloworld')
+    ys = YadageSteering()
+    with pytest.raises(jsonschema.exceptions.ValidationError):
+        ys.init_workflow(workflow_json = {'invalid':'data'})
+
 
 def test_directjson_ctx(tmpdir,multiproc_backend):
     wflowjson = yadage.workflow_loader.workflow('workflow.yml','tests/testspecs/local-helloworld')

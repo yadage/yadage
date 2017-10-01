@@ -118,13 +118,17 @@ class YadageSteering():
         if not workflow_json and not workflow:
             raise RuntimeError('need to provide either direct workflow spec or source to load from')
 
-        if not workflow_json:
+        if workflow_json:
+            if validate: workflow_loader.validate(workflow_json)
+        else:
             workflow_json = workflow_loader.workflow(
                 workflow,
                 toplevel=toplevel,
                 schemadir=schemadir,
                 validate=validate
             )
+
+
         with open('{}/yadage_template.json'.format(self.metadir), 'w') as f:
             json.dump(workflow_json, f)
         workflowobj = YadageWorkflow.createFromJSON(workflow_json, self.rootprovider)
