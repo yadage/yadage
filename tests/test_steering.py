@@ -1,4 +1,6 @@
+import pytest
 import os
+import yadage.workflow_loader
 from yadage.steering_object import YadageSteering
 from yadage.steering_api import steering_ctx
 from yadage.utils import prepare_workdir_from_archive
@@ -24,6 +26,37 @@ def test_inparchive(tmpdir,multiproc_backend):
                       dataopts = dict(inputarchive = inputarchive)) as ys:
         ys.adage_argument(default_trackers = False)
 
+def test_incomplete_data(tmpdir):
+    ys = YadageSteering()
+    ys.prepare(os.path.join(str(tmpdir),'workdir'))
+    with pytest.raises(RuntimeError):
+        ys.init_workflow()
+
+def test_incomplete_data_ctx(tmpdir):
+    workdir = os.path.join(str(tmpdir),'workdir')
+    with pytest.raises(RuntimeError):
+        with steering_ctx(workdir) as ys:
+            pass
+
+def test_directjson(tmpdir,multiproc_backend):
+    wflowjson = yadage.workflow_loader.workflow('workflow.yml','tests/testspecs/local-helloworld')
+
+    ys = YadageSteering()
+    ys.prepare(os.path.join(str(tmpdir),'workdir'))
+
+    ys.init_workflow(workflow_json = wflowjson, initdata = {'par': 'parvalue'})
+
+    ys.adage_argument(default_trackers = False)
+    ys.run_adage(multiproc_backend)
+
+    assert tmpdir.join('workdir/hello_world/hello_world.txt').check()
+
+def test_directjson_ctx(tmpdir,multiproc_backend):
+    wflowjson = yadage.workflow_loader.workflow('workflow.yml','tests/testspecs/local-helloworld')
+    workdir = os.path.join(str(tmpdir),'workdir')
+    with steering_ctx(workdir, workflow_json = wflowjson, backend = multiproc_backend) as ys:
+        ys.adage_argument(default_trackers = False)
+
 
 def test_reset(tmpdir,multiproc_backend):
     ys = YadageSteering()
@@ -42,5 +75,3 @@ def test_reset(tmpdir,multiproc_backend):
     assert tmpdir.join('workdir/reduce/output').check() == False
     ys.run_adage(multiproc_backend)
     assert tmpdir.join('workdir/reduce/output').check() == True
-
-

@@ -21,10 +21,11 @@ def run_workflow(*args, **kwargs):
 @contextmanager
 def steering_ctx(
     dataarg,
-    workflow,
+    workflow = None,
     initdata = None,
     toplevel = os.getcwd(),
     backend = None,
+    workflow_json = None,
     cache = None,
     dataopts = None,
     updateinterval = 0.02,
@@ -55,12 +56,18 @@ def steering_ctx(
         dataopts = dataopts
     )
 
+    wflow_kwargs = dict() #if this stays empty, error will be raise by ys
+    if workflow_json:
+        wflow_kwargs = dict(workflow_json = workflow_json)
+    elif workflow:
+        wflow_kwargs = dict(workflow = workflow, toplevel = toplevel, validate = validate, schemadir = schemadir)
+
     ys.init_workflow(
-        workflow = workflow, toplevel = toplevel, validate = validate, schemadir = schemadir,
         initdata = initdata,
         statesetup = statesetup,
+        **wflow_kwargs
     )
-    
+
     custom_tracker = os.environ.get('YADAGE_CUSTOM_TRACKER',None)
     if custom_tracker:
         modulename,trackerclassname = custom_tracker.split(':')
@@ -79,10 +86,10 @@ def steering_ctx(
             extend_decider = extend,
             submit_decider = submit
         )
-            
+
     yield ys
- 
-    backend = backend or setupbackend_fromstring('multiproc:auto')   
+
+    backend = backend or setupbackend_fromstring('multiproc:auto')
     log.info('running yadage workflow %s on backend %s', workflow, backend)
     if cache:
         if cache == 'checksums':
