@@ -24,15 +24,15 @@ def mancli():
 @mancli.command()
 @click.option('-s', '--statesetup', default='filebacked:yadage_state.json')
 @click.option('-t', '--toplevel', default=os.getcwd())
-@click.option('-a', '--inputarchive', default=None)
-@click.option('-d','--initdir', default='init', help = "relative path (to workdir) to initialiation data directory")
+@click.option('-d', '--dataopt', multiple=True, default=None, help = 'options for the workflow data state')
 @click.option('--metadir', default=None, help = 'directory to store workflow metadata')
 @click.option('--parameter', '-p', multiple=True)
 @click.argument('workdir')
 @click.argument('workflow')
 @click.argument('initfiles', nargs = -1)
-def init(workdir, workflow, initfiles, statesetup, initdir, metadir, toplevel, parameter, inputarchive):
+def init(workdir, workflow, initfiles, statesetup, dataopt, metadir, toplevel, parameter, inputarchive):
     initdata = utils.getinit_data(initfiles, parameter)
+    dataopts = utils.getdata_options(dataopt)
 
     if inputarchive:
         initdir = utils.prepare_workdir_from_archive(workdir, inputarchive)
@@ -42,7 +42,7 @@ def init(workdir, workflow, initfiles, statesetup, initdir, metadir, toplevel, p
     ys = YadageSteering()
     ys.prepare(workdir,
         metadir = metadir,
-        dataopts = dict(initdir = initdir, initdata = initdata)
+        dataopts = dataopts
     )
     ys.init_workflow(workflow, initdata, toplevel, statesetup = statesetup)
 
