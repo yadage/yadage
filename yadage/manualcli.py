@@ -30,7 +30,7 @@ def mancli():
 @click.argument('workdir')
 @click.argument('workflow')
 @click.argument('initfiles', nargs = -1)
-def init(workdir, workflow, initfiles, statesetup, dataopt, metadir, toplevel, parameter, inputarchive):
+def init(workdir, workflow, initfiles, statesetup, dataopt, metadir, toplevel, parameter):
     initdata = utils.getinit_data(initfiles, parameter)
     dataopts = utils.getdata_options(dataopt)
 
@@ -39,7 +39,7 @@ def init(workdir, workflow, initfiles, statesetup, dataopt, metadir, toplevel, p
         metadir = metadir,
         dataopts = dataopts
     )
-    ys.init_workflow(workflow, initdata, toplevel, statesetup = statesetup)
+    ys.init_workflow(workflow, e, toplevel, statesetup = statesetup)
 
 
 def click_print_applicable_stages(controller):
