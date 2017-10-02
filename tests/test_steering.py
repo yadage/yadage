@@ -33,6 +33,12 @@ def test_incomplete_data(tmpdir):
     with pytest.raises(RuntimeError):
         ys.init_workflow()
 
+
+def test_missing_prepare(tmpdir):
+    ys = YadageSteering()
+    with pytest.raises(RuntimeError):
+        ys.init_workflow()
+
 def test_incomplete_data_ctx(tmpdir):
     workdir = os.path.join(str(tmpdir),'workdir')
     with pytest.raises(RuntimeError):
