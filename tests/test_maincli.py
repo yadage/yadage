@@ -36,4 +36,3 @@ def test_maincli_interactive_no_yes(tmpdir):
     )
     assert tmpdir.join('workdir/hello_world/hello_world.txt').check()
     assert result.exit_code == 0
-

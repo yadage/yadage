@@ -53,9 +53,9 @@ class YadageSteering():
     def prepare_localstate(self, dataarg, dataopts, initdata = None):
         '''
         prepare default local state provider
-        
+
         :param dataarg: the workdirectory under which all packtivity data will be stored
-        :param dataopts: dictionary 
+        :param dataopts: dictionary
         :param initdata: initdata tempalte that is mutated based on initialization data on disk
         '''
         workdir = dataarg
@@ -81,10 +81,10 @@ class YadageSteering():
         prepares workflow data state, with  possible initialization and sets up stateprovider used for workflow stages.
         if initialization data is provided, it may be mutated to reflect automatic data discovery
 
-        :param dataarg: mandatory state provider setup. generally <datatype>:<argument>. For 
+        :param dataarg: mandatory state provider setup. generally <datatype>:<argument>. For
         :param dataopts: optional settings for state provider
         :param initdata: optional workflow init parameters to process against data setup
-        :param accept_metadir: 
+        :param accept_metadir:
         :param metadir: meta-data directory
         '''
         self.metadir = metadir
@@ -94,25 +94,41 @@ class YadageSteering():
             dataarg = split_dataarg[0]
             self.prepare_localstate(dataarg,dataopts,initdata)
         else:
-            assert self.metadir #for non-default provider, require metadir to be set 
+            assert self.metadir #for non-default provider, require metadir to be set
             datatype, dataarg = split_dataarg
             self.rootprovider = utils.setupstateprovider(datatype, dataarg, dataopts)
         self.prepare_meta(accept = accept_metadir)
-                
-    def init_workflow(self, workflow, initdata = None, toplevel = os.getcwd(), statesetup = 'inmem', validate = True, schemadir = yadageschemas.schemadir):
+
+    def init_workflow(self,
+                      workflow = None,
+                      initdata = None,
+                      toplevel = os.getcwd(),
+                      workflow_json = None,
+                      statesetup = 'inmem',
+                      validate = True,
+                      schemadir = yadageschemas.schemadir):
         '''
         load workflow from spec and initialize it
-        
+
         :param workflow: the workflow spec source
         :param toplevel: base URI against which to resolve JSON references in the spec
-        :param initdata: initialization data for workflow 
+        :param initdata: initialization data for workflow
         '''
-        workflow_json = workflow_loader.workflow(
-            workflow,
-            toplevel=toplevel,
-            schemadir=schemadir,
-            validate=validate
-        )
+
+        if not workflow_json and not workflow:
+            raise RuntimeError('need to provide either direct workflow spec or source to load from')
+
+        if workflow_json:
+            if validate: workflow_loader.validate(workflow_json)
+        else:
+            workflow_json = workflow_loader.workflow(
+                workflow,
+                toplevel=toplevel,
+                schemadir=schemadir,
+                validate=validate
+            )
+
+
         with open('{}/yadage_template.json'.format(self.metadir), 'w') as f:
             json.dump(workflow_json, f)
         workflowobj = YadageWorkflow.createFromJSON(workflow_json, self.rootprovider)
@@ -143,7 +159,7 @@ class YadageSteering():
     def serialize(self):
         '''
         serialized workflow and backend states (stored in meta directory)
-        ''' 
+        '''
         serialize.snapshot(
             self.workflow,
             '{}/yadage_snapshot_workflow.json'.format(self.metadir),
@@ -157,4 +173,3 @@ class YadageSteering():
         import yadage.visualize as visualize
         visualize.write_prov_graph(self.metadir, self.workflow, vizformat='png')
         visualize.write_prov_graph(self.metadir, self.workflow, vizformat='pdf')
-
