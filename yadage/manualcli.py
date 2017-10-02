@@ -34,11 +34,6 @@ def init(workdir, workflow, initfiles, statesetup, dataopt, metadir, toplevel, p
     initdata = utils.getinit_data(initfiles, parameter)
     dataopts = utils.getdata_options(dataopt)
 
-    if inputarchive:
-        initdir = utils.prepare_workdir_from_archive(workdir, inputarchive)
-    else:
-        initdir = os.path.join(workdir,initdir)
-
     ys = YadageSteering()
     ys.prepare(workdir,
         metadir = metadir,
