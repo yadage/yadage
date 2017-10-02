@@ -26,11 +26,12 @@ def mancli():
 @click.option('-t', '--toplevel', default=os.getcwd())
 @click.option('-a', '--inputarchive', default=None)
 @click.option('-d','--initdir', default='init', help = "relative path (to workdir) to initialiation data directory")
+@click.option('--metadir', default=None, help = 'directory to store workflow metadata')
 @click.option('--parameter', '-p', multiple=True)
 @click.argument('workdir')
 @click.argument('workflow')
 @click.argument('initfiles', nargs = -1)
-def init(workdir, workflow, initfiles, statesetup, initdir, toplevel, parameter, inputarchive):
+def init(workdir, workflow, initfiles, statesetup, initdir, metadir, toplevel, parameter, inputarchive):
     initdata = utils.getinit_data(initfiles, parameter)
 
     if inputarchive:
@@ -39,7 +40,10 @@ def init(workdir, workflow, initfiles, statesetup, initdir, toplevel, parameter,
         initdir = os.path.join(workdir,initdir)
 
     ys = YadageSteering()
-    ys.prepare(workdir,dataopts = dict(initdir = initdir, initdata = initdata))
+    ys.prepare(workdir,
+        metadir = metadir,
+        dataopts = dict(initdir = initdir, initdata = initdata)
+    )
     ys.init_workflow(workflow, initdata, toplevel, statesetup = statesetup)
 
 
