@@ -12,7 +12,7 @@ install:
 - sudo apt-get install -y imagemagick
 - sudo apt-get install -y graphviz
 - sudo apt-get install -y python-logilab-common
-- pip install --process-dependency-links -e .[viz,develop,celery]
+- pip install -U --process-dependency-links .[viz,develop,celery]
 - pip install sphinx
 script:
 - pyflakes yadage
