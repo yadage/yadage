@@ -61,11 +61,13 @@ def click_print_submittable_nodes(controller):
 @click.option('-n','--name', default=None)
 @click.option('-s', '--statetype', default='filebacked:yadage_state.json')
 @click.option('-v', '--verbosity', default='ERROR')
-def apply(name, statetype, verbosity):
+@click.option('-b', '--backend', default='celery')
+def apply(name, statetype, verbosity, backend):
     logging.basicConfig(level=getattr(logging, verbosity))
 
-    model      = load_model_fromstring(statetype)
-    controller = PersistentController(model)
+    model   = load_model_fromstring(statetype)
+    backend =  utils.setupbackend_fromstring(backend)
+    controller = PersistentController(model,backend)
 
     if not name:
         click_print_applicable_stages(controller)
@@ -100,8 +102,8 @@ def submit(nodeid, allof, offset, statetype, verbosity, backend):
     logging.basicConfig(level=getattr(logging, verbosity))
 
     model   = load_model_fromstring(statetype)
-    controller = PersistentController(model)
-    controller.backend = utils.setupbackend_fromstring(backend)
+    backend =  utils.setupbackend_fromstring(backend)
+    controller = PersistentController(model,backend)
 
     if not (allof or nodeid):
         click_print_submittable_nodes(controller)
