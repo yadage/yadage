@@ -115,6 +115,9 @@ class YadageSteering():
         :param initdata: initialization data for workflow
         '''
 
+        if not self.rootprovider:
+            raise RuntimeError('need to setup root state provider first. run .prepare() first')
+
         if not workflow_json and not workflow:
             raise RuntimeError('need to provide either direct workflow spec or source to load from')
 

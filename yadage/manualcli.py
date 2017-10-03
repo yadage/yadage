@@ -24,23 +24,22 @@ def mancli():
 @mancli.command()
 @click.option('-s', '--statesetup', default='filebacked:yadage_state.json')
 @click.option('-t', '--toplevel', default=os.getcwd())
-@click.option('-a', '--inputarchive', default=None)
-@click.option('-d','--initdir', default='init', help = "relative path (to workdir) to initialiation data directory")
+@click.option('-d', '--dataopt', multiple=True, default=None, help = 'options for the workflow data state')
+@click.option('--metadir', default=None, help = 'directory to store workflow metadata')
 @click.option('--parameter', '-p', multiple=True)
 @click.argument('workdir')
 @click.argument('workflow')
 @click.argument('initfiles', nargs = -1)
-def init(workdir, workflow, initfiles, statesetup, initdir, toplevel, parameter, inputarchive):
+def init(workdir, workflow, initfiles, statesetup, dataopt, metadir, toplevel, parameter):
     initdata = utils.getinit_data(initfiles, parameter)
-
-    if inputarchive:
-        initdir = utils.prepare_workdir_from_archive(workdir, inputarchive)
-    else:
-        initdir = os.path.join(workdir,initdir)
+    dataopts = utils.getdata_options(dataopt)
 
     ys = YadageSteering()
-    ys.prepare(workdir,dataopts = dict(initdir = initdir, initdata = initdata))
-    ys.init_workflow(workflow, initdata, toplevel, statesetup = statesetup)
+    ys.prepare(workdir,
+        metadir = metadir,
+        dataopts = dataopts
+    )
+    ys.init_workflow(workflow, initdata = initdata, toplevel = toplevel, statesetup = statesetup)
 
 
 def click_print_applicable_stages(controller):
@@ -62,11 +61,13 @@ def click_print_submittable_nodes(controller):
 @click.option('-n','--name', default=None)
 @click.option('-s', '--statetype', default='filebacked:yadage_state.json')
 @click.option('-v', '--verbosity', default='ERROR')
-def apply(name, statetype, verbosity):
+@click.option('-b', '--backend', default='celery')
+def apply(name, statetype, verbosity, backend):
     logging.basicConfig(level=getattr(logging, verbosity))
 
-    model      = load_model_fromstring(statetype)
-    controller = PersistentController(model)
+    model   = load_model_fromstring(statetype)
+    backend =  utils.setupbackend_fromstring(backend)
+    controller = PersistentController(model,backend)
 
     if not name:
         click_print_applicable_stages(controller)
@@ -101,8 +102,8 @@ def submit(nodeid, allof, offset, statetype, verbosity, backend):
     logging.basicConfig(level=getattr(logging, verbosity))
 
     model   = load_model_fromstring(statetype)
-    controller = PersistentController(model)
-    controller.backend = utils.setupbackend_fromstring(backend)
+    backend =  utils.setupbackend_fromstring(backend)
+    controller = PersistentController(model,backend)
 
     if not (allof or nodeid):
         click_print_submittable_nodes(controller)
