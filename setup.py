@@ -57,6 +57,7 @@ setup(
         'pydotplus'
     ],
     'develop': [
+       'pyflakes',
        'pytest',
        'pytest-cov',
        'python-coveralls'
