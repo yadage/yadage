@@ -58,8 +58,8 @@ setup(
     ],
     'develop': [
        'pyflakes',
-       'pytest',
-       'pytest-cov',
+       'pytest>=3.2.0',
+       'pytest-cov>=2.5.1',
        'python-coveralls'
     ]
   },
