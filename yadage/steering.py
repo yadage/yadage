@@ -73,7 +73,7 @@ def main(dataarg,
             dataarg = dataarg,
             dataopts = dataopts,
             metadir = metadir,
-            accept_metadir = accept_metadir,            
+            accept_metadir = accept_metadir,
 
             statesetup = statesetup,
             updateinterval = updateinterval,

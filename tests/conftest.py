@@ -9,11 +9,11 @@ from yadage.utils import setupbackend_fromstring
 
 @pytest.fixture()
 def localfs_state(tmpdir):
-    return LocalFSState(tmpdir.dirname)
+    return LocalFSState([tmpdir.dirname])
 
 @pytest.fixture()
 def localfs_state_provider(tmpdir):
-    return LocalFSProvider(LocalFSState(tmpdir.dirname))
+    return LocalFSProvider(LocalFSState([tmpdir.dirname]), ensure = True)
 
 @pytest.fixture()
 def basic_packtivity_spec(tmpdir):

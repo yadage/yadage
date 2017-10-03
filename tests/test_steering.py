@@ -33,6 +33,12 @@ def test_incomplete_data(tmpdir):
     with pytest.raises(RuntimeError):
         ys.init_workflow()
 
+
+def test_missing_prepare(tmpdir):
+    ys = YadageSteering()
+    with pytest.raises(RuntimeError):
+        ys.init_workflow()
+
 def test_incomplete_data_ctx(tmpdir):
     workdir = os.path.join(str(tmpdir),'workdir')
     with pytest.raises(RuntimeError):
@@ -52,9 +58,10 @@ def test_directjson(tmpdir,multiproc_backend):
 
     assert tmpdir.join('workdir/hello_world/hello_world.txt').check()
 
-def test_invalid_directjson():
+def test_invalid_directjson(tmpdir):
     wflowjson = yadage.workflow_loader.workflow('workflow.yml','tests/testspecs/local-helloworld')
     ys = YadageSteering()
+    ys.prepare(os.path.join(str(tmpdir),'workdir'))
     with pytest.raises(jsonschema.exceptions.ValidationError):
         ys.init_workflow(workflow_json = {'invalid':'data'})
 
