@@ -7,6 +7,7 @@ def test_persistent_controller(tmpdir, local_helloworld_wflow_w_init, foreground
         filename = str(tmpdir.join('wflowstate')),
         initdata = local_helloworld_wflow_w_init
     )
+
     pers_ctrl = PersistentController(model, foregroundasync_backend)
 
 
@@ -16,12 +17,20 @@ def test_persistent_controller(tmpdir, local_helloworld_wflow_w_init, foreground
     pers_ctrl.apply_rules(pers_ctrl.applicable_rules())
 
     assert len(pers_ctrl.submittable_nodes()) == 1
-
     pers_ctrl.submit_nodes(pers_ctrl.submittable_nodes())
+
     assert set(pers_ctrl.applicable_rules()) == set([local_helloworld_wflow_w_init.view().getRule('hello_world').identifier])
 
     pers_ctrl.apply_rules(pers_ctrl.applicable_rules())
     assert len(pers_ctrl.submittable_nodes()) == 1
+    pers_ctrl.submit_nodes(pers_ctrl.submittable_nodes())
+
+
+
+    model = FileBackedModel(
+        filename = str(tmpdir.join('wflowstate')),
+    )
+    pers_ctrl = PersistentController(model, foregroundasync_backend)
 
     # assert pers_ctrl.adageobj.dag.getNode(pers_ctrl.submittable_nodes()[0]).task.state.json() == 11
     # pers_ctrl.submit_nodes(pers_ctrl.submittable_nodes())

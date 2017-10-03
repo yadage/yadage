@@ -58,9 +58,10 @@ def test_directjson(tmpdir,multiproc_backend):
 
     assert tmpdir.join('workdir/hello_world/hello_world.txt').check()
 
-def test_invalid_directjson():
+def test_invalid_directjson(tmpdir):
     wflowjson = yadage.workflow_loader.workflow('workflow.yml','tests/testspecs/local-helloworld')
     ys = YadageSteering()
+    ys.prepare(os.path.join(str(tmpdir),'workdir'))
     with pytest.raises(jsonschema.exceptions.ValidationError):
         ys.init_workflow(workflow_json = {'invalid':'data'})
 

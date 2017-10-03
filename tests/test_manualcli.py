@@ -12,7 +12,7 @@ def test_manual_helloworld(tmpdir):
 
     result = runner.invoke(yadage.manualcli.preview,['-s','filebacked:'+statefile,'/init'])
     assert result.exit_code == 0
- 
+
     result = runner.invoke(yadage.manualcli.apply,['-s','filebacked:'+statefile])
     assert result.exit_code == 0
 
@@ -21,7 +21,7 @@ def test_manual_helloworld(tmpdir):
 
     result = runner.invoke(yadage.manualcli.preview,['-s','filebacked:'+statefile,'/hello_world'])
     assert result.exit_code == 0
- 
+
     result = runner.invoke(yadage.manualcli.apply,['-s','filebacked:'+statefile,'-n','/hello_world'])
     assert result.exit_code == 0
 
@@ -45,7 +45,7 @@ def test_manual_dynamicglob(tmpdir):
         workdir,'workflow_frominit.yml',
         '-t','tests/testspecs/dynamic_glob',
         '-s','filebacked:'+statefile,
-        '-a','file://{}/tests/testspecs/dynamic_glob/inputs/three_files.zip'.format(os.path.abspath(os.curdir)),
+        '-d','inputarchive=file://{}/tests/testspecs/dynamic_glob/inputs/three_files.zip'.format(os.path.abspath(os.curdir)),
         '-p','inputfiles="*.txt"'
     ])
     assert result.exit_code == 0
