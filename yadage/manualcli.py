@@ -73,7 +73,7 @@ def apply(name, statetype, verbosity, backend):
         click_print_applicable_stages(controller)
         return
 
-    offset, name = name.split('/')
+    offset, name = name.rsplit('/',1)
     rule = controller.adageobj.view(offset).getRule(name)
     if not rule:
         click.secho('No such stage, pick one of the applicable below:', fg='red')
@@ -112,7 +112,7 @@ def submit(nodeid, allof, offset, statetype, verbosity, backend):
     if nodeid:
         nodes_to_submit = [nodeid] if nodeid in controller.submittable_nodes() else []
     if allof:
-        offset, name = allof.split('/')
+        offset, name = allof.rsplit('/',1)
         rule = controller.adageobj.view().getRule(name = name, offset = offset)
         if not rule:
             click.secho('stage not found!', fg = 'red')
@@ -243,7 +243,7 @@ def reset(statetype, name):
     model   = load_model_fromstring(statetype)
     controller = PersistentController(model)
 
-    offset, name = name.split('/')
+    offset, name = name.rsplit('/',1)
     rule = controller.adageobj.view(offset).getRule(name)
     if not rule:
         click.secho('state not found!', fg = 'red')

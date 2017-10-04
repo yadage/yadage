@@ -9,7 +9,7 @@ def rule_steps_indices(workflow):
         path = '/'.join([rule.offset, rule.rule.name])
         p = jsonpointer.JsonPointer(path)
         try:
-            steps_of_rule = [x['_nodeid'] for x in p.resolve(workflow.stepsbystage)]
+            steps_of_rule = [x['_nodeid'] for x in p.resolve(workflow.stepsbystage) if '_nodeid' in x]
         except jsonpointer.JsonPointerException:
             steps_of_rule = []
         rule_to_steps_index[rule.identifier] = steps_of_rule
