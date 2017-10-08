@@ -45,11 +45,13 @@ jobs:
       deploy:
         provider: script
         script:
+        - echo "deploying to docker"
+        - echo $(git rev-parse --short HEAD)
         - docker build --build-arg VCS_REF=`git rev-parse --short HEAD` -t "yadage/yadage:git-${TRAVIS_BRANCH}"
         - docker login -u $DOCKERLOGIN -p $DOCKERPW
         - docker push "yadage/yadage:git-${TRAVIS_BRANCH}"
-        on:
-          tags: true
+        #on:
+        #  tags: true
 env:
   global:
   - secure: CzMADlzpQj7vGLOhGYHa8KZXJs69r/e85tPFBAFGl3E+q4dmTazLp9eBgYXe/KW/fnSZIM6PQLFst3lUc0SyQJCyOnUNbja3NRTrKRyzNfYr+yDXIkTiAuS7uF241YuF8WXAjcOYlNLpazVHBu95xroa5k3L6wtKkMi2bIs47EEHYhoTsZcRD5LDXf3d+ULpSYfiydsX3H/4CFa1u79wD26BTv2Ba2vT7lwwzX6hsZv6qGWFbLW2vKRw6zasBqnPfQe4wOhUp0oXF7TusM2/9rTyD0OiwE4pWeJ/B88ZFnUL7pdxPVFhPWmV2vSFdRd7P417vTEGqErEqzTm4csQUbu3PtbLFXbsTfgmIsbJyVIaU1upSo3oxeK1fyje5Yx31zUzgrUzYlKzsMM815F76sfoIAyTBLzyFBWCnM5mK2X5he/y2e0lxuuxxrVgOh1WnabUA6xn1+F7XCBO1BOIjVzGTySYZoi/TcK+TwokI/ZgVKXUrrQGYfeRSXZOIghB6/YoUAwL8Ju2dQaI1g6BQzRtViZ/61PpXzUK2rLQd6dtgUC90WR9q+0lXJ/SPoF774QpUjJFgsy47mc3mdMVL+fiLl6mvuSHrfW0PlrO4mTMY17AV0xQ9E+l4uT2Q0VEnIeMU3Z0dKFa/RFuZTWW5kTGxeTput13cM4GJd6KyCk=
