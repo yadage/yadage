@@ -13,6 +13,8 @@ import copy
 import glob2 as glob
 import importlib
 
+from yadageschemas.utils import WithJsonRefEncoder
+
 from .tasks import outputReference
 
 try:
@@ -31,8 +33,8 @@ def set_backend(dag, backend, proxymaker):
     returns a suitable result proxy
 
     :param dag: the dag object (par of the workflow object)
-    :param backend: the backend to associate with the nodes 
-    :param proxymaker: function object with signature f(node) to create result proxies    
+    :param backend: the backend to associate with the nodes
+    :param proxymaker: function object with signature f(node) to create result proxies
     '''
     for nodename in dag.nodes():
         n = dag.getNode(nodename)
@@ -66,19 +68,6 @@ def get_id_fromjson(jsonobject, method = DEFAULT_ID_METHOD):
 def get_obj_id(obj_with_json_method, method = DEFAULT_ID_METHOD):
     return get_id_fromjson(obj_with_json_method.json(), method)
 
-
-class WithJsonRefEncoder(json.JSONEncoder):
-
-    def default(self, obj):
-        if isinstance(obj, jsonref.JsonRef):
-            return {k: v for k, v in obj.items()}
-        elif type(obj)==map:
-            return list(obj)
-        try:
-            super(WithJsonRefEncoder, self).default(obj)
-        except TypeError:
-            return obj.json()
-
 def process_refs(x, dag):
     if type(x) == dict:
         for k, v in x.items():
@@ -97,7 +86,7 @@ def leaf_iterator(jsonable):
     '''
     generator function to yield leafs items of a JSON-like structure alongside
     their position in the structure as determined by a JSONPointer.
-    
+
     :param jsonable: a json-serializable object
     :return: tuples (jsonpointer, leaf value)
     '''
@@ -210,4 +199,3 @@ def setupstateprovider(datatype,dataarg,dataopts):
         module = importlib.import_module(os.environ['PACKTIVITY_STATEPROVIDER'])
         return module.setup_provider(dataarg,dataopts)
     raise RuntimeError('unknown data type %s', datatype)
-
