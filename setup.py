@@ -50,7 +50,7 @@ setup(
        'redis'
     ],
     'viz': [
-        #manually adding extras of adage[extra] because of pip 
+        #manually adding extras of adage[extra] because of pip
         #issue https://github.com/pypa/pip/issues/3189
         'pydot2',
         'pygraphviz',
@@ -67,7 +67,6 @@ setup(
       'console_scripts': [
           'yadage-run=yadage.steering:main',
           'yadage-manual=yadage.manualcli:mancli',
-          'yadage-validate=yadage.validator_workflow:main',
           'yadage-util=yadage.utilcli:utilcli',
       ],
   },
