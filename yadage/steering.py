@@ -16,20 +16,21 @@ RC_SUCCEEDED = 0
 @click.argument('dataarg')
 @click.argument('workflow')
 @click.argument('initfiles', nargs=-1)
-@click.option('-p','--parameter', multiple=True, help = '<parameter name>=<yaml string> input parameter specifcations ')
 @click.option('-b', '--backend', default='multiproc:auto', help = 'packtivity backend string')
-@click.option('-t', '--toplevel', default=os.getcwd(), help = 'toplevel uri to be used to resolve workflow name and references from')
 @click.option('-c', '--cache', default='')
-@click.option('-v', '--verbosity', default='INFO', help = 'logging verbosity')
-@click.option('-i', '--loginterval', default=30, help = 'adage tracking interval in seconds')
-@click.option('-u', '--updateinterval', default=0.02, help = 'adage graph inspection interval in seconds')
-@click.option('-s', '--statesetup', default='inmem', help = 'wflow state spec')
 @click.option('-d', '--dataopt', multiple=True, default=None, help = 'options for the workflow data state')
-@click.option('--metadir', default=None, help = 'directory to store workflow metadata')
-@click.option('--schemadir', default=yadageschemas.schemadir, help = 'schema directory for workflow validation')
+@click.option('-e', '--schemadir', default=yadageschemas.schemadir, help = 'schema directory for workflow validation')
+@click.option('-i', '--loginterval', default=30, help = 'adage tracking interval in seconds')
+@click.option('-k', '--backendopt', multiple=True, default=None, help = 'options for the workflow data state')
+@click.option('-m', '--metadir', default=None, help = 'directory to store workflow metadata')
+@click.option('-p', '--parameter', multiple=True, help = '<parameter name>=<yaml string> input parameter specifcations ')
+@click.option('-s', '--statesetup', default='inmem', help = 'wflow state spec')
+@click.option('-t', '--toplevel', default=os.getcwd(), help = 'toplevel uri to be used to resolve workflow name and references from')
+@click.option('-u', '--updateinterval', default=0.02, help = 'adage graph inspection interval in seconds')
+@click.option('-v', '--verbosity', default='INFO', help = 'logging verbosity')
+@click.option('--accept-metadir/--no-accept-metadir', default=False)
 @click.option('--interactive/--not-interactive', default=False, help = 'en-/disable user interactio (sign-off graph extensions and packtivity submissions)')
 @click.option('--validate/--no-validate', default=True, help = 'en-/disable workflow spec validation')
-@click.option('--accept-metadir/--no-accept-metadir', default=False)
 @click.option('--visualize/--no-visualize', default=False, help = 'visualize workflow graph')
 def main(dataarg,
          workflow,
@@ -41,6 +42,7 @@ def main(dataarg,
          schemadir,
          backend,
          dataopt,
+         backendopt,
          interactive,
          metadir,
          parameter,
@@ -56,7 +58,8 @@ def main(dataarg,
 
     initdata = utils.getinit_data(initfiles, parameter)
     dataopts = utils.getdata_options(dataopt)
-    backend  = utils.setupbackend_fromstring(backend)
+    backendopts = utils.getbackend_options(backendopt)
+    backend  = utils.setupbackend_fromstring(backend,backendopts)
     rc = RC_FAILED
     try:
         steering_api.run_workflow(

@@ -20,9 +20,9 @@ class PacktivityBackend(federatedbackend.FederatedBackend):
     except for init nodes, which are resolvable trivially.
     '''
 
-    def __init__(self,  packtivity_backendstring = None, packtivity_backend = None):
+    def __init__(self,  packtivity_backendstring = None, packtivity_backend = None, backendopts = None):
         if packtivity_backendstring:
-            is_sync, backend = backend_from_string(packtivity_backendstring)
+            is_sync, backend = backend_from_string(packtivity_backendstring, backendopts = backendopts)
             assert not is_sync
         elif packtivity_backend:
             backend = packtivity_backend
