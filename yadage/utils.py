@@ -158,6 +158,13 @@ def getdata_options(dataopts):
         dataoptdict[key] = yaml.load(value)
     return dataoptdict
 
+def getbackend_options(dataopts):
+    dataoptdict = {}
+    for x in dataopts:
+        key, value = x.split('=')
+        dataoptdict[key] = yaml.load(value)
+    return dataoptdict
+
 def getinit_data(initfiles, parameters):
     '''
     get initial data from both a list of files and a list of 'pname=pvalue'
@@ -189,11 +196,17 @@ def prepare_workdir_from_archive(initdir, inputarchive):
     os.remove(localzipfile)
     return initdir
 
-def setupbackend_fromstring(backend, name = 'backendname'):
+def setupbackend_fromstring(backend, backendopts = None):
+    backendopts = backendopts or {}
+    log.info('setting up backend %s with opts %s', backend, backendopts)
     import yadage.backends.packtivitybackend as pb
-    return pb.PacktivityBackend(packtivity_backendstring = backend)
+    return pb.PacktivityBackend(
+            packtivity_backendstring = backend,
+            backendopts = backendopts
+    )
 
-def setupstateprovider(datatype,dataarg,dataopts):
+def setupstateprovider(datatype,dataarg,dataopts = None):
+    dataopts = dataopts or {}
     if datatype == 'fromenv':
         module = importlib.import_module(os.environ['PACKTIVITY_STATEPROVIDER'])
         return module.setup_provider(dataarg,dataopts)
