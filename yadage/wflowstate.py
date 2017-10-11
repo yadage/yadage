@@ -15,19 +15,23 @@ def make_deserializer(deserialization_opts = None):
         return workflow
     return deserializer
 
-def load_model_fromstring(modelidstring):
-    modeltype, modelid = modelidstring.split(':')
-    if modeltype == 'filebacked':
-        return FileBackedModel(
-            filename = modelid,
-            deserializer = make_deserializer()
+def load_model_fromstring(statestr,stateopts = None,initdata = None):
+    stateopts = stateopts or {}
+    if statestr.startswith('filebacked'):
+        filename = statestr.split(':')[-1]
+        stateopts.update(filename = filename)
+        model   = FileBackedModel(
+            initdata = initdata,
+            **stateopts
         )
-    if modeltype == 'mongo':
-        return MongoBackedModel(
-            deserializer = make_deserializer(),
-            wflowid = modelid
+        return model
+    elif statestr == 'mongo':
+        model = MongoBackedModel(
+            initdata = initdata,
+            **stateopts
         )
-    raise RuntimeError('unknown model string')
+        return model
+    raise RuntimeError('unknown state model %s', statestr)
 
 class MongoBackedModel(object):
     '''

@@ -2,7 +2,7 @@ import logging
 import contextlib
 
 from adage.wflowcontroller import BaseController
-from yadage.wflowstate import FileBackedModel, MongoBackedModel
+from yadage.wflowstate import load_model_fromstring
 from yadage.reset import reset_steps
 
 log = logging.getLogger(__name__)
@@ -16,22 +16,9 @@ def setup_controller_from_statestring(workflowobj, statestr = 'inmem', stateopts
     stateopts = stateopts or {}
     if statestr == 'inmem':
         return BaseController(workflowobj)
-    elif statestr.startswith('filebacked'):
-        filename = statestr.split(':')[-1]
-        model   = FileBackedModel(
-            filename = filename,
-            initdata = workflowobj,
-            **stateopts
-        )
-        return PersistentController(model)
-    elif statestr == 'mongo':
-        model = MongoBackedModel(
-            initdata = workflowobj,
-            **stateopts
-        )
-        return PersistentController(model)
     else:
-        raise RuntimeError('unknown workflow state spec %s', statestr)
+        model = load_model_fromstring(statestr,stateopts,workflowobj)
+        return PersistentController(model)
 
 class PersistentController(BaseController):
     '''
