@@ -10,7 +10,7 @@ def make_deserializer(deserialization_opts = None):
     def deserializer(jsondata):
         workflow = YadageWorkflow.fromJSON(
             jsondata,
-            load_proxy
+            lambda data: load_proxy(data,deserialization_opts)
         )
         return workflow
     return deserializer

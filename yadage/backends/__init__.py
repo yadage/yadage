@@ -10,7 +10,8 @@ class CachedProxy(object):
     def fromJSON(cls,data):
         return cls(load_proxy(data['proxy']), data['cacheid'])
 
-def load_proxy(data):
+def load_proxy(data,deserialization_opts = None):
+        deserialization_opts = deserialization_opts or {}
         import packtivity.backendutils
         import yadage.backends.packtivitybackend
         import yadage.backends.trivialbackend
