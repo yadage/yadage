@@ -7,7 +7,7 @@ from yadage.reset import reset_steps
 
 log = logging.getLogger(__name__)
 
-def setup_controller_from_statestring(workflowobj, statestr = 'inmem', stateopts = None):
+def setup_controller_from_statestring(workflowobj = None, statestr = 'inmem', stateopts = None):
     '''
     return controller instance based on state configuration. For
     transaction-based states, returns PersistentController, for in-

@@ -60,12 +60,14 @@ def click_print_submittable_nodes(controller):
 @mancli.command()
 @click.option('-n','--name', default=None)
 @click.option('-s', '--statetype', default='filebacked:yadage_state.json')
+@click.option('-l', '--modelopt', multiple=True, default=None, help = 'options for the workflow state models')
 @click.option('-v', '--verbosity', default='ERROR')
 @click.option('-b', '--backend', default='celery')
-def apply(name, statetype, verbosity, backend):
+def apply(name, statetype, verbosity, backend,modelopt):
     logging.basicConfig(level=getattr(logging, verbosity))
 
-    model   = load_model_fromstring(statetype)
+    stateopts = utils.options_from_eqdelimstring(modelopt)
+    model   = load_model_fromstring(statetype,stateopts)
     backend =  utils.setupbackend_fromstring(backend)
     controller = PersistentController(model,backend)
 
@@ -96,12 +98,14 @@ def apply(name, statetype, verbosity, backend):
 @click.option('-a','--allof', default=None)
 @click.option('-o', '--offset', default='')
 @click.option('-s', '--statetype', default='filebacked:yadage_state.json')
+@click.option('-l', '--modelopt', multiple=True, default=None, help = 'options for the workflow state models')
 @click.option('-v', '--verbosity', default='ERROR')
 @click.option('-b', '--backend', default='celery')
-def submit(nodeid, allof, offset, statetype, verbosity, backend):
+def submit(nodeid, allof, offset, statetype, modelopt, verbosity, backend):
     logging.basicConfig(level=getattr(logging, verbosity))
 
-    model   = load_model_fromstring(statetype)
+    stateopts = utils.options_from_eqdelimstring(modelopt)
+    model   = load_model_fromstring(statetype,stateopts)
     backend =  utils.setupbackend_fromstring(backend)
     controller = PersistentController(model,backend)
 
@@ -132,9 +136,11 @@ def submit(nodeid, allof, offset, statetype, verbosity, backend):
 
 @mancli.command()
 @click.option('-s', '--statetype', default='filebacked:yadage_state.json')
+@click.option('-l', '--modelopt', multiple=True, default=None, help = 'options for the workflow state models')
 @click.option('-b', '--backend', default='celery')
-def show(statetype, backend):
-    model      = load_model_fromstring(statetype)
+def show(statetype, backend, modelopt):
+    stateopts = utils.options_from_eqdelimstring(modelopt)
+    model   = load_model_fromstring(statetype,stateopts)
     controller = PersistentController(model)
     controller.backend = utils.setupbackend_fromstring(backend)
 
@@ -162,9 +168,11 @@ valid: {valid}
 @mancli.command()
 @click.argument('name')
 @click.option('-s', '--statetype', default='filebacked:yadage_state.json')
+@click.option('-l', '--modelopt', multiple=True, default=None, help = 'options for the workflow state models')
 @click.option('-b', '--backend', default='celery')
-def preview(name,statetype,backend):
-    model      = load_model_fromstring(statetype)
+def preview(name,statetype,backend,modelopt):
+    stateopts = utils.options_from_eqdelimstring(modelopt)
+    model   = load_model_fromstring(statetype,stateopts)
     controller = PersistentController(model)
     controller.backend = utils.setupbackend_fromstring(backend)
 
@@ -176,15 +184,17 @@ def preview(name,statetype,backend):
             '-> new node "{}" with {} upstream dependencies'.format(n['name'], len(n['parents'])))
 @mancli.command()
 @click.option('-s', '--statetype', default='filebacked:yadage_state.json')
+@click.option('-l', '--modelopt', multiple=True, default=None, help = 'options for the workflow state models')
 @click.option('-v', '--verbosity', default='ERROR')
 @click.option('-n', '--nsteps', default=-1, help = 'number of steps to process. use -1 to for no limit (will run workflow to completion)')
 @click.option('-u', '--update-interval', default=1)
 @click.option('-b', '--backend', default='celery')
-def step(statetype, verbosity, nsteps, update_interval,backend):
+def step(statetype, verbosity, nsteps, update_interval,backend,modelopt):
     logging.basicConfig(level=getattr(logging, verbosity))
 
     maxsteps = nsteps if nsteps >= 0 else None
-    model   = load_model_fromstring(statetype)
+    stateopts = utils.options_from_eqdelimstring(modelopt)
+    model   = load_model_fromstring(statetype,stateopts)
     backend = utils.setupbackend_fromstring(backend)
 
     extend, submit = interactive.interactive_deciders(idbased = True)
@@ -200,15 +210,17 @@ def step(statetype, verbosity, nsteps, update_interval,backend):
 
 @mancli.command()
 @click.option('-s', '--statetype', default='filebacked:yadage_state.json')
+@click.option('-l', '--modelopt', multiple=True, default=None, help = 'options for the workflow state models')
 @click.option('-v', '--verbosity', default='ERROR')
 @click.option('-o', '--offset')
 @click.option('-t', '--toplevel', default = os.curdir)
 @click.argument('workdir')
 @click.argument('workflow')
-def add(statetype, verbosity, offset, toplevel, workdir, workflow):
+def add(statetype, verbosity, offset, toplevel, workdir, workflow,modelopt):
     logging.basicConfig(level=getattr(logging, verbosity))
 
-    model      = load_model_fromstring(statetype)
+    stateopts = utils.options_from_eqdelimstring(modelopt)
+    model   = load_model_fromstring(statetype,stateopts)
     controller = PersistentController(model)
 
     workflow_json = workflow_loader.workflow(
@@ -224,12 +236,14 @@ def add(statetype, verbosity, offset, toplevel, workdir, workflow):
 
 @mancli.command()
 @click.option('-s', '--statetype', default='filebacked:yadage_state.json')
+@click.option('-l', '--modelopt', multiple=True, default=None, help = 'options for the workflow state models')
 @click.option('-f', '--fileformat', default='pdf')
 @click.option('-w', '--workdir', default=os.curdir)
-def visualize(statetype, workdir, fileformat):
+def visualize(statetype, workdir, fileformat,modelopt):
     from .visualize import write_prov_graph
 
-    model      = load_model_fromstring(statetype)
+    stateopts = utils.options_from_eqdelimstring(modelopt)
+    model   = load_model_fromstring(statetype,stateopts)
     controller = PersistentController(model)
 
     write_prov_graph(workdir, controller.adageobj, fileformat)
@@ -239,8 +253,10 @@ def visualize(statetype, workdir, fileformat):
 @mancli.command()
 @click.argument('name')
 @click.option('-s', '--statetype', default='filebacked:yadage_state.json')
-def reset(statetype, name):
-    model   = load_model_fromstring(statetype)
+@click.option('-l', '--modelopt', multiple=True, default=None, help = 'options for the workflow state models')
+def reset(statetype, name,modelopt):
+    stateopts = utils.options_from_eqdelimstring(modelopt)
+    model   = load_model_fromstring(statetype,stateopts)
     controller = PersistentController(model)
 
     offset, name = name.rsplit('/',1)
