@@ -7,24 +7,27 @@ from yadage.reset import reset_steps
 
 log = logging.getLogger(__name__)
 
-def setup_controller_from_statestring(workflowobj, statestr = 'inmem'):
+def setup_controller_from_statestring(workflowobj, statestr = 'inmem', stateopts = None):
     '''
     return controller instance based on state configuration. For
     transaction-based states, returns PersistentController, for in-
     memory states returns in BaseController
     '''
+    stateopts = stateopts or {}
     if statestr == 'inmem':
         return BaseController(workflowobj)
     elif statestr.startswith('filebacked'):
         filename = statestr.split(':')[-1]
         model   = FileBackedModel(
             filename = filename,
-            initdata = workflowobj
+            initdata = workflowobj,
+            **stateopts
         )
         return PersistentController(model)
     elif statestr == 'mongo':
         model = MongoBackedModel(
-            initdata = workflowobj
+            initdata = workflowobj,
+            **stateopts
         )
         return PersistentController(model)
     else:
@@ -38,7 +41,7 @@ class PersistentController(BaseController):
         '''
         :param model: the model on whih the controller will operate
         :param backend: the backend to against which to check workflow state.
-        
+
         :return: the controller instance
         '''
         self.model = model

@@ -151,19 +151,12 @@ def discover_initfiles(initdata,sourcedir):
             pointer.set(initdata,globresult)
     return initdata
 
-def getdata_options(dataopts):
-    dataoptdict = {}
-    for x in dataopts:
+def options_from_eqdelimstring(opts):
+    options = {}
+    for x in opts:
         key, value = x.split('=')
-        dataoptdict[key] = yaml.load(value)
-    return dataoptdict
-
-def getbackend_options(dataopts):
-    dataoptdict = {}
-    for x in dataopts:
-        key, value = x.split('=')
-        dataoptdict[key] = yaml.load(value)
-    return dataoptdict
+        options[key] = yaml.load(value)
+    return options
 
 def getinit_data(initfiles, parameters):
     '''
@@ -177,9 +170,7 @@ def getinit_data(initfiles, parameters):
         log.info('loading initialization data from file %s',initfile)
         initdata.update(**yaml.load(open(initfile)))
 
-    for x in parameters:
-        key, value = x.split('=')
-        initdata[key] = yaml.load(value)
+    initdata.update(**options_from_eqdelimstring(parameters))
     return initdata
 
 def prepare_workdir_from_archive(initdir, inputarchive):

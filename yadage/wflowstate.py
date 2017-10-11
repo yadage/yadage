@@ -5,23 +5,26 @@ from .backends import load_proxy
 
 log = logging.getLogger(__name__)
 
-def load_model(jsondata):
-    workflow = YadageWorkflow.fromJSON(
-        jsondata,
-        load_proxy
-    )
-    return workflow
+
+def make_deserializer(deserialization_opts = None):
+    def deserializer(jsondata):
+        workflow = YadageWorkflow.fromJSON(
+            jsondata,
+            load_proxy
+        )
+        return workflow
+    return deserializer
 
 def load_model_fromstring(modelidstring):
     modeltype, modelid = modelidstring.split(':')
     if modeltype == 'filebacked':
         return FileBackedModel(
             filename = modelid,
-            deserializer = load_model
+            deserializer = make_deserializer()
         )
     if modeltype == 'mongo':
         return MongoBackedModel(
-            deserializer = load_model,
+            deserializer = make_deserializer(),
             wflowid = modelid
         )
     raise RuntimeError('unknown model string')
@@ -30,10 +33,10 @@ class MongoBackedModel(object):
     '''
     model that holds the workflow state in a MongoDB database.
     '''
-    def __init__(self, deserializer = load_model, connect_string = 'mongodb://localhost:27017/', initdata = None, wflowid = None):
+    def __init__(self, deserializer = None, connect_string = 'mongodb://localhost:27017/', initdata = None, wflowid = None):
         from pymongo import MongoClient
         from bson.objectid import ObjectId
-        self.deserializer = deserializer
+        self.deserializer = deserializer or make_deserializer()
         self.client = MongoClient(connect_string)
         self.db = self.client.wflowdb
         self.collection = self.db.workflows
@@ -62,9 +65,9 @@ class FileBackedModel(object):
     '''
     model that holds data on disk in a JSON file
     '''
-    def __init__(self, filename, deserializer = load_model, initdata = None):
+    def __init__(self, filename, deserializer = None, initdata = None):
         self.filename = filename
-        self.deserializer = deserializer
+        self.deserializer = deserializer or make_deserializer()
         if initdata:
             self.commit(initdata)
 
@@ -81,4 +84,3 @@ class FileBackedModel(object):
         '''
         with open(self.filename) as statefile:
             return self.deserializer(json.load(statefile))
-

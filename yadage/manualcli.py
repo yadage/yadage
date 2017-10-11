@@ -32,7 +32,7 @@ def mancli():
 @click.argument('initfiles', nargs = -1)
 def init(workdir, workflow, initfiles, statesetup, dataopt, metadir, toplevel, parameter):
     initdata = utils.getinit_data(initfiles, parameter)
-    dataopts = utils.getdata_options(dataopt)
+    dataopts = utils.options_from_eqdelimstring(dataopt)
 
     ys = YadageSteering()
     ys.prepare(workdir,

@@ -105,6 +105,7 @@ class YadageSteering():
                       toplevel = os.getcwd(),
                       workflow_json = None,
                       statesetup = 'inmem',
+                      stateopts = None,
                       validate = True,
                       schemadir = yadageschemas.schemadir):
         '''
@@ -140,7 +141,9 @@ class YadageSteering():
             workflowobj.view().init(initdata)
         else:
             log.info('no initialization data')
-        self.controller = setup_controller_from_statestring(workflowobj, statestr = statesetup)
+        self.controller = setup_controller_from_statestring(
+                workflowobj, statestr = statesetup, stateopts = stateopts
+        )
 
     def adage_argument(self,**kwargs):
         '''
