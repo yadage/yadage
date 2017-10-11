@@ -2,33 +2,23 @@ import logging
 import contextlib
 
 from adage.wflowcontroller import BaseController
-from yadage.wflowstate import FileBackedModel, MongoBackedModel
+from yadage.wflowstate import load_model_fromstring
 from yadage.reset import reset_steps
 
 log = logging.getLogger(__name__)
 
-def setup_controller_from_statestring(workflowobj, statestr = 'inmem'):
+def setup_controller_from_statestring(workflowobj = None, statestr = 'inmem', stateopts = None):
     '''
     return controller instance based on state configuration. For
     transaction-based states, returns PersistentController, for in-
     memory states returns in BaseController
     '''
+    stateopts = stateopts or {}
     if statestr == 'inmem':
         return BaseController(workflowobj)
-    elif statestr.startswith('filebacked'):
-        filename = statestr.split(':')[-1]
-        model   = FileBackedModel(
-            filename = filename,
-            initdata = workflowobj
-        )
-        return PersistentController(model)
-    elif statestr == 'mongo':
-        model = MongoBackedModel(
-            initdata = workflowobj
-        )
-        return PersistentController(model)
     else:
-        raise RuntimeError('unknown workflow state spec %s', statestr)
+        model = load_model_fromstring(statestr,stateopts,workflowobj)
+        return PersistentController(model)
 
 class PersistentController(BaseController):
     '''
@@ -38,7 +28,7 @@ class PersistentController(BaseController):
         '''
         :param model: the model on whih the controller will operate
         :param backend: the backend to against which to check workflow state.
-        
+
         :return: the controller instance
         '''
         self.model = model

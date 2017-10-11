@@ -5,35 +5,42 @@ from .backends import load_proxy
 
 log = logging.getLogger(__name__)
 
-def load_model(jsondata):
-    workflow = YadageWorkflow.fromJSON(
-        jsondata,
-        load_proxy
-    )
-    return workflow
 
-def load_model_fromstring(modelidstring):
-    modeltype, modelid = modelidstring.split(':')
-    if modeltype == 'filebacked':
-        return FileBackedModel(
-            filename = modelid,
-            deserializer = load_model
+def make_deserializer(deserialization_opts = None):
+    def deserializer(jsondata):
+        workflow = YadageWorkflow.fromJSON(
+            jsondata,
+            lambda data: load_proxy(data,deserialization_opts)
         )
-    if modeltype == 'mongo':
-        return MongoBackedModel(
-            deserializer = load_model,
-            wflowid = modelid
+        return workflow
+    return deserializer
+
+def load_model_fromstring(statestr,stateopts = None,initdata = None):
+    stateopts = stateopts or {}
+    if statestr.startswith('filebacked'):
+        filename = statestr.split(':')[-1]
+        model   = FileBackedModel(
+            filename = filename,
+            initdata = initdata,
+            deserializer = make_deserializer(stateopts)
         )
-    raise RuntimeError('unknown model string')
+        return model
+    elif statestr == 'mongo':
+        model = MongoBackedModel(
+            initdata = initdata,
+            deserializer = make_deserializer(stateopts)
+        )
+        return model
+    raise RuntimeError('unknown state model %s', statestr)
 
 class MongoBackedModel(object):
     '''
     model that holds the workflow state in a MongoDB database.
     '''
-    def __init__(self, deserializer = load_model, connect_string = 'mongodb://localhost:27017/', initdata = None, wflowid = None):
+    def __init__(self, deserializer = None, connect_string = 'mongodb://localhost:27017/', initdata = None, wflowid = None):
         from pymongo import MongoClient
         from bson.objectid import ObjectId
-        self.deserializer = deserializer
+        self.deserializer = deserializer or make_deserializer()
         self.client = MongoClient(connect_string)
         self.db = self.client.wflowdb
         self.collection = self.db.workflows
@@ -62,9 +69,9 @@ class FileBackedModel(object):
     '''
     model that holds data on disk in a JSON file
     '''
-    def __init__(self, filename, deserializer = load_model, initdata = None):
+    def __init__(self, filename, deserializer = None, initdata = None):
         self.filename = filename
-        self.deserializer = deserializer
+        self.deserializer = deserializer or make_deserializer()
         if initdata:
             self.commit(initdata)
 
@@ -81,4 +88,3 @@ class FileBackedModel(object):
         '''
         with open(self.filename) as statefile:
             return self.deserializer(json.load(statefile))
-

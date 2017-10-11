@@ -36,7 +36,8 @@ def steering_ctx(
     validate=True,
     visualize=True,
     accept_metadir = False,
-    statesetup = 'inmem'):
+    statesetup = 'inmem',
+    stateopts = None):
     '''
     context manage around yadage steering object.
 
@@ -65,6 +66,7 @@ def steering_ctx(
     ys.init_workflow(
         initdata = initdata,
         statesetup = statesetup,
+        stateopts = stateopts,
         **wflow_kwargs
     )
 
