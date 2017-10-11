@@ -18,7 +18,7 @@ def setupcache_fromstring(configstring):
 
     - checksums:<path to cache file (JSON)>
 
-    :param configstring: the configuration string 
+    :param configstring: the configuration string
     :return: a cache object
     '''
 
@@ -78,7 +78,7 @@ class CachedBackend(federatedbackend.FederatedBackend):
 
 class CacheBuilder(object):
     '''
-    Cache base class. Implementations need to provide cachevalid and 
+    Cache base class. Implementations need to provide cachevalid and
     generate_validation_data methods
     '''
     def __init__(self, cachefile):
@@ -155,7 +155,7 @@ class CacheBuilder(object):
 
     def cachevalid(self, cacheid):
         raise NotImplementedError
-        
+
     def generate_validation_data(self,cacheid):
         raise NotImplementedError
 

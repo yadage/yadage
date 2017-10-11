@@ -19,16 +19,16 @@ def load_model_fromstring(statestr,stateopts = None,initdata = None):
     stateopts = stateopts or {}
     if statestr.startswith('filebacked'):
         filename = statestr.split(':')[-1]
-        stateopts.update(filename = filename)
         model   = FileBackedModel(
+            filename = filename,
             initdata = initdata,
-            **stateopts
+            deserializer = make_deserializer(stateopts)
         )
         return model
     elif statestr == 'mongo':
         model = MongoBackedModel(
             initdata = initdata,
-            **stateopts
+            deserializer = make_deserializer(stateopts)
         )
         return model
     raise RuntimeError('unknown state model %s', statestr)
