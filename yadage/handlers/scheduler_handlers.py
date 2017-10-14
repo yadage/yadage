@@ -251,15 +251,14 @@ def process_jsonlike(jsonlike, jq_obj_selector, callback):
         wflowref.set(jsonlike,value)
     return jsonlike
 
+def process_noderef(leafobj,resultscript,view):
+    n = view.dag.getNode(leafobj['_nodeid'])
+    return jq.jq(resultscript).transform(pointerize(n.result,False,n.identifier), multiple_output = True)
+
 def process_wflowref(leafobj,view):
     nodeselector, resultscript = leafobj['$wflowref']
     nodestruct = jq.jq(nodeselector).transform(view.steps, multiple_output = True)
-    noderefs = [jsonpointer.JsonPointer.from_parts(x) for x in jq.jq('paths(if objects then has("_nodeid") else false end)').transform(nodestruct, multiple_output = True)]
-    for nr in noderefs:
-        n = view.dag.getNode(nr.resolve(nodestruct)['_nodeid'])
-        r = jq.jq(resultscript).transform(pointerize(n.result,False,n.identifier), multiple_output = True)
-        nr.set(nodestruct,r)
-    return nodestruct
+    return process_jsonlike(nodestruct, 'has("_nodeid")', lambda x: process_noderef(x, resultscript, view))
 
 def process_wflowpointer(leafobj):
     p = leafobj['$wflowpointer']
