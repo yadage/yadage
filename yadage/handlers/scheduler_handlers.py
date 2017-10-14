@@ -10,7 +10,7 @@ import yadage.handlers.utils as utils
 from .expression_handlers import handlers as exprhandlers
 from ..tasks import packtivity_task, init_task, outputReference
 from ..stages import JsonStage
-from ..utils import leaf_iterator_jsonlike, pointerize
+from ..utils import leaf_iterator_jsonlike, pointerize, process_jsonlike
 
 
 log = logging.getLogger(__name__)
@@ -239,17 +239,6 @@ def multistep_stage(stage, spec):
         step = step_or_init(singlename,spec,stage.state_provider)
         finalized = finalize_input(stage.view, step, pars)
         addStepOrWorkflow(singlename, stage, step.s(**finalized), spec)
-
-
-def process_jsonlike(jsonlike, jq_obj_selector, callback):
-    wflowrefs = [jsonpointer.JsonPointer.from_parts(x) for x in jq.jq(
-            'paths(if objects then {} else false end)'.format(jq_obj_selector)
-            ).transform( jsonlike, multiple_output = True
-    )]
-    for wflowref in wflowrefs:
-        value = callback(wflowref.resolve(jsonlike))
-        wflowref.set(jsonlike,value)
-    return jsonlike
 
 def process_noderef(leafobj,resultscript,view):
     n = view.dag.getNode(leafobj['_nodeid'])
