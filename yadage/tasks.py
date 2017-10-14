@@ -2,25 +2,11 @@ import packtivity
 import logging
 import jsonpointer
 from packtivity.statecontexts import load_state
+from .utils import leaf_iterator_jsonlike, outputReference
 
 log = logging.getLogger(__name__)
 
-class outputReference(object):
 
-    def __init__(self, stepid, pointer):
-        self.stepid = stepid
-        self.pointer = pointer
-
-    #(de-)serialization
-    @classmethod
-    def fromJSON(cls, data):
-        return cls(data['stepid'], jsonpointer.JsonPointer(data['pointer_path']))
-
-    def json(self):
-        return {
-            'stepid': self.stepid,
-            'pointer_path': self.pointer.path
-        }
 
 class TaskBase(object):
     def __init__(self, **metadata):
@@ -31,6 +17,9 @@ class TaskBase(object):
 
     def used_input(self, reference):
         self.inputs += [reference]
+
+    def used_inputs(self, references):
+        for r in references: self.used_input(r)
 
     #(de-)serialization
     def json(self):
@@ -76,7 +65,6 @@ class packtivity_task(TaskBase):
     '''
     packtivity task
     '''
-
     def __init__(self, name, spec, state):
         super(packtivity_task, self).__init__(name = name)
         self.spec = spec
@@ -84,6 +72,8 @@ class packtivity_task(TaskBase):
 
     def s(self, **parameters):
         self.parameters.update(**parameters)
+        for leaf_pointer, leaf_value in leaf_iterator_jsonlike(self.parameters):
+            leaf_pointer.set(self.parameters,self.state.contextualize_data(leaf_value))
         # attempt to prepublish output data merely from inputs
         # will still be None if not possible
         self.prepublished = packtivity.prepublish_default(self.spec, self.parameters, self.state)
