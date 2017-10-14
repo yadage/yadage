@@ -6,11 +6,10 @@ stages:
     parameters:
       parone: {stages: init, output: input_array, unwrap: true}
       outputfile: '{workdir}/hello_world.txt'
+    batchsize: 3
     cases:
-    - if: .parone==0 or .parone==3
+    - if: (.parone|length) > 1
       step: {$ref: 'steps.yml#/hello'}
-    - if: 0 < .parone and .parone < 3
-      step: {$ref: 'steps.yml#/bye'}
     scatter:
       method: 'zip'
       parameters: [parone]
