@@ -31,7 +31,7 @@ def select_parameter(wflowview, parameter):
     :param wflowview: the workflow view on which to evaluete possible value expressions
     :param parameter: either a non-dict value or a JSON-like dict for a
                       supported value expression
-    :return: the parameter value 
+    :return: the parameter value
     '''
     if type(parameter) is not dict:
         value = parameter
@@ -63,7 +63,7 @@ def finalize_value(wflowview, step, value, state):
 
 def finalize_input(wflowview, step, jsondata):
     '''
-    evaluate final values of step parameters by resolving 
+    evaluate final values of step parameters by resolving
     references to a upstream output and contextualizing stateful
     parameters. Also tracks usage of upstream references for the step
 
@@ -100,7 +100,7 @@ def step_or_init(name, spec, state_provider):
 def addStepOrWorkflow(name, stage, step, spec):
     '''
     adds a step or a sub-workflow belonging to a stage this stage init step to the current workflow view
-    
+
     :param str name: the name of the step or sub-workflow
     :param stage: the stage from which to use state context and workflow view
     :param step: either a packtivity_task (for normal workflow steps) initstep object (for sub-workflows)
@@ -129,10 +129,10 @@ def singlestep_stage(stage, spec):
     '''
     a simple state that adds a single step/workflow. The node is attached
     to the DAG based on used upstream outputs
-    
-    :param stage: common stage parent object 
+
+    :param stage: common stage parent object
     :param spec: stage JSON-like spec
-    
+
     :return: None
     '''
     log.debug('scheduling singlestep stage with spec:\n%s', spec)
@@ -158,7 +158,7 @@ def partition(alist, partitionsize):
     if partitionsize > total_len:
         partitionsize = total_len
     assert partitionsize <= total_len
-    end = 0 
+    end = 0
     partitioned = []
     for k in range(partitionsize):
         begin = end
@@ -224,9 +224,9 @@ def multistep_stage(stage, spec):
 
     Nodes are attached to the DAG based on used upstream inputs
 
-    :param stage: common stage parent object 
+    :param stage: common stage parent object
     :param spec: stage JSON-like spec
-    
+
     :return: None
     '''
     log.debug('scheduling multistep stage with spec:\n%s', spec)
@@ -241,43 +241,47 @@ def multistep_stage(stage, spec):
         addStepOrWorkflow(singlename, stage, step.s(**finalized), spec)
 
 
+def process_jsonlike(jsonlike, jq_obj_selector, callback):
+    wflowrefs = [jsonpointer.JsonPointer.from_parts(x) for x in jq.jq(
+            'paths(if objects then {} else false end)'.format(jq_obj_selector)
+            ).transform( jsonlike, multiple_output = True
+    )]
+    for wflowref in wflowrefs:
+        value = callback(wflowref.resolve(jsonlike))
+        wflowref.set(jsonlike,value)
+    return jsonlike
+
+def process_wflowref(leafobj,view):
+    nodeselector, resultscript = leafobj['$wflowref']
+    nodestruct = jq.jq(nodeselector).transform(view.steps, multiple_output = True)
+    noderefs = [jsonpointer.JsonPointer.from_parts(x) for x in jq.jq('paths(if objects then has("_nodeid") else false end)').transform(nodestruct, multiple_output = True)]
+    for nr in noderefs:
+        n = view.dag.getNode(nr.resolve(nodestruct)['_nodeid'])
+        r = jq.jq(resultscript).transform(pointerize(n.result,False,n.identifier), multiple_output = True)
+        nr.set(nodestruct,r)
+    return nodestruct
+
+def process_wflowpointer(leafobj):
+    p = leafobj['$wflowpointer']
+    return outputReference(p['step'],jsonpointer.JsonPointer(p['result']))
+
 @scheduler('jq-stage')
 def jq_stage(stage, spec):
     '''
-
-    :param stage: common stage parent object 
+    :param stage: common stage parent object
     :param spec: stage JSON-like spec
-    
     :return: None
     '''
-
     binds = spec['bindings']
-    wflowrefs = [jsonpointer.JsonPointer.from_parts(x) for x in jq.jq('paths(if objects then has("$wflowref") else false end)').transform(binds, multiple_output = True)]
-
-    for wflowref in wflowrefs:
-        nodeselector, resultscript = wflowref.resolve(binds)['$wflowref']
-        view = stage.view
-        nodestruct = jq.jq(nodeselector).transform(view.steps, multiple_output = True)
-
-        noderefs = [jsonpointer.JsonPointer.from_parts(x) for x in jq.jq('paths(if objects then has("_nodeid") else false end)').transform(nodestruct, multiple_output = True)]
-        for nr in noderefs:
-            n = view.dag.getNode(nr.resolve(nodestruct)['_nodeid'])
-            r = jq.jq(resultscript).transform(pointerize(n.result,False,n.identifier), multiple_output = True)
-            nr.set(nodestruct,r)
-        wflowref.set(binds,nodestruct)
-
+    binds = process_jsonlike(binds,'has("$wflowref")',lambda x: process_wflowref(x,stage.view))
     log.info('transforming binds: %s', binds)
     stagescript = spec['stepscript']
-    stageres = jq.jq(stagescript).transform(binds,multiple_output = False)
+    singlesteps = jq.jq(stagescript).transform(binds,multiple_output = False)
 
-    singlesteppars = []
-    for forstep in stageres:
-        wflowpointers = [jsonpointer.JsonPointer.from_parts(x) for x in jq.jq('paths(if objects then has("$wflowpointer") else false end)').transform(forstep, multiple_output = True)]
-        for wflowptr in wflowpointers:
-            pointer =  wflowptr.resolve(forstep)['$wflowpointer']
-            wflowptr.set(forstep,outputReference(pointer['step'],jsonpointer.JsonPointer(pointer['result'])))
-        singlesteppars.append(forstep)
-        log.info(forstep)
+    singlesteppars = map(
+        lambda x: process_jsonlike(x, 'has("$wflowpointer")',process_wflowpointer),
+        singlesteps
+    )
 
     postscript = spec['postscript']
     for i, pars in enumerate(singlesteppars):
@@ -290,5 +294,3 @@ def jq_stage(stage, spec):
 
         log.info('finalized to: %s',after_post)
         addStepOrWorkflow(singlename, stage, step.s(**after_post), spec)
-
-
