@@ -45,7 +45,7 @@ class init_task(TaskBase):
     '''
     initialization task
     '''
- 
+
     def __init__(self, name, initdata=None):
         super(init_task, self).__init__(name = name)
         self.prepublished = None

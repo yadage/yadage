@@ -38,7 +38,7 @@ def combine_outputs(outputs, flatten, unwrapsingle):
     non-list values will just be combined into a list while lists will be concatenated
     optinally we can return the sole element of a single-value list (argument: unwrapsingle)
 
-    :param outputs: 
+    :param outputs:
 
     '''
     combined = []
@@ -60,10 +60,10 @@ def select_steps(stageview, query):
     '''
     selects the step objects from the stage view based on a query and converts them to simple
     dictionaries with id,result keys
-    
+
     :param stageview: the view object on which to perform the query
     :param query: a slection query (JSONPath expression)
-    
+
     :return: list of {id: xx, result: yy} dictionaries
     '''
     return [{'id': s.identifier, 'result': s.result} for s in stageview.getSteps(query)]
@@ -78,7 +78,7 @@ def resolve_reference(stageview, selection):
     '''
     :param stageview: the workflow view objct
     :param selection: the JSON-like selection dictionary
-    :return : 
+    :return :
     resolves a output reference by selecting the stage and stage outputs
     '''
     log.debug('resolving selection %s', selection)
@@ -98,4 +98,4 @@ def resolve_reference(stageview, selection):
 
 @scheduler('jq-stage-output-selector')
 def resolve_jq_reference(stageview, selection):
-    return 
+    return
