@@ -1,6 +1,5 @@
 import packtivity
 import logging
-import jsonpointer
 from packtivity.statecontexts import load_state
 from .utils import leaf_iterator_jsonlike, outputReference
 
