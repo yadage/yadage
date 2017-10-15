@@ -146,6 +146,4 @@ def createOffsetMeta(offset, bookkeeping):
     view = bookkeeping
     for x in pointer.parts:
         view = view.setdefault(x,{})
-    scoped = pointer.resolve(bookkeeping)
-    if '_meta' not in scoped:
-        scoped['_meta'] = {'stages': [], 'steps': []}
+    pointer.resolve(bookkeeping).setdefault('_meta',{'stages': [], 'steps': []})
