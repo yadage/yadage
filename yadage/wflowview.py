@@ -145,9 +145,7 @@ def createOffsetMeta(offset, bookkeeping):
     pointer = JsonPointer(offset)
     view = bookkeeping
     for x in pointer.parts:
-        if x not in view:
-            view[x] = {}
-        view = view[x]
+        view = view.setdefault(x,{})
     scoped = pointer.resolve(bookkeeping)
     if '_meta' not in scoped:
         scoped['_meta'] = {'stages': [], 'steps': []}
