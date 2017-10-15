@@ -1,0 +1,33 @@
+hello:
+  process:
+    process_type: 'string-interpolated-cmd'
+    cmd: 'echo HELLO {parone} | tee {outputfile}'
+  publisher:
+    publisher_type: 'frompar-pub'
+    outputmap:
+      outputfile: outputfile
+  environment:
+    environment_type: 'localproc-env'
+
+
+bye:
+  process:
+    process_type: 'string-interpolated-cmd'
+    cmd: 'echo bye {parone} | tee {outputfile}'
+  publisher:
+    publisher_type: 'frompar-pub'
+    outputmap:
+      outputfile: outputfile
+  environment:
+    environment_type: 'localproc-env'
+
+fallback:
+  process:
+    process_type: 'string-interpolated-cmd'
+    cmd: 'echo fallback {parone} | tee {outputfile}'
+  publisher:
+    publisher_type: 'frompar-pub'
+    outputmap:
+      outputfile: outputfile
+  environment:
+    environment_type: 'localproc-env'

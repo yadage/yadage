@@ -74,7 +74,7 @@ class ViewStageBase(object):
     base class for workflow stages operating on workflow views, that may
     expose only a partial slice of an overall workflow.
     The class also provides common methods to ease modifying the workflow.
-    
+
     Implementations are required to provide
     * a ready() method to implement the predicate method
     * a schedule() method that is called upon apply
@@ -107,9 +107,8 @@ class ViewStageBase(object):
                 pass
         return self.view.addStep(step, stage = self.name, depends_on=dependencies)
 
-    def addWorkflow(self, rules, initstep):
-        self.view.addWorkflow(rules, initstep=initstep, stage=self.name)
-
+    def addWorkflow(self, rules, initstep, isolate = True):
+        self.view.addWorkflow(rules, initstep=initstep, stage=self.name if isolate else None)
     #(de-)serialization
     def json(self):
         return {

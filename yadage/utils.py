@@ -14,7 +14,22 @@ import importlib
 
 from yadageschemas.utils import WithJsonRefEncoder
 
-from .tasks import outputReference
+class outputReference(object):
+
+    def __init__(self, stepid, pointer):
+        self.stepid = stepid
+        self.pointer = pointer
+
+    #(de-)serialization
+    @classmethod
+    def fromJSON(cls, data):
+        return cls(data['stepid'], jsonpointer.JsonPointer(data['pointer_path']))
+
+    def json(self):
+        return {
+            'stepid': self.stepid,
+            'pointer_path': self.pointer.path
+        }
 
 try:
     # For Python 3.0 and later
