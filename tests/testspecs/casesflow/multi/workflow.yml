@@ -1,0 +1,15 @@
+stages:
+- name: hello_world
+  dependencies: [init]
+  scheduler:
+    scheduler_type: multistep-stage
+    parameters:
+      parone: {stages: init, output: input_array, unwrap: true}
+      outputfile: '{workdir}/hello_world.txt'
+    batchsize: 3
+    cases:
+    - if: (.parone|length) > 1
+      step: {$ref: 'steps.yml#/hello'}
+    scatter:
+      method: 'zip'
+      parameters: [parone]

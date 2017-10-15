@@ -8,9 +8,9 @@ import jsonpointer
 
 import yadage.handlers.utils as utils
 from .expression_handlers import handlers as exprhandlers
-from ..tasks import packtivity_task, init_task, outputReference
+from ..tasks import packtivity_task, init_task
 from ..stages import JsonStage
-from ..utils import leaf_iterator_jsonlike, pointerize
+from ..utils import leaf_iterator_jsonlike, pointerize, outputReference
 
 
 log = logging.getLogger(__name__)
@@ -31,7 +31,7 @@ def select_parameter(wflowview, parameter):
     :param wflowview: the workflow view on which to evaluete possible value expressions
     :param parameter: either a non-dict value or a JSON-like dict for a
                       supported value expression
-    :return: the parameter value 
+    :return: the parameter value
     '''
     if type(parameter) is not dict:
         value = parameter
@@ -40,30 +40,24 @@ def select_parameter(wflowview, parameter):
         value = handler(wflowview, parameter)
     return value
 
-def finalize_value(wflowview, step, value, state):
+def finalize_value(wflowview, value):
     '''
-    finalize a value by recursively resolving references and
-    contextualizing it for the passed state context
+    finalize a value by recursively resolving references
 
     :param wflowview: the workflow view against which to resolve upstream references
     :param step: the step for which to track usage of upstream references
     :param value: the parameter value. May be a output reference, or a JSON value type
-    :param state: the state context used to contextualize parameter values
     :return: finalized parameter value
     '''
     if type(value) == outputReference:
-        step.used_input(value)
         v = value.pointer.resolve(wflowview.dag.getNode(value.stepid).result)
-        return finalize_value(wflowview, step, v, state)
-    if state:
-        return state.contextualize_data(value)
+        return finalize_value(wflowview, v)
     else:
         return value
 
-
-def finalize_input(wflowview, step, jsondata):
+def finalize_input(jsondata,wflowview):
     '''
-    evaluate final values of step parameters by resolving 
+    evaluate final values of step parameters by resolving
     references to a upstream output and contextualizing stateful
     parameters. Also tracks usage of upstream references for the step
 
@@ -74,13 +68,14 @@ def finalize_input(wflowview, step, jsondata):
     :return: finalized step parameters
     '''
 
-    state =  step.state if hasattr(step, 'state') else None
     result = copy.deepcopy(jsondata)
+    inputs = []
     for leaf_pointer, leaf_value in leaf_iterator_jsonlike(jsondata):
-        leaf_pointer.set(result,finalize_value(wflowview, step, leaf_value, state))
-    return result
+        if type(leaf_value) == outputReference: inputs.append(leaf_value)
+        leaf_pointer.set(result,finalize_value(wflowview, leaf_value))
+    return result, inputs
 
-def step_or_init(name, spec, state_provider):
+def step_or_init(name, spec, state_provider, parameters):
     '''
     create a named packtivity_task of sub-workflow init_task object based on stage spec
 
@@ -92,15 +87,26 @@ def step_or_init(name, spec, state_provider):
     '''
     if 'step' in spec:
         step_state = state_provider.new_state(name)
-        return packtivity_task(name=name, spec=spec['step'], state=step_state)
+        p =  packtivity_task(name=name, spec=spec['step'], state=step_state)
+        p.s(**parameters)
+        return p,None
     elif 'workflow' in spec:
-        return init_task('init {}'.format(name))
-    raise RuntimeError('do not know what kind of stage spec we are dealing with.')
+        i = init_task('init {}'.format(name))
+        i.s(**parameters)
+        return i, spec['workflow']['stages']
+    elif 'cases' in spec:
+        for x in spec['cases']:
+            if jq.jq(x['if']).transform(parameters):
+                log.info('selected case %s', x['if'])
+                return step_or_init(name,x, state_provider, parameters)
+        log.info('no case selected on pars %s', parameters)
+        return None, None
+    raise RuntimeError('do not know what kind of stage spec we are dealing with. %s', spec.keys())
 
-def addStepOrWorkflow(name, stage, step, spec):
+def addStepOrWorkflow(name, stage, parameters, inputs, spec):
     '''
-    adds a step or a sub-workflow belonging to a stage this stage init step to the current workflow view
-    
+    adds a step or a sub-workflow based on a init step
+
     :param str name: the name of the step or sub-workflow
     :param stage: the stage from which to use state context and workflow view
     :param step: either a packtivity_task (for normal workflow steps) initstep object (for sub-workflows)
@@ -108,10 +114,17 @@ def addStepOrWorkflow(name, stage, step, spec):
 
     :return: None
     '''
+    step,stages = step_or_init(name,spec,stage.state_provider, parameters)
+    if not step: return
+    step.used_inputs(inputs)
+
     if type(step) == init_task:
         new_provider = stage.state_provider.new_provider(name)
-        subrules = [JsonStage(yml, new_provider) for yml in spec['workflow']['stages']]
-        stage.addWorkflow(subrules, initstep=step)
+        subrules = [JsonStage(s, new_provider) for s in stages]
+        stage.addWorkflow(subrules,
+            initstep=step if step.parameters else None,
+            isolate = True
+        )
     else:
         stage.addStep(step)
 
@@ -129,23 +142,18 @@ def singlestep_stage(stage, spec):
     '''
     a simple state that adds a single step/workflow. The node is attached
     to the DAG based on used upstream outputs
-    
-    :param stage: common stage parent object 
+
+    :param stage: common stage parent object
     :param spec: stage JSON-like spec
-    
+
     :return: None
     '''
     log.debug('scheduling singlestep stage with spec:\n%s', spec)
-
-    step = step_or_init(stage.name,spec,stage.state_provider)
-
     parameters = {
         k: select_parameter(stage.view, v) for k, v in get_parameters(spec).items()
     }
-
-    finalized = finalize_input(stage.view, step, parameters)
-    addStepOrWorkflow(stage.name, stage, step.s(**finalized), spec)
-
+    finalized, inputs = finalize_input(parameters, stage.view)
+    addStepOrWorkflow(stage.name, stage, finalized, inputs, spec)
 
 def chunk(alist, chunksize):
     '''split a list into equal-sized chunks of size chunksize'''
@@ -158,7 +166,7 @@ def partition(alist, partitionsize):
     if partitionsize > total_len:
         partitionsize = total_len
     assert partitionsize <= total_len
-    end = 0 
+    end = 0
     partitioned = []
     for k in range(partitionsize):
         begin = end
@@ -193,8 +201,6 @@ def scatter(parameters, scatter, batchsize = None, partitionsize = None):
     singlesteppars = []
     if scatter['method'] == 'zip':
         keys, zippable = zip(*[(k, v) for k, v in to_scatter.items()])
-
-
         for zipped in zip(*zippable):
             individualpars = dict(zip(keys, zipped))
             pars = commonpars.copy()
@@ -224,9 +230,9 @@ def multistep_stage(stage, spec):
 
     Nodes are attached to the DAG based on used upstream inputs
 
-    :param stage: common stage parent object 
+    :param stage: common stage parent object
     :param spec: stage JSON-like spec
-    
+
     :return: None
     '''
     log.debug('scheduling multistep stage with spec:\n%s', spec)
@@ -236,21 +242,19 @@ def multistep_stage(stage, spec):
     singlesteppars = scatter(parameters, spec['scatter'], spec.get('batchsize'), spec.get('partitionsize'))
     for i, pars in enumerate(singlesteppars):
         singlename = '{}_{}'.format(stage.name, i)
-        step = step_or_init(singlename,spec,stage.state_provider)
-        finalized = finalize_input(stage.view, step, pars)
-        addStepOrWorkflow(singlename, stage, step.s(**finalized), spec)
 
+        finalized, inputs = finalize_input(pars, stage.view)
+        addStepOrWorkflow(singlename, stage, finalized, inputs, spec)
 
 @scheduler('jq-stage')
 def jq_stage(stage, spec):
     '''
 
-    :param stage: common stage parent object 
+    :param stage: common stage parent object
     :param spec: stage JSON-like spec
-    
+
     :return: None
     '''
-
     binds = spec['bindings']
     wflowrefs = [jsonpointer.JsonPointer.from_parts(x) for x in jq.jq('paths(if objects then has("$wflowref") else false end)').transform(binds, multiple_output = True)]
 
@@ -282,13 +286,10 @@ def jq_stage(stage, spec):
     postscript = spec['postscript']
     for i, pars in enumerate(singlesteppars):
         singlename = '{}_{}'.format(stage.name, i)
-        step = step_or_init(singlename,spec,stage.state_provider)
-        finalized = finalize_input(stage.view, step, pars)
 
+        finalized, inputs = finalize_input(pars, stage.view)
         log.info('postscripting: %s',finalized)
         after_post = jq.jq(postscript).transform(finalized,multiple_output = False)
 
         log.info('finalized to: %s',after_post)
-        addStepOrWorkflow(singlename, stage, step.s(**after_post), spec)
-
-
+        addStepOrWorkflow(singlename, stage, after_post, inputs, spec)

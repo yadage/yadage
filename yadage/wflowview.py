@@ -29,7 +29,7 @@ class WorkflowView(object):
     def query(self, query, collection):
         '''
 
-        :return 
+        :return
         '''
 
         matches = jsonpath_rw.parse(query).find(collection)
@@ -50,7 +50,7 @@ class WorkflowView(object):
         for match in matches:
             value = match.value
             #step endpoint case
-            if isinstance(value,dict) and '_nodeid' in value: 
+            if isinstance(value,dict) and '_nodeid' in value:
                 nodeids.append(value['_nodeid'])
             #stage endpoint case
             elif isinstance(value,list):
@@ -106,36 +106,33 @@ class WorkflowView(object):
         '''
         adds a node to the DAG connecting it to the passed depending nodes
         while tracking that it was added by the specified stage
-        
+
         :param task: the task object for the step
         :param stage: the stage name
         :param depends_on: dependencies of this step
         '''
         node = YadageNode(task.metadata['name'], task, identifier=get_obj_id(task))
-        self.dag.addNode(node, depends_on=depends_on)
         node.task.metadata['wflow_node_id'] = node.identifier
         node.task.metadata['wflow_offset'] = self.offset
         node.task.metadata['wflow_stage'] = stage
 
-        log.debug('added node %s', node)
-
-        noderef = {'_nodeid': node.identifier}
-        self.steps.setdefault(stage,[]).append(noderef)
+        self.dag.addNode(node, depends_on=depends_on)
+        self.steps.setdefault(stage,[]).append({'_nodeid': node.identifier})
         self.bookkeeper['_meta']['steps'] += [node.identifier]
+        log.debug('added node %s', node)
         return node
 
     def addWorkflow(self, rules, initstep=None, stage=None):
-        if initstep:
+        '''
+        add a (sub-)workflow (i.e. list of stages) to the overall workflow
+        '''
+        if initstep: # if we want to initialize the workflow add a initstage
             rules += [InitStage(initstep)]
-        newsteps = {}
-        if stage in self.steps:
-            self.steps[stage] += [newsteps]
-        elif stage is not None:
-            self.steps[stage] = [newsteps]
 
-        offset = JsonPointer.from_parts(
-            [stage, len(self.steps[stage]) - 1]).path if stage else ''
+        offset = ''
         if stage is not None:
+            self.steps.setdefault(stage,[]).append({})
+            offset = JsonPointer.from_parts([stage, len(self.steps[stage]) - 1]).path
             self.steps[stage][-1]['_offset'] = offset
 
         for rule in rules:
@@ -148,9 +145,5 @@ def createOffsetMeta(offset, bookkeeping):
     pointer = JsonPointer(offset)
     view = bookkeeping
     for x in pointer.parts:
-        if x not in view:
-            view[x] = {}
-        view = view[x]
-    scoped = pointer.resolve(bookkeeping)
-    if '_meta' not in scoped:
-        scoped['_meta'] = {'stages': [], 'steps': []}
+        view = view.setdefault(x,{})
+    pointer.resolve(bookkeeping).setdefault('_meta',{'stages': [], 'steps': []})

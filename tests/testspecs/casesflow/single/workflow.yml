@@ -1,0 +1,15 @@
+stages:
+- name: hello_world
+  dependencies: [init]
+  scheduler:
+    scheduler_type: singlestep-stage
+    parameters:
+      parone: {stages: init, output: par, unwrap: true}
+      outputfile: '{workdir}/hello_world.txt'
+    cases:
+    - if: .parone==0
+      step: {$ref: 'steps.yml#/hello'}
+    - if: 0 < .parone and .parone < 4
+      step: {$ref: 'steps.yml#/bye'}
+    - if: 4 <= .parone
+      workflow: {$ref: 'subflow.yml'}
