@@ -131,6 +131,16 @@ def leaf_iterator_jsonlike(jsonlike, path = None):
         yield jsonpointer.JsonPointer.from_parts(path),jsonlike
 
 
+def process_jsonlike(jsonlike, jq_obj_selector, callback):
+    wflowrefs = [jsonpointer.JsonPointer.from_parts(x) for x in jq.jq(
+            'paths(if objects then {} else false end)'.format(jq_obj_selector)
+            ).transform( jsonlike, multiple_output = True
+    )]
+    for wflowref in wflowrefs:
+        value = callback(wflowref.resolve(jsonlike))
+        wflowref.set(jsonlike,value)
+    return jsonlike
+
 def pointerize(jsondata, asref=False, stepid=None):
     '''
     a helper method that replaces leaf nodes in a JSON object with

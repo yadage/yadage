@@ -10,8 +10,7 @@ import yadage.handlers.utils as utils
 from .expression_handlers import handlers as exprhandlers
 from ..tasks import packtivity_task, init_task
 from ..stages import JsonStage
-from ..utils import leaf_iterator_jsonlike, pointerize, outputReference
-
+from ..utils import leaf_iterator_jsonlike, pointerize, process_jsonlike, outputReference
 
 log = logging.getLogger(__name__)
 
@@ -242,46 +241,40 @@ def multistep_stage(stage, spec):
     singlesteppars = scatter(parameters, spec['scatter'], spec.get('batchsize'), spec.get('partitionsize'))
     for i, pars in enumerate(singlesteppars):
         singlename = '{}_{}'.format(stage.name, i)
-
         finalized, inputs = finalize_input(pars, stage.view)
         addStepOrWorkflow(singlename, stage, finalized, inputs, spec)
+
+def process_noderef(leafobj,resultscript,view):
+    n = view.dag.getNode(leafobj['_nodeid'])
+    return jq.jq(resultscript).transform(pointerize(n.result,False,n.identifier), multiple_output = True)
+
+def process_wflowref(leafobj,view):
+    nodeselector, resultscript = leafobj['$wflowref']
+    nodestruct = jq.jq(nodeselector).transform(view.steps, multiple_output = True)
+    return process_jsonlike(nodestruct, 'has("_nodeid")', lambda x: process_noderef(x, resultscript, view))
+
+def process_wflowpointer(leafobj):
+    p = leafobj['$wflowpointer']
+    return outputReference(p['step'],jsonpointer.JsonPointer(p['result']))
 
 @scheduler('jq-stage')
 def jq_stage(stage, spec):
     '''
-
     :param stage: common stage parent object
     :param spec: stage JSON-like spec
 
     :return: None
     '''
     binds = spec['bindings']
-    wflowrefs = [jsonpointer.JsonPointer.from_parts(x) for x in jq.jq('paths(if objects then has("$wflowref") else false end)').transform(binds, multiple_output = True)]
-
-    for wflowref in wflowrefs:
-        nodeselector, resultscript = wflowref.resolve(binds)['$wflowref']
-        view = stage.view
-        nodestruct = jq.jq(nodeselector).transform(view.steps, multiple_output = True)
-
-        noderefs = [jsonpointer.JsonPointer.from_parts(x) for x in jq.jq('paths(if objects then has("_nodeid") else false end)').transform(nodestruct, multiple_output = True)]
-        for nr in noderefs:
-            n = view.dag.getNode(nr.resolve(nodestruct)['_nodeid'])
-            r = jq.jq(resultscript).transform(pointerize(n.result,False,n.identifier), multiple_output = True)
-            nr.set(nodestruct,r)
-        wflowref.set(binds,nodestruct)
-
+    binds = process_jsonlike(binds,'has("$wflowref")',lambda x: process_wflowref(x,stage.view))
     log.info('transforming binds: %s', binds)
     stagescript = spec['stepscript']
-    stageres = jq.jq(stagescript).transform(binds,multiple_output = False)
+    singlesteps = jq.jq(stagescript).transform(binds,multiple_output = False)
 
-    singlesteppars = []
-    for forstep in stageres:
-        wflowpointers = [jsonpointer.JsonPointer.from_parts(x) for x in jq.jq('paths(if objects then has("$wflowpointer") else false end)').transform(forstep, multiple_output = True)]
-        for wflowptr in wflowpointers:
-            pointer =  wflowptr.resolve(forstep)['$wflowpointer']
-            wflowptr.set(forstep,outputReference(pointer['step'],jsonpointer.JsonPointer(pointer['result'])))
-        singlesteppars.append(forstep)
-        log.info(forstep)
+    singlesteppars = map(
+        lambda x: process_jsonlike(x, 'has("$wflowpointer")',process_wflowpointer),
+        singlesteps
+    )
 
     postscript = spec['postscript']
     for i, pars in enumerate(singlesteppars):
