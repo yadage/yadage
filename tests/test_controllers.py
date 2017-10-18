@@ -1,5 +1,6 @@
 from yadage.controllers import PersistentController
 from yadage.wflowstate  import FileBackedModel
+from packtivity.statecontexts import load_provider
 
 def test_persistent_controller(tmpdir, local_helloworld_wflow_w_init, foregroundasync_backend):
 

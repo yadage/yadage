@@ -32,6 +32,7 @@ def select_parameter(wflowview, parameter):
                       supported value expression
     :return: the parameter value
     '''
+    log.debug('selecting parameter %s', parameter)
     if type(parameter) is not dict:
         value = parameter
     else:
@@ -192,6 +193,9 @@ def scatter(parameters, scatter, batchsize = None, partitionsize = None):
     :return: list of parameter sets
     '''
 
+    log.debug('scattering:  pars: %s scatter: %s batchsisze: %s partitionsize: %s',
+        parameters, scatter, batchsize, partitionsize
+    )
     commonpars = parameters.copy()
     to_scatter = {}
     for scatpar in scatter['parameters']:

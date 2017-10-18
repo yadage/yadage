@@ -1,6 +1,7 @@
 import copy
 import jsonpointer
 from yadage.wflow import YadageWorkflow
+from packtivity.statecontexts import load_provider
 
 def rule_steps_indices(workflow):
     rule_to_steps_index = {}
@@ -19,7 +20,8 @@ def rule_steps_indices(workflow):
 
 def preview_rule(wflow, name = None, identifier=None):
     newflow = YadageWorkflow.fromJSON(
-        copy.deepcopy(wflow.json())
+        copy.deepcopy(wflow.json()),
+        state_provider_deserializer = load_provider
     )
 
     if identifier:

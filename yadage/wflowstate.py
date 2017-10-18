@@ -2,6 +2,7 @@ import json
 import logging
 from .wflow import YadageWorkflow
 from .backends import load_proxy
+from packtivity.statecontexts import load_provider
 
 log = logging.getLogger(__name__)
 
@@ -10,7 +11,8 @@ def make_deserializer(deserialization_opts = None):
     def deserializer(jsondata):
         workflow = YadageWorkflow.fromJSON(
             jsondata,
-            lambda data: load_proxy(data,deserialization_opts)
+            lambda data: load_proxy(data,deserialization_opts),
+            load_provider
         )
         return workflow
     return deserializer
