@@ -1,5 +1,4 @@
 import logging
-from packtivity.statecontexts import load_provider
 
 from .handlers.predicate_handlers import handlers as pred_handlers
 from .utils import get_id_fromjson
@@ -51,11 +50,11 @@ class OffsetStage(object):
 
     #(de-)serialization
     @classmethod
-    def fromJSON(cls, data):
+    def fromJSON(cls, data, state_provider_deserializer = None):
         if data['rule']['type'] == 'InitStage':
             rule = InitStage.fromJSON(data['rule'])
         elif data['rule']['type'] == 'JsonStage':
-            rule = JsonStage.fromJSON(data['rule'])
+            rule = JsonStage.fromJSON(data['rule'], state_provider_deserializer)
         return cls(
             rule=rule,
             identifier=data['id'],
@@ -174,14 +173,14 @@ class JsonStage(ViewStageBase):
 
     #(de-)serialization
     @classmethod
-    def fromJSON(cls, data):
+    def fromJSON(cls, data, state_provider_deserializer):
         return cls(
             json={
                 'scheduler': data['scheduler'],
                 'name': data['name'],
                 'dependencies': data['dependencies']
             },
-            state_provider=load_provider(data['state_provider'])
+            state_provider=state_provider_deserializer(data['state_provider'])
         )
 
     def json(self):

@@ -1,6 +1,5 @@
-import copy
 import jsonpointer
-from yadage.wflow import YadageWorkflow
+from yadage.wflowstate import make_deserializer
 
 def rule_steps_indices(workflow):
     rule_to_steps_index = {}
@@ -18,9 +17,9 @@ def rule_steps_indices(workflow):
     return rule_to_steps_index, steps_to_rule_index
 
 def preview_rule(wflow, name = None, identifier=None):
-    newflow = YadageWorkflow.fromJSON(
-        copy.deepcopy(wflow.json())
-    )
+    stateopts = {}
+    wflowmaker = make_deserializer(stateopts)
+    newflow = wflowmaker(wflow.json())
 
     if identifier:
         rule = newflow.view().getRule(identifier=identifier)

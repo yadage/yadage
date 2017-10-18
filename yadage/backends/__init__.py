@@ -27,7 +27,7 @@ def load_proxy(data,deserialization_opts = None):
         return yadage.backends.trivialbackend.TrivialProxy.fromJSON(data)
 
     # it must be a packtivity proxy
-    from_pack_proxy = packtivity.backendutils.proxy_from_json(
+    from_pack_proxy = packtivity.backendutils.load_proxy(
         data,
         deserialization_opts = deserialization_opts,
         best_effort_backend = False
