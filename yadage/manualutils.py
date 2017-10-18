@@ -1,6 +1,4 @@
-import copy
 import jsonpointer
-from yadage.wflow import YadageWorkflow
 from yadage.wflowstate import make_deserializer
 
 def rule_steps_indices(workflow):

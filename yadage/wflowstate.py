@@ -7,12 +7,12 @@ from packtivity.statecontexts import load_provider
 log = logging.getLogger(__name__)
 
 
-def make_deserializer(deserialization_opts = None):
+def make_deserializer(stateopts = None):
     def deserializer(jsondata):
         workflow = YadageWorkflow.fromJSON(
             jsondata,
-            lambda data: load_proxy(data,deserialization_opts),
-            load_provider
+            lambda data: load_proxy(data,stateopts),
+            lambda data: load_provider(data)
         )
         return workflow
     return deserializer
