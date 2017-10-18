@@ -1,7 +1,6 @@
 import adage
 from adage.serialize import obj_to_json
 from .wflowview import WorkflowView
-from .wflownode import YadageNode
 from .stages import JsonStage, OffsetStage
 
 def json_or_nil(x):

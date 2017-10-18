@@ -5,7 +5,6 @@ import tempfile
 import shutil
 import logging
 
-from .wflow import YadageWorkflow
 from .handlers.expression_handlers import handlers as exh
 from .utils import set_backend, process_refs
 from .backends.trivialbackend import TrivialProxy, TrivialBackend
