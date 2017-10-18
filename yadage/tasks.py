@@ -1,6 +1,5 @@
 import packtivity
 import logging
-from packtivity.statecontexts import load_state
 from .utils import leaf_iterator_jsonlike, outputReference
 
 log = logging.getLogger(__name__)
@@ -84,8 +83,8 @@ class packtivity_task(TaskBase):
 
     #(de-)serialization
     @classmethod
-    def fromJSON(cls, data):
-        instance = cls(data['metadata']['name'], data['spec'], load_state(data['state']))
+    def fromJSON(cls, data, state_deserializer):
+        instance = cls(data['metadata']['name'], data['spec'], state_deserializer(data['state']))
         instance.parameters = data['parameters']
         instance.prepublished = data['prepublished']
         instance.inputs = map(outputReference.fromJSON, data['inputs'])

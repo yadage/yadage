@@ -6,7 +6,11 @@ import os
 def test_clis(tmpdir):
     runner = CliRunner()
 
-    result = runner.invoke(yadage.steering.main,[str(tmpdir.join('workdir')),'workflow.yml','-t','tests/testspecs/local-helloworld','-p','par=value'])
+    result = runner.invoke(yadage.steering.main,[str(tmpdir.join('workdir')),'workflow.yml',
+        '-t','tests/testspecs/local-helloworld','-p','par=value',
+        '-b','foregroundasync'
+        ]
+    )
     assert tmpdir.join('workdir/hello_world/hello_world.txt').check()
 
 

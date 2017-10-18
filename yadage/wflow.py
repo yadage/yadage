@@ -35,6 +35,7 @@ class YadageWorkflow(adage.adageobject):
     def fromJSON(cls, data,
             proxydeserializer = lambda data: None,
             state_provider_deserializer = lambda data: None,
+            task_deserializer = lambda data: None,
             backend=None):
         instance = cls()
         instance.rules = [OffsetStage.fromJSON(x,state_provider_deserializer) for x in data['rules'] ]
@@ -44,7 +45,7 @@ class YadageWorkflow(adage.adageobject):
 
         instance.dag = adage.serialize.dag_from_json(
             data['dag'],
-            YadageNode.fromJSON,
+            task_deserializer,
             proxydeserializer,
             backend
         )

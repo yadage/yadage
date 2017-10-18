@@ -1,12 +1,13 @@
 import pytest
 from yadage.wflownode import YadageNode
 from yadage.tasks import packtivity_task
+from packtivity.statecontexts import load_state
 
 
 def test_create(basic_packtivity_spec,localfs_state):
 	step = packtivity_task('myname',basic_packtivity_spec,localfs_state)
 	node = YadageNode('myname',step,'identiifer')
-	
+
 def test_result_prepub(basic_packtivity_spec,localfs_state):
 	step = packtivity_task('myname',basic_packtivity_spec,localfs_state)
 	step.prepublished = {'hello': 'world'}
@@ -30,10 +31,10 @@ def test_serialize_desrialize(basic_packtivity_spec,localfs_state):
 		'name': '',
 		'id': 'anid'
 	}
-	YadageNode.fromJSON(data)
+	YadageNode.fromJSON(data, load_state)
 
 	step = packtivity_task('myname',basic_packtivity_spec,localfs_state)
-	packtivity_task.fromJSON(step.json()).json() == step.json()
+	packtivity_task.fromJSON(step.json(), load_state).json() == step.json()
 
 def test_noresult(basic_packtivity_spec,localfs_state):
 	step = packtivity_task('myname',basic_packtivity_spec,localfs_state)
