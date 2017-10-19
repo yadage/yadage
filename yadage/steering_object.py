@@ -61,18 +61,14 @@ class YadageSteering():
         workdir = dataarg
         initdir = os.path.join(workdir,dataopts.get('initdir','init'))
         inputarchive = dataopts.get('inputarchive',None)
-        read = dataopts.get('read',None)
-        nest = dataopts.get('nest',True)
-        ensure = dataopts.get('ensure',True)
 
         if inputarchive:
             initdir = utils.prepare_workdir_from_archive(initdir, inputarchive)
         if initdata:
             utils.discover_initfiles(initdata,os.path.realpath(initdir))
-        writable_state = LocalFSState([workdir])
-        rootprovider = LocalFSProvider(read,writable_state, ensure = ensure, nest = nest)
-
-        self.rootprovider = rootprovider
+        self.rootprovider = utils.rootprovider_from_string(
+            'local:'+dataarg, dataopts
+        )
         self.metadir = self.metadir or '{}/_yadage/'.format(workdir)
 
 
@@ -87,6 +83,7 @@ class YadageSteering():
         :param accept_metadir:
         :param metadir: meta-data directory
         '''
+
         self.metadir = metadir
         dataopts = dataopts or {}
         split_dataarg = dataarg.split(':',1)
@@ -95,9 +92,8 @@ class YadageSteering():
             self.prepare_localstate(dataarg,dataopts,initdata)
         else:
             assert self.metadir #for non-default provider, require metadir to be set
-            datatype, dataarg = split_dataarg
-            self.rootprovider = utils.setupstateprovider(
-                datatype, dataarg, dataopts
+            self.rootprovider = utils.rootprovider_from_string(
+                dataarg, dataopts
             )
         self.prepare_meta(accept = accept_metadir)
 
