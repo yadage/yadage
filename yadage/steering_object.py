@@ -4,12 +4,11 @@ import os
 import json
 import yadageschemas
 import logging
-from packtivity.statecontexts.posixfs_context import LocalFSProvider, LocalFSState
 
 import yadage.workflow_loader as workflow_loader
 import yadage.utils as utils
 import yadage.serialize as serialize
-from .controllers import setup_controller_from_statestring
+from .controllers import setup_controller_from_modelstring
 from .wflow import YadageWorkflow
 from .utils import setupbackend_fromstring
 
@@ -61,18 +60,14 @@ class YadageSteering():
         workdir = dataarg
         initdir = os.path.join(workdir,dataopts.get('initdir','init'))
         inputarchive = dataopts.get('inputarchive',None)
-        read = dataopts.get('read',None)
-        nest = dataopts.get('nest',True)
-        ensure = dataopts.get('ensure',True)
 
         if inputarchive:
             initdir = utils.prepare_workdir_from_archive(initdir, inputarchive)
         if initdata:
             utils.discover_initfiles(initdata,os.path.realpath(initdir))
-        writable_state = LocalFSState([workdir])
-        rootprovider = LocalFSProvider(read,writable_state, ensure = ensure, nest = nest)
-
-        self.rootprovider = rootprovider
+        self.rootprovider = utils.rootprovider_from_string(
+            'local:'+dataarg, dataopts
+        )
         self.metadir = self.metadir or '{}/_yadage/'.format(workdir)
 
 
@@ -87,6 +82,7 @@ class YadageSteering():
         :param accept_metadir:
         :param metadir: meta-data directory
         '''
+
         self.metadir = metadir
         dataopts = dataopts or {}
         split_dataarg = dataarg.split(':',1)
@@ -95,8 +91,9 @@ class YadageSteering():
             self.prepare_localstate(dataarg,dataopts,initdata)
         else:
             assert self.metadir #for non-default provider, require metadir to be set
-            datatype, dataarg = split_dataarg
-            self.rootprovider = utils.setupstateprovider(datatype, dataarg, dataopts)
+            self.rootprovider = utils.rootprovider_from_string(
+                dataarg, dataopts
+            )
         self.prepare_meta(accept = accept_metadir)
 
     def init_workflow(self,
@@ -104,8 +101,8 @@ class YadageSteering():
                       initdata = None,
                       toplevel = os.getcwd(),
                       workflow_json = None,
-                      statesetup = 'inmem',
-                      stateopts = None,
+                      modelsetup = 'inmem',
+                      modelopts = None,
                       validate = True,
                       schemadir = yadageschemas.schemadir):
         '''
@@ -141,8 +138,8 @@ class YadageSteering():
             workflowobj.view().init(initdata)
         else:
             log.info('no initialization data')
-        self.controller = setup_controller_from_statestring(
-                workflowobj, statestr = statesetup, stateopts = stateopts
+        self.controller = setup_controller_from_modelstring(
+                workflowobj, modelsetup = modelsetup, modelopts = modelopts
         )
 
     def adage_argument(self,**kwargs):

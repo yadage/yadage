@@ -221,9 +221,22 @@ def setupbackend_fromstring(backend, backendopts = None):
             backendopts = backendopts
     )
 
-def setupstateprovider(datatype,dataarg,dataopts = None):
-    dataopts = dataopts or {}
-    if datatype == 'fromenv':
+def rootprovider_from_string(dataarg,dataopts = None):
+    log.info('%s %s',dataarg,dataopts)
+    if dataarg.startswith('local:'):
+        from packtivity.statecontexts.posixfs_context import LocalFSProvider, LocalFSState
+        workdir = dataarg.split(':',2)[1]
+        read = dataopts.get('read',None)
+        nest = dataopts.get('nest',True)
+        ensure = dataopts.get('ensure',True)
+        writable_state = LocalFSState([workdir])
+        return LocalFSProvider(read,writable_state, ensure = ensure, nest = nest)
+    if dataarg.startswith('py:'):
+        _,module, setupfunc,dataarg = dataarg.split(':',3)
+        module = importlib.import_module(module)
+        setupfunc = getattr(module,setupfunc)
+        return setupfunc(dataarg,dataopts)
+    if dataarg.startswith('fromenv:'):
         module = importlib.import_module(os.environ['PACKTIVITY_STATEPROVIDER'])
         return module.setup_provider(dataarg,dataopts)
-    raise RuntimeError('unknown data type %s', datatype)
+    raise RuntimeError('unknown data type %s %s', dataarg, dataopts)

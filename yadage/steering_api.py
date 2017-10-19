@@ -36,8 +36,8 @@ def steering_ctx(
     validate=True,
     visualize=True,
     accept_metadir = False,
-    statesetup = 'inmem',
-    stateopts = None):
+    modelsetup = 'inmem',
+    modelopts = None):
     '''
     context manage around yadage steering object.
 
@@ -51,10 +51,9 @@ def steering_ctx(
         accept_metadir = True
 
     ys.prepare(
-        dataarg = dataarg,
+        dataarg = dataarg, dataopts = dataopts,
         initdata = initdata,
         metadir = metadir, accept_metadir = accept_metadir,
-        dataopts = dataopts
     )
 
     wflow_kwargs = dict() #if this stays empty, error will be raise by ys
@@ -65,8 +64,8 @@ def steering_ctx(
 
     ys.init_workflow(
         initdata = initdata,
-        statesetup = statesetup,
-        stateopts = stateopts,
+        modelsetup = modelsetup,
+        modelopts = modelopts,
         **wflow_kwargs
     )
 

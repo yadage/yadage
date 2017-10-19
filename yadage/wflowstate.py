@@ -15,28 +15,33 @@ def make_deserializer(deserialization_opts = None):
             jsondata,
             lambda data: load_proxy(data,deserialization_opts),
             lambda data: load_provider(data,deserialization_opts),
-            lambda data: YadageNode.fromJSON(data, state_deserializer = load_state)
+            lambda data: YadageNode.fromJSON(data,
+                                state_deserializer =
+                                    lambda state: load_state(
+                                        state,deserialization_opts
+                                    )
+            )
         )
         return workflow
     return deserializer
 
-def load_model_fromstring(statestr,stateopts = None,initdata = None):
-    stateopts = stateopts or {}
-    if statestr.startswith('filebacked'):
-        filename = statestr.split(':')[-1]
+def load_model_fromstring(modelsetup,modelopts = None,initdata = None):
+    modelopts = modelopts or {}
+    if modelsetup.startswith('filebacked'):
+        filename = modelsetup.split(':')[-1]
         model   = FileBackedModel(
             filename = filename,
             initdata = initdata,
-            deserializer = make_deserializer(stateopts)
+            deserializer = make_deserializer(modelopts)
         )
         return model
-    elif statestr == 'mongo':
+    elif modelsetup == 'mongo':
         model = MongoBackedModel(
             initdata = initdata,
-            deserializer = make_deserializer(stateopts)
+            deserializer = make_deserializer(modelopts)
         )
         return model
-    raise RuntimeError('unknown state model %s', statestr)
+    raise RuntimeError('unknown state model %s', modelsetup)
 
 class MongoBackedModel(object):
     '''
