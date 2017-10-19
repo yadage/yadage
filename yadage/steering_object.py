@@ -4,7 +4,6 @@ import os
 import json
 import yadageschemas
 import logging
-from packtivity.statecontexts.posixfs_context import LocalFSProvider, LocalFSState
 
 import yadage.workflow_loader as workflow_loader
 import yadage.utils as utils

@@ -35,7 +35,7 @@ def load_model_fromstring(modelsetup,modelopts = None,initdata = None):
             deserializer = make_deserializer(modelopts)
         )
         return model
-    elif statestr == 'mongo':
+    elif modelsetup == 'mongo':
         model = MongoBackedModel(
             initdata = initdata,
             deserializer = make_deserializer(modelopts)
