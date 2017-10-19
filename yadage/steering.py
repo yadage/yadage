@@ -16,16 +16,16 @@ RC_SUCCEEDED = 0
 @click.argument('dataarg')
 @click.argument('workflow')
 @click.argument('initfiles', nargs=-1)
+@click.option('-d', '--dataopt', multiple=True, default=None, help = 'options for the workflow data state')
+@click.option('-p', '--parameter', multiple=True, help = '<parameter name>=<yaml string> input parameter specifcations ')
 @click.option('-b', '--backend', default='multiproc:auto', help = 'packtivity backend string')
+@click.option('-k', '--backendopt', multiple=True, default=None, help = 'options for the workflow data state')
 @click.option('-c', '--cache', default='')
 @click.option('-e', '--schemadir', default=yadageschemas.schemadir, help = 'schema directory for workflow validation')
 @click.option('-i', '--loginterval', default=30, help = 'adage tracking interval in seconds')
-@click.option('-k', '--backendopt', multiple=True, default=None, help = 'options for the workflow data state')
-@click.option('-d', '--dataopt', multiple=True, default=None, help = 'options for the workflow data state')
+@click.option('-s', '--modelsetup', default='inmem', help = 'wflow state model')
 @click.option('-l', '--modelopt', multiple=True, default=None, help = 'options for the workflow state models')
 @click.option('-m', '--metadir', default=None, help = 'directory to store workflow metadata')
-@click.option('-p', '--parameter', multiple=True, help = '<parameter name>=<yaml string> input parameter specifcations ')
-@click.option('-s', '--statesetup', default='inmem', help = 'wflow state model')
 @click.option('-t', '--toplevel', default=os.getcwd(), help = 'toplevel uri to be used to resolve workflow name and references from')
 @click.option('-u', '--updateinterval', default=0.02, help = 'adage graph inspection interval in seconds')
 @click.option('-v', '--verbosity', default='INFO', help = 'logging verbosity')
@@ -45,12 +45,12 @@ def main(dataarg,
          dataopt,
          backendopt,
          interactive,
+         modelsetup,
          modelopt,
          metadir,
          parameter,
          validate,
          visualize,
-         statesetup,
          cache,
          accept_metadir
          ):
@@ -61,7 +61,7 @@ def main(dataarg,
     initdata = utils.getinit_data(initfiles, parameter)
     dataopts = utils.options_from_eqdelimstring(dataopt)
     backendopts = utils.options_from_eqdelimstring(backendopt)
-    stateopts = utils.options_from_eqdelimstring(modelopt)
+    modelopts = utils.options_from_eqdelimstring(modelopt)
 
     backend  = utils.setupbackend_fromstring(backend,backendopts)
     rc = RC_FAILED
@@ -81,8 +81,8 @@ def main(dataarg,
             dataopts = dataopts,
             metadir = metadir,
             accept_metadir = accept_metadir,
-            statesetup = statesetup,
-            stateopts = stateopts,
+            modelsetup = modelsetup,
+            modelopts = modelopts,
             updateinterval = updateinterval,
             loginterval = loginterval,
             visualize = visualize,

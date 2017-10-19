@@ -221,7 +221,7 @@ def setupbackend_fromstring(backend, backendopts = None):
             backendopts = backendopts
     )
 
-def setupstateprovider(datatype,dataarg,dataopts = None):
+def make_rootprovider(datatype,dataarg,dataopts = None):
     dataopts = dataopts or {}
     if datatype == 'fromenv':
         module = importlib.import_module(os.environ['PACKTIVITY_STATEPROVIDER'])

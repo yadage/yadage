@@ -39,7 +39,7 @@ def init(workdir, workflow, initfiles, statesetup, dataopt, metadir, toplevel, p
         metadir = metadir,
         dataopts = dataopts
     )
-    ys.init_workflow(workflow, initdata = initdata, toplevel = toplevel, statesetup = statesetup)
+    ys.init_workflow(workflow, initdata = initdata, toplevel = toplevel, modelsetup = statesetup)
 
 
 def click_print_applicable_stages(controller):

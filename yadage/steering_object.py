@@ -9,7 +9,7 @@ from packtivity.statecontexts.posixfs_context import LocalFSProvider, LocalFSSta
 import yadage.workflow_loader as workflow_loader
 import yadage.utils as utils
 import yadage.serialize as serialize
-from .controllers import setup_controller_from_statestring
+from .controllers import setup_controller_from_modelstring
 from .wflow import YadageWorkflow
 from .utils import setupbackend_fromstring
 
@@ -96,7 +96,9 @@ class YadageSteering():
         else:
             assert self.metadir #for non-default provider, require metadir to be set
             datatype, dataarg = split_dataarg
-            self.rootprovider = utils.setupstateprovider(datatype, dataarg, dataopts)
+            self.rootprovider = utils.setupstateprovider(
+                datatype, dataarg, dataopts
+            )
         self.prepare_meta(accept = accept_metadir)
 
     def init_workflow(self,
@@ -104,8 +106,8 @@ class YadageSteering():
                       initdata = None,
                       toplevel = os.getcwd(),
                       workflow_json = None,
-                      statesetup = 'inmem',
-                      stateopts = None,
+                      modelsetup = 'inmem',
+                      modelopts = None,
                       validate = True,
                       schemadir = yadageschemas.schemadir):
         '''
@@ -141,8 +143,8 @@ class YadageSteering():
             workflowobj.view().init(initdata)
         else:
             log.info('no initialization data')
-        self.controller = setup_controller_from_statestring(
-                workflowobj, statestr = statesetup, stateopts = stateopts
+        self.controller = setup_controller_from_modelstring(
+                workflowobj, modelsetup = modelsetup, modelopts = modelopts
         )
 
     def adage_argument(self,**kwargs):
