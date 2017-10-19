@@ -5,10 +5,10 @@ import tempfile
 import shutil
 import logging
 
-from .wflow import YadageWorkflow
 from .handlers.expression_handlers import handlers as exh
 from .utils import set_backend, process_refs
 from .backends.trivialbackend import TrivialProxy, TrivialBackend
+from .wflowstate import make_deserializer
 
 def printRef(ref, dag, indent=''):
     click.secho('{}name: {} position: {}, value: {}, id: {}'.format(
@@ -22,9 +22,11 @@ def printRef(ref, dag, indent=''):
 
 
 def wflow_with_trivial_backend(instance,results):
-    wflow = YadageWorkflow.fromJSON(
-        json.load(open(instance))
-    )
+
+    stateopts = {}
+    wflowmaker = make_deserializer(stateopts)
+    wflow = wflowmaker(json.load(open(instance)))
+
     resultdata = json.load(open(results))
     set_backend(
         wflow.dag,

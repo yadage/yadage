@@ -53,11 +53,11 @@ class YadageNode(adage.node.Node):
         return v
 
     @classmethod
-    def fromJSON(cls, data):
+    def fromJSON(cls, data, state_deserializer):
         if data['task']['type'] == 'init_task':
             task = tasks.init_task.fromJSON(data['task'])
         elif data['task']['type'] == 'packtivity_task':
-            task = tasks.packtivity_task.fromJSON(data['task'])
+            task = tasks.packtivity_task.fromJSON(data['task'], state_deserializer)
         else:
             raise RuntimeError('unknown task type',data['task']['type'])
         return cls(data['name'], task, data['id'])
