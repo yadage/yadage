@@ -3,16 +3,9 @@ from packtivity.backendutils import backend_from_string
 
 import yadage.backends.caching as caching
 import yadage.backends.federatedbackend as federatedbackend
-from ..tasks import packtivity_task, init_task
-from .trivialbackend import TrivialProxy, TrivialBackend
+from .initbackend import InitProxy, InitBackend
 
 log = logging.getLogger(__name__)
-
-
-class InitProxy(TrivialProxy):
-    def proxyname(self):
-        return 'InitProxy'
-
 
 class PacktivityBackend(federatedbackend.FederatedBackend):
     '''
@@ -30,7 +23,7 @@ class PacktivityBackend(federatedbackend.FederatedBackend):
             raise RuntimeError('need backend or backendstring')
         self.cached = False
         super(PacktivityBackend, self).__init__({
-            'init': TrivialBackend(),
+            'init': InitBackend(),
             'packtivity': backend
         })
 
@@ -45,8 +38,12 @@ class PacktivityBackend(federatedbackend.FederatedBackend):
         )
 
     def routedsubmit(self, task):
-        tasktype = type(task)
-        if tasktype == packtivity_task:
+
+        # print 'ROUTE', task.json()
+
+        is_init = task.metadata['wflow_hints'].get('is_init_step',False)
+
+        if not is_init:
             #this is a little hacky, because the packtivity backends
             #take unrolled spec/parameters/context while the adage API
             #takes generalized task objects
@@ -60,9 +57,11 @@ class PacktivityBackend(federatedbackend.FederatedBackend):
                 return self.backends['packtivity'].submit(
                     task.spec, task.parameters, task.state, task.metadata
                 )
-        elif tasktype == init_task:
+        else:
             #init steps are by definition successful
-            return InitProxy(status = 'SUCCESS', result = task.parameters)
+            return self.backends['init'].submit(
+                task.spec, task.parameters, task.state, task.metadata
+            )
 
     def routeproxy(self, proxy):
         if type(proxy) == InitProxy:

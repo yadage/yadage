@@ -20,6 +20,9 @@ class outputReference(object):
         self.stepid = stepid
         self.pointer = pointer
 
+    def __repr__(self):
+        return 'outputReference {}#{}'.format(self.stepid, self.pointer.path)
+
     #(de-)serialization
     @classmethod
     def fromJSON(cls, data):
@@ -155,27 +158,6 @@ def pointerize(jsondata, asref=False, stepid=None):
         x.set(jsondata_proxy, outputReference(stepid, x) if asref else {'$wflowpointer': {'step': stepid,'result': x.path}} if stepid else x.path)
     return jsondata_proxy
 
-def discover_initfiles(initdata,sourcedir):
-    '''inspect sourcedir, first tries exact path match, and then (possbly recursive) glob'''
-    log.info('inspecting %s to discover referenced input files',sourcedir)
-
-    # filled_initdata = copy.deepcopy(initdata)
-    for pointer,value in leaf_iterator(initdata):
-
-        try:
-            if type(value) not in [str,unicode]: continue #python2
-        except NameError:
-            if type(value) not in [str]: continue #python3
-
-
-        within_sourcedir = os.path.join(sourcedir,value)
-        globresult = glob.glob(os.path.join(sourcedir,value))
-        if os.path.exists(within_sourcedir):
-            pointer.set(initdata,within_sourcedir)
-        elif globresult:
-            pointer.set(initdata,globresult)
-    return initdata
-
 def options_from_eqdelimstring(opts):
     options = {}
     for x in opts:
@@ -210,7 +192,6 @@ def prepare_workdir_from_archive(initdir, inputarchive):
     with zipfile.ZipFile(localzipfile) as zf:
         zf.extractall(path=initdir)
     os.remove(localzipfile)
-    return initdir
 
 def setupbackend_fromstring(backend, backendopts = None):
     backendopts = backendopts or {}
@@ -224,13 +205,8 @@ def setupbackend_fromstring(backend, backendopts = None):
 def rootprovider_from_string(dataarg,dataopts = None):
     log.info('%s %s',dataarg,dataopts)
     if dataarg.startswith('local:'):
-        from packtivity.statecontexts.posixfs_context import LocalFSProvider, LocalFSState
-        workdir = dataarg.split(':',2)[1]
-        read = dataopts.get('read',None)
-        nest = dataopts.get('nest',True)
-        ensure = dataopts.get('ensure',True)
-        writable_state = LocalFSState([workdir])
-        return LocalFSProvider(read,writable_state, ensure = ensure, nest = nest)
+        import yadage.state_providers.localposix
+        return yadage.state_providers.localposix.setup_provider(dataarg,dataopts)
     if dataarg.startswith('py:'):
         _,module, setupfunc,dataarg = dataarg.split(':',3)
         module = importlib.import_module(module)
@@ -240,3 +216,13 @@ def rootprovider_from_string(dataarg,dataopts = None):
         module = importlib.import_module(os.environ['PACKTIVITY_STATEPROVIDER'])
         return module.setup_provider(dataarg,dataopts)
     raise RuntimeError('unknown data type %s %s', dataarg, dataopts)
+
+def get_init_spec(discover):
+    return {
+        'publisher': {
+            'publisher_type': 'fromparjq-pub',
+            'script': '.',
+            'glob': discover,
+            'relative_paths': True
+        }
+    }

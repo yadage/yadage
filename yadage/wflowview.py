@@ -1,7 +1,7 @@
 import logging
 from jsonpointer import JsonPointer
 import jsonpath_rw
-from .utils import get_obj_id
+from .utils import get_obj_id, get_init_spec
 from .wflownode import YadageNode
 from .stages import InitStage,OffsetStage
 import yadage.tasks as tasks
@@ -82,13 +82,15 @@ class WorkflowView(object):
                 return x
         return None
 
-    def init(self, initdata, name='init'):
+    def init(self, initdata, initstate = None, name='init', discover = False):
         '''
         initialize this scope by adding an initialization stage.
 
         :param inidata: initialization JSON data
         '''
-        step = tasks.init_task(name, initdata)
+        spec = get_init_spec(discover)
+        step = tasks.packtivity_task(name, spec, initstate)
+        step.s(**initdata)
         self.addRule(InitStage(step), self.offset)
 
     def addRule(self, rule, offset=''):
@@ -102,7 +104,7 @@ class WorkflowView(object):
         thisoffset.resolve(self.bookkeeper)['_meta']['stages'] += [offsetstage.identifier]
         return offsetstage.identifier
 
-    def addStep(self, task, stage, depends_on=None):
+    def addStep(self, task, stage, depends_on=None, hints = None):
         '''
         adds a node to the DAG connecting it to the passed depending nodes
         while tracking that it was added by the specified stage
@@ -111,15 +113,18 @@ class WorkflowView(object):
         :param stage: the stage name
         :param depends_on: dependencies of this step
         '''
+
+
         node = YadageNode(task.metadata['name'], task, identifier=get_obj_id(task))
         node.task.metadata['wflow_node_id'] = node.identifier
         node.task.metadata['wflow_offset'] = self.offset
         node.task.metadata['wflow_stage'] = stage
+        node.task.metadata['wflow_hints'] = hints or {}
 
         self.dag.addNode(node, depends_on=depends_on)
         self.steps.setdefault(stage,[]).append({'_nodeid': node.identifier})
         self.bookkeeper['_meta']['steps'] += [node.identifier]
-        log.debug('added node %s', node)
+        log.info('added node %s', node)
         return node
 
     def addWorkflow(self, rules, initstep=None, stage=None):

@@ -1,8 +1,9 @@
 import yadage.workflow_loader
 from yadage.wflow import YadageWorkflow
 from yadage.stages import JsonStage,InitStage
-from packtivity.statecontexts.posixfs_context import LocalFSProvider,LocalFSState
-from packtivity.statecontexts import load_provider
+from packtivity.statecontexts.posixfs_context import LocalFSState
+from yadage.state_providers.localposix import LocalFSProvider
+from yadage.state_providers import load_provider
 
 def test_applicable():
     data  = yadage.workflow_loader.workflow('workflow.yml','tests/testspecs/local-helloworld')

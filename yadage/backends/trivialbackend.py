@@ -1,4 +1,5 @@
 from packtivity.asyncbackends import PacktivityProxyBase
+
 class TrivialProxy(PacktivityProxyBase):
     '''
     A trivial proxy that carries the results and status already

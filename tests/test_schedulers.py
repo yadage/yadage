@@ -17,6 +17,7 @@ def test_nested_wflow(nested_wflow):
 
     wflow.view().rules[-1].apply(wflow)
     assert len(wflow.dag.nodes()) == 1
+
     assert wflow.rules[0].applicable(wflow) == True
     assert wflow.rules[0].rule.stagespec['scheduler_type'] == 'singlestep-stage'
     assert len(wflow.view('').rules) == 3 # init nested higherscope

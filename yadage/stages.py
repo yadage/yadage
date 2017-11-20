@@ -97,14 +97,9 @@ class ViewStageBase(object):
         self.view = flowview
         self.schedule()
 
-    def addStep(self, step):
+    def addStep(self, step, hints = None):
         dependencies = [self.view.dag.getNode(k.stepid) for k in step.inputs]
-        for d in dependencies:
-            try:
-                step.state.add_dependency(d.task.state)
-            except AttributeError:
-                pass
-        return self.view.addStep(step, stage = self.name, depends_on=dependencies)
+        return self.view.addStep(step, stage = self.name, depends_on=dependencies, hints = hints)
 
     def addWorkflow(self, rules, initstep, isolate = True):
         self.view.addWorkflow(rules, initstep=initstep, stage=self.name if isolate else None)
@@ -128,15 +123,16 @@ class InitStage(ViewStageBase):
         return True
 
     def schedule(self):
-        log.debug('initializing a scope with init step: %s',
-                  self.step.prepublished)
-        self.addStep(self.step)
+        log.info('initializing a scope with init step: %s', self.step.prepublished)
+        self.addStep(self.step, hints = {'is_init_step': True})
 
     #(de-)serialization
     @classmethod
     def fromJSON(cls, data):
+        from packtivity.statecontexts import load_state
+        # print 'DATA',data
         instance = cls(
-            step = tasks.init_task.fromJSON(data['step'])
+            step = tasks.packtivity_task.fromJSON(data['step'], load_state)
         )
         return instance
 

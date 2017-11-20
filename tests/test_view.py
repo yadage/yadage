@@ -1,8 +1,9 @@
 import yadage.workflow_loader
 from yadage.wflow import YadageWorkflow
 from yadage.stages import OffsetStage
-from packtivity.statecontexts import load_provider
-from packtivity.statecontexts.posixfs_context import LocalFSProvider,LocalFSState
+from yadage.state_providers import load_provider
+from packtivity.statecontexts.posixfs_context import LocalFSState
+from yadage.state_providers.localposix import LocalFSProvider
 
 def test_init():
     data  = yadage.workflow_loader.workflow('workflow.yml','tests/testspecs/nestedmapreduce')

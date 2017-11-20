@@ -75,7 +75,7 @@ def test_directjson_ctx(tmpdir,multiproc_backend):
 
 def test_reset(tmpdir,multiproc_backend):
     ys = YadageSteering()
-    ys.prepare(os.path.join(str(tmpdir),'workdir'),initdata = {'input': [1,2,3]})
+    ys.prepare(os.path.join(str(tmpdir),'workdir'))
     ys.init_workflow('workflow.yml', {'input': [1,2,3]}, 'tests/testspecs/nestedmapreduce')
 
     ys.adage_argument(default_trackers = False)
