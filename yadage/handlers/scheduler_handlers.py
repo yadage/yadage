@@ -93,8 +93,6 @@ def step_or_stages(name, spec, state_provider, inputs, parameters, dependencies)
         return p,None
     elif 'workflow' in spec:
         name = 'init_{}'.format(name)
-        depstates  = [d.task.state for d in dependencies if d.task.state]
-        step_state = state_provider.new_state(name,depstates, readonly = True)
         init_spec  = init_stage_spec(parameters, discover = False, used_inputs=[x.json() for x in inputs], name = 'init', nodename = 'init_{}'.format(name))
         return None, [init_spec] + spec['workflow']['stages']
     elif 'cases' in spec:
