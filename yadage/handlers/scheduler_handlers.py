@@ -75,7 +75,7 @@ def finalize_input(jsondata,wflowview):
         leaf_pointer.set(result,finalize_value(wflowview, leaf_value))
     return result, inputs
 
-def step_or_init(name, spec, state_provider, parameters, dependencies):
+def step_or_stages(name, spec, state_provider, inputs, parameters, dependencies):
     '''
     :param name: name of the eventual (init-)step
     :param spec: the stage spec
@@ -89,20 +89,19 @@ def step_or_init(name, spec, state_provider, parameters, dependencies):
         step_state = state_provider.new_state(name,depstates)
         p = packtivity_task(name=name, spec=spec['step'], state=step_state)
         p.s(**parameters)
+        p.used_inputs(inputs)
         return p,None
     elif 'workflow' in spec:
         name = 'init_{}'.format(name)
-        depstates = [d.task.state for d in dependencies if d.task.state]
+        depstates  = [d.task.state for d in dependencies if d.task.state]
         step_state = state_provider.new_state(name,depstates, readonly = True)
-        init_spec = get_init_spec(discover = False)
-        i = packtivity_task(name, init_spec, step_state)
-        i.s(**parameters)
-        return i, spec['workflow']['stages']
+        init_spec  = init_stage_spec(parameters, discover = False, used_inputs=[x.json() for x in inputs], name = 'init', nodename = 'init_{}'.format(name))
+        return None, [init_spec] + spec['workflow']['stages']
     elif 'cases' in spec:
         for x in spec['cases']:
             if jq.jq(x['if']).transform(parameters):
                 log.info('selected case %s', x['if'])
-                return step_or_init(name,x, state_provider, parameters, dependencies)
+                return step_or_stages(name,x, state_provider, parameters, dependencies)
         log.info('no case selected on pars %s', parameters)
         return None, None
     raise RuntimeError('do not know what kind of stage spec we are dealing with. %s', spec.keys())
@@ -119,23 +118,20 @@ def addStepOrWorkflow(name, stage, parameters, inputs, spec):
     :return: None
     '''
     dependencies = [stage.view.dag.getNode(k.stepid) for k in inputs]
-    step,stages = step_or_init(name,spec,stage.state_provider, parameters, dependencies)
-    if not step: return
-    step.used_inputs(inputs)
+    step,stages = step_or_stages(name,spec,stage.state_provider, inputs, parameters, dependencies)
+
+    if step:
+        stage.addStep(step)
+        log.debug('scheduled a step')
 
     if stages: #subworkflow case
         depstates = [d.task.state for d in set(dependencies) if d.task.state]
         new_provider = stage.state_provider.new_provider(name, init_states = depstates)
-        init_spec = init_stage_spec(parameters, discover = False, used_inputs=[k.json() for k in step.inputs], name = 'init', nodename = 'init_{}'.format(name))
-        subrules = [JsonStage(init_spec,new_provider)] + [JsonStage(s, new_provider) for s in stages]
-
+        subrules = [JsonStage(s, new_provider) for s in stages]
         stage.addWorkflow(subrules,
             isolate = True
         )
         log.debug('scheduled a subworkflow')
-    else:
-        stage.addStep(step)
-        log.debug('scheduled a step')
 
 def get_parameters(spec):
     '''
