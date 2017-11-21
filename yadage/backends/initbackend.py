@@ -1,5 +1,4 @@
 from packtivity.asyncbackends import ForegroundProxy, ForegroundBackend
-import packtivity
 import logging
 
 log = logging.getLogger(__name__)

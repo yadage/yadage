@@ -93,7 +93,7 @@ class FileBackedModel(object):
         jsondata = data.json()
 
         with open(self.filename,'w') as statefile:
-            json.dump(data.json(), statefile)
+            json.dump(jsondata, statefile)
 
     def load(self):
         '''

@@ -198,7 +198,7 @@ class ChecksumCache(CacheBuilder):
 
         :param cachid: the cache entry identifier
         '''
-        task = self.cache[cacheid]['task']
+        # task = self.cache[cacheid]['task']
 
         stored_validation_data = self.cache[cacheid]['result']['validation_data']
         validation_data_now = self.generate_validation_data(cacheid)

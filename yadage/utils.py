@@ -9,7 +9,6 @@ import jq
 import hashlib
 import uuid
 import copy
-import glob2 as glob
 import importlib
 
 from yadageschemas.utils import WithJsonRefEncoder
