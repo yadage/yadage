@@ -54,7 +54,7 @@ def steering_ctx(
         dataarg = dataarg, dataopts = dataopts,
         metadir = metadir, accept_metadir = accept_metadir,
     )
-    
+
     wflow_kwargs = dict() #if this stays empty, error will be raise by ys
     if workflow_json:
         wflow_kwargs = dict(workflow_json = workflow_json)

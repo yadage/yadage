@@ -3,7 +3,7 @@ from packtivity.backendutils import backend_from_string
 
 import yadage.backends.caching as caching
 import yadage.backends.federatedbackend as federatedbackend
-from .initbackend import InitProxy, InitBackend
+from packtivity.asyncbackends import ForegroundBackend
 
 log = logging.getLogger(__name__)
 
@@ -23,7 +23,7 @@ class PacktivityBackend(federatedbackend.FederatedBackend):
             raise RuntimeError('need backend or backendstring')
         self.cached = False
         super(PacktivityBackend, self).__init__({
-            'init': InitBackend(),
+            'purepub': ForegroundBackend(),
             'packtivity': backend
         })
 
@@ -38,12 +38,16 @@ class PacktivityBackend(federatedbackend.FederatedBackend):
         )
 
     def routedsubmit(self, task):
+        is_pure_publishing = task.metadata['wflow_hints'].get('is_purepub',False)
 
-        # print 'ROUTE', task.json()
+        if is_pure_publishing:
+            foreground_proxy = self.backends['purepub'].submit(
+                task.spec, task.parameters, task.state, task.metadata
+            )
+            foreground_proxy.set_details({'labels': {'backend_hints': 'is_purepub'}})
+            return foreground_proxy
 
-        is_init = task.metadata['wflow_hints'].get('is_init_step',False)
-
-        if not is_init:
+        else:
             #this is a little hacky, because the packtivity backends
             #take unrolled spec/parameters/context while the adage API
             #takes generalized task objects
@@ -57,15 +61,11 @@ class PacktivityBackend(federatedbackend.FederatedBackend):
                 return self.backends['packtivity'].submit(
                     task.spec, task.parameters, task.state, task.metadata
                 )
-        else:
-            #init steps are by definition successful
-            return self.backends['init'].submit(
-                task.spec, task.parameters, task.state, task.metadata
-            )
 
     def routeproxy(self, proxy):
-        if type(proxy) == InitProxy:
-            return 'init', proxy
+        details = proxy.details() or {}
+        if details.get('labels',{}).get('backend_hints') == 'is_purepub':
+            return 'purepub', proxy
         else:
             return 'packtivity', proxy
         raise NotImplementedError('needs implementation')
