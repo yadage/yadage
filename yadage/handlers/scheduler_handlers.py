@@ -85,7 +85,7 @@ def step_or_stages(name, spec, state_provider, inputs, parameters, dependencies)
     :return: yadage or init step object
     '''
     if 'step' in spec:
-        depstates = [d.task.state for d in dependencies if d.task.state]
+        depstates = set(d.task.state for d in dependencies if d.task.state)
         step_state = state_provider.new_state(name,depstates)
         p = packtivity_task(name=name, spec=spec['step'], state=step_state)
         p.s(**parameters)

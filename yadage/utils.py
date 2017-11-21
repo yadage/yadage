@@ -219,6 +219,8 @@ def rootprovider_from_string(dataarg,dataopts = None):
 
 def get_init_spec(discover):
     return {
+        'process': None,
+        'environment': None,
         'publisher': {
             'publisher_type': 'fromparjq-pub',
             'script': '.',
