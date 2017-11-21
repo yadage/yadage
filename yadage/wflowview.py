@@ -1,9 +1,9 @@
 import logging
 from jsonpointer import JsonPointer
 import jsonpath_rw
-from .utils import get_obj_id, get_init_spec
+from .utils import get_obj_id, init_stage_spec
 from .wflownode import YadageNode
-from .stages import InitStage,OffsetStage
+from .stages import JsonStage,OffsetStage
 import yadage.tasks as tasks
 
 log = logging.getLogger(__name__)
@@ -19,6 +19,7 @@ class WorkflowView(object):
     '''
 
     def __init__(self, workflowobj, offset=''):
+        self.wflow = workflowobj
         self.dag = workflowobj.dag
         self.rules = workflowobj.rules
         self.applied_rules = workflowobj.applied_rules
@@ -31,7 +32,6 @@ class WorkflowView(object):
 
         :return
         '''
-
         matches = jsonpath_rw.parse(query).find(collection)
         return matches
 
@@ -82,20 +82,18 @@ class WorkflowView(object):
                 return x
         return None
 
-    def init(self, initdata, initstate = None, name='init', discover = False):
+    def init(self, initdata, init_provider = None, used_inputs = None, name='init', discover = False):
         '''
         initialize this scope by adding an initialization stage.
 
         :param inidata: initialization JSON data
         '''
-        spec = get_init_spec(discover)
-        step = tasks.packtivity_task(name, spec, initstate)
-        step.s(**initdata)
-        self.addRule(InitStage(step), self.offset)
+        spec = init_stage_spec(initdata, discover, used_inputs or [], name)
+        self.addRule(JsonStage(spec, init_provider), self.offset)
 
     def addRule(self, rule, offset=''):
         '''
-        add a DAG extensloaderion rule, possibly with a scope offset
+        add a DAG extension rule, possibly with a scope offset
         '''
         thisoffset = JsonPointer(offset)
         offsetstage = OffsetStage(rule, self._makeoffset(offset))
@@ -127,12 +125,12 @@ class WorkflowView(object):
         log.info('added node %s', node)
         return node
 
-    def addWorkflow(self, rules, initstep=None, stage=None):
+    def addWorkflow(self, rules, initspec = None, init_provider = None, stage=None):
         '''
         add a (sub-)workflow (i.e. list of stages) to the overall workflow
         '''
-        if initstep: # if we want to initialize the workflow add a initstage
-            rules += [InitStage(initstep)]
+        if initspec: # if we want to initialize the workflow add a initstage
+            rules += [JsonStage(initspec, init_provider)]
 
         offset = ''
         if stage is not None:

@@ -10,7 +10,7 @@ import yadage.handlers.utils as utils
 from .expression_handlers import handlers as exprhandlers
 from ..tasks import packtivity_task
 from ..stages import JsonStage
-from ..utils import leaf_iterator_jsonlike, pointerize, process_jsonlike, outputReference, get_init_spec
+from ..utils import leaf_iterator_jsonlike, pointerize, process_jsonlike, outputReference, get_init_spec, init_stage_spec
 
 log = logging.getLogger(__name__)
 
@@ -126,8 +126,11 @@ def addStepOrWorkflow(name, stage, parameters, inputs, spec):
     if stages: #subworkflow case
         new_provider = stage.state_provider.new_provider(name)
         subrules = [JsonStage(s, new_provider) for s in stages]
+
+        init_spec = init_stage_spec(parameters, discover = False, used_inputs=[k.json() for k in step.inputs], name = 'init', nodename = 'init_{}'.format(name))
+
         stage.addWorkflow(subrules,
-            initstep=step if step.parameters else None,
+            initspec = init_spec,
             isolate = True
         )
         log.debug('scheduled a subworkflow')
@@ -297,3 +300,31 @@ def jq_stage(stage, spec):
 
         log.info('finalized to: %s',after_post)
         addStepOrWorkflow(singlename, stage, after_post, inputs, spec)
+
+
+@scheduler('init-stage')
+def init_stage(stage, spec):
+    '''
+    :param stage: common stage parent object
+    :param spec: stage JSON-like spec
+
+    :return: None
+    '''
+    inputs = []
+    if spec.get('inputs'):
+        inputs = map(outputReference.fromJSON, spec['inputs'])
+        depstates = [stage.view.dag.getNode(k.stepid).task.state for k in inputs]
+        log.info('initializing scope from dependent tasks')
+    else:
+        depstates = [stage.state_provider.init_state] if stage.state_provider else []
+        log.info('initializing scope from dependent tasks')
+
+    if depstates:
+        step_state = stage.state_provider.new_state(stage.name,depstates, readonly = True)
+    else:
+        step_state = None
+    init_spec = get_init_spec(discover = spec['discover'])
+    task = packtivity_task(spec['nodename'] or stage.name, init_spec, step_state)
+    task.s(**spec['parameters'])
+    task.used_inputs(inputs)
+    stage.addStep(task, hints = {'is_init_step': True})

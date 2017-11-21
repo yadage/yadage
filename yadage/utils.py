@@ -226,3 +226,19 @@ def get_init_spec(discover):
             'relative_paths': True
         }
     }
+
+def init_stage_spec(parameters, discover, used_inputs, name, nodename = None):
+    return {
+        'name': name,
+        'dependencies': {
+            "dependency_type": "jsonpath_ready",
+            "expressions": []
+        },
+        'scheduler': {
+             'scheduler_type': 'init-stage',
+             'parameters': parameters,
+             'inputs':   used_inputs,
+             'nodename': nodename,
+             'discover': discover
+        }
+    }

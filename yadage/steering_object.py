@@ -105,13 +105,12 @@ class YadageSteering():
                 validate=validate
             )
 
-
         with open('{}/yadage_template.json'.format(self.metadir), 'w') as f:
             json.dump(workflow_json, f)
         workflowobj = YadageWorkflow.createFromJSON(workflow_json, self.rootprovider)
         if initdata:
             log.info('initializing workflow with %s',initdata)
-            workflowobj.view().init(initdata, self.rootprovider.init_state, discover = True)
+            workflowobj.view().init(initdata, self.rootprovider, discover = True)
         else:
             log.info('no initialization data')
         self.controller = setup_controller_from_modelstring(
