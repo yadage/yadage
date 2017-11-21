@@ -12,5 +12,5 @@ class InitProxy(ForegroundProxy):
 
 class InitBackend(ForegroundBackend):
     def submit(self, spec, parameters, state, metadata):
-        foreground_proxy = super(InitBackend,self).submit(spec, parameters, state)
+        foreground_proxy = super(InitBackend,self).submit(spec, parameters, state,metadata)
         return InitProxy(foreground_proxy.result, foreground_proxy.success)

@@ -118,7 +118,7 @@ class WorkflowView(object):
         node.task.metadata['wflow_offset'] = self.offset
         node.task.metadata['wflow_stage'] = stage
         node.task.metadata['wflow_hints'] = hints or {}
-
+        
         self.dag.addNode(node, depends_on=depends_on)
         self.steps.setdefault(stage,[]).append({'_nodeid': node.identifier})
         self.bookkeeper['_meta']['steps'] += [node.identifier]

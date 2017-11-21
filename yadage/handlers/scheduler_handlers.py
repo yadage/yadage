@@ -93,13 +93,13 @@ def step_or_stages(name, spec, state_provider, inputs, parameters, dependencies)
         return p,None
     elif 'workflow' in spec:
         name = 'init_{}'.format(name)
-        init_spec  = init_stage_spec(parameters, discover = False, used_inputs=[x.json() for x in inputs], name = 'init', nodename = 'init_{}'.format(name))
+        init_spec  = init_stage_spec(parameters, discover = False, used_inputs=[x.json() for x in inputs], name = 'init', nodename = name)
         return None, [init_spec] + spec['workflow']['stages']
     elif 'cases' in spec:
         for x in spec['cases']:
             if jq.jq(x['if']).transform(parameters):
                 log.info('selected case %s', x['if'])
-                return step_or_stages(name,x, state_provider, parameters, dependencies)
+                return step_or_stages(name,x, state_provider, inputs, parameters, dependencies)
         log.info('no case selected on pars %s', parameters)
         return None, None
     raise RuntimeError('do not know what kind of stage spec we are dealing with. %s', spec.keys())
@@ -312,7 +312,10 @@ def init_stage(stage, spec):
 
     depstates = stage.state_provider.init_states if stage.state_provider else []
 
-    step_state = stage.state_provider.new_state(stage.name,depstates, readonly = True)
+    if stage.state_provider:
+        step_state = stage.state_provider.new_state(stage.name,depstates, readonly = True)
+    else:
+        step_state = None
 
     init_spec = get_init_spec(discover = spec['discover'])
     task = packtivity_task(spec['nodename'] or stage.name, init_spec, step_state)
