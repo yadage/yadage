@@ -321,4 +321,4 @@ def init_stage(stage, spec):
     task = packtivity_task(spec['nodename'] or stage.name, init_spec, step_state)
     task.s(**spec['parameters'])
     task.used_inputs(inputs)
-    stage.addStep(task, hints = {'is_init_step': True})
+    stage.addStep(task, hints = {'is_purepub': True})

@@ -3,6 +3,9 @@ class CachedProxy(object):
         self.proxy = proxy
         self.cacheid = cacheid
 
+    def details(self):
+        return {}
+
     def json(self):
         return {'proxyname': 'CachedProxy', 'proxy': self.proxy.json(), 'cacheid': self.cacheid}
 
@@ -16,13 +19,10 @@ def load_proxy(data,deserialization_opts = None):
     import packtivity.backendutils
     import yadage.backends.packtivitybackend
     import yadage.backends.trivialbackend
-    import yadage.backends.initbackend
 
 
     ## test if this is one of the yadage-specfic proxies
-    if data['proxyname']=='InitProxy':
-        return yadage.backends.initbackend.InitProxy.fromJSON(data)
-    elif data['proxyname']=='CachedProxy':
+    if data['proxyname']=='CachedProxy':
         return CachedProxy.fromJSON(data,deserialization_opts)
     elif data['proxyname']=='TrivialProxy':
         return yadage.backends.trivialbackend.TrivialProxy.fromJSON(data)
