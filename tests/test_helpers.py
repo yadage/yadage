@@ -14,19 +14,6 @@ def test_leafit():
 		('/nested/dict/1','structure'),
 	}
 
-def test_filediscovery(tmpdir):
-	tmpdir.join('afile').ensure()
-	tmpdir.join('bfile1').ensure()
-	tmpdir.join('bfile2').ensure()
-	tmpdir.join('cfile').ensure()
-	initdata = {'key1':'afile','key2':'bfile*','key3':'nofile','nested':{'file':'cfile'}}
-	data = yadage.utils.discover_initfiles(initdata,str(tmpdir))
-	assert data['key1'] == os.path.join(str(tmpdir),'afile')
-	assert set(data['key2']) == set([os.path.join(str(tmpdir),'bfile1'),os.path.join(str(tmpdir),'bfile2')])
-	assert data['key3'] == 'nofile'
-	assert data['nested']['file'] == os.path.join(str(tmpdir),'cfile')
-
-
 def test_getinit(tmpdir):
 	tmpdir.join('input.yml').write('input: [1,2,3]\n')
 

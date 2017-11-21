@@ -6,6 +6,11 @@ from .stages import JsonStage, OffsetStage
 def json_or_nil(x):
     return None if x is None else x.json()
 
+def what(x):
+    # raise RuntimeError(x.json()['metadata']['wflow_hints'])
+    return None if x is None else x.json()
+
+
 class YadageWorkflow(adage.adageobject):
     '''
     The overall workflow state object that extends the basic
@@ -23,7 +28,7 @@ class YadageWorkflow(adage.adageobject):
     def json(self):
         data = obj_to_json(self,
                            ruleserializer=json_or_nil,
-                           taskserializer=json_or_nil,
+                           taskserializer=what,
                            proxyserializer=json_or_nil,
                            )
         data['bookkeeping'] = self.bookkeeping

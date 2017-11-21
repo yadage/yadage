@@ -2,7 +2,6 @@ import logging
 
 from .handlers.predicate_handlers import handlers as pred_handlers
 from .utils import get_id_fromjson
-import yadage.tasks as tasks
 
 log = logging.getLogger(__name__)
 
@@ -51,10 +50,10 @@ class OffsetStage(object):
     #(de-)serialization
     @classmethod
     def fromJSON(cls, data, state_provider_deserializer = None):
-        if data['rule']['type'] == 'InitStage':
-            rule = InitStage.fromJSON(data['rule'])
-        elif data['rule']['type'] == 'JsonStage':
+        if data['rule']['type'] == 'JsonStage':
             rule = JsonStage.fromJSON(data['rule'], state_provider_deserializer)
+        else:
+            RuntimeError('unknown stage type %s', data['rule']['type'])
         return cls(
             rule=rule,
             identifier=data['id'],
@@ -97,54 +96,18 @@ class ViewStageBase(object):
         self.view = flowview
         self.schedule()
 
-    def addStep(self, step):
+    def addStep(self, step, hints = None):
         dependencies = [self.view.dag.getNode(k.stepid) for k in step.inputs]
-        for d in dependencies:
-            try:
-                step.state.add_dependency(d.task.state)
-            except AttributeError:
-                pass
-        return self.view.addStep(step, stage = self.name, depends_on=dependencies)
+        return self.view.addStep(step, stage = self.name, depends_on=dependencies, hints = hints)
 
-    def addWorkflow(self, rules, initstep, isolate = True):
-        self.view.addWorkflow(rules, initstep=initstep, stage=self.name if isolate else None)
-    #(de-)serialization
+    def addWorkflow(self, rules, isolate = True):
+        self.view.addWorkflow(rules, stage=self.name if isolate else None)
+
     def json(self):
         return {
             'name': self.name,
             'state_provider': self.state_provider.json() if self.state_provider else None
         }
-
-class InitStage(ViewStageBase):
-    '''
-    simple stage that just adds a initializer step to the DAG
-    '''
-
-    def __init__(self, step):
-        super(InitStage, self).__init__('init', None)
-        self.step = step
-
-    def applicable(self, flowview):
-        return True
-
-    def schedule(self):
-        log.debug('initializing a scope with init step: %s',
-                  self.step.prepublished)
-        self.addStep(self.step)
-
-    #(de-)serialization
-    @classmethod
-    def fromJSON(cls, data):
-        instance = cls(
-            step = tasks.init_task.fromJSON(data['step'])
-        )
-        return instance
-
-    def json(self):
-        data = super(InitStage, self).json()
-        data.update(type='InitStage', info='', step=self.step.json())
-        return data
-
 
 class JsonStage(ViewStageBase):
     '''

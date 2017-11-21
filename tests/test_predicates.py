@@ -1,9 +1,11 @@
 import yadage.workflow_loader
 from yadage.wflow import YadageWorkflow
-from packtivity.statecontexts.posixfs_context import LocalFSProvider,LocalFSState
-def test_multistepstage_schedule_wflows():
+from packtivity.statecontexts.posixfs_context import LocalFSState
+from yadage.state_providers.localposix import LocalFSProvider
+
+def test_multistepstage_schedule_wflows(localfs_state_provider):
     data  = yadage.workflow_loader.workflow('workflow.yml','tests/testspecs/nestedmapreduce')
-    wflow = YadageWorkflow.createFromJSON(data,LocalFSProvider(LocalFSState(['/workdir']), ensure = False))
+    wflow = YadageWorkflow.createFromJSON(data,localfs_state_provider)
 
 
     inputdata = [1,2,3]
@@ -11,7 +13,7 @@ def test_multistepstage_schedule_wflows():
     assert wflow.view().getRule(name = 'map').applicable(wflow) == False
 
     wflow.view().getRule(name = 'init').apply(wflow)
-    assert len(wflow.dag.nodes()) == 1 
+    assert len(wflow.dag.nodes()) == 1
     assert wflow.view().getRule(name = 'map').applicable(wflow) == True
 
 

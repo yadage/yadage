@@ -2,7 +2,8 @@
 import logging
 import click
 import os
-from packtivity.statecontexts.posixfs_context import LocalFSProvider,LocalFSState
+from packtivity.statecontexts.posixfs_context import LocalFSState
+from yadage.state_providers.localposix import LocalFSProvider
 
 from .steering_object import YadageSteering
 from .controllers import PersistentController

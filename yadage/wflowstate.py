@@ -3,7 +3,7 @@ import logging
 from .wflow import YadageWorkflow
 from .wflownode import YadageNode
 from .backends import load_proxy
-from packtivity.statecontexts import load_provider
+from .state_providers import load_provider
 from packtivity.statecontexts import load_state
 
 log = logging.getLogger(__name__)
@@ -89,12 +89,17 @@ class FileBackedModel(object):
         '''
         :param data: data to commit to disk. needs to have '.json()' method
         '''
+        log.debug('committing model')
+        jsondata = data.json()
+
         with open(self.filename,'w') as statefile:
-            json.dump(data.json(), statefile)
+            json.dump(jsondata, statefile)
 
     def load(self):
         '''
         :return: the adage workflow object holding rules and the graph
         '''
+        log.debug('loading model')
         with open(self.filename) as statefile:
-            return self.deserializer(json.load(statefile))
+            jsondata = json.load(statefile)
+            return self.deserializer(jsondata)

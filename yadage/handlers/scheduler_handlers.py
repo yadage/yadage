@@ -8,9 +8,9 @@ import jsonpointer
 
 import yadage.handlers.utils as utils
 from .expression_handlers import handlers as exprhandlers
-from ..tasks import packtivity_task, init_task
+from ..tasks import packtivity_task
 from ..stages import JsonStage
-from ..utils import leaf_iterator_jsonlike, pointerize, process_jsonlike, outputReference
+from ..utils import leaf_iterator_jsonlike, pointerize, process_jsonlike, outputReference, get_init_spec, init_stage_spec
 
 log = logging.getLogger(__name__)
 
@@ -75,30 +75,31 @@ def finalize_input(jsondata,wflowview):
         leaf_pointer.set(result,finalize_value(wflowview, leaf_value))
     return result, inputs
 
-def step_or_init(name, spec, state_provider, parameters):
+def step_or_stages(name, spec, state_provider, inputs, parameters, dependencies):
     '''
-    create a named packtivity_task of sub-workflow init_task object based on stage spec
-
     :param name: name of the eventual (init-)step
     :param spec: the stage spec
     :param state_provider: the stage's state provider
+    :param dependencies: dependent nodes
 
     :return: yadage or init step object
     '''
     if 'step' in spec:
-        step_state = state_provider.new_state(name)
-        p =  packtivity_task(name=name, spec=spec['step'], state=step_state)
+        depstates = set(d.task.state for d in dependencies if d.task.state)
+        step_state = state_provider.new_state(name,depstates)
+        p = packtivity_task(name=name, spec=spec['step'], state=step_state)
         p.s(**parameters)
+        p.used_inputs(inputs)
         return p,None
     elif 'workflow' in spec:
-        i = init_task('init {}'.format(name))
-        i.s(**parameters)
-        return i, spec['workflow']['stages']
+        name = 'init_{}'.format(name)
+        init_spec  = init_stage_spec(parameters, discover = False, used_inputs=[x.json() for x in inputs], name = 'init', nodename = name)
+        return None, [init_spec] + spec['workflow']['stages']
     elif 'cases' in spec:
         for x in spec['cases']:
             if jq.jq(x['if']).transform(parameters):
                 log.info('selected case %s', x['if'])
-                return step_or_init(name,x, state_provider, parameters)
+                return step_or_stages(name,x, state_provider, inputs, parameters, dependencies)
         log.info('no case selected on pars %s', parameters)
         return None, None
     raise RuntimeError('do not know what kind of stage spec we are dealing with. %s', spec.keys())
@@ -114,19 +115,21 @@ def addStepOrWorkflow(name, stage, parameters, inputs, spec):
 
     :return: None
     '''
-    step,stages = step_or_init(name,spec,stage.state_provider, parameters)
-    if not step: return
-    step.used_inputs(inputs)
+    dependencies = [stage.view.dag.getNode(k.stepid) for k in inputs]
+    step,stages = step_or_stages(name,spec,stage.state_provider, inputs, parameters, dependencies)
 
-    if type(step) == init_task:
-        new_provider = stage.state_provider.new_provider(name)
+    if step:
+        stage.addStep(step)
+        log.debug('scheduled a step')
+
+    if stages: #subworkflow case
+        depstates = [d.task.state for d in set(dependencies) if d.task.state]
+        new_provider = stage.state_provider.new_provider(name, init_states = depstates)
         subrules = [JsonStage(s, new_provider) for s in stages]
         stage.addWorkflow(subrules,
-            initstep=step if step.parameters else None,
             isolate = True
         )
-    else:
-        stage.addStep(step)
+        log.debug('scheduled a subworkflow')
 
 def get_parameters(spec):
     '''
@@ -290,3 +293,32 @@ def jq_stage(stage, spec):
 
         log.info('finalized to: %s',after_post)
         addStepOrWorkflow(singlename, stage, after_post, inputs, spec)
+
+
+@scheduler('init-stage')
+def init_stage(stage, spec):
+    '''
+    :param stage: common stage parent object
+    :param spec: stage JSON-like spec
+
+    :return: None
+    '''
+    inputs = []
+    if spec.get('inputs'):
+        inputs = map(outputReference.fromJSON, spec['inputs'])
+        log.info('initializing scope from dependent tasks')
+    else:
+        log.info('initializing scope from dependent tasks')
+
+    depstates = stage.state_provider.init_states if stage.state_provider else []
+
+    if stage.state_provider:
+        step_state = stage.state_provider.new_state(stage.name,depstates, readonly = True)
+    else:
+        step_state = None
+
+    init_spec = get_init_spec(discover = spec['discover'])
+    task = packtivity_task(spec['nodename'] or stage.name, init_spec, step_state)
+    task.s(**spec['parameters'])
+    task.used_inputs(inputs)
+    stage.addStep(task, hints = {'is_init_step': True})

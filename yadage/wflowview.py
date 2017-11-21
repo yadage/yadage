@@ -1,10 +1,9 @@
 import logging
 from jsonpointer import JsonPointer
 import jsonpath_rw
-from .utils import get_obj_id
+from .utils import get_obj_id, init_stage_spec
 from .wflownode import YadageNode
-from .stages import InitStage,OffsetStage
-import yadage.tasks as tasks
+from .stages import JsonStage,OffsetStage
 
 log = logging.getLogger(__name__)
 
@@ -19,6 +18,7 @@ class WorkflowView(object):
     '''
 
     def __init__(self, workflowobj, offset=''):
+        self.wflow = workflowobj
         self.dag = workflowobj.dag
         self.rules = workflowobj.rules
         self.applied_rules = workflowobj.applied_rules
@@ -31,7 +31,6 @@ class WorkflowView(object):
 
         :return
         '''
-
         matches = jsonpath_rw.parse(query).find(collection)
         return matches
 
@@ -82,18 +81,18 @@ class WorkflowView(object):
                 return x
         return None
 
-    def init(self, initdata, name='init'):
+    def init(self, initdata, init_provider = None, used_inputs = None, name='init', discover = False):
         '''
         initialize this scope by adding an initialization stage.
 
         :param inidata: initialization JSON data
         '''
-        step = tasks.init_task(name, initdata)
-        self.addRule(InitStage(step), self.offset)
+        spec = init_stage_spec(initdata, discover, used_inputs or [], name)
+        self.addRule(JsonStage(spec, init_provider), self.offset)
 
     def addRule(self, rule, offset=''):
         '''
-        add a DAG extensloaderion rule, possibly with a scope offset
+        add a DAG extension rule, possibly with a scope offset
         '''
         thisoffset = JsonPointer(offset)
         offsetstage = OffsetStage(rule, self._makeoffset(offset))
@@ -102,7 +101,7 @@ class WorkflowView(object):
         thisoffset.resolve(self.bookkeeper)['_meta']['stages'] += [offsetstage.identifier]
         return offsetstage.identifier
 
-    def addStep(self, task, stage, depends_on=None):
+    def addStep(self, task, stage, depends_on=None, hints = None):
         '''
         adds a node to the DAG connecting it to the passed depending nodes
         while tracking that it was added by the specified stage
@@ -111,24 +110,24 @@ class WorkflowView(object):
         :param stage: the stage name
         :param depends_on: dependencies of this step
         '''
+
+
         node = YadageNode(task.metadata['name'], task, identifier=get_obj_id(task))
         node.task.metadata['wflow_node_id'] = node.identifier
         node.task.metadata['wflow_offset'] = self.offset
         node.task.metadata['wflow_stage'] = stage
+        node.task.metadata['wflow_hints'] = hints or {}
 
         self.dag.addNode(node, depends_on=depends_on)
         self.steps.setdefault(stage,[]).append({'_nodeid': node.identifier})
         self.bookkeeper['_meta']['steps'] += [node.identifier]
-        log.debug('added node %s', node)
+        log.info('added node %s', node)
         return node
 
-    def addWorkflow(self, rules, initstep=None, stage=None):
+    def addWorkflow(self, rules, stage=None):
         '''
         add a (sub-)workflow (i.e. list of stages) to the overall workflow
         '''
-        if initstep: # if we want to initialize the workflow add a initstage
-            rules += [InitStage(initstep)]
-
         offset = ''
         if stage is not None:
             self.steps.setdefault(stage,[]).append({})

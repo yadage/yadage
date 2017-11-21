@@ -16,11 +16,12 @@ def load_proxy(data,deserialization_opts = None):
     import packtivity.backendutils
     import yadage.backends.packtivitybackend
     import yadage.backends.trivialbackend
+    import yadage.backends.initbackend
 
 
     ## test if this is one of the yadage-specfic proxies
     if data['proxyname']=='InitProxy':
-        return yadage.backends.packtivitybackend.InitProxy.fromJSON(data)
+        return yadage.backends.initbackend.InitProxy.fromJSON(data)
     elif data['proxyname']=='CachedProxy':
         return CachedProxy.fromJSON(data,deserialization_opts)
     elif data['proxyname']=='TrivialProxy':

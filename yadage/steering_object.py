@@ -49,36 +49,13 @@ class YadageSteering():
             os.makedirs(self.metadir)
         self.adage_argument(workdir = os.path.join(self.metadir,'adage'))
 
-    def prepare_localstate(self, dataarg, dataopts, initdata = None):
-        '''
-        prepare default local state provider
-
-        :param dataarg: the workdirectory under which all packtivity data will be stored
-        :param dataopts: dictionary
-        :param initdata: initdata tempalte that is mutated based on initialization data on disk
-        '''
-        workdir = dataarg
-        initdir = os.path.join(workdir,dataopts.get('initdir','init'))
-        inputarchive = dataopts.get('inputarchive',None)
-
-        if inputarchive:
-            initdir = utils.prepare_workdir_from_archive(initdir, inputarchive)
-        if initdata:
-            utils.discover_initfiles(initdata,os.path.realpath(initdir))
-        self.rootprovider = utils.rootprovider_from_string(
-            'local:'+dataarg, dataopts
-        )
-        self.metadir = self.metadir or '{}/_yadage/'.format(workdir)
-
-
-    def prepare(self, dataarg, dataopts = None, initdata = None, accept_metadir = False, metadir = None):
+    def prepare(self, dataarg, dataopts = None, accept_metadir = False, metadir = None):
         '''
         prepares workflow data state, with  possible initialization and sets up stateprovider used for workflow stages.
         if initialization data is provided, it may be mutated to reflect automatic data discovery
 
         :param dataarg: mandatory state provider setup. generally <datatype>:<argument>. For
         :param dataopts: optional settings for state provider
-        :param initdata: optional workflow init parameters to process against data setup
         :param accept_metadir:
         :param metadir: meta-data directory
         '''
@@ -88,12 +65,11 @@ class YadageSteering():
         split_dataarg = dataarg.split(':',1)
         if len(split_dataarg) == 1:
             dataarg = split_dataarg[0]
-            self.prepare_localstate(dataarg,dataopts,initdata)
+            self.rootprovider = utils.rootprovider_from_string('local:'+dataarg, dataopts)
+            self.metadir = self.metadir or '{}/_yadage/'.format(dataarg)
         else:
             assert self.metadir #for non-default provider, require metadir to be set
-            self.rootprovider = utils.rootprovider_from_string(
-                dataarg, dataopts
-            )
+            self.rootprovider = utils.rootprovider_from_string(dataarg, dataopts)
         self.prepare_meta(accept = accept_metadir)
 
     def init_workflow(self,
@@ -129,17 +105,16 @@ class YadageSteering():
                 validate=validate
             )
 
-
         with open('{}/yadage_template.json'.format(self.metadir), 'w') as f:
             json.dump(workflow_json, f)
         workflowobj = YadageWorkflow.createFromJSON(workflow_json, self.rootprovider)
         if initdata:
             log.info('initializing workflow with %s',initdata)
-            workflowobj.view().init(initdata)
+            workflowobj.view().init(initdata, self.rootprovider, discover = True)
         else:
             log.info('no initialization data')
         self.controller = setup_controller_from_modelstring(
-                workflowobj, modelsetup = modelsetup, modelopts = modelopts
+            workflowobj, modelsetup = modelsetup, modelopts = modelopts
         )
 
     def adage_argument(self,**kwargs):
