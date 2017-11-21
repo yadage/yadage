@@ -125,13 +125,10 @@ class WorkflowView(object):
         log.info('added node %s', node)
         return node
 
-    def addWorkflow(self, rules, initspec = None, init_provider = None, stage=None):
+    def addWorkflow(self, rules, stage=None):
         '''
         add a (sub-)workflow (i.e. list of stages) to the overall workflow
         '''
-        if initspec: # if we want to initialize the workflow add a initstage
-            rules += [JsonStage(initspec, init_provider)]
-
         offset = ''
         if stage is not None:
             self.steps.setdefault(stage,[]).append({})

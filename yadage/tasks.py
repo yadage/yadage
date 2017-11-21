@@ -43,10 +43,10 @@ class packtivity_task(TaskBase):
         # attempt to prepublish output data merely from inputs
         # will still be None if not possible
         self.prepublished = packtivity.prepublish_default(self.spec, self.parameters, self.state)
-        log.info('parameters for packtivity_task set to %s. prepublished result, if any: %s',
+        log.debug('parameters for packtivity_task set to %s. prepublished result, if any: %s',
                     self.parameters,
                     self.prepublished
-                  )
+        )
         return self
 
     #(de-)serialization

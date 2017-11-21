@@ -124,13 +124,12 @@ def addStepOrWorkflow(name, stage, parameters, inputs, spec):
     step.used_inputs(inputs)
 
     if stages: #subworkflow case
-        new_provider = stage.state_provider.new_provider(name)
-        subrules = [JsonStage(s, new_provider) for s in stages]
-
+        depstates = [d.task.state for d in set(dependencies) if d.task.state]
+        new_provider = stage.state_provider.new_provider(name, init_states = depstates)
         init_spec = init_stage_spec(parameters, discover = False, used_inputs=[k.json() for k in step.inputs], name = 'init', nodename = 'init_{}'.format(name))
+        subrules = [JsonStage(init_spec,new_provider)] + [JsonStage(s, new_provider) for s in stages]
 
         stage.addWorkflow(subrules,
-            initspec = init_spec,
             isolate = True
         )
         log.debug('scheduled a subworkflow')
@@ -313,16 +312,14 @@ def init_stage(stage, spec):
     inputs = []
     if spec.get('inputs'):
         inputs = map(outputReference.fromJSON, spec['inputs'])
-        depstates = [stage.view.dag.getNode(k.stepid).task.state for k in inputs]
         log.info('initializing scope from dependent tasks')
     else:
-        depstates = [stage.state_provider.init_state] if stage.state_provider else []
         log.info('initializing scope from dependent tasks')
 
-    if depstates:
-        step_state = stage.state_provider.new_state(stage.name,depstates, readonly = True)
-    else:
-        step_state = None
+    depstates = stage.state_provider.init_states if stage.state_provider else []
+
+    step_state = stage.state_provider.new_state(stage.name,depstates, readonly = True)
+
     init_spec = get_init_spec(discover = spec['discover'])
     task = packtivity_task(spec['nodename'] or stage.name, init_spec, step_state)
     task.s(**spec['parameters'])

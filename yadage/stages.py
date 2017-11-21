@@ -101,8 +101,8 @@ class ViewStageBase(object):
         dependencies = [self.view.dag.getNode(k.stepid) for k in step.inputs]
         return self.view.addStep(step, stage = self.name, depends_on=dependencies, hints = hints)
 
-    def addWorkflow(self, rules, initspec, isolate = True):
-        self.view.addWorkflow(rules, initspec=initspec, init_provider = self.state_provider, stage=self.name if isolate else None)
+    def addWorkflow(self, rules, isolate = True):
+        self.view.addWorkflow(rules, stage=self.name if isolate else None)
 
     def json(self):
         return {
