@@ -11,5 +11,5 @@ stages:
     scheduler:
       scheduler_type: singlestep-stage
       parameters:
-        input: {stages: 'nested[0].morenested[0].stage1', output: outputA}
+        input: {stages: 'nested[0].output', output: wellKnown}
       step: {$ref: steps.yml#/stepA}

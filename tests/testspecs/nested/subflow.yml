@@ -6,3 +6,16 @@ stages:
       parameters:
         inputpar: {stages: init, output: inputpar, unwrap: true}
       workflow: {$ref: subsubflow.yml}
+  - name: output
+    dependencies: ['morenested']
+    scheduler:
+      scheduler_type: singlestep-stage
+      parameters:
+        input: {stages: 'morenested[*].stage1', output: outputA, unwrap: true}
+      step:
+        process: null
+        environment: null
+        publisher:
+          publisher_type: 'frompar-pub'
+          outputmap:
+            wellKnown: 'input'

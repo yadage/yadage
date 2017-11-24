@@ -26,9 +26,14 @@ class WorkflowView(object):
         self.steps = JsonPointer(self.offset).resolve(workflowobj.stepsbystage)
         self.bookkeeper = JsonPointer(self.offset).resolve(workflowobj.bookkeeping)
 
+    def view(self, offset):
+        '''
+        return a view with an additional offset to this view's offset
+        '''
+        return self.wflow.view(self._makeoffset(offset))
+
     def query(self, query, collection):
         '''
-
         :return
         '''
         matches = jsonpath_rw.parse(query).find(collection)
@@ -101,7 +106,7 @@ class WorkflowView(object):
         thisoffset.resolve(self.bookkeeper)['_meta']['stages'] += [offsetstage.identifier]
         return offsetstage.identifier
 
-    def addStep(self, task, stage, depends_on=None, hints = None):
+    def addStep(self, task, stage, depends_on=None):
         '''
         adds a node to the DAG connecting it to the passed depending nodes
         while tracking that it was added by the specified stage
@@ -116,7 +121,7 @@ class WorkflowView(object):
         node.task.metadata['wflow_node_id'] = node.identifier
         node.task.metadata['wflow_offset'] = self.offset
         node.task.metadata['wflow_stage'] = stage
-        node.task.metadata['wflow_hints'] = hints or {}
+        node.task.metadata['wflow_hints'] = {'is_purepub': task.pubOnlyTask()}
 
         self.dag.addNode(node, depends_on=depends_on)
         self.steps.setdefault(stage,[]).append({'_nodeid': node.identifier})

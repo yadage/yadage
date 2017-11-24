@@ -39,7 +39,6 @@ class PacktivityBackend(federatedbackend.FederatedBackend):
 
     def routedsubmit(self, task):
         is_pure_publishing = task.metadata['wflow_hints'].get('is_purepub',False)
-
         if is_pure_publishing:
             foreground_proxy = self.backends['purepub'].submit(
                 task.spec, task.parameters, task.state, task.metadata

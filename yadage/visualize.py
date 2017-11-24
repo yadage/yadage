@@ -41,10 +41,10 @@ def fillscope(cluster, workflow, scope='', subcluster=True):
             if '_nodeid' in element:
                 element = element['_nodeid']
                 targetcl = stagecluster if stage != 'init' else scopecluster
-                shape = 'diamond' if stage == 'init' else 'box'
-                label = '' if stage == 'init' else '{}[{}]'.format(stage, i)
+                shape = 'diamond' if stage in ['init','output'] else 'box'
+                label = '' if stage in ['init','output'] else '{}[{}]'.format(stage, i)
                 additional = {'fixedsize': True, 'height': 0.2,
-                              'width': 0.2} if stage == 'init' else {}
+                              'width': 0.2} if stage in ['init','output'] else {}
                 targetcl.add_node(pydotplus.graphviz.Node(
                     element, label=label, color='blue', shape=shape, **additional))
                 add_result(targetcl, element,
