@@ -1,0 +1,16 @@
+stages:
+  - name: upstream
+    dependencies: [init]
+    scheduler:
+      scheduler_type: jq-stage
+      bindings:
+        init_pars: {'$wflowref': ['.init[]','.']}
+      stepscript: '[.init_pars[][]]'
+      workflow: {$ref: subflowA.yml}
+  - name: downstream
+    dependencies: [upstream]
+    scheduler:
+      scheduler_type: singlestep-stage
+      parameters:
+        input: {stages: 'upstream[*].stage1', output: outputA, unwrap: true}
+      workflow: {$ref: subflowB.yml}

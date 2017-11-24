@@ -1,0 +1,39 @@
+stepA:
+  process:
+    process_type: string-interpolated-cmd
+    cmd: cat {inputfile} > {output} && echo {input} >> {output}
+  publisher:
+    publisher_type: 'frompar-pub'
+    outputmap:
+      outputA: 'output'
+  environment:
+    environment_type: docker-encapsulated
+    image: busybox
+    # environment_type: localproc-env
+
+subflowA:
+  process:
+    process_type: string-interpolated-cmd
+    cmd: cat {inputfile} > {output} && echo {input} >> {output}
+  publisher:
+    publisher_type: 'frompar-pub'
+    outputmap:
+      outputA: 'output'
+  environment:
+    environment_type: docker-encapsulated
+    image: busybox
+    # environment_type: localproc-env
+
+
+stepB:
+  process:
+    process_type: string-interpolated-cmd
+    cmd: echo {input} > {output}
+  publisher:
+    publisher_type: 'frompar-pub'
+    outputmap:
+      outputB: 'output'
+  environment:
+    # environment_type: localproc-env
+    environment_type: docker-encapsulated
+    image: busybox
