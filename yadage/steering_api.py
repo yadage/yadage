@@ -96,7 +96,6 @@ def steering_ctx(
             backend.enable_cache(':'.join([cache,os.path.join(ys.metadir,'cache.json')]))
         else:
             backend.enable_cache(cache)
-
     try:
         ys.run_adage(backend)
     finally:

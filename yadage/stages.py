@@ -96,9 +96,9 @@ class ViewStageBase(object):
         self.view = flowview
         self.schedule()
 
-    def addStep(self, step, hints = None):
+    def addStep(self, step):
         dependencies = [self.view.dag.getNode(k.stepid) for k in step.inputs]
-        return self.view.addStep(step, stage = self.name, depends_on=dependencies, hints = hints)
+        return self.view.addStep(step, stage = self.name, depends_on=dependencies)
 
     def addWorkflow(self, rules, isolate = True):
         self.view.addWorkflow(rules, stage=self.name if isolate else None)

@@ -35,6 +35,9 @@ class packtivity_task(TaskBase):
         self.spec = spec
         self.state = state
 
+    def pubOnlyTask(self):
+        return (self.spec['environment'] is None) and (self.spec['process'] is None)
+
     def s(self, **parameters):
         self.parameters.update(**parameters)
         if self.state:
