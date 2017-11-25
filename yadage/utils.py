@@ -223,6 +223,7 @@ def get_init_spec(discover):
         'publisher': {
             'publisher_type': 'fromparjq-pub',
             'script': '.',
+            'tryExact': True,
             'glob': discover,
             'relative_paths': True
         }
