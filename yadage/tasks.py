@@ -1,6 +1,6 @@
 import packtivity
 import logging
-from .utils import leaf_iterator_jsonlike, outputReference
+from .utils import outputReference
 
 log = logging.getLogger(__name__)
 
