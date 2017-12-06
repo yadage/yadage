@@ -36,7 +36,7 @@ class YadageNode(adage.node.Node):
             if self.ready() and self.successful():
                 sanity =  super(YadageNode, self).result == self.task.prepublished
                 if not sanity:
-                    raise RuntimeError('prepublished and actual result differ:\nlhs:\n{}\nrhs:{}'.format(
+                    raise RuntimeError('prepublished and actual result differ:\n result:\n{}\n prepub:{}'.format(
                         super(YadageNode, self).result,self.task.prepublished)
                 )
             return self.task.prepublished
