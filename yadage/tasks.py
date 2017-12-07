@@ -1,6 +1,6 @@
 import packtivity
 import logging
-from .utils import leaf_iterator_jsonlike, outputReference
+from .utils import outputReference
 
 log = logging.getLogger(__name__)
 
@@ -40,9 +40,7 @@ class packtivity_task(TaskBase):
 
     def s(self, **parameters):
         self.parameters.update(**parameters)
-        if self.state:
-            for leaf_pointer, leaf_value in leaf_iterator_jsonlike(self.parameters):
-                leaf_pointer.set(self.parameters,self.state.contextualize_data(leaf_value))
+
         # attempt to prepublish output data merely from inputs
         # will still be None if not possible
         self.prepublished = packtivity.prepublish_default(self.spec, self.parameters, self.state)
