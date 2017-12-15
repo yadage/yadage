@@ -18,8 +18,7 @@ def run_workflow(*args, **kwargs):
     with steering_ctx(*args, **kwargs):
         pass
 
-@contextmanager
-def steering_ctx(
+def setup_steering(
     dataarg,
     workflow = None,
     initdata = None,
@@ -87,15 +86,13 @@ def steering_ctx(
             submit_decider = submit
         )
 
-    yield ys
+    return ys, backend
 
-    backend = backend or setupbackend_fromstring('multiproc:auto')
-    log.info('running yadage workflow %s on backend %s', workflow, backend)
-    if cache:
-        if cache == 'checksums':
-            backend.enable_cache(':'.join([cache,os.path.join(ys.metadir,'cache.json')]))
-        else:
-            backend.enable_cache(cache)
+@contextmanager
+def steering_ctx(*args, **kwargs):
+    visualize = kwargs.setdefault('visualize',False)
+    ys, backend = setup_steering(*args, **kwargs)
+    yield ys
     try:
         ys.run_adage(backend)
     finally:
