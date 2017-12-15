@@ -44,6 +44,7 @@ class CachedBackend(federatedbackend.FederatedBackend):
             'primary': backend
         })
         self.cache = cache
+        self.primary_enabled = True
 
     def ready(self, proxy):
         isready = super(CachedBackend, self).ready(proxy)
@@ -61,6 +62,8 @@ class CachedBackend(federatedbackend.FederatedBackend):
             log.info('use cached result for task: %s',task.metadata['name'])
             return TrivialProxy(status=cached['status'], result = cached['result'])
         else:
+            if not self.primary_enabled:
+                raise RuntimeError('cache failed but refusing to submit to primary since it was explicitly disabled')
             log.info('do proper submit for task: %s',task.metadata['name'])
             #create id for this task using the cache builder, with which
             #we will store the result with once it's ready

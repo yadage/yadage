@@ -255,7 +255,7 @@ def visualize(statetype, workdir, fileformat,modelopt):
 @click.argument('name')
 @click.option('-s', '--statetype', default='filebacked:yadage_state.json')
 @click.option('-l', '--modelopt', multiple=True, default=None, help = 'options for the workflow state models')
-def reset(statetype, name,modelopt):
+def reset(statetype, name, modelopt):
     stateopts = utils.options_from_eqdelimstring(modelopt)
     model   = load_model_fromstring(statetype,stateopts)
     controller = PersistentController(model)
@@ -269,7 +269,6 @@ def reset(statetype, name,modelopt):
     steps_of_rule = r2s[rule.identifier]
 
     to_reset = steps_of_rule + reset_module.collective_downstream(controller.adageobj, steps_of_rule)
-
     controller.reset_nodes(to_reset)
 
 if __name__ == '__main__':

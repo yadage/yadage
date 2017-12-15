@@ -18,8 +18,7 @@ def run_workflow(*args, **kwargs):
     with steering_ctx(*args, **kwargs):
         pass
 
-@contextmanager
-def steering_ctx(
+def setup_steering(
     dataarg,
     workflow = None,
     initdata = None,
@@ -50,16 +49,16 @@ def steering_ctx(
     if cache:
         accept_metadir = True
 
-    ys.prepare(
-        dataarg = dataarg, dataopts = dataopts,
-        metadir = metadir, accept_metadir = accept_metadir,
-    )
-
     wflow_kwargs = dict() #if this stays empty, error will be raise by ys
     if workflow_json:
         wflow_kwargs = dict(workflow_json = workflow_json)
     elif workflow:
         wflow_kwargs = dict(workflow = workflow, toplevel = toplevel, validate = validate, schemadir = schemadir)
+
+    ys.prepare(
+        dataarg = dataarg, dataopts = dataopts,
+        metadir = metadir, accept_metadir = accept_metadir,
+    )
 
     ys.init_workflow(
         initdata = initdata,
@@ -68,26 +67,11 @@ def steering_ctx(
         **wflow_kwargs
     )
 
-    custom_tracker = os.environ.get('YADAGE_CUSTOM_TRACKER',None)
-    if custom_tracker:
-        modulename,trackerclassname = custom_tracker.split(':')
-        module = importlib.import_module(modulename)
-        trackerclass = getattr(module,trackerclassname)
-        ys.adage_argument(additional_trackers = [trackerclass()])
-
     ys.adage_argument(
         default_trackers = visualize,
         trackevery = loginterval,
         update_interval = updateinterval,
     )
-    if interactive:
-        extend, submit = interactive_deciders()
-        ys.adage_argument(
-            extend_decider = extend,
-            submit_decider = submit
-        )
-
-    yield ys
 
     backend = backend or setupbackend_fromstring('multiproc:auto')
     log.info('running yadage workflow %s on backend %s', workflow, backend)
@@ -96,6 +80,31 @@ def steering_ctx(
             backend.enable_cache(':'.join([cache,os.path.join(ys.metadir,'cache.json')]))
         else:
             backend.enable_cache(cache)
+    return ys, backend
+
+@contextmanager
+def steering_ctx(*args, **kwargs):
+    interactive = kwargs.pop('interactive',False)
+
+    visualize = kwargs.setdefault('visualize',False)
+    ys, backend = setup_steering(*args, **kwargs)
+
+    yield ys
+
+    custom_tracker = os.environ.get('YADAGE_CUSTOM_TRACKER',None)
+    if custom_tracker:
+        modulename,trackerclassname = custom_tracker.split(':')
+        module = importlib.import_module(modulename)
+        trackerclass = getattr(module,trackerclassname)
+        ys.adage_argument(additional_trackers = [trackerclass()])
+
+    if interactive:
+        extend, submit = interactive_deciders()
+        ys.adage_argument(
+            extend_decider = extend,
+            submit_decider = submit
+        )
+
     try:
         ys.run_adage(backend)
     finally:
