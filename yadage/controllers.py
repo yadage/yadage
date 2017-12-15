@@ -7,18 +7,26 @@ from yadage.reset import reset_steps
 
 log = logging.getLogger(__name__)
 
-def setup_controller_from_modelstring(workflowobj = None, modelsetup = 'inmem', modelopts = None):
+def setup_controller_from_modelstring(workflowobj = None, controller = 'auto', ctrlopts = None, modelsetup = 'inmem', modelopts = None):
     '''
     return controller instance based on state configuration. For
     transaction-based states, returns PersistentController, for in-
     memory states returns in BaseController
     '''
+
     modelopts = modelopts or {}
-    if modelsetup == 'inmem':
-        return BaseController(workflowobj)
+    ctrlopts  = ctrlopts or {}
+    model     = load_model_fromstring(modelsetup,modelopts,workflowobj)
+
+    if controller == 'auto':
+        if modelsetup == 'inmem':
+            return BaseController(model)
+        else:
+            return PersistentController(model)
+    elif controller.startswith('py:'):
+        raise NotImplementedError('not implemented ctrl: %s opts: %s', controller, ctrlopts)
     else:
-        model = load_model_fromstring(modelsetup,modelopts,workflowobj)
-        return PersistentController(model)
+        raise RuntimeError('unknown controller type %s', controller)
 
 class PersistentController(BaseController):
     '''

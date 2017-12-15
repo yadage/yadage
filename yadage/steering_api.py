@@ -24,6 +24,8 @@ def setup_steering(
     initdata = None,
     toplevel = os.getcwd(),
     backend = None,
+    controller = 'auto',
+    ctrlopts = None,
     workflow_json = None,
     cache = None,
     dataopts = None,
@@ -59,11 +61,13 @@ def setup_steering(
         dataarg = dataarg, dataopts = dataopts,
         metadir = metadir, accept_metadir = accept_metadir,
     )
-
+    
     ys.init_workflow(
         initdata = initdata,
         modelsetup = modelsetup,
         modelopts = modelopts,
+        controller = controller,
+        ctrlopts = ctrlopts,
         **wflow_kwargs
     )
 

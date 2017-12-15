@@ -27,7 +27,9 @@ def make_deserializer(deserialization_opts = None):
 
 def load_model_fromstring(modelsetup,modelopts = None,initdata = None):
     modelopts = modelopts or {}
-    if modelsetup.startswith('filebacked'):
+    if modelsetup.startswith('inmem'):
+        return initdata
+    elif modelsetup.startswith('filebacked'):
         filename = modelsetup.split(':')[-1]
         model   = FileBackedModel(
             filename = filename,
