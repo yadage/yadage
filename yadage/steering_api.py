@@ -86,6 +86,7 @@ def setup_steering(
             submit_decider = submit
         )
 
+    backend = backend or setupbackend_fromstring('multiproc:auto')
     return ys, backend
 
 @contextmanager
