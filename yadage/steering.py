@@ -24,7 +24,9 @@ RC_SUCCEEDED = 0
 @click.option('-k', '--backendopt', multiple=True, default=None, help = 'options for the workflow data state')
 @click.option('-l', '--modelopt', multiple=True, default=None, help = 'options for the workflow state models')
 @click.option('-m', '--metadir', default=None, help = 'directory to store workflow metadata')
+@click.option('-o', '--ctrlopt', multiple=True, default=None, help = 'options for the workflow controller')
 @click.option('-p', '--parameter', multiple=True, help = '<parameter name>=<yaml string> input parameter specifcations ')
+@click.option('-r', '--controller', default = None, help = 'controll')
 @click.option('-s', '--modelsetup', default='inmem', help = 'wflow state model')
 @click.option('-t', '--toplevel', default=os.getcwd(), help = 'toplevel uri to be used to resolve workflow name and references from')
 @click.option('-u', '--updateinterval', default=0.02, help = 'adage graph inspection interval in seconds')
@@ -36,6 +38,8 @@ RC_SUCCEEDED = 0
 def main(dataarg,
          workflow,
          initfiles,
+         controller,
+         ctrlopt,
          toplevel,
          verbosity,
          loginterval,
@@ -58,10 +62,11 @@ def main(dataarg,
 
     logging.basicConfig(level=getattr(logging, verbosity), format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
-    initdata = utils.getinit_data(initfiles, parameter)
-    dataopts = utils.options_from_eqdelimstring(dataopt)
+    initdata    = utils.getinit_data(initfiles, parameter)
+    dataopts    = utils.options_from_eqdelimstring(dataopt)
     backendopts = utils.options_from_eqdelimstring(backendopt)
-    modelopts = utils.options_from_eqdelimstring(modelopt)
+    modelopts   = utils.options_from_eqdelimstring(modelopt)
+    ctrlopts    = utils.options_from_eqdelimstring(modelopt)
 
     backend  = utils.setupbackend_fromstring(backend,backendopts)
     rc = RC_FAILED
@@ -73,7 +78,8 @@ def main(dataarg,
             schemadir = schemadir,
 
             initdata = initdata,
-
+            controller = controller,
+            ctrlopts = ctrlopts,
             backend = backend,
             cache = cache,
 

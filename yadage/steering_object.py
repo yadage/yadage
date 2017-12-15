@@ -79,6 +79,8 @@ class YadageSteering():
                       workflow_json = None,
                       modelsetup = 'inmem',
                       modelopts = None,
+                      controller = 'auto',
+                      ctrlopts = None,
                       validate = True,
                       schemadir = yadageschemas.schemadir):
         '''
@@ -114,7 +116,9 @@ class YadageSteering():
         else:
             log.info('no initialization data')
         self.controller = setup_controller_from_modelstring(
-            workflowobj, modelsetup = modelsetup, modelopts = modelopts
+            workflowobj,
+            controller = controller, ctrlopts = ctrlopts,
+            modelsetup = modelsetup, modelopts = modelopts
         )
 
     def adage_argument(self,**kwargs):

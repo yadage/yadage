@@ -25,6 +25,8 @@ def steering_ctx(
     initdata = None,
     toplevel = os.getcwd(),
     backend = None,
+    controller = 'auto',
+    ctrlopts = None,
     workflow_json = None,
     cache = None,
     dataopts = None,
