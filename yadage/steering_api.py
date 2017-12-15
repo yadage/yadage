@@ -63,10 +63,13 @@ def steering_ctx(
     elif workflow:
         wflow_kwargs = dict(workflow = workflow, toplevel = toplevel, validate = validate, schemadir = schemadir)
 
+
     ys.init_workflow(
         initdata = initdata,
         modelsetup = modelsetup,
         modelopts = modelopts,
+        controller = controller,
+        ctrlopts = ctrlopts,
         **wflow_kwargs
     )
 

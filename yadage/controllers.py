@@ -14,13 +14,17 @@ def setup_controller_from_modelstring(workflowobj = None, controller = 'auto', c
     memory states returns in BaseController
     '''
 
+    modelopts = modelopts or {}
+    ctrlopts  = ctrlopts or {}
+    model     = load_model_fromstring(modelsetup,modelopts,workflowobj)
+
     if controller == 'auto':
-        modelopts = modelopts or {}
         if modelsetup == 'inmem':
-            return BaseController(workflowobj)
+            return BaseController(model)
         else:
-            model = load_model_fromstring(modelsetup,modelopts,workflowobj)
             return PersistentController(model)
+    elif controller.startswith('py:'):
+        raise NotImplementedError('not implemented ctrl: %s opts: %s', controller, ctrlopts)
     else:
         raise RuntimeError('unknown controller type %s', controller)
 
