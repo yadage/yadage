@@ -58,6 +58,16 @@ def test_directjson(tmpdir,multiproc_backend):
 
     assert tmpdir.join('workdir/hello_world/hello_world.txt').check()
 
+
+def test_directjson_ctx(tmpdir,multiproc_backend):
+    wflowjson = yadage.workflow_loader.workflow('workflow.yml','tests/testspecs/local-helloworld')
+    workdir = os.path.join(str(tmpdir),'workdir')
+    with steering_ctx(workdir, workflow_json = wflowjson, backend = multiproc_backend, initdata = {'par': 'parvalue'}) as ys:
+        ys.adage_argument(default_trackers = False)
+
+
+
+
 def test_invalid_directjson(tmpdir):
     wflowjson = yadage.workflow_loader.workflow('workflow.yml','tests/testspecs/local-helloworld')
     ys = YadageSteering()
@@ -66,11 +76,6 @@ def test_invalid_directjson(tmpdir):
         ys.init_workflow(workflow_json = {'invalid':'data'})
 
 
-def test_directjson_ctx(tmpdir,multiproc_backend):
-    wflowjson = yadage.workflow_loader.workflow('workflow.yml','tests/testspecs/local-helloworld')
-    workdir = os.path.join(str(tmpdir),'workdir')
-    with steering_ctx(workdir, workflow_json = wflowjson, backend = multiproc_backend) as ys:
-        ys.adage_argument(default_trackers = False)
 
 
 def test_reset(tmpdir,multiproc_backend):

@@ -18,16 +18,14 @@ def run_workflow(*args, **kwargs):
     with steering_ctx(*args, **kwargs):
         pass
 
-def setup_steering(
+def init_steering(
     dataarg,
     workflow = None,
     initdata = None,
     toplevel = os.getcwd(),
-    backend = None,
     controller = 'auto',
     ctrlopts = None,
     workflow_json = None,
-    cache = None,
     dataopts = None,
     updateinterval = 0.02,
     loginterval = 30,
@@ -48,9 +46,6 @@ def setup_steering(
 
     ys = YadageSteering()
 
-    if cache:
-        accept_metadir = True
-
     wflow_kwargs = dict() #if this stays empty, error will be raise by ys
     if workflow_json:
         wflow_kwargs = dict(workflow_json = workflow_json)
@@ -61,7 +56,7 @@ def setup_steering(
         dataarg = dataarg, dataopts = dataopts,
         metadir = metadir, accept_metadir = accept_metadir,
     )
-    
+
     ys.init_workflow(
         initdata = initdata,
         modelsetup = modelsetup,
@@ -71,6 +66,19 @@ def setup_steering(
         **wflow_kwargs
     )
 
+    return ys
+
+def execute_steering(
+    steering_object,
+    updateinterval = 0.02,
+    loginterval = 30,
+    visualize=True,
+    interactive = False,
+    backend = None,
+    cache = None
+    ):
+
+    ys = steering_object
     ys.adage_argument(
         default_trackers = visualize,
         trackevery = loginterval,
@@ -78,22 +86,13 @@ def setup_steering(
     )
 
     backend = backend or setupbackend_fromstring('multiproc:auto')
-    log.info('running yadage workflow %s on backend %s', workflow, backend)
+    log.info('running yadage workflow on backend %s', backend)
     if cache:
         if cache == 'checksums':
             backend.enable_cache(':'.join([cache,os.path.join(ys.metadir,'cache.json')]))
         else:
             backend.enable_cache(cache)
-    return ys, backend
 
-@contextmanager
-def steering_ctx(*args, **kwargs):
-    interactive = kwargs.pop('interactive',False)
-
-    visualize = kwargs.setdefault('visualize',False)
-    ys, backend = setup_steering(*args, **kwargs)
-
-    yield ys
 
     custom_tracker = os.environ.get('YADAGE_CUSTOM_TRACKER',None)
     if custom_tracker:
@@ -115,3 +114,51 @@ def steering_ctx(*args, **kwargs):
         ys.serialize()
     if visualize:
         ys.visualize()
+
+@contextmanager
+def steering_ctx(
+    dataarg,
+    workflow = None,
+    initdata = None,
+    toplevel = os.getcwd(),
+    backend = None,
+    controller = 'auto',
+    ctrlopts = None,
+    workflow_json = None,
+    cache = None,
+    dataopts = None,
+    updateinterval = 0.02,
+    loginterval = 30,
+    schemadir = yadageschemas.schemadir,
+    metadir = None,
+    interactive=False,
+    validate=True,
+    visualize=True,
+    accept_metadir = False,
+    modelsetup = 'inmem',
+    modelopts = None
+):
+
+    ys = init_steering(
+        metadir = metadir, accept_metadir = True if (accept_metadir or cache) else False,
+        dataarg = dataarg, dataopts = dataopts,
+        workflow_json = workflow_json,
+        workflow = workflow, toplevel = toplevel,
+        schemadir = schemadir, validate = validate,
+        initdata = initdata,
+        modelsetup = modelsetup, modelopts = modelopts,
+        controller = controller, ctrlopts = ctrlopts,
+    )
+
+    yield ys
+
+
+    execute_steering(
+        steering_object = ys,
+        updateinterval = updateinterval,
+        loginterval = loginterval,
+        visualize = visualize,
+        interactive = interactive,
+        backend = backend,
+        cache = cache
+    )
