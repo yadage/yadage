@@ -19,21 +19,17 @@ def run_workflow(*args, **kwargs):
         pass
 
 def init_steering(
-    dataarg,
+    dataarg = None,
+    dataopts = None,
+    workflow_json = None,
     workflow = None,
-    initdata = None,
     toplevel = os.getcwd(),
+    schemadir = yadageschemas.schemadir,
+    validate=True,
+    initdata = None,
     controller = 'auto',
     ctrlopts = None,
-    workflow_json = None,
-    dataopts = None,
-    updateinterval = 0.02,
-    loginterval = 30,
-    schemadir = yadageschemas.schemadir,
     metadir = None,
-    interactive=False,
-    validate=True,
-    visualize=True,
     accept_metadir = False,
     modelsetup = 'inmem',
     modelopts = None):
@@ -48,9 +44,14 @@ def init_steering(
 
     wflow_kwargs = dict() #if this stays empty, error will be raise by ys
     if workflow_json:
-        wflow_kwargs = dict(workflow_json = workflow_json)
+        wflow_kwargs = dict(
+            workflow_json = workflow_json
+        )
     elif workflow:
-        wflow_kwargs = dict(workflow = workflow, toplevel = toplevel, validate = validate, schemadir = schemadir)
+        wflow_kwargs = dict(
+            workflow = workflow, toplevel = toplevel,
+            validate = validate, schemadir = schemadir
+        )
 
     ys.prepare(
         dataarg = dataarg, dataopts = dataopts,
@@ -65,14 +66,13 @@ def init_steering(
         ctrlopts = ctrlopts,
         **wflow_kwargs
     )
-
     return ys
 
 def execute_steering(
     steering_object,
     updateinterval = 0.02,
     loginterval = 30,
-    visualize=True,
+    default_trackers=True,
     interactive = False,
     backend = None,
     cache = None
@@ -80,7 +80,7 @@ def execute_steering(
 
     ys = steering_object
     ys.adage_argument(
-        default_trackers = visualize,
+        default_trackers = default_trackers,
         trackevery = loginterval,
         update_interval = updateinterval,
     )
@@ -108,12 +108,7 @@ def execute_steering(
             submit_decider = submit
         )
 
-    try:
-        ys.run_adage(backend)
-    finally:
-        ys.serialize()
-    if visualize:
-        ys.visualize()
+    ys.run_adage(backend)
 
 @contextmanager
 def steering_ctx(
@@ -152,13 +147,17 @@ def steering_ctx(
 
     yield ys
 
-
-    execute_steering(
-        steering_object = ys,
-        updateinterval = updateinterval,
-        loginterval = loginterval,
-        visualize = visualize,
-        interactive = interactive,
-        backend = backend,
-        cache = cache
-    )
+    try:
+        execute_steering(
+            steering_object = ys,
+            updateinterval = updateinterval,
+            loginterval = loginterval,
+            default_trackers = visualize,
+            interactive = interactive,
+            backend = backend,
+            cache = cache
+        )
+    finally:
+        ys.serialize()
+    if visualize:
+        ys.visualize()
