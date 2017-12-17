@@ -84,7 +84,7 @@ class LocalFSProvider(object):
             load_state(jsondata['base_state'],deserialization_opts),
             nest = jsondata['nest'],
             ensure = jsondata['ensure'],
-            init_state = [load_state(x,deserialization_opts) for x in jsondata['init_states']]
+            init_states = [load_state(x,deserialization_opts) for x in jsondata['init_states']]
         )
 
 def setup_provider(dataarg, dataopts):
