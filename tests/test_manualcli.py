@@ -43,7 +43,7 @@ def test_manual_step(tmpdir):
     result = runner.invoke(yadage.manualcli.init,[workdir,'workflow.yml','-t','tests/testspecs/local-helloworld','-s','filebacked:'+statefile,'-p','par=value'])
     assert result.exit_code == 0
 
-    result = runner.invoke(yadage.manualcli.step,['-s','filebacked:'+statefile])
+    result = runner.invoke(yadage.manualcli.step,['-s','filebacked:'+statefile, '-b','foregroundasync'])
     assert result.exit_code == 0
 
 
