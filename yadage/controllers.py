@@ -26,7 +26,7 @@ def setup_controller(model = None, controller = 'auto', ctrlopts = None):
         _, module, ctrlclass = controller.split(':')
         module = importlib.import_module(module)
         ctrlclass = getattr(module,ctrlclass)
-        if ctrlopts.pop('pass_model'):
+        if ctrlopts.pop('pass_model',False):
             ctrlopts['model'] = model
         return ctrlclass(**ctrlopts)
     else:

@@ -24,8 +24,68 @@ class YadageSteering():
         self.metadir = None
         self.controller = None
         self.rootprovider = None
-        self.initdata = {}
         self.adage_kwargs = {}
+
+    @classmethod
+    def connect(cls, metadir, ctrlstring, ctrlopts = None, modelsetup = None, modelopts = None):
+        model = None
+        instance = cls()
+        instance.prepare_meta(metadir)
+        if modelsetup:
+            model = load_model_fromstring(modelsetup,modelopts,workflowobj)
+        instance.controller = setup_controller(
+            model = model,
+            controller = ctrlstring, ctrlopts = ctrlopts,
+        )
+        return instance
+
+    @classmethod
+    def new(
+        cls,
+        dataarg = None,
+        dataopts = None,
+        workflow_json = None,
+        workflow = None,
+        toplevel = os.getcwd(),
+        schemadir = yadageschemas.schemadir,
+        validate=True,
+        initdata = None,
+        controller = 'auto',
+        ctrlopts = None,
+        metadir = None,
+        accept_metadir = False,
+        modelsetup = 'inmem',
+        modelopts = None):
+
+        ys = cls()
+        if workflow_json:
+            wflow_kwargs = dict(
+                workflow_json = workflow_json
+            )
+        elif workflow:
+            wflow_kwargs = dict(
+                workflow = workflow, toplevel = toplevel,
+                validate = validate, schemadir = schemadir
+            )
+        else:
+            raise RuntimeError('need to initialize either from full JSON or remote location')
+
+        ys.prepare(
+            dataarg = dataarg, dataopts = dataopts,
+            metadir = metadir, accept_metadir = accept_metadir,
+        )
+
+        ys.init_workflow(
+            initdata = initdata,
+            modelsetup = modelsetup,
+            modelopts = modelopts,
+            controller = controller,
+            ctrlopts = ctrlopts,
+            **wflow_kwargs
+        )
+        return ys
+
+
 
     @property
     def workflow(self):
@@ -93,8 +153,7 @@ class YadageSteering():
         :param toplevel: base URI against which to resolve JSON references in the spec
         :param initdata: initialization data for workflow
 
-        sets self.controller
-
+        prepares initial workflow object and sets self.controller
         '''
 
         if not self.rootprovider:
