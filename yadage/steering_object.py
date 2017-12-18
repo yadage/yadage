@@ -8,7 +8,8 @@ import logging
 import yadage.workflow_loader as workflow_loader
 import yadage.utils as utils
 import yadage.serialize as serialize
-from .controllers import setup_controller_from_modelstring
+from .controllers import setup_controller
+from .wflowstate import load_model_fromstring
 from .wflow import YadageWorkflow
 from .utils import setupbackend_fromstring
 
@@ -23,8 +24,68 @@ class YadageSteering():
         self.metadir = None
         self.controller = None
         self.rootprovider = None
-        self.initdata = {}
         self.adage_kwargs = {}
+
+    @classmethod
+    def connect(cls, metadir, ctrlstring, ctrlopts = None, modelsetup = None, modelopts = None):
+        model = None
+        instance = cls()
+        instance.prepare_meta(metadir)
+        if modelsetup:
+            model = load_model_fromstring(modelsetup,modelopts)
+        instance.controller = setup_controller(
+            model = model,
+            controller = ctrlstring, ctrlopts = ctrlopts,
+        )
+        return instance
+
+    @classmethod
+    def new(
+        cls,
+        dataarg = None,
+        dataopts = None,
+        workflow_json = None,
+        workflow = None,
+        toplevel = os.getcwd(),
+        schemadir = yadageschemas.schemadir,
+        validate=True,
+        initdata = None,
+        controller = 'auto',
+        ctrlopts = None,
+        metadir = None,
+        accept_metadir = False,
+        modelsetup = 'inmem',
+        modelopts = None):
+
+        ys = cls()
+        if workflow_json:
+            wflow_kwargs = dict(
+                workflow_json = workflow_json
+            )
+        elif workflow:
+            wflow_kwargs = dict(
+                workflow = workflow, toplevel = toplevel,
+                validate = validate, schemadir = schemadir
+            )
+        else:
+            raise RuntimeError('need to initialize either from full JSON or remote location')
+
+        ys.prepare(
+            dataarg = dataarg, dataopts = dataopts,
+            metadir = metadir, accept_metadir = accept_metadir,
+        )
+
+        ys.init_workflow(
+            initdata = initdata,
+            modelsetup = modelsetup,
+            modelopts = modelopts,
+            controller = controller,
+            ctrlopts = ctrlopts,
+            **wflow_kwargs
+        )
+        return ys
+
+
 
     @property
     def workflow(self):
@@ -52,7 +113,9 @@ class YadageSteering():
     def prepare(self, dataarg, dataopts = None, accept_metadir = False, metadir = None):
         '''
         prepares workflow data state, with  possible initialization and sets up stateprovider used for workflow stages.
-        if initialization data is provided, it may be mutated to reflect automatic data discovery
+        if initialization data is provided
+
+        sets self.metadir and self.rootprovider
 
         :param dataarg: mandatory state provider setup. generally <datatype>:<argument>. For
         :param dataopts: optional settings for state provider
@@ -89,6 +152,8 @@ class YadageSteering():
         :param workflow: the workflow spec source
         :param toplevel: base URI against which to resolve JSON references in the spec
         :param initdata: initialization data for workflow
+
+        prepares initial workflow object and sets self.controller
         '''
 
         if not self.rootprovider:
@@ -115,10 +180,11 @@ class YadageSteering():
             workflowobj.view().init(initdata, self.rootprovider, discover = True)
         else:
             log.info('no initialization data')
-        self.controller = setup_controller_from_modelstring(
-            workflowobj,
+
+        model = load_model_fromstring(modelsetup,modelopts,workflowobj)
+        self.controller = setup_controller(
+            model = model,
             controller = controller, ctrlopts = ctrlopts,
-            modelsetup = modelsetup, modelopts = modelopts
         )
 
     def adage_argument(self,**kwargs):

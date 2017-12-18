@@ -18,56 +18,6 @@ def run_workflow(*args, **kwargs):
     with steering_ctx(*args, **kwargs):
         pass
 
-def init_steering(
-    dataarg = None,
-    dataopts = None,
-    workflow_json = None,
-    workflow = None,
-    toplevel = os.getcwd(),
-    schemadir = yadageschemas.schemadir,
-    validate=True,
-    initdata = None,
-    controller = 'auto',
-    ctrlopts = None,
-    metadir = None,
-    accept_metadir = False,
-    modelsetup = 'inmem',
-    modelopts = None):
-    '''
-    context manage around yadage steering object.
-
-    param dataarg: primary data argument (e.g. workdir) of the workflow
-    param workflow: workflow spec source
-    '''
-
-    ys = YadageSteering()
-
-    wflow_kwargs = dict() #if this stays empty, error will be raise by ys
-    if workflow_json:
-        wflow_kwargs = dict(
-            workflow_json = workflow_json
-        )
-    elif workflow:
-        wflow_kwargs = dict(
-            workflow = workflow, toplevel = toplevel,
-            validate = validate, schemadir = schemadir
-        )
-
-    ys.prepare(
-        dataarg = dataarg, dataopts = dataopts,
-        metadir = metadir, accept_metadir = accept_metadir,
-    )
-
-    ys.init_workflow(
-        initdata = initdata,
-        modelsetup = modelsetup,
-        modelopts = modelopts,
-        controller = controller,
-        ctrlopts = ctrlopts,
-        **wflow_kwargs
-    )
-    return ys
-
 def execute_steering(
     steering_object,
     updateinterval = 0.02,
@@ -134,7 +84,7 @@ def steering_ctx(
     modelopts = None
 ):
 
-    ys = init_steering(
+    ys = YadageSteering.new(
         metadir = metadir, accept_metadir = True if (accept_metadir or cache) else False,
         dataarg = dataarg, dataopts = dataopts,
         workflow_json = workflow_json,
