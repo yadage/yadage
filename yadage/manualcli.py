@@ -12,7 +12,6 @@ from .wflowstate import load_model_fromstring
 from .stages import JsonStage
 import yadage.manualutils as manualutils
 import yadage.utils as utils
-import yadage.interactive as interactive_module
 import yadage.reset as reset_module
 import yadage.workflow_loader as workflow_loader
 
