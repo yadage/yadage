@@ -200,12 +200,13 @@ def preview(name,modelsetup,backend,modelopt):
 @click.option('--local/--remote', default = True)
 
 @click.option('-v', '--verbosity', default='ERROR')
+@click.option('--track/--no-track', default=True)
 @click.option('-n', '--nsteps', default=-1, help = 'number of steps to process. use -1 to for no limit (will run workflow to completion)')
 @click.option('-u', '--update-interval', default=1)
 @click.option('-b', '--backend', default='celery')
 @click.option('--interactive/--not-interactive', default=False, help = 'en-/disable user interactio (sign-off graph extensions and packtivity submissions)')
 
-def step(metadir,controller, local, accept_metadir, interactive, ctrlopt, modelsetup, verbosity, nsteps, update_interval,backend,modelopt):
+def step(metadir,controller, local, track, accept_metadir, interactive, ctrlopt, modelsetup, verbosity, nsteps, update_interval,backend,modelopt):
     logging.basicConfig(level=getattr(logging, verbosity))
 
     ctrlopts = utils.options_from_eqdelimstring(ctrlopt)
@@ -224,7 +225,7 @@ def step(metadir,controller, local, accept_metadir, interactive, ctrlopt, models
     execute_steering(
         ys,
         updateinterval = update_interval,
-        default_trackers=False,
+        default_trackers = track,
         interactive = interactive,
         backend = backend,
     )

@@ -35,8 +35,6 @@ def execute_steering(
         update_interval = updateinterval,
     )
 
-    backend = backend or setupbackend_fromstring('multiproc:auto')
-    log.info('running yadage workflow on backend %s', backend)
     if cache:
         if cache == 'checksums':
             backend.enable_cache(':'.join([cache,os.path.join(ys.metadir,'cache.json')]))
