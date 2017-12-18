@@ -37,13 +37,15 @@ def init(workdir, workflow, initfiles, modelsetup, dataopt, metadir, toplevel, p
     initdata = utils.getinit_data(initfiles, parameter)
     dataopts = utils.options_from_eqdelimstring(dataopt)
 
-    ys = YadageSteering()
-    ys.prepare(workdir,
+    ys = YadageSteering.new(
+        dataarg = workdir,
+        dataopts = dataopts,
+        workflow = workflow,
+        toplevel = toplevel,
+        initdata = initdata,
         metadir = metadir,
-        dataopts = dataopts
+        modelsetup = modelsetup,
     )
-    ys.init_workflow(workflow, initdata = initdata, toplevel = toplevel, modelsetup = modelsetup)
-
 
 def click_print_applicable_stages(controller):
     click.secho('Applicable Stages: ', fg='blue')
@@ -188,14 +190,13 @@ def preview(name,modelsetup,backend,modelopt):
 @mancli.command()
 
 @click.option('-m', '--metadir', default='yadagemeta', help = 'directory to store workflow metadata')
-
+@click.option('--accept-metadir/--no-accept-metadir', default=True)
 @click.option('-r', '--controller', default='frommodel')
 @click.option('-o', '--ctrlopt', multiple=True, default=None, help = 'options for the workflow controller')
 @click.option('-s', '--modelsetup', default='filebacked:yadage_state.json')
 @click.option('-l', '--modelopt', multiple=True, default=None, help = 'options for the workflow state models')
 
 @click.option('--local/--remote', default = True)
-@click.option('--accept-metadir/--no-accept-metadir', default=True)
 
 @click.option('-v', '--verbosity', default='ERROR')
 @click.option('-n', '--nsteps', default=-1, help = 'number of steps to process. use -1 to for no limit (will run workflow to completion)')
