@@ -40,7 +40,7 @@ class YadageSteering():
         return instance
 
     @classmethod
-    def new(
+    def create(
         cls,
         dataarg = None,
         dataopts = None,

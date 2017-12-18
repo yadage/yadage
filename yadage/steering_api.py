@@ -84,7 +84,7 @@ def steering_ctx(
     modelopts = None
 ):
 
-    ys = YadageSteering.new(
+    ys = YadageSteering.create(
         metadir = metadir, accept_metadir = True if (accept_metadir or cache) else False,
         dataarg = dataarg, dataopts = dataopts,
         workflow_json = workflow_json,

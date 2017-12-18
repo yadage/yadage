@@ -6,6 +6,7 @@ from packtivity.statecontexts.posixfs_context import LocalFSState
 from yadage.state_providers.localposix import LocalFSProvider
 
 from .steering_object import YadageSteering
+from .steering_api import execute_steering
 from .controllers import PersistentController
 from .wflowstate import load_model_fromstring
 from .stages import JsonStage
@@ -37,7 +38,7 @@ def init(workdir, workflow, initfiles, modelsetup, dataopt, metadir, toplevel, p
     initdata = utils.getinit_data(initfiles, parameter)
     dataopts = utils.options_from_eqdelimstring(dataopt)
 
-    ys = YadageSteering.new(
+    ys = YadageSteering.create(
         dataarg = workdir,
         dataopts = dataopts,
         workflow = workflow,
@@ -46,6 +47,7 @@ def init(workdir, workflow, initfiles, modelsetup, dataopt, metadir, toplevel, p
         metadir = metadir,
         modelsetup = modelsetup,
     )
+    assert ys
 
 def click_print_applicable_stages(controller):
     click.secho('Applicable Stages: ', fg='blue')
@@ -220,22 +222,14 @@ def step(metadir,controller, local, accept_metadir, interactive, ctrlopt, models
     else:
         backend = None
 
-
-    if interactive:
-        extend, submit = interactive_module.interactive_deciders(idbased = True)
-        ys.adage_argument(
-            submit_decider = submit,
-            extend_decider = extend,
-        )
-
-    maxsteps = nsteps if nsteps >= 0 else None
-
-    ys.run_adage(
+    execute_steering(
+        ys,
+        updateinterval = update_interval,
+        default_trackers=False,
+        interactive = interactive,
         backend = backend,
-        maxsteps = maxsteps,
-        default_trackers = False,
-        update_interval = update_interval
     )
+
 
 @mancli.command()
 @click.option('-s', '--modelsetup', default='filebacked:yadage_state.json')
