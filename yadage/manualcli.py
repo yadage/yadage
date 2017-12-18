@@ -11,7 +11,7 @@ from .wflowstate import load_model_fromstring
 from .stages import JsonStage
 import yadage.manualutils as manualutils
 import yadage.utils as utils
-import yadage.interactive as interactive
+import yadage.interactive as interactive_module
 import yadage.reset as reset_module
 import yadage.workflow_loader as workflow_loader
 
@@ -221,7 +221,7 @@ def step(metadir,controller, local, accept_metadir, interactive, ctrlopt, models
 
 
     if interactive:
-        extend, submit = interactive.interactive_deciders(idbased = True)
+        extend, submit = interactive_module.interactive_deciders(idbased = True)
         ys.adage_argument(
             submit_decider = submit,
             extend_decider = extend,
