@@ -5,7 +5,6 @@ import yadageschemas
 import os
 
 from .steering_object import YadageSteering
-from .utils import setupbackend_fromstring
 from .interactive import interactive_deciders
 
 log = logging.getLogger(__name__)

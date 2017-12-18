@@ -15,7 +15,7 @@ from .utils import setupbackend_fromstring
 
 log = logging.getLogger(__name__)
 
-class YadageSteering():
+class YadageSteering(object):
     '''
     high level steering object to manage worklfow execution
     '''
@@ -201,8 +201,10 @@ class YadageSteering():
         :param backend: backend to use for packtivity processing.
         '''
         if backend=='auto':
-            backend = setupbackend_fromstring('multiproc:auto')
-        if backend:
+            #respect if the controller already has a backend wired up
+            backend = self.controller.backend or setupbackend_fromstring('multiproc:auto')
+            log.info('backend automatically set to %s', backend)
+        elif backend:
             self.controller.backend = backend
         self.adage_argument(**adage_kwargs)
         adage.rundag(controller = self.controller, **self.adage_kwargs)

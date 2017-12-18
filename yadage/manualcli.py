@@ -196,38 +196,35 @@ def preview(name,modelsetup,backend,modelopt):
 @click.option('-o', '--ctrlopt', multiple=True, default=None, help = 'options for the workflow controller')
 @click.option('-s', '--modelsetup', default='filebacked:yadage_state.json')
 @click.option('-l', '--modelopt', multiple=True, default=None, help = 'options for the workflow state models')
-
+@click.option('-b', '--backend', default='celery')
 @click.option('--local/--remote', default = True)
 
 @click.option('-v', '--verbosity', default='ERROR')
 @click.option('--track/--no-track', default=True)
 @click.option('-n', '--nsteps', default=-1, help = 'number of steps to process. use -1 to for no limit (will run workflow to completion)')
 @click.option('-u', '--update-interval', default=1)
-@click.option('-b', '--backend', default='celery')
 @click.option('--interactive/--not-interactive', default=False, help = 'en-/disable user interactio (sign-off graph extensions and packtivity submissions)')
 
 def step(metadir,controller, local, track, accept_metadir, interactive, ctrlopt, modelsetup, verbosity, nsteps, update_interval,backend,modelopt):
     logging.basicConfig(level=getattr(logging, verbosity))
 
     ctrlopts = utils.options_from_eqdelimstring(ctrlopt)
-
-    ys = YadageSteering.connect(
-        accept_metadir = accept_metadir,
+    modelopts = utils.options_from_eqdelimstring(modelopt)
+    ys = manualutils.connect(
         metadir = metadir,
+        accept_metadir = accept_metadir,
         ctrlstring = controller,
-        ctrlopts = ctrlopts, modelsetup = modelsetup, modelopts = modelopt
+        ctrlopts = ctrlopts,
+        modelsetup = modelsetup,
+        modelopts = modelopts,
+        backendstring = backend if local else None
     )
-    if local:
-        backend = utils.setupbackend_fromstring(backend)
-    else:
-        backend = None
 
     execute_steering(
         ys,
         updateinterval = update_interval,
         default_trackers = track,
-        interactive = interactive,
-        backend = backend,
+        interactive = interactive
     )
 
 
