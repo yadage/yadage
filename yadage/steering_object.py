@@ -8,7 +8,8 @@ import logging
 import yadage.workflow_loader as workflow_loader
 import yadage.utils as utils
 import yadage.serialize as serialize
-from .controllers import setup_controller_from_modelstring
+from .controllers import setup_controller
+from .wflowstate import load_model_fromstring
 from .wflow import YadageWorkflow
 from .utils import setupbackend_fromstring
 
@@ -52,7 +53,9 @@ class YadageSteering():
     def prepare(self, dataarg, dataopts = None, accept_metadir = False, metadir = None):
         '''
         prepares workflow data state, with  possible initialization and sets up stateprovider used for workflow stages.
-        if initialization data is provided, it may be mutated to reflect automatic data discovery
+        if initialization data is provided
+
+        sets self.metadir and self.rootprovider
 
         :param dataarg: mandatory state provider setup. generally <datatype>:<argument>. For
         :param dataopts: optional settings for state provider
@@ -89,6 +92,9 @@ class YadageSteering():
         :param workflow: the workflow spec source
         :param toplevel: base URI against which to resolve JSON references in the spec
         :param initdata: initialization data for workflow
+
+        sets self.controller
+
         '''
 
         if not self.rootprovider:
@@ -115,10 +121,11 @@ class YadageSteering():
             workflowobj.view().init(initdata, self.rootprovider, discover = True)
         else:
             log.info('no initialization data')
-        self.controller = setup_controller_from_modelstring(
-            workflowobj,
+
+        model = load_model_fromstring(modelsetup,modelopts,workflowobj)
+        self.controller = setup_controller(
+            model = model,
             controller = controller, ctrlopts = ctrlopts,
-            modelsetup = modelsetup, modelopts = modelopts
         )
 
     def adage_argument(self,**kwargs):

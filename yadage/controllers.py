@@ -1,30 +1,34 @@
 import logging
 import contextlib
+import importlib
 
 from adage.wflowcontroller import BaseController
-from yadage.wflowstate import load_model_fromstring
-from yadage.reset import reset_steps
+from .reset import reset_steps
+from .wflow import YadageWorkflow
 
 log = logging.getLogger(__name__)
 
-def setup_controller_from_modelstring(workflowobj = None, controller = 'auto', ctrlopts = None, modelsetup = 'inmem', modelopts = None):
+def setup_controller(model = None, controller = 'auto', ctrlopts = None):
     '''
     return controller instance based on state configuration. For
     transaction-based states, returns PersistentController, for in-
     memory states returns in BaseController
     '''
 
-    modelopts = modelopts or {}
     ctrlopts  = ctrlopts or {}
-    model     = load_model_fromstring(modelsetup,modelopts,workflowobj)
 
     if controller == 'auto':
-        if modelsetup == 'inmem':
+        if isinstance(model, YadageWorkflow):
             return BaseController(model)
         else:
             return PersistentController(model)
-    elif controller.startswith('py:'):
-        raise NotImplementedError('not implemented ctrl: %s opts: %s', controller, ctrlopts)
+    if controller.startswith('py:'):
+        _, module, ctrlclass = controller.split(':')
+        module = importlib.import_module(module)
+        ctrlclass = getattr(module,ctrlclass)
+        if ctrlopts.pop('pass_model'):
+            ctrlopts['model'] = model
+        return ctrlclass(**ctrlopts)
     else:
         raise RuntimeError('unknown controller type %s', controller)
 
