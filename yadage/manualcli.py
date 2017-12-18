@@ -18,6 +18,8 @@ import yadage.workflow_loader as workflow_loader
 log = logging.getLogger(__name__)
 logging.basicConfig(level = logging.INFO)
 
+
+
 @click.group()
 def mancli():
     pass
@@ -184,28 +186,53 @@ def preview(name,statetype,backend,modelopt):
         click.secho(
             '-> new node "{}" with {} upstream dependencies'.format(n['name'], len(n['parents'])))
 @mancli.command()
-@click.option('-s', '--statetype', default='filebacked:yadage_state.json')
+
+@click.option('-m', '--metadir', default='yadagemeta', help = 'directory to store workflow metadata')
+
+@click.option('-r', '--controller', default='frommodel')
+@click.option('-o', '--ctrlopt', multiple=True, default=None, help = 'options for the workflow controller')
+@click.option('-s', '--modelsetup', default='filebacked:yadage_state.json')
 @click.option('-l', '--modelopt', multiple=True, default=None, help = 'options for the workflow state models')
+
+@click.option('--local/--remote', default = True)
+@click.option('--accept-metadir/--no-accept-metadir', default=True)
+
 @click.option('-v', '--verbosity', default='ERROR')
 @click.option('-n', '--nsteps', default=-1, help = 'number of steps to process. use -1 to for no limit (will run workflow to completion)')
 @click.option('-u', '--update-interval', default=1)
 @click.option('-b', '--backend', default='celery')
-def step(statetype, verbosity, nsteps, update_interval,backend,modelopt):
+@click.option('--interactive/--not-interactive', default=False, help = 'en-/disable user interactio (sign-off graph extensions and packtivity submissions)')
+
+def step(metadir,controller, local, accept_metadir, interactive, ctrlopt, modelsetup, verbosity, nsteps, update_interval,backend,modelopt):
     logging.basicConfig(level=getattr(logging, verbosity))
 
-    maxsteps = nsteps if nsteps >= 0 else None
-    stateopts = utils.options_from_eqdelimstring(modelopt)
-    model   = load_model_fromstring(statetype,stateopts)
-    backend = utils.setupbackend_fromstring(backend)
+    ctrlopts = utils.options_from_eqdelimstring(ctrlopt)
 
-    extend, submit = interactive.interactive_deciders(idbased = True)
-    ys = YadageSteering()
-    ys.controller = PersistentController(model)
-    ys.run_adage(backend,
+    ys = YadageSteering.connect(
+        accept_metadir = accept_metadir,
+        metadir = metadir,
+        ctrlstring = controller,
+        ctrlopts = ctrlopts, modelsetup = modelsetup, modelopts = modelopt
+    )
+    if local:
+        backend = utils.setupbackend_fromstring(backend)
+    else:
+        backend = None
+
+
+    if interactive:
+        extend, submit = interactive.interactive_deciders(idbased = True)
+        ys.adage_argument(
+            submit_decider = submit,
+            extend_decider = extend,
+        )
+
+    maxsteps = nsteps if nsteps >= 0 else None
+
+    ys.run_adage(
+        backend = backend,
         maxsteps = maxsteps,
         default_trackers = False,
-        submit_decider = submit,
-        extend_decider = extend,
         update_interval = update_interval
     )
 

@@ -8,7 +8,7 @@ from .wflow import YadageWorkflow
 
 log = logging.getLogger(__name__)
 
-def setup_controller(model = None, controller = 'auto', ctrlopts = None):
+def setup_controller(model = None, controller = 'frommodel', ctrlopts = None):
     '''
     return controller instance based on state configuration. For
     transaction-based states, returns PersistentController, for in-
@@ -17,7 +17,7 @@ def setup_controller(model = None, controller = 'auto', ctrlopts = None):
 
     ctrlopts  = ctrlopts or {}
 
-    if controller == 'auto':
+    if controller == 'frommodel':
         if isinstance(model, YadageWorkflow):
             return BaseController(model)
         else:
