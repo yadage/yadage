@@ -32,7 +32,7 @@ class YadageSteering():
         instance = cls()
         instance.prepare_meta(metadir)
         if modelsetup:
-            model = load_model_fromstring(modelsetup,modelopts,workflowobj)
+            model = load_model_fromstring(modelsetup,modelopts)
         instance.controller = setup_controller(
             model = model,
             controller = ctrlstring, ctrlopts = ctrlopts,
