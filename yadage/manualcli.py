@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import logging
 import click
+import functools
 import os
 from packtivity.statecontexts.posixfs_context import LocalFSState
 from yadage.state_providers.localposix import LocalFSProvider
@@ -23,6 +24,29 @@ logging.basicConfig(level = logging.INFO)
 @click.group()
 def mancli():
     pass
+
+
+def connection_options(func):
+    @click.option('-m', '--metadir', default='yadagemeta', help = 'directory to store workflow metadata')
+    @click.option('--accept-metadir/--no-accept-metadir', default=True)
+    @click.option('-r', '--controller', default='frommodel')
+    @click.option('-o', '--ctrlopt', multiple=True, default=None, help = 'options for the workflow controller')
+    @click.option('-s', '--modelsetup', default='filebacked:yadage_state.json')
+    @click.option('-l', '--modelopt', multiple=True, default=None, help = 'options for the workflow state models')
+    @click.option('-b', '--backend', default='celery')
+    @click.option('--local/--remote', default = True)
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        return func(*args, **kwargs)
+    return wrapper
+
+def common_options(func):
+    @click.option('-v', '--verbosity', default='ERROR')
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        return func(*args, **kwargs)
+    return wrapper
+
 
 @mancli.command()
 @click.option('-s', '--modelsetup', default='filebacked:yadage_state.json')
@@ -65,17 +89,16 @@ def click_print_submittable_nodes(controller):
 
 @mancli.command()
 @click.option('-n','--name', default=None)
-@click.option('-s', '--modelsetup', default='filebacked:yadage_state.json')
-@click.option('-l', '--modelopt', multiple=True, default=None, help = 'options for the workflow state models')
-@click.option('-v', '--verbosity', default='ERROR')
-@click.option('-b', '--backend', default='celery')
-def apply(name, modelsetup, verbosity, backend,modelopt):
-    logging.basicConfig(level=getattr(logging, verbosity))
+@connection_options
+@common_options
+def apply(name,
+          metadir, accept_metadir, controller, ctrlopt, modelsetup, modelopt, backend, local,
+          verbosity
+         ):
 
-    stateopts = utils.options_from_eqdelimstring(modelopt)
-    model   = load_model_fromstring(modelsetup,stateopts)
-    backend =  utils.setupbackend_fromstring(backend)
-    controller = PersistentController(model,backend)
+    handle_common_options(verbosity)
+    ys = handle_connection_options(metadir, accept_metadir, controller, ctrlopt, modelsetup, modelopt, backend, local)
+    controller = ys.controller
 
     if not name:
         click_print_applicable_stages(controller)
@@ -103,17 +126,15 @@ def apply(name, modelsetup, verbosity, backend,modelopt):
 @click.option('-n','--nodeid', default=None)
 @click.option('-a','--allof', default=None)
 @click.option('-o', '--offset', default='')
-@click.option('-s', '--modelsetup', default='filebacked:yadage_state.json')
-@click.option('-l', '--modelopt', multiple=True, default=None, help = 'options for the workflow state models')
-@click.option('-v', '--verbosity', default='ERROR')
-@click.option('-b', '--backend', default='celery')
-def submit(nodeid, allof, offset, modelsetup, modelopt, verbosity, backend):
-    logging.basicConfig(level=getattr(logging, verbosity))
-
-    stateopts = utils.options_from_eqdelimstring(modelopt)
-    model   = load_model_fromstring(modelsetup,stateopts)
-    backend =  utils.setupbackend_fromstring(backend)
-    controller = PersistentController(model,backend)
+@connection_options
+@common_options
+def submit(nodeid, allof, offset,
+           metadir, accept_metadir, controller, ctrlopt, modelsetup, modelopt, backend, local,
+           verbosity
+           ):
+    handle_common_options(verbosity)
+    ys = handle_connection_options(metadir, accept_metadir, controller, ctrlopt, modelsetup, modelopt, backend, local)
+    controller = ys.controller
 
     if not (allof or nodeid):
         click_print_submittable_nodes(controller)
@@ -141,14 +162,14 @@ def submit(nodeid, allof, offset, modelsetup, modelopt, verbosity, backend):
     click.secho('submitted: {}'.format(nodes_to_submit), fg = 'green')
 
 @mancli.command()
-@click.option('-s', '--modelsetup', default='filebacked:yadage_state.json')
-@click.option('-l', '--modelopt', multiple=True, default=None, help = 'options for the workflow state models')
-@click.option('-b', '--backend', default='celery')
-def show(modelsetup, backend, modelopt):
-    stateopts = utils.options_from_eqdelimstring(modelopt)
-    model   = load_model_fromstring(modelsetup,stateopts)
-    controller = PersistentController(model)
-    controller.backend = utils.setupbackend_fromstring(backend)
+@connection_options
+@common_options
+def show(metadir, accept_metadir, controller, ctrlopt, modelsetup, modelopt, backend, local,
+         verbosity
+         ):
+    handle_common_options(verbosity)
+    ys = handle_connection_options(metadir, accept_metadir, controller, ctrlopt, modelsetup, modelopt, backend, local)
+    controller = ys.controller
 
     click.secho('''
 Workflow:
@@ -173,14 +194,17 @@ valid: {valid}
 
 @mancli.command()
 @click.argument('name')
-@click.option('-s', '--modelsetup', default='filebacked:yadage_state.json')
-@click.option('-l', '--modelopt', multiple=True, default=None, help = 'options for the workflow state models')
-@click.option('-b', '--backend', default='celery')
-def preview(name,modelsetup,backend,modelopt):
-    stateopts = utils.options_from_eqdelimstring(modelopt)
-    model   = load_model_fromstring(modelsetup,stateopts)
-    controller = PersistentController(model)
-    controller.backend = utils.setupbackend_fromstring(backend)
+@connection_options
+@common_options
+def preview(name,
+            metadir, accept_metadir, controller, ctrlopt, modelsetup, modelopt, backend, local,
+            verbosity
+            ):
+
+
+    handle_common_options(verbosity)
+    ys = handle_connection_options(metadir, accept_metadir, controller, ctrlopt, modelsetup, modelopt, backend, local)
+    controller = ys.controller
 
     new_rules, new_nodes = manualutils.preview_rule(controller.adageobj, name)
     click.secho('Preview of Stage: # new rules: {} # new nodes {}'.format(
@@ -188,26 +212,12 @@ def preview(name,modelsetup,backend,modelopt):
     for n in new_nodes:
         click.secho(
             '-> new node "{}" with {} upstream dependencies'.format(n['name'], len(n['parents'])))
-@mancli.command()
 
-@click.option('-m', '--metadir', default='yadagemeta', help = 'directory to store workflow metadata')
-@click.option('--accept-metadir/--no-accept-metadir', default=True)
-@click.option('-r', '--controller', default='frommodel')
-@click.option('-o', '--ctrlopt', multiple=True, default=None, help = 'options for the workflow controller')
-@click.option('-s', '--modelsetup', default='filebacked:yadage_state.json')
-@click.option('-l', '--modelopt', multiple=True, default=None, help = 'options for the workflow state models')
-@click.option('-b', '--backend', default='celery')
-@click.option('--local/--remote', default = True)
 
-@click.option('-v', '--verbosity', default='ERROR')
-@click.option('--track/--no-track', default=True)
-@click.option('-n', '--nsteps', default=-1, help = 'number of steps to process. use -1 to for no limit (will run workflow to completion)')
-@click.option('-u', '--update-interval', default=1)
-@click.option('--interactive/--not-interactive', default=False, help = 'en-/disable user interactio (sign-off graph extensions and packtivity submissions)')
-
-def step(metadir,controller, local, track, accept_metadir, interactive, ctrlopt, modelsetup, verbosity, nsteps, update_interval,backend,modelopt):
+def handle_common_options(verbosity):
     logging.basicConfig(level=getattr(logging, verbosity))
 
+def handle_connection_options(metadir, accept_metadir, controller, ctrlopt, modelsetup, modelopt, backend, local):
     ctrlopts = utils.options_from_eqdelimstring(ctrlopt)
     modelopts = utils.options_from_eqdelimstring(modelopt)
     ys = manualutils.connect(
@@ -219,6 +229,23 @@ def step(metadir,controller, local, track, accept_metadir, interactive, ctrlopt,
         modelopts = modelopts,
         backendstring = backend if local else None
     )
+    return ys
+
+
+@mancli.command()
+@click.option('--track/--no-track', default=True)
+@click.option('-n', '--nsteps', default=-1, help = 'number of steps to process. use -1 to for no limit (will run workflow to completion)')
+@click.option('-u', '--update-interval', default=1)
+@click.option('--interactive/--not-interactive', default=False, help = 'en-/disable user interactio (sign-off graph extensions and packtivity submissions)')
+@connection_options
+@common_options
+def step(track , interactive, nsteps, update_interval,
+         metadir, accept_metadir, controller, ctrlopt, modelsetup, modelopt, backend, local,
+         verbosity
+         ):
+
+    handle_common_options(verbosity)
+    ys = handle_connection_options(metadir, accept_metadir, controller, ctrlopt, modelsetup, modelopt, backend, local)
 
     execute_steering(
         ys,
@@ -229,19 +256,19 @@ def step(metadir,controller, local, track, accept_metadir, interactive, ctrlopt,
 
 
 @mancli.command()
-@click.option('-s', '--modelsetup', default='filebacked:yadage_state.json')
-@click.option('-l', '--modelopt', multiple=True, default=None, help = 'options for the workflow state models')
-@click.option('-v', '--verbosity', default='ERROR')
-@click.option('-o', '--offset')
-@click.option('-t', '--toplevel', default = os.curdir)
 @click.argument('workdir')
 @click.argument('workflow')
-def add(modelsetup, verbosity, offset, toplevel, workdir, workflow,modelopt):
-    logging.basicConfig(level=getattr(logging, verbosity))
+@click.option('-o', '--offset')
+@click.option('-t', '--toplevel', default = os.curdir)
+@connection_options
+@common_options
+def add(offset, toplevel, workdir, workflow,
+        metadir, accept_metadir, controller, ctrlopt, modelsetup, modelopt, backend, local,
+        verbosity
+        ):
 
-    stateopts = utils.options_from_eqdelimstring(modelopt)
-    model   = load_model_fromstring(modelsetup,stateopts)
-    controller = PersistentController(model)
+    handle_common_options(verbosity)
+    ys = handle_connection_options(metadir, accept_metadir, controller, ctrlopt, modelsetup, modelopt, backend, local)
 
     workflow_json = workflow_loader.workflow(
         workflow,
@@ -251,8 +278,8 @@ def add(modelsetup, verbosity, offset, toplevel, workdir, workflow,modelopt):
 
     state_provider = LocalFSProvider(LocalFSState([workdir]))
     rules = [JsonStage(json, state_provider) for json in workflow_json['stages']]
-    with controller.transaction():
-        controller.adageobj.view().addWorkflow(rules)
+    with ys.controller.transaction():
+        ys.controller.adageobj.view().addWorkflow(rules)
 
 @mancli.command()
 @click.option('-s', '--modelsetup', default='filebacked:yadage_state.json')
