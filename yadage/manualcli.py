@@ -167,6 +167,8 @@ def submit(nodeid, allof, offset,
 def show(metadir, accept_metadir, controller, ctrlopt, modelsetup, modelopt, backend, local,
          verbosity
          ):
+
+    ctrlarg = controller # for later
     handle_common_options(verbosity)
     ys = handle_connection_options(metadir, accept_metadir, controller, ctrlopt, modelsetup, modelopt, backend, local)
     controller = ys.controller
@@ -174,14 +176,14 @@ def show(metadir, accept_metadir, controller, ctrlopt, modelsetup, modelopt, bac
     click.secho('''
 Workflow:
 ---------
-state source: {modelsetup}
+state source: {statesource}
 successful: {successful}
 finished: {finished}
 valid: {valid}
 # of applicable rules: {applicable}
 # of submittable nodes: {submittable}
 '''.format(
-    modelsetup = modelsetup,
+    statesource = modelsetup if local else 'remote via {}'.format(ctrlarg),
     successful =  click.style(str(controller.successful()), fg = 'green' if controller.successful() else 'red'),
     finished = click.style(str(controller.finished()), fg = 'green' if controller.finished() else 'yellow'),
     valid = click.style(str(controller.validate()), fg = 'green' if controller.validate() else 'red'),
