@@ -164,6 +164,18 @@ def submit(nodeid, allof, offset,
 @mancli.command()
 @connection_options
 @common_options
+def shell(metadir, accept_metadir, controller, ctrlopt, modelsetup, modelopt, backend, local,
+         verbosity
+         ):
+    ctrlarg = controller # for later
+    handle_common_options(verbosity)
+    ys = handle_connection_options(metadir, accept_metadir, controller, ctrlopt, modelsetup, modelopt, backend, local)
+    import IPython
+    IPython.embed()
+
+@mancli.command()
+@connection_options
+@common_options
 def show(metadir, accept_metadir, controller, ctrlopt, modelsetup, modelopt, backend, local,
          verbosity
          ):

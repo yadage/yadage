@@ -11,7 +11,6 @@ def test_persistent_controller(tmpdir, local_helloworld_wflow_w_init, foreground
 
     pers_ctrl = PersistentController(model, foregroundasync_backend)
 
-
     assert pers_ctrl.submittable_nodes() == []
     assert set(pers_ctrl.applicable_rules()) == set([local_helloworld_wflow_w_init.view().getRule('init').identifier])
 

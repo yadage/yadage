@@ -48,9 +48,10 @@ class PersistentController(BaseController):
 
 
     @contextlib.contextmanager
-    def transaction(self):
+    def transaction(self, sync = True):
         '''the transaction context. will commit model to persistent store on exit.'''
         self.adageobj = self.model.load()
+        if sync: self.sync_backend()
         yield
 
         isvalid = self.validate()
@@ -86,7 +87,7 @@ class PersistentController(BaseController):
         '''
         synchronize node data with backend
         '''
-        with self.transaction():
+        with self.transaction(sync = False): # disable sync to avoid infinite recursion
             super(PersistentController,self).sync_backend()
 
     def applicable_rules(self):
