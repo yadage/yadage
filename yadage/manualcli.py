@@ -167,9 +167,9 @@ def submit(nodeid, allof, offset,
 def shell(metadir, accept_metadir, controller, ctrlopt, modelsetup, modelopt, backend, local,
          verbosity
          ):
-    ctrlarg = controller # for later
     handle_common_options(verbosity)
     ys = handle_connection_options(metadir, accept_metadir, controller, ctrlopt, modelsetup, modelopt, backend, local)
+    assert ys
     import IPython
     IPython.embed()
 
