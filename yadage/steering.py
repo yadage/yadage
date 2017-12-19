@@ -26,7 +26,7 @@ RC_SUCCEEDED = 0
 @click.option('-m', '--metadir', default=None, help = 'directory to store workflow metadata')
 @click.option('-o', '--ctrlopt', multiple=True, default=None, help = 'options for the workflow controller')
 @click.option('-p', '--parameter', multiple=True, help = '<parameter name>=<yaml string> input parameter specifcations ')
-@click.option('-r', '--controller', default = 'auto', help = 'controll')
+@click.option('-r', '--controller', default = 'frommodel', help = 'controller')
 @click.option('-s', '--modelsetup', default='inmem', help = 'wflow state model')
 @click.option('-t', '--toplevel', default=os.getcwd(), help = 'toplevel uri to be used to resolve workflow name and references from')
 @click.option('-u', '--updateinterval', default=0.02, help = 'adage graph inspection interval in seconds')

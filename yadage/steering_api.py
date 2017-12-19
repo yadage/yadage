@@ -5,7 +5,6 @@ import yadageschemas
 import os
 
 from .steering_object import YadageSteering
-from .utils import setupbackend_fromstring
 from .interactive import interactive_deciders
 
 log = logging.getLogger(__name__)
@@ -35,8 +34,6 @@ def execute_steering(
         update_interval = updateinterval,
     )
 
-    backend = backend or setupbackend_fromstring('multiproc:auto')
-    log.info('running yadage workflow on backend %s', backend)
     if cache:
         if cache == 'checksums':
             backend.enable_cache(':'.join([cache,os.path.join(ys.metadir,'cache.json')]))
@@ -67,7 +64,7 @@ def steering_ctx(
     initdata = None,
     toplevel = os.getcwd(),
     backend = None,
-    controller = 'auto',
+    controller = 'frommodel',
     ctrlopts = None,
     workflow_json = None,
     cache = None,
@@ -84,7 +81,7 @@ def steering_ctx(
     modelopts = None
 ):
 
-    ys = YadageSteering.new(
+    ys = YadageSteering.create(
         metadir = metadir, accept_metadir = True if (accept_metadir or cache) else False,
         dataarg = dataarg, dataopts = dataopts,
         workflow_json = workflow_json,

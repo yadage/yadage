@@ -1,5 +1,21 @@
 import jsonpointer
 from .wflowstate import make_deserializer
+from .steering_object import YadageSteering
+from .utils import setupbackend_fromstring
+
+def connect(metadir, accept_metadir, ctrlstring, ctrlopts, modelsetup, modelopts, backendstring):
+    ys = YadageSteering.connect(
+        accept_metadir = accept_metadir,
+        metadir = metadir,
+        ctrlstring = ctrlstring,
+        ctrlopts = ctrlopts,
+        modelsetup = modelsetup,
+        modelopts = modelopts
+    )
+    if backendstring:
+        ys.controller.backend = setupbackend_fromstring(backendstring)
+    return ys
+
 
 def rule_steps_indices(workflow):
     rule_to_steps_index = {}

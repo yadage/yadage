@@ -15,7 +15,7 @@ from .utils import setupbackend_fromstring
 
 log = logging.getLogger(__name__)
 
-class YadageSteering():
+class YadageSteering(object):
     '''
     high level steering object to manage worklfow execution
     '''
@@ -27,10 +27,10 @@ class YadageSteering():
         self.adage_kwargs = {}
 
     @classmethod
-    def connect(cls, metadir, ctrlstring, ctrlopts = None, modelsetup = None, modelopts = None):
+    def connect(cls, metadir, ctrlstring, ctrlopts = None, modelsetup = None, modelopts = None, accept_metadir = False):
         model = None
         instance = cls()
-        instance.prepare_meta(metadir)
+        instance.prepare_meta(metadir, accept = accept_metadir)
         if modelsetup:
             model = load_model_fromstring(modelsetup,modelopts)
         instance.controller = setup_controller(
@@ -40,7 +40,7 @@ class YadageSteering():
         return instance
 
     @classmethod
-    def new(
+    def create(
         cls,
         dataarg = None,
         dataopts = None,
@@ -50,7 +50,7 @@ class YadageSteering():
         schemadir = yadageschemas.schemadir,
         validate=True,
         initdata = None,
-        controller = 'auto',
+        controller = 'frommodel',
         ctrlopts = None,
         metadir = None,
         accept_metadir = False,
@@ -105,7 +105,7 @@ class YadageSteering():
         assert self.metadir
         if os.path.exists(self.metadir):
             if not accept:
-                raise RuntimeError('yadage meta directory exists. explicitly accept')
+                raise RuntimeError('yadage meta directory %s exists. explicitly accept', self.metadir)
         else:
             os.makedirs(self.metadir)
         self.adage_argument(workdir = os.path.join(self.metadir,'adage'))
@@ -142,7 +142,7 @@ class YadageSteering():
                       workflow_json = None,
                       modelsetup = 'inmem',
                       modelopts = None,
-                      controller = 'auto',
+                      controller = 'frommodel',
                       ctrlopts = None,
                       validate = True,
                       schemadir = yadageschemas.schemadir):
@@ -195,12 +195,17 @@ class YadageSteering():
         '''
         self.adage_kwargs.update(**kwargs)
 
-    def run_adage(self, backend = None, **adage_kwargs):
+    def run_adage(self, backend = 'auto', **adage_kwargs):
         '''
         execution workflow with adage based against given backend
         :param backend: backend to use for packtivity processing.
         '''
-        self.controller.backend = backend or setupbackend_fromstring('multiproc:auto')
+        if backend=='auto':
+            #respect if the controller already has a backend wired up
+            backend = self.controller.backend or setupbackend_fromstring('multiproc:auto')
+            log.info('backend automatically set to %s', backend)
+        elif backend:
+            self.controller.backend = backend
         self.adage_argument(**adage_kwargs)
         adage.rundag(controller = self.controller, **self.adage_kwargs)
 

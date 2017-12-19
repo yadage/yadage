@@ -56,6 +56,7 @@ def set_backend(dag, backend, proxymaker):
         n = dag.getNode(nodename)
         n.backend = backend
         n.resultproxy = proxymaker(n)
+        n.update_state()
 
 DEFAULT_ID_METHOD = 'jsonhash'
 

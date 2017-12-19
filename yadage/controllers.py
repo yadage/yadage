@@ -8,7 +8,7 @@ from .wflow import YadageWorkflow
 
 log = logging.getLogger(__name__)
 
-def setup_controller(model = None, controller = 'auto', ctrlopts = None):
+def setup_controller(model = None, controller = 'frommodel', ctrlopts = None):
     '''
     return controller instance based on state configuration. For
     transaction-based states, returns PersistentController, for in-
@@ -17,7 +17,7 @@ def setup_controller(model = None, controller = 'auto', ctrlopts = None):
 
     ctrlopts  = ctrlopts or {}
 
-    if controller == 'auto':
+    if controller == 'frommodel':
         if isinstance(model, YadageWorkflow):
             return BaseController(model)
         else:
@@ -48,9 +48,10 @@ class PersistentController(BaseController):
 
 
     @contextlib.contextmanager
-    def transaction(self):
+    def transaction(self, sync = True):
         '''the transaction context. will commit model to persistent store on exit.'''
         self.adageobj = self.model.load()
+        if sync: self.sync_backend()
         yield
 
         isvalid = self.validate()
@@ -86,7 +87,7 @@ class PersistentController(BaseController):
         '''
         synchronize node data with backend
         '''
-        with self.transaction():
+        with self.transaction(sync = False): # disable sync to avoid infinite recursion
             super(PersistentController,self).sync_backend()
 
     def applicable_rules(self):
