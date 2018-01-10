@@ -22,6 +22,13 @@ def setup_controller(model = None, controller = 'frommodel', ctrlopts = None):
             return BaseController(model)
         else:
             return PersistentController(model)
+    if controller.startswith('http'):
+        try:
+            from yadagehttpctrl.clientcontroller import YadageHTTPController
+            ctrl = YadageHTTPController(server = controller, **ctrlopts)
+            return ctrl
+        except ImportError:
+            log.exception('try installing yadagehttpctrl')
     if controller.startswith('py:'):
         _, module, ctrlclass = controller.split(':')
         module = importlib.import_module(module)

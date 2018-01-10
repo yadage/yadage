@@ -20,12 +20,6 @@ log = logging.getLogger(__name__)
 logging.basicConfig(level = logging.INFO)
 
 
-
-@click.group()
-def mancli():
-    pass
-
-
 def connection_options(func):
     @click.option('-m', '--metadir', default='yadagemeta', help = 'directory to store workflow metadata')
     @click.option('--accept-metadir/--no-accept-metadir', default=True)
@@ -47,6 +41,9 @@ def common_options(func):
         return func(*args, **kwargs)
     return wrapper
 
+@click.group()
+def mancli():
+    pass
 
 @mancli.command()
 @click.option('-s', '--modelsetup', default='filebacked:yadage_state.json')
@@ -185,7 +182,7 @@ def show(metadir, accept_metadir, controller, ctrlopt, modelsetup, modelopt, bac
     ys = handle_connection_options(metadir, accept_metadir, controller, ctrlopt, modelsetup, modelopt, backend, local)
     controller = ys.controller
 
-    click.secho('''
+    click.secho('''\
 Workflow:
 ---------
 state source: {statesource}
@@ -195,12 +192,12 @@ valid: {valid}
 # of applicable rules: {applicable}
 # of submittable nodes: {submittable}
 '''.format(
-    statesource = modelsetup if local else 'remote via {}'.format(ctrlarg),
-    successful =  click.style(str(controller.successful()), fg = 'green' if controller.successful() else 'red'),
-    finished = click.style(str(controller.finished()), fg = 'green' if controller.finished() else 'yellow'),
-    valid = click.style(str(controller.validate()), fg = 'green' if controller.validate() else 'red'),
-    applicable = len(controller.applicable_rules()),
-    submittable = len(controller.submittable_nodes())
+        statesource = modelsetup if local else 'remote via {}'.format(ctrlarg),
+        successful =  click.style(str(controller.successful()), fg = 'green' if controller.successful() else 'red'),
+        finished = click.style(str(controller.finished()), fg = 'green' if controller.finished() else 'yellow'),
+        valid = click.style(str(controller.validate()), fg = 'green' if controller.validate() else 'red'),
+        applicable = len(controller.applicable_rules()),
+        submittable = len(controller.submittable_nodes())
     ))
     click_print_applicable_stages(controller)
     click_print_submittable_nodes(controller)
@@ -268,7 +265,6 @@ def step(track , interactive, nsteps, update_interval,
         interactive = interactive
     )
 
-
 @mancli.command()
 @click.argument('workdir')
 @click.argument('workflow')
@@ -296,16 +292,19 @@ def add(offset, toplevel, workdir, workflow,
         ys.controller.adageobj.view().addWorkflow(rules)
 
 @mancli.command()
-@click.option('-s', '--modelsetup', default='filebacked:yadage_state.json')
-@click.option('-l', '--modelopt', multiple=True, default=None, help = 'options for the workflow state models')
 @click.option('-f', '--fileformat', default='pdf')
 @click.option('-w', '--workdir', default=os.curdir)
-def visualize(modelsetup, workdir, fileformat,modelopt):
+@connection_options
+@common_options
+def visualize(workdir, fileformat,
+              metadir, accept_metadir, controller, ctrlopt, modelsetup, modelopt, backend, local,
+              verbosity
+            ):
     from .visualize import write_prov_graph
 
-    stateopts = utils.options_from_eqdelimstring(modelopt)
-    model   = load_model_fromstring(modelsetup,stateopts)
-    controller = PersistentController(model)
+    handle_common_options(verbosity)
+    ys = handle_connection_options(metadir, accept_metadir, controller, ctrlopt, modelsetup, modelopt, backend, local)
+    controller = ys.controller
 
     write_prov_graph(workdir, controller.adageobj, fileformat)
 
@@ -313,12 +312,15 @@ def visualize(modelsetup, workdir, fileformat,modelopt):
 
 @mancli.command()
 @click.argument('name')
-@click.option('-s', '--modelsetup', default='filebacked:yadage_state.json')
-@click.option('-l', '--modelopt', multiple=True, default=None, help = 'options for the workflow state models')
-def reset(modelsetup, name, modelopt):
-    stateopts = utils.options_from_eqdelimstring(modelopt)
-    model   = load_model_fromstring(modelsetup,stateopts)
-    controller = PersistentController(model)
+@connection_options
+@common_options
+def reset(name,
+          metadir, accept_metadir, controller, ctrlopt, modelsetup, modelopt, backend, local,
+          verbosity
+    ):
+    handle_common_options(verbosity)
+    ys = handle_connection_options(metadir, accept_metadir, controller, ctrlopt, modelsetup, modelopt, backend, local)
+    controller = ys.controller
 
     offset, name = name.rsplit('/',1)
     rule = controller.adageobj.view(offset).getRule(name)
