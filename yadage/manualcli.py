@@ -8,8 +8,6 @@ from yadage.state_providers.localposix import LocalFSProvider
 
 from .steering_object import YadageSteering
 from .steering_api import execute_steering
-from .controllers import PersistentController
-from .wflowstate import load_model_fromstring
 from .stages import JsonStage
 import yadage.manualutils as manualutils
 import yadage.utils as utils
