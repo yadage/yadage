@@ -121,14 +121,14 @@ class CacheBuilder(object):
             'validation_data': self.generate_validation_data(cacheid)
         }
 
-    def cachedresult(self,cacheid, silent = True):
+    def cachedresult(self,cacheid, state, silent = True):
         '''
         returns the cached result. when silent = True the mthod exits gracefully
         and returns None
         '''
         if silent:
             if not self.cacheexists(cacheid): return None
-        return TypedLeafs(self.cache[cacheid]['result'])
+        return TypedLeafs(self.cache[cacheid]['result'], state.datamodel)
 
     def cacheid(self,task):
         return get_obj_id(task, method = 'jsonhash')
@@ -154,7 +154,7 @@ class CacheBuilder(object):
             self.cache[cacheid] = {'task' : task.json()}
             return None
         #return a cached result if we have one if not, return None
-        result =  self.cachedresult(cacheid, silent = True)
+        result =  self.cachedresult(cacheid, task.state, silent = True)
         log.debug('returning cached result %s',result)
         return result
 

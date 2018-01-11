@@ -39,10 +39,10 @@ class YadageNode(adage.node.Node):
     def result(self):
         if self.task.prepublished is not None and 'YADAGE_IGNORE_PREPUBLISHING' not in os.environ:
             if self.ready() and self.successful():
-                sanity =  super(YadageNode, self).result == self.task.prepublished
+                sanity =  super(YadageNode, self).result.json() == self.task.prepublished.json()
                 if not sanity:
                     raise RuntimeError('prepublished and actual result differ:\n result:\n{}\n prepub:{}'.format(
-                        super(YadageNode, self).result,self.task.prepublished)
+                        super(YadageNode, self).result.json(),self.task.prepublished.json())
                 )
             return self.task.prepublished
         return super(YadageNode, self).result
