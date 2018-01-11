@@ -68,8 +68,8 @@ class CachedBackend(federatedbackend.FederatedBackend):
             #create id for this task using the cache builder, with which
             #we will store the result with once it's ready
             cacheid = self.cache.cacheid(task)
-            primaryproxy = self.backends['primary'].submit(task.spec, task.parameters, task.state, task.metadata)
-            cachedproxy = CachedProxy(primaryproxy, cacheid)
+            primaryproxy = self.backends['primary'].submit(task.spec, task.parameters.json(), task.state, task.metadata)
+            cachedproxy  = CachedProxy(primaryproxy, cacheid)
             return cachedproxy
 
     def routeproxy(self, proxy):

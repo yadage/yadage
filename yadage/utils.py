@@ -144,19 +144,17 @@ def process_jsonlike(jsonlike, jq_obj_selector, callback):
         wflowref.set(jsonlike,value)
     return jsonlike
 
-def pointerize(jsondata, asref=False, stepid=None):
+def pointerize(typedleafs, asref=False, stepid=None):
     '''
     a helper method that replaces leaf nodes in a JSON object with
     a outputReference objects (~ a JSONPath) pointing to that leaf position
     useful to track access to leaf nodes later on.
     '''
-    allleafs = jq.jq('leaf_paths').transform(jsondata, multiple_output=True)
-    leafpointers = [jsonpointer.JsonPointer.from_parts(x).path for x in allleafs]
-    jsondata_proxy = copy.deepcopy(jsondata)
-    for leaf in leafpointers:
-        x = jsonpointer.JsonPointer(leaf)
-        x.set(jsondata_proxy, outputReference(stepid, x) if asref else {'$wflowpointer': {'step': stepid,'result': x.path}} if stepid else x.path)
-    return jsondata_proxy
+    pointerized = typedleafs.copy().json()
+    for p,v in typedleafs.leafs():
+        newval = outputReference(stepid, p) if asref else {'$wflowpointer': {'step': stepid,'result': p.path}} if stepid else p.path
+        p.set(pointerized, newval)
+    return pointerized
 
 def options_from_eqdelimstring(opts):
     options = {}

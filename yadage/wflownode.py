@@ -5,6 +5,7 @@ import datetime
 import time
 
 import yadage.tasks as tasks
+from simplytyped.typed import TypedLeafs
 
 class YadageNode(adage.node.Node):
     '''
@@ -24,6 +25,10 @@ class YadageNode(adage.node.Node):
         return '<YadageNode {} {} lifetime: {}  runtime: {} (id: {}) has result: {}>'.format(
             self.name, self.state, lifetime, runtime, self.identifier, self.has_result()
         )
+
+    @property
+    def result(self):
+        return TypedLeafs(super(YadageNode, self).result)
 
     def has_result(self):
         if 'YADAGE_IGNORE_PREPUBLISHING' in os.environ:
