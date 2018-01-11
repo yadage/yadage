@@ -48,15 +48,12 @@ class packtivity_task(object):
         return instance
 
     def json(self):
-        data = {
+        return {
             'metadata': self.metadata,
             'parameters': self.parameters.json(),
             'prepublished': self.prepublished.json() if self.prepublished else None,
-            'inputs': [x.json() for x in self.inputs]
+            'inputs': [x.json() for x in self.inputs],
+            'type': 'packtivity_task',
+            'spec': self.spec,
+            'state': self.state.json() if self.state else None,
         }
-        data.update(
-            type='packtivity_task',
-            spec=self.spec,
-            state=self.state.json() if self.state else None,
-        )
-        return data

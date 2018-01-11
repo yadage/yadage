@@ -36,6 +36,10 @@ class YadageNode(adage.node.Node):
         return (self.task.prepublished is not None) or self.successful()
 
     @property
+    def prepublished(self):
+        return self.task.prepublished
+
+    @property
     def result(self):
         if self.task.prepublished is not None and 'YADAGE_IGNORE_PREPUBLISHING' not in os.environ:
             if self.ready() and self.successful():
