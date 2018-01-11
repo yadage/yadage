@@ -1,39 +1,25 @@
 import packtivity
 import logging
 from .utils import outputReference
-
 log = logging.getLogger(__name__)
 
-class TaskBase(object):
-    def __init__(self, **metadata):
-        self.metadata = metadata
+class packtivity_task(object):
+    '''
+    packtivity task
+    '''
+    def __init__(self, name, spec, state):
+        self.metadata = {'name': name}
         self.inputs = []
         self.parameters = {}
         self.prepublished = None
+        self.spec = spec
+        self.state = state
 
     def used_input(self, reference):
         self.inputs += [reference]
 
     def used_inputs(self, references):
         for r in references: self.used_input(r)
-
-    #(de-)serialization
-    def json(self):
-        return {
-            'metadata': self.metadata,
-            'parameters': self.parameters,
-            'prepublished': self.prepublished,
-            'inputs': [x.json() for x in self.inputs]
-        }
-
-class packtivity_task(TaskBase):
-    '''
-    packtivity task
-    '''
-    def __init__(self, name, spec, state):
-        super(packtivity_task, self).__init__(name = name)
-        self.spec = spec
-        self.state = state
 
     def pubOnlyTask(self):
         return (self.spec['environment'] is None) and (self.spec['process'] is None)
@@ -61,7 +47,12 @@ class packtivity_task(TaskBase):
         return instance
 
     def json(self):
-        data = super(packtivity_task, self).json()
+        data = {
+            'metadata': self.metadata,
+            'parameters': self.parameters,
+            'prepublished': self.prepublished,
+            'inputs': [x.json() for x in self.inputs]
+        }
         data.update(
             type='packtivity_task',
             spec=self.spec,
