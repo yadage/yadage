@@ -9,6 +9,8 @@ from yadage.utils import get_obj_id
 from .trivialbackend import TrivialProxy, TrivialBackend
 from ..backends import CachedProxy
 
+from packtivity.typedleafs import TypedLeafs
+
 log = logging.getLogger(__name__)
 
 def setupcache_fromstring(configstring):
@@ -68,7 +70,7 @@ class CachedBackend(federatedbackend.FederatedBackend):
             #create id for this task using the cache builder, with which
             #we will store the result with once it's ready
             cacheid = self.cache.cacheid(task)
-            primaryproxy = self.backends['primary'].submit(task.spec, task.parameters.json(), task.state, task.metadata)
+            primaryproxy = self.backends['primary'].submit(task.spec, task.parameters, task.state, task.metadata)
             cachedproxy  = CachedProxy(primaryproxy, cacheid)
             return cachedproxy
 
@@ -114,7 +116,7 @@ class CacheBuilder(object):
         log.debug('caching result for process: %s',self.cache[cacheid]['task']['spec']['process'])
         self.cache[cacheid]['result'] = {
             'status': 'SUCCESS' if status else 'FAILED',
-            'result': result,
+            'result': result.json(),
             'cachingtime': time.time(),
             'validation_data': self.generate_validation_data(cacheid)
         }
@@ -126,7 +128,7 @@ class CacheBuilder(object):
         '''
         if silent:
             if not self.cacheexists(cacheid): return None
-        return self.cache[cacheid]['result']
+        return TypedLeafs(self.cache[cacheid]['result'])
 
     def cacheid(self,task):
         return get_obj_id(task, method = 'jsonhash')

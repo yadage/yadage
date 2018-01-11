@@ -1,7 +1,7 @@
 import packtivity
 import logging
 from .utils import outputReference
-from simplytyped.typed import TypedLeafs
+from packtivity.typedleafs import TypedLeafs
 log = logging.getLogger(__name__)
 
 class packtivity_task(object):

@@ -41,7 +41,7 @@ class PacktivityBackend(federatedbackend.FederatedBackend):
         is_pure_publishing = task.metadata['wflow_hints'].get('is_purepub',False)
         if is_pure_publishing:
             foreground_proxy = self.backends['purepub'].submit(
-                task.spec, task.parameters.json(), task.state, task.metadata
+                task.spec, task.parameters, task.state, task.metadata
             )
             foreground_proxy.set_details({'labels': {'backend_hints': 'is_purepub'}})
             return foreground_proxy
@@ -58,7 +58,7 @@ class PacktivityBackend(federatedbackend.FederatedBackend):
             else:
                 #primary packtivity backends adhere to the unrolled API
                 return self.backends['packtivity'].submit(
-                    task.spec, task.parameters.json(), task.state, task.metadata
+                    task.spec, task.parameters, task.state, task.metadata
                 )
 
     def routeproxy(self, proxy):
