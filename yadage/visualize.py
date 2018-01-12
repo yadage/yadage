@@ -2,7 +2,6 @@ import shlex
 import pydotplus
 import jsonpointer
 import logging
-import jq
 import subprocess
 
 log = logging.getLogger(__name__)

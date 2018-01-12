@@ -5,7 +5,6 @@ import datetime
 import time
 
 import yadage.tasks as tasks
-from packtivity.typedleafs import TypedLeafs
 
 class YadageNode(adage.node.Node):
     '''
