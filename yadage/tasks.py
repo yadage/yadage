@@ -1,4 +1,3 @@
-import packtivity
 import logging
 from .utils import outputReference
 from packtivity.typedleafs import TypedLeafs
@@ -8,11 +7,10 @@ class packtivity_task(object):
     '''
     packtivity task
     '''
-    def __init__(self, name, spec, state):
+    def __init__(self, name, spec, state, parameters = None):
         self.metadata = {'name': name}
         self.inputs = []
-        self.parameters = TypedLeafs({}, state.datamodel if state else None)
-        self.prepublished = None
+        self.parameters = TypedLeafs(parameters or {}, state.datamodel if state else None)
         self.spec = spec
         self.state = state
 
@@ -27,27 +25,19 @@ class packtivity_task(object):
 
     def s(self, **parameters):
         self.parameters.update(**parameters)
-
-        # print 'SET', self.parameters.typed()
-        #
-        # # attempt to prepublish output data merely from inputs
-        # # will still be None if not possible
-        self.prepublished = packtivity.prepublish_default(self.spec, self.parameters.json(), self.state)
-        log.debug('parameters for packtivity_task set to %s. prepublished result, if any: %s',
-                    self.parameters,
-                    self.prepublished
-        )
         return self
 
     #(de-)serialization
     @classmethod
     def fromJSON(cls, data, state_deserializer):
-        instance = cls(data['metadata']['name'], data['spec'], state_deserializer(data['state']) if data['state'] else None)
+        instance = cls(
+            data['metadata']['name'],
+            data['spec'],
+            state_deserializer(data['state']) if data['state'] else None,
+            data['parameters']
+        )
         datamodel = instance.state.datamodel if instance.state else None
-
-        instance.parameters = TypedLeafs(data['parameters'], datamodel)
-        instance.prepublished = TypedLeafs(data['prepublished'], datamodel) if data['prepublished'] else None
-        instance.inputs = map(outputReference.fromJSON, data['inputs'])
+        instance.inputs       = map(outputReference.fromJSON, data['inputs'])
         instance.metadata.update(**data['metadata'])
         return instance
 
@@ -55,7 +45,6 @@ class packtivity_task(object):
         return {
             'metadata': self.metadata,
             'parameters': self.parameters.json(),
-            'prepublished': self.prepublished.json() if self.prepublished else None,
             'inputs': [x.json() for x in self.inputs],
             'type': 'packtivity_task',
             'spec': self.spec,

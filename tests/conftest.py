@@ -20,6 +20,11 @@ def localfs_state_provider(tmpdir):
 def basic_packtivity_spec(tmpdir):
     return packtivity.utils.load_packtivity('tests/testspecs/local-helloworld/workflow.yml#/stages/0/scheduler/step')
 
+
+@pytest.fixture()
+def dynamic_packtivity_spec(tmpdir):
+    return packtivity.utils.load_packtivity('tests/testspecs/dynamic_glob/steps.yml#/acquire')
+
 @pytest.fixture()
 def nested_mapreduce_wflow(tmpdir,localfs_state_provider):
     '''a workflow object with horizontally scalable map stage scheduling sub-workflows'''
