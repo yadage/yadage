@@ -36,7 +36,6 @@ class packtivity_task(object):
             state_deserializer(data['state']) if data['state'] else None,
             data['parameters']
         )
-        datamodel = instance.state.datamodel if instance.state else None
         instance.inputs       = map(outputReference.fromJSON, data['inputs'])
         instance.metadata.update(**data['metadata'])
         return instance
