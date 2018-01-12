@@ -9,6 +9,8 @@ from yadage.utils import get_obj_id
 from .trivialbackend import TrivialProxy, TrivialBackend
 from ..backends import CachedProxy
 
+from packtivity.typedleafs import TypedLeafs
+
 log = logging.getLogger(__name__)
 
 def setupcache_fromstring(configstring):
@@ -56,11 +58,14 @@ class CachedBackend(federatedbackend.FederatedBackend):
                 self.cache.cacheresult(proxy.cacheid, status, result)
         return isready
 
+    def expected_result(self, task):
+        return self.backends['packtivity'].prepublish(task)
+
     def routedsubmit(self, task):
         cached = self.cache.cacheddata(task)
         if cached:
             log.info('use cached result for task: %s',task.metadata['name'])
-            return TrivialProxy(status=cached['status'], result = cached['result'])
+            return TrivialProxy(cached['status'], cached['result'].json(), task.state.datamodel)
         else:
             if not self.primary_enabled:
                 raise RuntimeError('cache failed but refusing to submit to primary since it was explicitly disabled')
@@ -69,7 +74,7 @@ class CachedBackend(federatedbackend.FederatedBackend):
             #we will store the result with once it's ready
             cacheid = self.cache.cacheid(task)
             primaryproxy = self.backends['primary'].submit(task.spec, task.parameters, task.state, task.metadata)
-            cachedproxy = CachedProxy(primaryproxy, cacheid)
+            cachedproxy  = CachedProxy(primaryproxy, cacheid)
             return cachedproxy
 
     def routeproxy(self, proxy):
@@ -114,19 +119,22 @@ class CacheBuilder(object):
         log.debug('caching result for process: %s',self.cache[cacheid]['task']['spec']['process'])
         self.cache[cacheid]['result'] = {
             'status': 'SUCCESS' if status else 'FAILED',
-            'result': result,
+            'result': result.json(),
             'cachingtime': time.time(),
             'validation_data': self.generate_validation_data(cacheid)
         }
 
-    def cachedresult(self,cacheid, silent = True):
+    def cachedresult(self,cacheid, state, silent = True):
         '''
         returns the cached result. when silent = True the mthod exits gracefully
         and returns None
         '''
         if silent:
             if not self.cacheexists(cacheid): return None
-        return self.cache[cacheid]['result']
+        return {
+            'result': TypedLeafs(self.cache[cacheid]['result']['result'], state.datamodel),
+            'status': self.cache[cacheid]['result']['status']
+        }
 
     def cacheid(self,task):
         return get_obj_id(task, method = 'jsonhash')
@@ -152,7 +160,7 @@ class CacheBuilder(object):
             self.cache[cacheid] = {'task' : task.json()}
             return None
         #return a cached result if we have one if not, return None
-        result =  self.cachedresult(cacheid, silent = True)
+        result =  self.cachedresult(cacheid, task.state, silent = True)
         log.debug('returning cached result %s',result)
         return result
 

@@ -1,15 +1,18 @@
-import packtivity
 import logging
 from .utils import outputReference
-
+from packtivity.typedleafs import TypedLeafs
 log = logging.getLogger(__name__)
 
-class TaskBase(object):
-    def __init__(self, **metadata):
-        self.metadata = metadata
+class packtivity_task(object):
+    '''
+    packtivity task
+    '''
+    def __init__(self, name, spec, state, parameters = None):
+        self.metadata = {'name': name}
         self.inputs = []
-        self.parameters = {}
-        self.prepublished = None
+        self.parameters = TypedLeafs(parameters or {}, state.datamodel if state else None)
+        self.spec = spec
+        self.state = state
 
     def used_input(self, reference):
         self.inputs += [reference]
@@ -17,54 +20,32 @@ class TaskBase(object):
     def used_inputs(self, references):
         for r in references: self.used_input(r)
 
-    #(de-)serialization
-    def json(self):
-        return {
-            'metadata': self.metadata,
-            'parameters': self.parameters,
-            'prepublished': self.prepublished,
-            'inputs': [x.json() for x in self.inputs]
-        }
-
-class packtivity_task(TaskBase):
-    '''
-    packtivity task
-    '''
-    def __init__(self, name, spec, state):
-        super(packtivity_task, self).__init__(name = name)
-        self.spec = spec
-        self.state = state
-
     def pubOnlyTask(self):
         return (self.spec['environment'] is None) and (self.spec['process'] is None)
 
     def s(self, **parameters):
         self.parameters.update(**parameters)
-
-        # attempt to prepublish output data merely from inputs
-        # will still be None if not possible
-        self.prepublished = packtivity.prepublish_default(self.spec, self.parameters, self.state)
-        log.debug('parameters for packtivity_task set to %s. prepublished result, if any: %s',
-                    self.parameters,
-                    self.prepublished
-        )
         return self
 
     #(de-)serialization
     @classmethod
     def fromJSON(cls, data, state_deserializer):
-        instance = cls(data['metadata']['name'], data['spec'], state_deserializer(data['state']) if data['state'] else None)
-        instance.parameters = data['parameters']
-        instance.prepublished = data['prepublished']
-        instance.inputs = map(outputReference.fromJSON, data['inputs'])
+        instance = cls(
+            data['metadata']['name'],
+            data['spec'],
+            state_deserializer(data['state']) if data['state'] else None,
+            data['parameters']
+        )
+        instance.inputs       = map(outputReference.fromJSON, data['inputs'])
         instance.metadata.update(**data['metadata'])
         return instance
 
     def json(self):
-        data = super(packtivity_task, self).json()
-        data.update(
-            type='packtivity_task',
-            spec=self.spec,
-            state=self.state.json() if self.state else None,
-        )
-        return data
+        return {
+            'metadata': self.metadata,
+            'parameters': self.parameters.json(),
+            'inputs': [x.json() for x in self.inputs],
+            'type': 'packtivity_task',
+            'spec': self.spec,
+            'state': self.state.json() if self.state else None,
+        }

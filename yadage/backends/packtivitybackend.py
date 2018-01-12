@@ -61,6 +61,16 @@ class PacktivityBackend(federatedbackend.FederatedBackend):
                     task.spec, task.parameters, task.state, task.metadata
                 )
 
+    def expected_result(self, task):
+        if self.cached:
+            #Cached backends adhere to the task-based API
+            return self.backends['packtivity'].expected_result(task)
+        else:
+            #primary packtivity backends adhere to the unrolled API
+            return self.backends['packtivity'].prepublish(
+                task.spec, task.parameters, task.state
+            )
+
     def routeproxy(self, proxy):
         details = proxy.details() or {}
         if details.get('labels',{}).get('backend_hints') == 'is_purepub':

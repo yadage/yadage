@@ -2,7 +2,6 @@ import shlex
 import pydotplus
 import jsonpointer
 import logging
-import jq
 import subprocess
 
 log = logging.getLogger(__name__)
@@ -61,9 +60,8 @@ def fillscope(cluster, workflow, scope='', subcluster=True):
 def path_to_id(stepid, path):
     return '{}_{}'.format(stepid, path.replace('/', '_'))
 
-def add_result(graph, parent, jsondata):
-    allleafs = jq.jq('leaf_paths').transform(jsondata, multiple_output=True)
-    leafpointers = [jsonpointer.JsonPointer.from_parts(x) for x in allleafs]
+def add_result(graph, parent, typedleafs):
+    leafpointers = [p for p,v in typedleafs.leafs()]
 
     for leaf in leafpointers:
         leafid = path_to_id(parent, leaf.path)

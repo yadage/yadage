@@ -23,6 +23,9 @@ handlers, scheduler = utils.handler_decorator()
 #     - the step parameters are determined using the scheduler spec and context
 #     - a list of used inputs (in the form of [stepname,outputkey,index])
 
+def isExpression(parameter):
+    return type(parameter)==dict and 'expression_type' in parameter
+
 def select_parameter(wflowview, parameter):
     '''
     Evaluates parameter expressions (if needed) in the context of a workflow view
@@ -33,11 +36,11 @@ def select_parameter(wflowview, parameter):
     :return: the parameter value
     '''
     log.debug('selecting parameter %s', parameter)
-    if type(parameter) is not dict:
-        value = parameter
-    else:
+    if isExpression(parameter):
         handler = exprhandlers[parameter['expression_type']]
         value = handler(wflowview, parameter)
+    else:
+        value = parameter
     return value
 
 def finalize_value(wflowview, value):

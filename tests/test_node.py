@@ -9,28 +9,28 @@ def test_create(basic_packtivity_spec,localfs_state):
 	node = YadageNode('myname',step,'identiifer')
 
 def test_result_prepub(basic_packtivity_spec,localfs_state):
-	step = packtivity_task('myname',basic_packtivity_spec,localfs_state)
-	step.prepublished = {'hello': 'world'}
+	step = packtivity_task('myname',basic_packtivity_spec,localfs_state, {'outputfile': 'world', 'par': 'value'})
 	node = YadageNode('myname',step,'identiifer')
 
+
 	assert node.has_result() == True
-	assert node.result == step.prepublished
+	assert node.result == node.expected_result
 
 	node.readfromresult('') == node.result
-	node.readfromresult('/hello') == node.result['hello']
+	node.readfromresult('/outputfile') == node.result['outputfile']
 
 
 	another_step = packtivity_task('another',basic_packtivity_spec,localfs_state)
-	node.readfromresult('/hello',another_step)
+	node.readfromresult('/outputfile',another_step)
 	assert another_step.inputs[-1].stepid == node.identifier
-	assert another_step.inputs[-1].pointer.path == '/hello'
+	assert another_step.inputs[-1].pointer.path == '/outputfile'
 
 def test_serialize_deserialize(basic_packtivity_spec,localfs_state):
 	step = packtivity_task('myname',basic_packtivity_spec,localfs_state)
 	packtivity_task.fromJSON(step.json(), load_state).json() == step.json()
 
-def test_noresult(basic_packtivity_spec,localfs_state):
-	step = packtivity_task('myname',basic_packtivity_spec,localfs_state)
+def test_noresult(dynamic_packtivity_spec,localfs_state):
+	step = packtivity_task('myname', dynamic_packtivity_spec, localfs_state, {'localname': 'hello', 'source': 'world'})
 	node = YadageNode('myname',step,'identiifer')
 	assert node.has_result() == False
 	node.readfromresult('', failsilently = True) == None
@@ -39,6 +39,6 @@ def test_noresult(basic_packtivity_spec,localfs_state):
 
 
 def test_repr(basic_packtivity_spec,localfs_state):
-	step = packtivity_task('myname',basic_packtivity_spec,localfs_state)
+	step = packtivity_task('myname',basic_packtivity_spec,localfs_state, {'outputfile': 'world', 'par': 'value'})
 	node = YadageNode('myname',step,'identiifer')
 	assert repr(node)
