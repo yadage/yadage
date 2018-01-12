@@ -62,7 +62,7 @@ class CachedBackend(federatedbackend.FederatedBackend):
         cached = self.cache.cacheddata(task)
         if cached:
             log.info('use cached result for task: %s',task.metadata['name'])
-            return TrivialProxy(status=cached['status'], result = cached['result'])
+            return TrivialProxy(cached['status'], cached['result'].json(), task.state.datamodel)
         else:
             if not self.primary_enabled:
                 raise RuntimeError('cache failed but refusing to submit to primary since it was explicitly disabled')
@@ -128,7 +128,10 @@ class CacheBuilder(object):
         '''
         if silent:
             if not self.cacheexists(cacheid): return None
-        return TypedLeafs(self.cache[cacheid]['result'], state.datamodel)
+        return {
+            'result': TypedLeafs(self.cache[cacheid]['result']['result'], state.datamodel),
+            'status': self.cache[cacheid]['result']['status']
+        }
 
     def cacheid(self,task):
         return get_obj_id(task, method = 'jsonhash')

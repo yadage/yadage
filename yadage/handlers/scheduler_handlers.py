@@ -24,7 +24,6 @@ handlers, scheduler = utils.handler_decorator()
 #     - a list of used inputs (in the form of [stepname,outputkey,index])
 
 def isExpression(parameter):
-    print 'HUH',parameter
     return type(parameter)==dict and 'expression_type' in parameter
 
 def select_parameter(wflowview, parameter):

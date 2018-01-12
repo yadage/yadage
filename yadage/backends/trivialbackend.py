@@ -1,26 +1,29 @@
 from packtivity.asyncbackends import PacktivityProxyBase
+from packtivity.typedleafs import TypedLeafs
 
 class TrivialProxy(PacktivityProxyBase):
     '''
     A trivial proxy that carries the results and status already
     '''
 
-    def __init__(self, status, result):
+    def __init__(self, status, resultdata, datamodel):
         self.status = status
-        self.result = result
+        self.resultdata = resultdata
+        self.datamodel = datamodel
 
     def proxyname(self):
         return 'TrivialProxy'
 
     def details(self):
         return {
-            'result':self.result,
+            'resultdata':self.resultdata,
+            'datamodel': self.datamodel,
             'status':self.status
         }
 
     @classmethod
     def fromJSON(cls,data):
-        return cls(data['proxydetails']['status'],data['proxydetails']['result'])
+        return cls(**data['proxydetails'])
 
 class TrivialBackend(object):
     '''
@@ -32,7 +35,7 @@ class TrivialBackend(object):
             'The trivial proxy is not made for submission')
 
     def result(self, resultproxy):
-        return resultproxy.result
+        return TypedLeafs(resultproxy.resultdata, resultproxy.datamodel)
 
     def ready(self, resultproxy):
         # when we have a proxy it is by definition ready...

@@ -11,7 +11,7 @@ class packtivity_task(object):
     def __init__(self, name, spec, state):
         self.metadata = {'name': name}
         self.inputs = []
-        self.parameters = TypedLeafs({}, state.datamodel)
+        self.parameters = TypedLeafs({}, state.datamodel if state else None)
         self.prepublished = None
         self.spec = spec
         self.state = state
@@ -32,7 +32,7 @@ class packtivity_task(object):
         #
         # # attempt to prepublish output data merely from inputs
         # # will still be None if not possible
-        # self.prepublished = packtivity.prepublish_default(self.spec, self.parameters.json(), self.state)
+        self.prepublished = packtivity.prepublish_default(self.spec, self.parameters.json(), self.state)
         log.debug('parameters for packtivity_task set to %s. prepublished result, if any: %s',
                     self.parameters,
                     self.prepublished
@@ -43,8 +43,10 @@ class packtivity_task(object):
     @classmethod
     def fromJSON(cls, data, state_deserializer):
         instance = cls(data['metadata']['name'], data['spec'], state_deserializer(data['state']) if data['state'] else None)
-        instance.parameters = TypedLeafs(data['parameters'], self.state.datamodel)
-        instance.prepublished = TypedLeafs(data['prepublished'], self.state.datamodel) if data['prepublished'] else None
+        datamodel = instance.state.datamodel if instance.state else None
+
+        instance.parameters = TypedLeafs(data['parameters'], datamodel)
+        instance.prepublished = TypedLeafs(data['prepublished'], datamodel) if data['prepublished'] else None
         instance.inputs = map(outputReference.fromJSON, data['inputs'])
         instance.metadata.update(**data['metadata'])
         return instance
