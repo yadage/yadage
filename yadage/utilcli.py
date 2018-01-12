@@ -20,7 +20,6 @@ def printRef(ref, dag, indent=''):
     ),
         fg='cyan')
 
-
 def wflow_with_trivial_backend(instance,results):
 
     stateopts = {}
@@ -32,8 +31,9 @@ def wflow_with_trivial_backend(instance,results):
         wflow.dag,
         TrivialBackend(),
         proxymaker=lambda n: TrivialProxy(
-            status=resultdata[n.identifier]['status'],
-            result=resultdata[n.identifier]['result']
+            resultdata[n.identifier]['status'],
+            resultdata[n.identifier]['result'],
+            n.task.state.datamodel
         )
     )
     return wflow

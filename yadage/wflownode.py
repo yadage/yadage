@@ -3,6 +3,7 @@ import os
 import jsonpointer
 import datetime
 import time
+import packtivity
 
 import yadage.tasks as tasks
 
@@ -28,18 +29,31 @@ class YadageNode(adage.node.Node):
     def has_result(self):
         if 'YADAGE_IGNORE_PREPUBLISHING' in os.environ:
             return self.successful()
-        return (self.task.prepublished is not None) or self.successful()
+        return (self.expected_result is not None) or self.successful()
+
+    @property
+    def expected_result(self):
+        if 'YADAGE_IGNORE_PREPUBLISHING' in os.environ:
+            return
+        try:
+            return self._prepublished_cache
+        except AttributeError:
+            self._prepublished_cache = packtivity.prepublish_default(self.task.spec, self.task.parameters.json(), self.task.state)
+            return self._prepublished_cache
 
     @property
     def result(self):
-        if self.task.prepublished is not None and 'YADAGE_IGNORE_PREPUBLISHING' not in os.environ:
+        if self.expected_result is not None and 'YADAGE_IGNORE_PREPUBLISHING' not in os.environ:
             if self.ready() and self.successful():
-                sanity =  super(YadageNode, self).result == self.task.prepublished
+                try:
+                    sanity =  super(YadageNode, self).result.json() == self.expected_result.json()
+                except:
+                    assert self.resultproxy.wha
                 if not sanity:
                     raise RuntimeError('prepublished and actual result differ:\n result:\n{}\n prepub:{}'.format(
-                        super(YadageNode, self).result,self.task.prepublished)
+                        super(YadageNode, self).result.json(),self.expected_result.json())
                 )
-            return self.task.prepublished
+            return self.expected_result
         return super(YadageNode, self).result
 
     def readfromresult(self,pointerpath, whoisreading = None, failsilently = False):

@@ -32,6 +32,7 @@ RC_SUCCEEDED = 0
 @click.option('-u', '--updateinterval', default=0.02, help = 'adage graph inspection interval in seconds')
 @click.option('-v', '--verbosity', default='INFO', help = 'logging verbosity')
 @click.option('--accept-metadir/--no-accept-metadir', default=False)
+@click.option('--plugins', default=None)
 @click.option('--interactive/--not-interactive', default=False, help = 'en-/disable user interactio (sign-off graph extensions and packtivity submissions)')
 @click.option('--validate/--no-validate', default=True, help = 'en-/disable workflow spec validation')
 @click.option('--visualize/--no-visualize', default=False, help = 'visualize workflow graph')
@@ -56,11 +57,15 @@ def main(dataarg,
          validate,
          visualize,
          cache,
+         plugins,
          accept_metadir
          ):
 
 
     logging.basicConfig(level=getattr(logging, verbosity), format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    from packtivity.plugins import enable_plugins
+    if plugins:
+        enable_plugins(plugins.split(','))
 
     initdata    = utils.getinit_data(initfiles, parameter)
     dataopts    = utils.options_from_eqdelimstring(dataopt)
