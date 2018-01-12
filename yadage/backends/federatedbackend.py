@@ -20,6 +20,10 @@ class FederatedBackend(object):
         b,p = self.routeproxy(proxy)
         return self.backends[b].result(p)
 
+    def expected_result(self, proxy):
+        b,p = self.routeproxy(proxy)
+        return self.backends[b].expected_result(p)
+
     def ready(self, proxy):
         b,p = self.routeproxy(proxy)
         return self.backends[b].ready(p)

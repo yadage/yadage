@@ -37,6 +37,9 @@ class TrivialBackend(object):
     def result(self, resultproxy):
         return TypedLeafs(resultproxy.resultdata, resultproxy.datamodel)
 
+    def expected_result(self, resultproxy):
+        return None
+
     def ready(self, resultproxy):
         # when we have a proxy it is by definition ready...
         return True

@@ -33,6 +33,8 @@ class YadageNode(adage.node.Node):
 
     @property
     def expected_result(self):
+        if 'YADAGE_IGNORE_PREPUBLISHING' in os.environ:
+            return
         try:
             return self._prepublished_cache
         except AttributeError:

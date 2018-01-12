@@ -58,6 +58,9 @@ class CachedBackend(federatedbackend.FederatedBackend):
                 self.cache.cacheresult(proxy.cacheid, status, result)
         return isready
 
+    def expected_result(self, task):
+        return self.backends['packtivity'].prepublish(task)
+
     def routedsubmit(self, task):
         cached = self.cache.cacheddata(task)
         if cached:

@@ -1,5 +1,6 @@
 import yadage.workflow_loader
 from yadage.wflow import YadageWorkflow
+from yadage.utils import set_backend
 
 def test_singlestepstage_schedule_steps(local_helloworld_wflow):
     wflow = local_helloworld_wflow
@@ -24,8 +25,9 @@ def test_nested_wflow(nested_wflow):
     wflow.rules[0].apply(wflow)
 
 
-def test_singlestep_cases_first(singlestage_cases):
+def test_singlestep_cases_first(singlestage_cases, foregroundasync_backend):
     wflow = singlestage_cases
+
     inputdata = {'par': 0}
     wflow.view().init(inputdata)
 
