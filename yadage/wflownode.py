@@ -47,8 +47,8 @@ class YadageNode(adage.node.Node):
             if self.ready() and self.successful():
                 try:
                     sanity =  super(YadageNode, self).result.json() == self.expected_result.json()
-                except:
-                    assert self.resultproxy.wha
+                except AttributeError:
+                    raise RuntimeError('unexpected error when checking results %s %s', super(YadageNode, self).result, self.expected_result)
                 if not sanity:
                     raise RuntimeError('prepublished and actual result differ:\n result:\n{}\n prepub:{}'.format(
                         super(YadageNode, self).result.json(),self.expected_result.json())
