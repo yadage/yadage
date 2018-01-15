@@ -181,7 +181,7 @@ def getinit_data(initfiles, parameters):
 def prepare_workdir_from_archive(initdir, inputarchive):
     if os.path.exists(initdir):
         raise click.exceptions.ClickException(click.style(
-            "initialization directory exists and input archive give. Can't have both", fg='red'))
+            "initialization directory {} exists and input archive give. Can't have both".format(initdir), fg='red'))
     os.makedirs(initdir)
     localzipfile = '{}/.yadage_inputarchive.zip'.format(initdir)
     f = urlopen(inputarchive)
