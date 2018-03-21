@@ -13,16 +13,19 @@ def test_manual_helloworld(tmpdir):
     result = runner.invoke(yadage.manualcli.preview,['-s','filebacked:'+statefile,'/init'])
     assert result.exit_code == 0
 
-    result = runner.invoke(yadage.manualcli.apply,['-s','filebacked:'+statefile])
-    assert result.exit_code == 0
-
-    result = runner.invoke(yadage.manualcli.apply,['-s','filebacked:'+statefile,'-n','/init'])
+    result = runner.invoke(yadage.manualcli.apply_stage,['-s','filebacked:'+statefile,'/init'])
     assert result.exit_code == 0
 
     result = runner.invoke(yadage.manualcli.preview,['-s','filebacked:'+statefile,'/hello_world'])
     assert result.exit_code == 0
 
-    result = runner.invoke(yadage.manualcli.apply,['-s','filebacked:'+statefile,'-n','/hello_world'])
+    result = runner.invoke(yadage.manualcli.apply_stage,['-s','filebacked:'+statefile,'/hello_world'])
+    assert result.exit_code == 0
+
+    result = runner.invoke(yadage.manualcli.undo_stage,['-s','filebacked:'+statefile,'/hello_world'])
+    assert result.exit_code == 0
+
+    result = runner.invoke(yadage.manualcli.apply_stage,['-s','filebacked:'+statefile,'/hello_world'])
     assert result.exit_code == 0
 
     result = runner.invoke(yadage.manualcli.show,['-s','filebacked:'+statefile])
