@@ -1,4 +1,3 @@
-import jsonpointer
 from .wflowstate import make_deserializer
 from .steering_object import YadageSteering
 from .utils import setupbackend_fromstring
