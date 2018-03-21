@@ -16,22 +16,6 @@ def connect(metadir, accept_metadir, ctrlstring, ctrlopts, modelsetup, modelopts
         ys.controller.backend = setupbackend_fromstring(backendstring)
     return ys
 
-
-def rule_steps_indices(workflow):
-    rule_to_steps_index = {}
-    steps_to_rule_index = {}
-    for rule in workflow.rules + workflow.applied_rules:
-        path = '/'.join([rule.offset, rule.rule.name])
-        p = jsonpointer.JsonPointer(path)
-        try:
-            steps_of_rule = [x['_nodeid'] for x in p.resolve(workflow.stepsbystage) if '_nodeid' in x]
-        except jsonpointer.JsonPointerException:
-            steps_of_rule = []
-        rule_to_steps_index[rule.identifier] = steps_of_rule
-        for step in steps_of_rule:
-            steps_to_rule_index[step] = rule.identifier
-    return rule_to_steps_index, steps_to_rule_index
-
 def preview_rule(wflow, name = None, identifier=None):
     stateopts = {}
     wflowmaker = make_deserializer(stateopts)

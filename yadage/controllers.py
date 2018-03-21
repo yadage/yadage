@@ -3,7 +3,7 @@ import contextlib
 import importlib
 
 from adage.wflowcontroller import BaseController
-from .reset import reset_steps
+from .reset import reset_steps, undo_rules, remove_rules
 from .wflow import YadageWorkflow
 
 log = logging.getLogger(__name__)
@@ -110,6 +110,18 @@ class PersistentController(BaseController):
         '''
         submittable_nodes = super(PersistentController,self).submittable_nodes()
         return [x.identifier for x in submittable_nodes]
+
+    def undo_rules(self, ruleids):
+        '''
+        :param nodeids: list of ids of nodes to reset
+        :return: None
+        '''
+        with self.transaction():
+            undo_rules(self.adageobj, ruleids)
+
+    def remove_rules(self, ruleids):
+        with self.transaction():
+            remove_rules(self.adageobj, ruleids)
 
     def reset_nodes(self, nodeids):
         '''
