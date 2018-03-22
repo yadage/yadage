@@ -22,6 +22,7 @@ def test_manual_helloworld(tmpdir):
     result = runner.invoke(yadage.manualcli.apply_stage,['-s','filebacked:'+statefile,'/hello_world'])
     assert result.exit_code == 0
 
+    #undo and redo
     result = runner.invoke(yadage.manualcli.undo_stage,['-s','filebacked:'+statefile,'/hello_world'])
     assert result.exit_code == 0
 
