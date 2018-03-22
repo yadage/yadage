@@ -116,15 +116,17 @@ class WorkflowView(object):
         :param depends_on: dependencies of this step
         '''
 
+        self.steps.setdefault(stage,[])
 
         node = YadageNode(task.metadata['name'], task, identifier=get_obj_id(task))
         node.task.metadata['wflow_node_id'] = node.identifier
         node.task.metadata['wflow_offset'] = self.offset
         node.task.metadata['wflow_stage'] = stage
+        node.task.metadata['wflow_stage_node_idx'] = len(self.steps[stage])
         node.task.metadata['wflow_hints'] = {'is_purepub': task.pubOnlyTask()}
 
         self.dag.addNode(node, depends_on=depends_on)
-        self.steps.setdefault(stage,[]).append({'_nodeid': node.identifier})
+        self.steps[stage].append({'_nodeid': node.identifier})
         self.bookkeeper['_meta']['steps'] += [node.identifier]
         log.info('added node %s', node)
         return node

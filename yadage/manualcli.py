@@ -75,18 +75,35 @@ def click_print_applicable_stages(controller):
 
 def click_print_submittable_nodes(controller):
     click.secho('Submittable Nodes: ', fg='blue')
-    _, s2r = manualutils.rule_steps_indices(controller.adageobj)
+    _, s2r = utils.rule_steps_indices(controller.adageobj)
     for x in controller.adageobj.dag.nodes():
         node = controller.adageobj.dag.getNode(x)
         rule = controller.adageobj.view().getRule(identifier = s2r[node.identifier])
         if node.identifier in controller.submittable_nodes():
             click.secho('node: {} ({}) part of stage {}'.format(node.name, node.identifier,  '/'.join([rule.offset,rule.rule.name])))
 
+def click_print_rule(rule, step_index, step_status):
+    steps_of_rule = step_index[rule.identifier]
+
+    rule_stats = {}
+    for x in steps_of_rule:
+        rule_stats.setdefault(step_status[x],0)
+        rule_stats[step_status[x]] += 1
+    click.secho('{}/{} ({})' .format(rule.offset, rule.rule.name, '/'.join('{}: {}'.format(k,v) for k,v in rule_stats.items())))
+
+def click_print_applied_stages(controller):
+    click.secho('Applied Stages: ', fg='blue')
+    r2s, s2r = utils.rule_steps_indices(controller.adageobj)
+    step_status = {s: str(controller.adageobj.dag.getNode(s).state) for s in s2r.keys()}
+    # print(step_status)
+    for x in controller.adageobj.applied_rules:
+        click_print_rule(x, r2s, step_status)
+
 @mancli.command()
-@click.option('-n','--name', default=None)
+@click.argument('name', default=None, nargs = -1)
 @connection_options
 @common_options
-def apply(name,
+def apply_stage(name,
           metadir, accept_metadir, controller, ctrlopt, modelsetup, modelopt, backend, local,
           verbosity
          ):
@@ -99,23 +116,24 @@ def apply(name,
         click_print_applicable_stages(controller)
         return
 
-    offset, name = name.rsplit('/',1)
-    rule = controller.adageobj.view(offset).getRule(name)
-    if not rule:
-        click.secho('No such stage, pick one of the applicable below:', fg='red')
-        click_print_applicable_stages(controller)
-        return
+    for n in name:
+        offset, scopedname = n.rsplit('/',1)
+        rule = controller.adageobj.view(offset).getRule(scopedname)
+        if not rule:
+            click.secho('No such stage {}, pick one of the applicable below:'.format(n), fg='red')
+            click_print_applicable_stages(controller)
+            return
 
-    if rule in controller.adageobj.applied_rules:
-        click.secho('Already applied.', fg = 'yellow')
-        return
+        if rule in controller.adageobj.applied_rules:
+            click.secho('Stage {} was already applied.'.format(n), fg = 'yellow')
+            continue
 
-    if rule.identifier not in controller.applicable_rules():
-        click.secho('Rule not yet appilcable', fg = 'red')
-        return
+        if rule.identifier not in controller.applicable_rules():
+            click.secho('Rule {} not yet applicable'.format(n), fg = 'red')
+            continue
 
-    controller.apply_rules([rule.identifier])
-    click.secho('stage applied', fg = 'green')
+        controller.apply_rules([rule.identifier])
+        click.secho('Stage {} applied'.format(n), fg = 'green')
 
 @mancli.command()
 @click.option('-n','--nodeid', default=None)
@@ -146,7 +164,7 @@ def submit(nodeid, allof, offset,
 
 
         all_submittable = controller.submittable_nodes()
-        _, s2r = manualutils.rule_steps_indices(controller.adageobj)
+        _, s2r = utils.rule_steps_indices(controller.adageobj)
         nodes_to_submit = [x for x in all_submittable if s2r[x] == rule.identifier]
 
     if not nodes_to_submit:
@@ -171,8 +189,10 @@ def shell(metadir, accept_metadir, controller, ctrlopt, modelsetup, modelopt, ba
 @mancli.command()
 @connection_options
 @common_options
+@click.option('--show-processed/--hide-processed', default = False)
 def show(metadir, accept_metadir, controller, ctrlopt, modelsetup, modelopt, backend, local,
-         verbosity
+         verbosity,
+         show_processed
          ):
 
     ctrlarg = controller # for later
@@ -200,6 +220,10 @@ valid: {valid}
     click_print_applicable_stages(controller)
     click_print_submittable_nodes(controller)
 
+    if show_processed:
+        click_print_applied_stages(controller)
+
+
 
 @mancli.command()
 @click.argument('name')
@@ -215,7 +239,12 @@ def preview(name,
     ys = handle_connection_options(metadir, accept_metadir, controller, ctrlopt, modelsetup, modelopt, backend, local)
     controller = ys.controller
 
-    new_rules, new_nodes = manualutils.preview_rule(controller.adageobj, name)
+    preview = manualutils.preview_rule(controller.adageobj, name)
+    if not preview:
+        click.secho('cannot preview {}'.format(name))
+        raise click.Abort()
+
+    new_rules, new_nodes = preview
     click.secho('Preview of Stage: # new rules: {} # new nodes {}'.format(
         len(new_rules), len(new_nodes)))
     for n in new_nodes:
@@ -303,10 +332,53 @@ def visualize(workdir, fileformat,
     handle_common_options(verbosity)
     ys = handle_connection_options(metadir, accept_metadir, controller, ctrlopt, modelsetup, modelopt, backend, local)
     controller = ys.controller
+    if controller.backend:
+        controller.sync_backend()
+
 
     write_prov_graph(workdir, controller.adageobj, fileformat)
 
+@mancli.command()
+@click.argument('name', default=None)
+@connection_options
+@common_options
+def undo_stage(name,
+          metadir, accept_metadir, controller, ctrlopt, modelsetup, modelopt, backend, local,
+          verbosity
+    ):
+    handle_common_options(verbosity)
+    ys = handle_connection_options(metadir, accept_metadir, controller, ctrlopt, modelsetup, modelopt, backend, local)
+    controller = ys.controller
 
+    if not name:
+        click.secho('No stage specified. Pick one of the stages below:  ', fg = 'red')
+        click_print_applied_stages(controller)
+        return
+
+    offset, name = name.rsplit('/',1)
+    rule = controller.adageobj.view(offset).getRule(name)
+    controller.undo_rules([rule.identifier])
+
+@mancli.command()
+@click.argument('name', default=None)
+@connection_options
+@common_options
+def remove_stage(name,
+          metadir, accept_metadir, controller, ctrlopt, modelsetup, modelopt, backend, local,
+          verbosity
+    ):
+    handle_common_options(verbosity)
+    ys = handle_connection_options(metadir, accept_metadir, controller, ctrlopt, modelsetup, modelopt, backend, local)
+    controller = ys.controller
+
+    if not name:
+        click.secho('No stage specified. Pick one of the stages below:  ', fg = 'red')
+        click_print_applied_stages(controller)
+        return
+
+    offset, name = name.rsplit('/',1)
+    rule = controller.adageobj.view(offset).getRule(name)
+    controller.remove_rules([rule.identifier])
 
 @mancli.command()
 @click.argument('name')
@@ -325,7 +397,7 @@ def reset(name,
     if not rule:
         click.secho('state not found!', fg = 'red')
 
-    r2s, _ = manualutils.rule_steps_indices(controller.adageobj)
+    r2s, _ = utils.rule_steps_indices(controller.adageobj)
     steps_of_rule = r2s[rule.identifier]
 
     to_reset = steps_of_rule + reset_module.collective_downstream(controller.adageobj, steps_of_rule)
