@@ -3,6 +3,19 @@ import yadage.manualcli
 import os
 
 
+def test_manual_remove(tmpdir):
+    runner = CliRunner()
+    workdir   = os.path.join(str(tmpdir),'workdir')
+    statefile = os.path.join(str(tmpdir),'state.json')
+    result = runner.invoke(yadage.manualcli.init,[workdir,'workflow.yml','-t','tests/testspecs/local-helloworld','-s','filebacked:'+statefile,'-p','par=value'])
+    assert result.exit_code == 0
+
+    result = runner.invoke(yadage.manualcli.preview,['-s','filebacked:'+statefile,'/init'])
+    assert result.exit_code == 0
+
+    result = runner.invoke(yadage.manualcli.remove_stage,['-s','filebacked:'+statefile,'/init'])
+    assert result.exit_code == 0
+
 def test_manual_helloworld(tmpdir):
     runner = CliRunner()
     workdir   = os.path.join(str(tmpdir),'workdir')
