@@ -2,6 +2,9 @@ from .wflowstate import make_deserializer
 from .steering_object import YadageSteering
 from .utils import setupbackend_fromstring
 
+import logging
+log = logging.getLogger(__name__)
+
 def connect(metadir, accept_metadir, ctrlstring, ctrlopts, modelsetup, modelopts, backendstring):
     ys = YadageSteering.connect(
         accept_metadir = accept_metadir,
@@ -27,6 +30,7 @@ def preview_rule(wflow, name = None, identifier=None):
         rule = newflow.view(offset).getRule(name)
 
     if not rule.applicable(newflow):
+        log.warning('rule not applicable')
         return
 
     rule.apply(newflow)

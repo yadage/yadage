@@ -239,7 +239,12 @@ def preview(name,
     ys = handle_connection_options(metadir, accept_metadir, controller, ctrlopt, modelsetup, modelopt, backend, local)
     controller = ys.controller
 
-    new_rules, new_nodes = manualutils.preview_rule(controller.adageobj, name)
+    preview = manualutils.preview_rule(controller.adageobj, name)
+    if not preview:
+        click.secho('cannot preview {}'.format(name))
+        raise click.Abort()
+
+    new_rules, new_nodes = preview
     click.secho('Preview of Stage: # new rules: {} # new nodes {}'.format(
         len(new_rules), len(new_nodes)))
     for n in new_nodes:

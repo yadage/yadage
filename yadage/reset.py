@@ -20,10 +20,10 @@ def reset_step(workflow, step):
         pass
 
 def remove_rule(workflow, ruleid):
-    assert ruleid in [r.identifier for r in workflow.rules]
-    workflow.view(r.offset).bookkeeper['_meta']['stages'].remove(ruleid)
+    assert ruleid in [x.identifier for x in workflow.rules]
     r = workflow.view().getRule(identifier = ruleid)
     workflow.rules.remove(r)
+    workflow.view(r.offset).bookkeeper['_meta']['stages'].remove(ruleid)
 
 def remove_rules(workflow, ruleids):
     for r in ruleids:
