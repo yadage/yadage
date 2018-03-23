@@ -44,7 +44,7 @@ def undo_rule(workflow, ruleid):
 
     if not down_rules:
         r = workflow.view().getRule(identifier = ruleid)
-        log.info('removing %s', r)
+        log.info('undoing %s', r)
         idx   = workflow.applied_rules.index(r)
         stepids = r2s[ruleid]
         steps = [workflow.dag.getNode(nid) for nid in stepids]
@@ -82,6 +82,7 @@ def undo_rule(workflow, ruleid):
     undo_rule(workflow,ruleid)
 
 def undo_rules(workflow, ruleids):
+    log.debug('undo rules')
     for r in ruleids:
         undo_rule(workflow, r)
 
