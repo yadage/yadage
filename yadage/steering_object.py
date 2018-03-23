@@ -37,6 +37,7 @@ class YadageSteering(object):
             model = model,
             controller = ctrlstring, ctrlopts = ctrlopts,
         )
+        log.info('connected to model')
         return instance
 
     @classmethod

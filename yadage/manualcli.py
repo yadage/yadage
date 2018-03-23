@@ -124,7 +124,7 @@ def apply_stage(name,
             click_print_applicable_stages(controller)
             return
 
-        if rule in controller.adageobj.applied_rules:
+        if rule.identifier in [r.identifier for r in controller.adageobj.applied_rules]:
             click.secho('Stage {} was already applied.'.format(n), fg = 'yellow')
             continue
 
@@ -182,6 +182,7 @@ def shell(metadir, accept_metadir, controller, ctrlopt, modelsetup, modelopt, ba
          ):
     handle_common_options(verbosity)
     ys = handle_connection_options(metadir, accept_metadir, controller, ctrlopt, modelsetup, modelopt, backend, local)
+    click.secho('launching yadage shell', fg = 'green')
     assert ys
     import IPython
     IPython.embed()
@@ -339,7 +340,7 @@ def visualize(workdir, fileformat,
     write_prov_graph(workdir, controller.adageobj, fileformat)
 
 @mancli.command()
-@click.argument('name', default=None)
+@click.argument('name', default=None, nargs = -1)
 @connection_options
 @common_options
 def undo_stage(name,
@@ -355,9 +356,11 @@ def undo_stage(name,
         click_print_applied_stages(controller)
         return
 
-    offset, name = name.rsplit('/',1)
-    rule = controller.adageobj.view(offset).getRule(name)
-    controller.undo_rules([rule.identifier])
+    for n in name:
+        offset, scopedname = n.rsplit('/',1)
+        rule = controller.adageobj.view(offset).getRule(scopedname)
+        controller.undo_rules([rule.identifier])
+        click.secho('undone {}'.format(n), fg = 'green')
 
 @mancli.command()
 @click.argument('name', default=None)
