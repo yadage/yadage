@@ -1,5 +1,6 @@
 import os
 import logging
+import shutil
 log = logging.getLogger(__name__)
 
 from packtivity.statecontexts import load_state
@@ -92,6 +93,10 @@ def setup_provider(dataarg, dataopts):
     read = dataopts.get('read',None)
     nest = dataopts.get('nest',True)
     ensure = dataopts.get('ensure',True)
+    overwrite = dataopts.get('overwrite',False)
+
+    if overwrite and os.path.exists(workdir):
+        shutil.rmtree(workdir)
 
     init_states = []
 
