@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import logging
 import click
+import yaml
 import functools
 import os
 from packtivity.statecontexts.posixfs_context import LocalFSState
@@ -338,6 +339,36 @@ def visualize(workdir, fileformat,
 
 
     write_prov_graph(workdir, controller.adageobj, fileformat)
+
+@mancli.command()
+@click.argument('name', default=None)
+@click.option('-p','--patchspec', default=None)
+@connection_options
+@common_options
+def edit_stage(name,patchspec,
+          metadir, accept_metadir, controller, ctrlopt, modelsetup, modelopt, backend, local,
+          verbosity
+    ):
+    handle_common_options(verbosity)
+    ys = handle_connection_options(metadir, accept_metadir, controller, ctrlopt, modelsetup, modelopt, backend, local)
+    controller = ys.controller
+
+    if not name:
+        click.secho('No stage specified. Pick one of the stages below:  ', fg = 'red')
+        click_print_applied_stages(controller)
+        return
+
+    offset, scopedname = name.rsplit('/',1)
+    rule = controller.adageobj.view(offset).getRule(scopedname)
+
+    s = yaml.safe_dump(rule.rule.stagespec, default_flow_style = False)
+
+    if patchspec:
+        edited = yaml.load(open(patchspec))
+    else:
+        edited = yaml.load(click.edit(s, editor='vi'))
+    controller.patch_rule(rule.identifier, edited)
+    click.secho('updated {}'.format(name), fg = 'green')
 
 @mancli.command()
 @click.argument('name', default=None, nargs = -1)
