@@ -342,9 +342,10 @@ def visualize(workdir, fileformat,
 
 @mancli.command()
 @click.argument('name', default=None)
+@click.option('-p','--patchspec', default=None)
 @connection_options
 @common_options
-def edit_stage(name,
+def edit_stage(name,patchspec,
           metadir, accept_metadir, controller, ctrlopt, modelsetup, modelopt, backend, local,
           verbosity
     ):
@@ -361,7 +362,11 @@ def edit_stage(name,
     rule = controller.adageobj.view(offset).getRule(scopedname)
 
     s = yaml.safe_dump(rule.rule.stagespec, default_flow_style = False)
-    edited = yaml.load(click.edit(s, editor='vi'))
+
+    if patchspec:
+        edited = yaml.load(open(patchspec))
+    else:
+        edited = yaml.load(click.edit(s, editor='vi'))
     controller.patch_rule(rule.identifier, edited)
     click.secho('updated {}'.format(name), fg = 'green')
 
