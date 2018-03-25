@@ -1,6 +1,8 @@
 from click.testing import CliRunner
 import yadage.manualcli
 import os
+import jq
+import json
 
 
 def test_manual_remove(tmpdir):
@@ -25,6 +27,13 @@ def test_manual_helloworld(tmpdir):
 
     result = runner.invoke(yadage.manualcli.preview,['-s','filebacked:'+statefile,'/init'])
     assert result.exit_code == 0
+
+    patch = '{"inputs":[],"discover":true,"nodename":null,"parameters":{"par":"patched"},"scheduler_type":"init-stage"}'
+    tmpdir.join('patch.json').write(patch)
+    result = runner.invoke(yadage.manualcli.edit_stage,['/init','-s','filebacked:'+statefile,'-p',str(tmpdir.join('patch.json'))])
+    assert result.exit_code == 0
+    valondisk = jq.jq('.rules[]|select(.rule.name=="init").rule.scheduler.parameters.par').transform(json.load(open(statefile)))
+    assert valondisk == "patched"
 
     result = runner.invoke(yadage.manualcli.apply_stage,['-s','filebacked:'+statefile,'/init'])
     assert result.exit_code == 0

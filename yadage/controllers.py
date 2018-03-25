@@ -111,6 +111,12 @@ class PersistentController(BaseController):
         submittable_nodes = super(PersistentController,self).submittable_nodes()
         return [x.identifier for x in submittable_nodes]
 
+    def patch_rule(self, ruleid, patchspec):
+        with self.transaction():
+            rule = [x for x in self.adageobj.rules if x.identifier == ruleid][0]
+            rule.rule.stagespec = patchspec
+
+
     def undo_rules(self, ruleids):
         '''
         :param nodeids: list of ids of nodes to reset
