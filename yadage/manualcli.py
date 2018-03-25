@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import logging
 import click
+import yaml
 import functools
 import os
 from packtivity.statecontexts.posixfs_context import LocalFSState
@@ -357,17 +358,12 @@ def edit_stage(name,
         return
 
     offset, scopedname = name.rsplit('/',1)
+    rule = controller.adageobj.view(offset).getRule(scopedname)
 
-    import yaml
-    with controller.transaction():
-        rule = controller.adageobj.view(offset).getRule(scopedname)
-        if rule.identifier not in [x.identifier for x in controller.adageobj.rules]:
-            click.secho('This stage has already been applied, to change it first undo it', fg = 'red')
-            raise click.Abort()
-        s = yaml.safe_dump(rule.rule.stagespec, default_flow_style = False)
-        edited = click.edit(s, editor='vi')
-        rule.rule.stagespec = yaml.load(edited)
-        click.secho('updated {}'.format(name), fg = 'green')
+    s = yaml.safe_dump(rule.rule.stagespec, default_flow_style = False)
+    edited = yaml.load(click.edit(s, editor='vi'))
+    controller.patch_rule(rule.identifier, edited)
+    click.secho('updated {}'.format(name), fg = 'green')
 
 @mancli.command()
 @click.argument('name', default=None, nargs = -1)
