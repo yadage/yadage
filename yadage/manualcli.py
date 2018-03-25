@@ -340,6 +340,36 @@ def visualize(workdir, fileformat,
     write_prov_graph(workdir, controller.adageobj, fileformat)
 
 @mancli.command()
+@click.argument('name', default=None)
+@connection_options
+@common_options
+def edit_stage(name,
+          metadir, accept_metadir, controller, ctrlopt, modelsetup, modelopt, backend, local,
+          verbosity
+    ):
+    handle_common_options(verbosity)
+    ys = handle_connection_options(metadir, accept_metadir, controller, ctrlopt, modelsetup, modelopt, backend, local)
+    controller = ys.controller
+
+    if not name:
+        click.secho('No stage specified. Pick one of the stages below:  ', fg = 'red')
+        click_print_applied_stages(controller)
+        return
+
+    offset, scopedname = name.rsplit('/',1)
+
+    import yaml
+    with controller.transaction():
+        rule = controller.adageobj.view(offset).getRule(scopedname)
+        if rule.identifier not in [x.identifier for x in controller.adageobj.rules]:
+            click.secho('This stage has already been applied, to change it first undo it', fg = 'red')
+            raise click.Abort()
+        s = yaml.safe_dump(rule.rule.stagespec, default_flow_style = False)
+        edited = click.edit(s, editor='vi')
+        rule.rule.stagespec = yaml.load(edited)
+        click.secho('updated {}'.format(name), fg = 'green')
+
+@mancli.command()
 @click.argument('name', default=None, nargs = -1)
 @connection_options
 @common_options
