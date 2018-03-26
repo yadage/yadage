@@ -311,10 +311,9 @@ def add(offset, groupname, dataarg, dataopts, workflow, toplevel, parameter,
     ys = handle_connection_options(metadir, accept_metadir, controller, ctrlopt, modelsetup, modelopt, backend, local)
     controller = ys.controller
 
-    from utils import init_stage_spec
     stages = []
     if parameter:
-        inspec = init_stage_spec(parameter, False, [], 'init')
+        inspec = utils.init_stage_spec(parameter, False, [], 'init')
         stages.append(inspec)
 
     stages = stages + workflow_loader.workflow(
