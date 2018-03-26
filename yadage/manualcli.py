@@ -4,8 +4,6 @@ import click
 import yaml
 import functools
 import os
-from packtivity.statecontexts.posixfs_context import LocalFSState
-from yadage.state_providers.localposix import LocalFSProvider
 
 from .steering_object import YadageSteering
 from .steering_api import execute_steering
