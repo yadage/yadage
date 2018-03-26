@@ -25,7 +25,7 @@ def scope_done(scope, flowview):
     '''
     walks recursively all scopes starting at some initial scope to determine if
     all steps and stages under this scope have been executed / applied. Will indicate
-    that it's save to reference any result of the workflow within that scope.
+    that it's safe to reference any result of the workflow within that scope.
     '''
     log.debug('checking scope %s on view with offset %s',
               scope, flowview.offset)

@@ -137,13 +137,17 @@ class WorkflowView(object):
         '''
         offset = ''
         if stage is not None:
+            #make sure storage for the 'authoring' stage is present and
+            #register the workflow as part of that 'author'
+            #needed e.g. for predicate handlers trying to determing if
+            #the author stage is done
             self.steps.setdefault(stage,[]).append({})
             offset = JsonPointer.from_parts([stage, len(self.steps[stage]) - 1]).path
             self.steps[stage][-1]['_offset'] = offset
 
         for rule in rules:
             self.addRule(rule, offset)
-
+        
 def createOffsetMeta(offset, bookkeeping):
     '''
     sets up a location to track rule and step ids for a given scope offset

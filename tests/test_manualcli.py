@@ -60,6 +60,19 @@ def test_manual_helloworld(tmpdir):
     result = runner.invoke(yadage.manualcli.visualize,['-s','filebacked:'+statefile,'-w',str(tmpdir)])
     assert result.exit_code == 0
 
+    result = runner.invoke(yadage.manualcli.add,['-s','filebacked:'+statefile,workdir,'workflow.yml','-t','tests/testspecs/local-helloworld','-p','par=newadd','-g','grouped'])
+    assert result.exit_code == 0
+
+    result = runner.invoke(yadage.manualcli.step,['-s','filebacked:'+statefile, '-b','foregroundasync'])
+    assert result.exit_code == 0
+
+    valondisk = jq.jq('.bookkeeping.grouped."0"._meta.stages').transform(json.load(open(statefile)))
+    assert len(valondisk) ==2
+
+
+    assert result.exit_code == 0
+
+
     assert tmpdir.join('yadage_workflow_instance.pdf').check()
 
 def test_manual_step(tmpdir):

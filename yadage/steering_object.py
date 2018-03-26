@@ -125,15 +125,13 @@ class YadageSteering(object):
         '''
 
         self.metadir = metadir
+        self.rootprovider = utils.state_provider_from_string(dataarg, dataopts)
         dataopts = dataopts or {}
-        split_dataarg = dataarg.split(':',1)
-        if len(split_dataarg) == 1:
-            dataarg = split_dataarg[0]
-            self.rootprovider = utils.rootprovider_from_string('local:'+dataarg, dataopts)
+        is_local_data = len(dataarg.split(':',1)) == 1
+        if is_local_data:
             self.metadir = self.metadir or '{}/_yadage/'.format(dataarg)
         else:
             assert self.metadir #for non-default provider, require metadir to be set
-            self.rootprovider = utils.rootprovider_from_string(dataarg, dataopts)
         self.prepare_meta(accept = accept_metadir)
 
     def init_workflow(self,
