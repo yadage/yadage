@@ -200,8 +200,11 @@ def setupbackend_fromstring(backend, backendopts = None):
             backendopts = backendopts
     )
 
-def rootprovider_from_string(dataarg,dataopts = None):
+def state_provider_from_string(dataarg,dataopts = None):
+    dataopts = dataopts or {}
     log.info('%s %s',dataarg,dataopts)
+    if len(dataarg.split(':',1)) == 1:
+        dataarg = 'local:'+dataarg
     if dataarg.startswith('local:'):
         import yadage.state_providers.localposix
         return yadage.state_providers.localposix.setup_provider(dataarg,dataopts)

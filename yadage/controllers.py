@@ -111,11 +111,18 @@ class PersistentController(BaseController):
         submittable_nodes = super(PersistentController,self).submittable_nodes()
         return [x.identifier for x in submittable_nodes]
 
+    def add_rules(self, rulespecs, dataarg, offset = '', groupname = None , dataopts = None):
+        from .stages import JsonStage
+        from .utils  import state_provider_from_string
+        sp = state_provider_from_string(dataarg,dataopts)
+        rules = [JsonStage(json, sp) for json in rulespecs]
+        with self.transaction():
+            self.adageobj.view(offset).addWorkflow(rules,groupname)
+
     def patch_rule(self, ruleid, patchspec):
         with self.transaction():
             rule = [x for x in self.adageobj.rules if x.identifier == ruleid][0]
             rule.rule.stagespec = patchspec
-
 
     def undo_rules(self, ruleids):
         '''

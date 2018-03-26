@@ -4,12 +4,9 @@ import click
 import yaml
 import functools
 import os
-from packtivity.statecontexts.posixfs_context import LocalFSState
-from yadage.state_providers.localposix import LocalFSProvider
 
 from .steering_object import YadageSteering
 from .steering_api import execute_steering
-from .stages import JsonStage
 import yadage.manualutils as manualutils
 import yadage.utils as utils
 import yadage.reset as reset_module
@@ -295,30 +292,36 @@ def step(track , interactive, nsteps, update_interval,
     )
 
 @mancli.command()
-@click.argument('workdir')
+@click.argument('dataarg')
 @click.argument('workflow')
-@click.option('-o', '--offset')
+@click.option('-d', '--dataopts', multiple=True, default=None, help = 'ctrl opts for state provider')
+@click.option('-f', '--offset', default = '')
+@click.option('-g', '--groupname', default = None)
 @click.option('-t', '--toplevel', default = os.curdir)
+@click.option('--parameter', '-p', multiple=True)
 @connection_options
 @common_options
-def add(offset, toplevel, workdir, workflow,
+def add(offset, groupname, dataarg, dataopts, workflow, toplevel, parameter,
         metadir, accept_metadir, controller, ctrlopt, modelsetup, modelopt, backend, local,
         verbosity
         ):
-
+    parameter = utils.options_from_eqdelimstring(parameter)
+    dataopts = utils.options_from_eqdelimstring(dataopts)
     handle_common_options(verbosity)
     ys = handle_connection_options(metadir, accept_metadir, controller, ctrlopt, modelsetup, modelopt, backend, local)
+    controller = ys.controller
 
-    workflow_json = workflow_loader.workflow(
+    stages = []
+    if parameter:
+        inspec = utils.init_stage_spec(parameter, False, [], 'init')
+        stages.append(inspec)
+
+    stages = stages + workflow_loader.workflow(
         workflow,
         toplevel=toplevel,
         validate=True
-    )
-
-    state_provider = LocalFSProvider(LocalFSState([workdir]))
-    rules = [JsonStage(json, state_provider) for json in workflow_json['stages']]
-    with ys.controller.transaction():
-        ys.controller.adageobj.view().addWorkflow(rules)
+    )['stages']
+    controller.add_rules(stages, dataarg, offset = offset, groupname = groupname, dataopts = dataopts)
 
 @mancli.command()
 @click.option('-f', '--fileformat', default='pdf')
