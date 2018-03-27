@@ -98,17 +98,12 @@ class CacheBuilder(object):
             log.info('reading cache from %s',self.cachefile)
             self.cache = json.load(open(self.cachefile))
 
-    def __del__(self):
-        self.todisk()
-
     def todisk(self):
         log.info('writing cache to %s',self.cachefile)
         json.dump(self.cache, open(self.cachefile, 'w'), indent=4, sort_keys=True)
 
     def remove(self,cacheid):
         self.cache.pop(cacheid)
-
-
 
     def cacheresult(self, cacheid, status, result):
         '''
@@ -123,6 +118,7 @@ class CacheBuilder(object):
             'cachingtime': time.time(),
             'validation_data': self.generate_validation_data(cacheid)
         }
+        self.todisk()
 
     def cachedresult(self,cacheid, state, silent = True):
         '''
@@ -138,7 +134,10 @@ class CacheBuilder(object):
 
     def cacheid(self,task):
         t = task.json()
-        return json_hash([t['state'], t['parameters'], t['spec']])
+        tocache = [t['state'], t['parameters'], t['spec']]
+        hash = json_hash(tocache)
+        # log.info('%s -> %s', json.dumps(tocache), hash)
+        return hash
 
     def cacheexists(self,cacheid):
         return cacheid in self.cache and 'result' in self.cache[cacheid]
@@ -150,7 +149,7 @@ class CacheBuilder(object):
         '''
         cacheid = self.cacheid(task)
         #register this task with the cacheid if we don't know about it yet
-        log.debug('checking cache for task %s',task.metadata['name'])
+        log.debug('checking cache for task %s',task.metadata['name'], cacheid)
         if cacheid not in self.cache:
             self.cache[cacheid] = {'task' : task.json()}
         if not self.cacheexists(cacheid):
