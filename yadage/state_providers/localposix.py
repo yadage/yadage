@@ -54,16 +54,9 @@ class LocalFSProvider(object):
         if not readonly:
             readwrites = ['{}/{}'.format(self.base.readwrite[0],name)] if self.nest else self.base.readwrite
 
-        readonlies = []
-        for d in dependencies or []:
-            if d.readwrite:
-                readonlies += d.readwrite # if dep has readwrite add those
-            else:
-                readonlies += d.readonly # else add the readonlies
-
-        log.debug('new state is: rw: %s, ro: %s', readwrites, readonlies)
+        log.debug('new state is: rw: %s', readwrites)
         state_identifier = name.replace('/','_') # replace in case name is nested path
-        newstate = LocalFSState(readwrite = readwrites, readonly = readonlies, identifier = state_identifier, dependencies = dependencies)
+        newstate = LocalFSState(readwrite = readwrites, identifier = state_identifier, dependencies = dependencies)
 
         if not readonly and self.ensure:
             newstate.ensure()

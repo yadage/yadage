@@ -73,6 +73,10 @@ class CachedBackend(federatedbackend.FederatedBackend):
             #create id for this task using the cache builder, with which
             #we will store the result with once it's ready
             cacheid = self.cache.cacheid(task)
+
+            task.state.reset()
+            #maybe we erroneously are re-submitting this see
+            #https://github.com/diana-hep/yadage/issues/45 TODO!
             primaryproxy = self.backends['primary'].submit(task.spec, task.parameters, task.state, task.metadata)
             cachedproxy  = CachedProxy(primaryproxy, cacheid)
             return cachedproxy
