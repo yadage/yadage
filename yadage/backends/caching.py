@@ -5,7 +5,7 @@ import logging
 from packtivity.statecontexts import load_state
 
 import yadage.backends.federatedbackend as federatedbackend
-from yadage.utils import get_obj_id
+from yadage.utils import get_obj_id, json_hash
 from .trivialbackend import TrivialProxy, TrivialBackend
 from ..backends import CachedProxy
 
@@ -137,7 +137,8 @@ class CacheBuilder(object):
         }
 
     def cacheid(self,task):
-        return get_obj_id(task, method = 'jsonhash')
+        t = task.json()
+        return json_hash([t['state'], t['parameters'], t['spec']])
 
     def cacheexists(self,cacheid):
         return cacheid in self.cache and 'result' in self.cache[cacheid]

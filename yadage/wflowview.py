@@ -117,7 +117,6 @@ class WorkflowView(object):
         '''
 
         self.steps.setdefault(stage,[])
-
         node = YadageNode(task.metadata['name'], task, identifier=get_obj_id(task))
         node.task.metadata['wflow_node_id'] = node.identifier
         node.task.metadata['wflow_offset'] = self.offset
@@ -147,7 +146,7 @@ class WorkflowView(object):
 
         for rule in rules:
             self.addRule(rule, offset)
-        
+
 def createOffsetMeta(offset, bookkeeping):
     '''
     sets up a location to track rule and step ids for a given scope offset
