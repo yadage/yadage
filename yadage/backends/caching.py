@@ -5,7 +5,7 @@ import logging
 from packtivity.statecontexts import load_state
 
 import yadage.backends.federatedbackend as federatedbackend
-from yadage.utils import get_obj_id
+from yadage.utils import json_hash
 from .trivialbackend import TrivialProxy, TrivialBackend
 from ..backends import CachedProxy
 
@@ -73,6 +73,10 @@ class CachedBackend(federatedbackend.FederatedBackend):
             #create id for this task using the cache builder, with which
             #we will store the result with once it's ready
             cacheid = self.cache.cacheid(task)
+
+            task.state.reset()
+            #maybe we erroneously are re-submitting this see
+            #https://github.com/diana-hep/yadage/issues/45 TODO!
             primaryproxy = self.backends['primary'].submit(task.spec, task.parameters, task.state, task.metadata)
             cachedproxy  = CachedProxy(primaryproxy, cacheid)
             return cachedproxy
@@ -98,17 +102,12 @@ class CacheBuilder(object):
             log.info('reading cache from %s',self.cachefile)
             self.cache = json.load(open(self.cachefile))
 
-    def __del__(self):
-        self.todisk()
-
     def todisk(self):
         log.info('writing cache to %s',self.cachefile)
         json.dump(self.cache, open(self.cachefile, 'w'), indent=4, sort_keys=True)
 
     def remove(self,cacheid):
         self.cache.pop(cacheid)
-
-
 
     def cacheresult(self, cacheid, status, result):
         '''
@@ -123,6 +122,7 @@ class CacheBuilder(object):
             'cachingtime': time.time(),
             'validation_data': self.generate_validation_data(cacheid)
         }
+        self.todisk()
 
     def cachedresult(self,cacheid, state, silent = True):
         '''
@@ -137,7 +137,11 @@ class CacheBuilder(object):
         }
 
     def cacheid(self,task):
-        return get_obj_id(task, method = 'jsonhash')
+        t = task.json()
+        tocache = [t['state'], t['parameters'], t['spec']]
+        hash = json_hash(tocache)
+        # log.info('%s -> %s', json.dumps(tocache), hash)
+        return hash
 
     def cacheexists(self,cacheid):
         return cacheid in self.cache and 'result' in self.cache[cacheid]
@@ -149,7 +153,7 @@ class CacheBuilder(object):
         '''
         cacheid = self.cacheid(task)
         #register this task with the cacheid if we don't know about it yet
-        log.debug('checking cache for task %s',task.metadata['name'])
+        log.debug('checking cache for task %s',task.metadata['name'], cacheid)
         if cacheid not in self.cache:
             self.cache[cacheid] = {'task' : task.json()}
         if not self.cacheexists(cacheid):

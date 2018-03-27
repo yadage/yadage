@@ -58,7 +58,7 @@ def set_backend(dag, backend, proxymaker = None):
         n.resultproxy = proxymaker(n) if proxymaker else None
         n.update_state()
 
-DEFAULT_ID_METHOD = 'jsonhash'
+DEFAULT_ID_METHOD = 'uuid'
 
 
 def json_hash(jsonable):
@@ -75,7 +75,7 @@ def json_hash(jsonable):
 def get_id_fromjson(jsonobject, method = DEFAULT_ID_METHOD):
     method = os.environ.get('YADAGE_ID_METHOD', method)
     if method == 'uuid':
-        return str(uuid.uuid1())
+        return str(uuid.uuid4())
     elif method == 'jsonhash':
         return json_hash(jsonobject)
     else:
