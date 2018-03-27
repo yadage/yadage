@@ -5,7 +5,7 @@ import logging
 from packtivity.statecontexts import load_state
 
 import yadage.backends.federatedbackend as federatedbackend
-from yadage.utils import get_obj_id, json_hash
+from yadage.utils import json_hash
 from .trivialbackend import TrivialProxy, TrivialBackend
 from ..backends import CachedProxy
 
