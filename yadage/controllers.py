@@ -3,7 +3,7 @@ import contextlib
 import importlib
 
 from adage.wflowcontroller import BaseController
-from .reset import reset_steps, undo_rules, remove_rules
+from .reset import reset_steps, undo_rules, remove_rules, collective_downstream
 from .wflow import YadageWorkflow
 
 log = logging.getLogger(__name__)
@@ -112,6 +112,7 @@ class PersistentController(BaseController):
         return [x.identifier for x in submittable_nodes]
 
     def add_rules(self, rulespecs, dataarg, offset = '', groupname = None , dataopts = None):
+        log.info('adding %s rules', len(rulespecs))
         from .stages import JsonStage
         from .utils  import state_provider_from_string
         sp = state_provider_from_string(dataarg,dataopts)
@@ -141,5 +142,6 @@ class PersistentController(BaseController):
         :param nodeids: list of ids of nodes to reset
         :return: None
         '''
+        to_reset = nodeids + collective_downstream(self.adageobj, nodeids)
         with self.transaction():
-            reset_steps(self.adageobj,nodeids)
+            reset_steps(self.adageobj,to_reset)
