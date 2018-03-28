@@ -9,7 +9,6 @@ from .steering_object import YadageSteering
 from .steering_api import execute_steering
 import yadage.manualutils as manualutils
 import yadage.utils as utils
-import yadage.reset as reset_module
 import yadage.workflow_loader as workflow_loader
 
 log = logging.getLogger(__name__)
@@ -421,7 +420,7 @@ def remove_stage(name,
 @click.argument('name')
 @connection_options
 @common_options
-def reset(name,
+def reset_stage(name,
           metadir, accept_metadir, controller, ctrlopt, modelsetup, modelopt, backend, local,
           verbosity
     ):
@@ -436,9 +435,7 @@ def reset(name,
 
     r2s, _ = utils.rule_steps_indices(controller.adageobj)
     steps_of_rule = r2s[rule.identifier]
-
-    to_reset = steps_of_rule + reset_module.collective_downstream(controller.adageobj, steps_of_rule)
-    controller.reset_nodes(to_reset)
+    controller.reset_nodes(steps_of_rule)
 
 if __name__ == '__main__':
     mancli()
