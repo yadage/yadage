@@ -1,4 +1,5 @@
 import click
+from .utils import advance_coroutine
 
 def decide_rule(rule, controller, idbased):
     click.secho('we could extend DAG with rule', fg='blue')
@@ -52,12 +53,7 @@ def custom_decider(decide_func, idbased):
             data = yield decide_func(*data, idbased = idbased)
     return decider
 
-def advance_coroutine(coroutine):
-    try:
-        return coroutine.next()
-    except AttributeError:
-        return coroutine.__next__()
-   
+
 
 def interactive_deciders(idbased = False):
     '''

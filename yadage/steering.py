@@ -20,6 +20,7 @@ RC_SUCCEEDED = 0
 @click.option('-c', '--cache', default='')
 @click.option('-d', '--dataopt', multiple=True, default=None, help = 'options for the workflow data state')
 @click.option('-e', '--schemadir', default=yadageschemas.schemadir, help = 'schema directory for workflow validation')
+@click.option('-g', '--strategy', help = 'set execution stragegy')
 @click.option('-i', '--loginterval', default=30, help = 'adage tracking interval in seconds')
 @click.option('-k', '--backendopt', multiple=True, default=None, help = 'options for the workflow data state')
 @click.option('-l', '--modelopt', multiple=True, default=None, help = 'options for the workflow state models')
@@ -33,7 +34,6 @@ RC_SUCCEEDED = 0
 @click.option('-v', '--verbosity', default='INFO', help = 'logging verbosity')
 @click.option('--accept-metadir/--no-accept-metadir', default=False)
 @click.option('--plugins', default=None)
-@click.option('--interactive/--not-interactive', default=False, help = 'en-/disable user interactio (sign-off graph extensions and packtivity submissions)')
 @click.option('--validate/--no-validate', default=True, help = 'en-/disable workflow spec validation')
 @click.option('--visualize/--no-visualize', default=False, help = 'visualize workflow graph')
 def main(dataarg,
@@ -49,7 +49,7 @@ def main(dataarg,
          backend,
          dataopt,
          backendopt,
-         interactive,
+         strategy,
          modelsetup,
          modelopt,
          metadir,
@@ -97,7 +97,7 @@ def main(dataarg,
             updateinterval = updateinterval,
             loginterval = loginterval,
             visualize = visualize,
-            interactive = interactive,
+            strategy = strategy,
         )
         rc = RC_SUCCEEDED
     except:

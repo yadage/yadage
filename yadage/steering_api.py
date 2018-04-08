@@ -5,7 +5,7 @@ import yadageschemas
 import os
 
 from .steering_object import YadageSteering
-from .interactive import interactive_deciders
+from .strategies import get_strategy
 
 log = logging.getLogger(__name__)
 
@@ -22,7 +22,7 @@ def execute_steering(
     updateinterval = 0.02,
     loginterval = 30,
     default_trackers=True,
-    interactive = False,
+    strategy = None,
     backend = None,
     cache = None
     ):
@@ -48,12 +48,8 @@ def execute_steering(
         trackerclass = getattr(module,trackerclassname)
         ys.adage_argument(additional_trackers = [trackerclass()])
 
-    if interactive:
-        extend, submit = interactive_deciders()
-        ys.adage_argument(
-            extend_decider = extend,
-            submit_decider = submit
-        )
+    if strategy is not None:
+        ys.adage_argument(**get_strategy(strategy))
 
     ys.run_adage(backend)
 
@@ -73,7 +69,7 @@ def steering_ctx(
     loginterval = 30,
     schemadir = yadageschemas.schemadir,
     metadir = None,
-    interactive=False,
+    strategy=None,
     validate=True,
     visualize=True,
     accept_metadir = False,
@@ -100,7 +96,7 @@ def steering_ctx(
             updateinterval = updateinterval,
             loginterval = loginterval,
             default_trackers = visualize,
-            interactive = interactive,
+            strategy = strategy,
             backend = backend,
             cache = cache
         )

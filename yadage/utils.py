@@ -261,3 +261,9 @@ def rule_steps_indices(workflow):
         for step in steps_of_rule:
             steps_to_rule_index[step] = rule.identifier
     return rule_to_steps_index, steps_to_rule_index
+
+def advance_coroutine(coroutine):
+    try:
+        return coroutine.next()
+    except AttributeError:
+        return coroutine.__next__()
