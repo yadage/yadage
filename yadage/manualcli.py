@@ -272,10 +272,10 @@ def handle_connection_options(metadir, accept_metadir, controller, ctrlopt, mode
 @click.option('--track/--no-track', default=True)
 @click.option('-n', '--nsteps', default=-1, help = 'number of steps to process. use -1 to for no limit (will run workflow to completion)')
 @click.option('-u', '--update-interval', default=1)
-@click.option('--interactive/--not-interactive', default=False, help = 'en-/disable user interactio (sign-off graph extensions and packtivity submissions)')
+@click.option('-g','--strategy', help = 'set execution stragegy')
 @connection_options
 @common_options
-def step(track , interactive, nsteps, update_interval,
+def step(track , strategy, nsteps, update_interval,
          metadir, accept_metadir, controller, ctrlopt, modelsetup, modelopt, backend, local,
          verbosity
          ):
@@ -287,7 +287,7 @@ def step(track , interactive, nsteps, update_interval,
         ys,
         updateinterval = update_interval,
         default_trackers = track,
-        interactive = interactive
+        strategy = strategy
     )
 
 @mancli.command()
