@@ -8,7 +8,7 @@ def workflow(source, toplevel, schema_name='yadage/workflow-schema', schemadir=N
     param toplevel: base URI to resolve references from
     schemadir
     '''
-    dialect, spec = ('raw_with_defaults', source) if ':' not in source else source.split(':')
+    dialect, spec = ('raw_with_defaults', source) if ':' not in source else source.split(':',1)
 
     specopts = {
         'toplevel': toplevel,
