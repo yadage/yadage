@@ -47,7 +47,7 @@ def from_file(ctx, param, value):
 @click.option('-c', '--cache', default='')
 @click.option('-d', '--dataopt', multiple=True, default=None, help = 'options for the workflow data state')
 @click.option('-e', '--schemadir', default=yadageschemas.schemadir, help = 'schema directory for workflow validation')
-@click.option('-f', '--from-file', multiple=True, type=click.File('rb'), help = 'read entire configuration from file, no other flags settings are read.', callback=from_file, is_eager = True)
+@click.option('-f', '--from-file', expose_value=False, multiple=True, type=click.File('rb'), help = 'read entire configuration from file, no other flags settings are read.', callback=from_file, is_eager = True)
 @click.option('-g', '--strategy', help = 'set execution stragegy')
 @click.option('-i', '--loginterval', default=30, help = 'adage tracking interval in seconds')
 @click.option('-k', '--backendopt', multiple=True, default=None, help = 'options for the workflow data state')
