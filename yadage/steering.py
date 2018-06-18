@@ -2,6 +2,7 @@
 import click
 import os
 import logging
+import yaml
 import yadageschemas
 import yadage.utils as utils
 import yadage.steering_api as steering_api
@@ -12,6 +13,32 @@ RC_FAILED = 1
 RC_SUCCEEDED = 0
 
 
+def from_file(ctx, param, value):
+    if not value or ctx.resilient_parsing:
+        return
+    data = {}
+    verbosity = 'INFO'
+    logging.basicConfig(level=getattr(logging, verbosity), format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    click.secho('running from file')
+    for v in value:
+        data.update(**yaml.load(v))
+    data['backend']  = utils.setupbackend_fromstring(data.pop('backend'),data.pop('backendopts'))
+
+    rc = RC_FAILED
+    try:
+        steering_api.run_workflow(**data)
+        rc = RC_SUCCEEDED
+    except:
+        log.exception('workflow failed')
+    if rc != RC_SUCCEEDED:
+        exc = click.exceptions.ClickException(
+            click.style("Workflow failed", fg='red')
+        )
+        exc.exit_code = rc
+        raise exc
+
+    ctx.exit()
+
 @click.command()
 @click.argument('dataarg')
 @click.argument('workflow')
@@ -20,6 +47,7 @@ RC_SUCCEEDED = 0
 @click.option('-c', '--cache', default='')
 @click.option('-d', '--dataopt', multiple=True, default=None, help = 'options for the workflow data state')
 @click.option('-e', '--schemadir', default=yadageschemas.schemadir, help = 'schema directory for workflow validation')
+@click.option('-f', '--from-file', expose_value=False, multiple=True, type=click.File('rb'), help = 'read entire configuration from file, no other flags settings are read.', callback=from_file, is_eager = True)
 @click.option('-g', '--strategy', help = 'set execution stragegy')
 @click.option('-i', '--loginterval', default=30, help = 'adage tracking interval in seconds')
 @click.option('-k', '--backendopt', multiple=True, default=None, help = 'options for the workflow data state')
