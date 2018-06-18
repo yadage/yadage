@@ -16,11 +16,12 @@ RC_SUCCEEDED = 0
 def from_file(ctx, param, value):
     if not value or ctx.resilient_parsing:
         return
-    # yaml
+    data = {}
     verbosity = 'INFO'
     logging.basicConfig(level=getattr(logging, verbosity), format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     click.secho('running from file')
-    data = yaml.load(value)
+    for v in value:
+        data.update(**yaml.load(v))
     data['backend']  = utils.setupbackend_fromstring(data.pop('backend'),data.pop('backendopts'))
 
     rc = RC_FAILED
@@ -46,7 +47,7 @@ def from_file(ctx, param, value):
 @click.option('-c', '--cache', default='')
 @click.option('-d', '--dataopt', multiple=True, default=None, help = 'options for the workflow data state')
 @click.option('-e', '--schemadir', default=yadageschemas.schemadir, help = 'schema directory for workflow validation')
-@click.option('-f', '--from-file', type=click.File('rb'), help = 'read entire configuration from file, no other flags settings are read.', callback=from_file, is_eager = True)
+@click.option('-f', '--from-file', multiple=True, type=click.File('rb'), help = 'read entire configuration from file, no other flags settings are read.', callback=from_file, is_eager = True)
 @click.option('-g', '--strategy', help = 'set execution stragegy')
 @click.option('-i', '--loginterval', default=30, help = 'adage tracking interval in seconds')
 @click.option('-k', '--backendopt', multiple=True, default=None, help = 'options for the workflow data state')
