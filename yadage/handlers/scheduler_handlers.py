@@ -96,11 +96,11 @@ def step_or_stages(name, spec, state_provider, inputs, parameters, dependencies)
         return p,None
     elif 'workflow' in spec:
         name = 'init_{}'.format(name)
-        init_spec  = init_stage_spec(parameters, discover = False, used_inputs=[x.json() for x in inputs], name = 'init', nodename = name)
+        init_spec  = init_stage_spec(parameters.json(), discover = False, used_inputs=[x.json() for x in inputs], name = 'init', nodename = name)
         return None, [init_spec] + spec['workflow']['stages']
     elif 'cases' in spec:
         for x in spec['cases']:
-            if jq.jq(x['if']).transform(parameters):
+            if parameters.jq(x['if']).json():
                 log.info('selected case %s', x['if'])
                 return step_or_stages(name,x, state_provider, inputs, parameters, dependencies)
         log.info('no case selected on pars %s', parameters)
@@ -134,14 +134,15 @@ def addStepOrWorkflow(name, stage, parameters, inputs, spec):
         )
         log.debug('scheduled a subworkflow')
 
-def get_parameters(spec):
+from packtivity.typedleafs import TypedLeafs
+def get_parameters(parameters):
     '''
     retrieve parameters from the spec
 
     :param spec: the stage spec
     :return: a JSON-like object of stage parameters
     '''
-    return {x['key']: x['value']for x in spec['parameters']}
+    return {x['key']: x['value']for x in parameters}
 
 @scheduler('singlestep-stage')
 def singlestep_stage(stage, spec):
@@ -156,9 +157,10 @@ def singlestep_stage(stage, spec):
     '''
     log.debug('scheduling singlestep stage with spec:\n%s', spec)
     parameters = {
-        k: select_parameter(stage.view, v) for k, v in get_parameters(spec).items()
+        k: select_parameter(stage.view, v) for k, v in get_parameters(spec['parameters']).items()
     }
     finalized, inputs = finalize_input(parameters, stage.view)
+    finalized = TypedLeafs(finalized, getattr(stage.state_provider,'datamodel',None))
     addStepOrWorkflow(stage.name, stage, finalized, inputs, spec)
 
 def chunk(alist, chunksize):
@@ -246,12 +248,13 @@ def multistep_stage(stage, spec):
     '''
     log.debug('scheduling multistep stage with spec:\n%s', spec)
     parameters = {
-        k: select_parameter(stage.view, v) for k, v in get_parameters(spec).items()
+        k: select_parameter(stage.view, v) for k, v in get_parameters(spec['parameters']).items()
     }
     singlesteppars = scatter(parameters, spec['scatter'], spec.get('batchsize'), spec.get('partitionsize'))
     for i, pars in enumerate(singlesteppars):
         singlename = '{}_{}'.format(stage.name, i)
         finalized, inputs = finalize_input(pars, stage.view)
+        finalized = TypedLeafs(finalized, getattr(stage.state_provider,'datamodel',None))
         addStepOrWorkflow(singlename, stage, finalized, inputs, spec)
 
 def process_noderef(leafobj,resultscript,view):
