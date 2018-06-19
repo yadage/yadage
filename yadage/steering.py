@@ -1,11 +1,14 @@
 #!/usr/bin/env python
-import click
-import os
 import logging
+import os
+
+import click
 import yaml
-import yadageschemas
-import yadage.utils as utils
+
 import yadage.steering_api as steering_api
+import yadage.utils as utils
+import yadageschemas
+from packtivity.plugins import enable_plugins
 
 log = logging.getLogger(__name__)
 
@@ -23,6 +26,8 @@ def from_file(ctx, param, value):
     for v in value:
         data.update(**yaml.load(v))
     data['backend']  = utils.setupbackend_fromstring(data.pop('backend'),data.pop('backendopts'))
+
+    enable_plugins(data.pop('plugins'))
 
     rc = RC_FAILED
     try:
