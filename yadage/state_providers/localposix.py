@@ -1,11 +1,14 @@
-import os
 import logging
+import os
 import shutil
-log = logging.getLogger(__name__)
 
 from packtivity.statecontexts import load_state
 from packtivity.statecontexts.posixfs_context import LocalFSState
+
 from ..utils import prepare_workdir_from_archive
+
+log = logging.getLogger(__name__)
+
 
 
 

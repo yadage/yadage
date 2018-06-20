@@ -1,5 +1,7 @@
 import click
+
 from .utils import advance_coroutine
+
 
 def decide_rule(rule, controller, idbased):
     click.secho('we could extend DAG with rule', fg='blue')

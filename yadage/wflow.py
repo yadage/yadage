@@ -1,7 +1,9 @@
 import adage
 from adage.serialize import obj_to_json
-from .wflowview import WorkflowView
+
 from .stages import JsonStage, OffsetStage
+from .wflowview import WorkflowView
+
 
 def json_or_nil(x):
     return None if x is None else x.json()

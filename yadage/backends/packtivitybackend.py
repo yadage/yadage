@@ -1,9 +1,9 @@
 import logging
-from packtivity.backendutils import backend_from_string
 
 import yadage.backends.caching as caching
 import yadage.backends.federatedbackend as federatedbackend
 from packtivity.asyncbackends import ForegroundBackend
+from packtivity.backendutils import backend_from_string
 
 log = logging.getLogger(__name__)
 

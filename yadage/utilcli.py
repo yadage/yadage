@@ -1,14 +1,16 @@
-import yaml
 import json
-import click
-import tempfile
-import shutil
 import logging
+import shutil
+import tempfile
 
+import click
+import yaml
+
+from .backends.trivialbackend import TrivialBackend, TrivialProxy
 from .handlers.expression_handlers import handlers as exh
-from .utils import set_backend, process_refs
-from .backends.trivialbackend import TrivialProxy, TrivialBackend
+from .utils import process_refs, set_backend
 from .wflowstate import make_deserializer
+
 
 def printRef(ref, dag, indent=''):
     click.secho('{}name: {} position: {}, value: {}, id: {}'.format(

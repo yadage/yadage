@@ -1,6 +1,9 @@
 import logging
-import yadage.handlers.utils as utils
+
 import jsonpath_rw
+
+import yadage.handlers.utils as utils
+
 from ..utils import pointerize
 
 log = logging.getLogger(__name__)

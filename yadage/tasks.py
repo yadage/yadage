@@ -1,6 +1,9 @@
 import logging
-from .utils import outputReference
+
 from packtivity.typedleafs import TypedLeafs
+
+from .utils import outputReference
+
 log = logging.getLogger(__name__)
 
 class packtivity_task(object):
