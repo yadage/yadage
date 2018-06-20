@@ -16,6 +16,7 @@ install:
 - pip install sphinx
 script:
 - pyflakes yadage
+- #isort -rc -c -df yadage/*.py
 - pytest --cov=yadage
 - docker build .
 after_success:

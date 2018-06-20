@@ -1,4 +1,5 @@
 import logging
+
 import jsonpointer
 
 import yadage.handlers.utils as utils

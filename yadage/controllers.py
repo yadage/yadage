@@ -1,9 +1,10 @@
-import logging
 import contextlib
 import importlib
+import logging
 
 from adage.wflowcontroller import BaseController
-from .reset import reset_steps, undo_rules, remove_rules, collective_downstream
+
+from .reset import collective_downstream, remove_rules, reset_steps, undo_rules
 from .wflow import YadageWorkflow
 
 log = logging.getLogger(__name__)

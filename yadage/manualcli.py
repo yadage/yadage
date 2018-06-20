@@ -1,15 +1,17 @@
 #!/usr/bin/env python
-import logging
-import click
-import yaml
 import functools
+import logging
 import os
 
-from .steering_object import YadageSteering
-from .steering_api import execute_steering
+import click
+import yaml
+
 import yadage.manualutils as manualutils
 import yadage.utils as utils
 import yadage.workflow_loader as workflow_loader
+
+from .steering_api import execute_steering
+from .steering_object import YadageSteering
 
 log = logging.getLogger(__name__)
 logging.basicConfig(level = logging.INFO)

@@ -1,16 +1,18 @@
-import logging
-import itertools
 import copy
+import itertools
+import logging
 
 import jq
 import jsonpointer
 
-
 import yadage.handlers.utils as utils
-from .expression_handlers import handlers as exprhandlers
-from ..tasks import packtivity_task
+from packtivity.typedleafs import TypedLeafs
+
 from ..stages import JsonStage
-from ..utils import leaf_iterator_jsonlike, pointerize, process_jsonlike, outputReference, get_init_spec, init_stage_spec
+from ..tasks import packtivity_task
+from ..utils import (get_init_spec, init_stage_spec, leaf_iterator_jsonlike,
+                     outputReference, pointerize, process_jsonlike)
+from .expression_handlers import handlers as exprhandlers
 
 log = logging.getLogger(__name__)
 
@@ -134,7 +136,6 @@ def addStepOrWorkflow(name, stage, parameters, inputs, spec):
         )
         log.debug('scheduled a subworkflow')
 
-from packtivity.typedleafs import TypedLeafs
 def get_parameters(parameters):
     '''
     retrieve parameters from the spec

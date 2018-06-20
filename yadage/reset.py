@@ -1,6 +1,8 @@
-import networkx as nx
-import yadage.utils as utils
 import logging
+
+import networkx as nx
+
+import yadage.utils as utils
 
 log = logging.getLogger(__name__)
 

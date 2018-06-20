@@ -1,8 +1,9 @@
-import shlex
-import pydotplus
-import jsonpointer
 import logging
+import shlex
 import subprocess
+
+import jsonpointer
+import pydotplus
 
 log = logging.getLogger(__name__)
 

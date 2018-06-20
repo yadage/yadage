@@ -1,17 +1,19 @@
-import json
-import yaml
-import os
-import click
-import zipfile
-import logging
-import jsonpointer
-import jq
-import hashlib
-import uuid
 import copy
+import hashlib
 import importlib
+import json
+import logging
+import os
+import uuid
+import zipfile
+
+import click
+import jq
+import jsonpointer
+import yaml
 
 from yadageschemas.utils import WithJsonRefEncoder
+
 
 class outputReference(object):
 

@@ -1,11 +1,13 @@
-import adage.node
-import os
-import jsonpointer
 import datetime
+import os
 import time
-import packtivity
 
+import jsonpointer
+
+import adage.node
+import packtivity
 import yadage.tasks as tasks
+
 
 class YadageNode(adage.node.Node):
     '''

@@ -1,8 +1,9 @@
-from .wflowstate import make_deserializer
+import logging
+
 from .steering_object import YadageSteering
 from .utils import setupbackend_fromstring
+from .wflowstate import make_deserializer
 
-import logging
 log = logging.getLogger(__name__)
 
 def connect(metadir, accept_metadir, ctrlstring, ctrlopts, modelsetup, modelopts, backendstring):

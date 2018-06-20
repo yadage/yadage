@@ -1,9 +1,11 @@
 import logging
-from jsonpointer import JsonPointer
+
 import jsonpath_rw
+from jsonpointer import JsonPointer
+
+from .stages import JsonStage, OffsetStage
 from .utils import get_obj_id, init_stage_spec
 from .wflownode import YadageNode
-from .stages import JsonStage,OffsetStage
 
 log = logging.getLogger(__name__)
 
