@@ -17,7 +17,7 @@ def test_serialize():
     json.dumps(data)
 
 def test_deserialize():
-    data = {'rules': [], 'applied': [], 'dag': {'nodes': [], 'edges': []}, 'stepsbystage': {}, 'bookkeeping': {}}
+    data = {'rules': [], 'applied': [], 'dag': {'nodes': [], 'edges': []}, 'stepsbystage': {}, 'bookkeeping': {}, 'values': {}}
     wflow = YadageWorkflow.fromJSON(data)
     assert data == wflow.json()
 
