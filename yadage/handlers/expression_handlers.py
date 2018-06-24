@@ -8,7 +8,7 @@ from ..utils import pointerize
 
 log = logging.getLogger(__name__)
 
-handlers, scheduler = utils.handler_decorator()
+handlers, expression = utils.handler_decorator()
 
 
 
@@ -76,8 +76,8 @@ def select_outputs(steps, selection, flatten, unwrapsingle):
     return combine_outputs(map(lambda s: select_reference(s, selection), steps), flatten, unwrapsingle)
 
 
-@scheduler('stage-output-selector')
-def resolve_reference(stageview, selection):
+@expression('stage-output-selector')
+def stage_output_selector(stageview, selection):
     '''
     :param stageview: the workflow view objct
     :param selection: the JSON-like selection dictionary
@@ -96,9 +96,3 @@ def resolve_reference(stageview, selection):
                                  selection.get('unwrap', False))
         log.debug('selected outputs %s', outputs)
         return outputs
-
-
-
-@scheduler('jq-stage-output-selector')
-def resolve_jq_reference(stageview, selection):
-    return
