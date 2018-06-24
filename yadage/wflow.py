@@ -18,6 +18,7 @@ class YadageWorkflow(adage.adageobject):
         super(YadageWorkflow, self).__init__()
         self.stepsbystage = {}
         self.bookkeeping = {}
+        self.values = {}
 
     def view(self, offset=''):
         return WorkflowView(self, offset)
@@ -30,6 +31,7 @@ class YadageWorkflow(adage.adageobject):
                            )
         data['bookkeeping'] = self.bookkeeping
         data['stepsbystage'] = self.stepsbystage
+        data['values'] = self.values
         return data
 
     @classmethod
@@ -43,6 +45,7 @@ class YadageWorkflow(adage.adageobject):
         instance.applied_rules = [OffsetStage.fromJSON(x,state_provider_deserializer) for x in data['applied'] ]
         instance.bookkeeping = data['bookkeeping']
         instance.stepsbystage = data['stepsbystage']
+        instance.values = data['values']
 
         instance.dag = adage.serialize.dag_from_json(
             data['dag'],

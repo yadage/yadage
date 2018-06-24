@@ -27,6 +27,7 @@ class WorkflowView(object):
         self.offset = offset
         self.steps = JsonPointer(self.offset).resolve(workflowobj.stepsbystage)
         self.bookkeeper = JsonPointer(self.offset).resolve(workflowobj.bookkeeping)
+        self.values = JsonPointer(self.offset).resolve(workflowobj.values)
 
     def view(self, offset):
         '''
@@ -108,6 +109,15 @@ class WorkflowView(object):
         thisoffset.resolve(self.bookkeeper)['_meta']['stages'] += [offsetstage.identifier]
         return offsetstage.identifier
 
+    def addValue(self, key, value):
+        v = self.values.setdefault('_values', {})
+        if key in v:
+            raise RuntimeError('cannot overwrite value')
+        v[key] = value
+
+    def getValue(self, key):
+        return self.values['_values'][key]
+
     def addStep(self, task, stage, depends_on=None):
         '''
         adds a node to the DAG connecting it to the passed depending nodes
@@ -145,6 +155,10 @@ class WorkflowView(object):
             self.steps.setdefault(stage,[]).append({})
             offset = JsonPointer.from_parts([stage, len(self.steps[stage]) - 1]).path
             self.steps[stage][-1]['_offset'] = offset
+
+            self.values.setdefault(stage,[]).append({})
+            offset = JsonPointer.from_parts([stage, len(self.values[stage]) - 1]).path
+            self.values[stage][-1] = {}
 
         for rule in rules:
             self.addRule(rule, offset)
