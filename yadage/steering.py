@@ -45,8 +45,8 @@ def from_file(ctx, param, value):
     ctx.exit()
 
 @click.command()
-@click.argument('dataarg')
-@click.argument('workflow')
+@click.argument('dataarg', default = 'work')
+@click.argument('workflow', default = 'workflow.yml')
 @click.argument('initfiles', nargs=-1)
 @click.option('-b', '--backend', default='multiproc:auto', help = 'packtivity backend string')
 @click.option('-c', '--cache', default='')
