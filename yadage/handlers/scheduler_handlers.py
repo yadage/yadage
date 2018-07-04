@@ -109,6 +109,11 @@ def step_or_stages(name, spec, state_provider, inputs, parameters, dependencies)
         return None, None
     raise RuntimeError('do not know what kind of stage spec we are dealing with. %s', spec.keys())
 
+def register_expressions(stage, expressions):
+    if not expressions: return
+    for key, expression in expressions.items():
+        stage.view.addValue(key, expression)
+
 def addStepOrWorkflow(name, stage, parameters, inputs, spec):
     '''
     adds a step or a sub-workflow based on a init step
@@ -163,6 +168,7 @@ def singlestep_stage(stage, spec):
     finalized, inputs = finalize_input(parameters, stage.view)
     finalized = TypedLeafs(finalized, getattr(stage.state_provider,'datamodel',None))
     addStepOrWorkflow(stage.name, stage, finalized, inputs, spec)
+    register_expressions(stage, spec.get('register_values'))
 
 def chunk(alist, chunksize):
     '''split a list into equal-sized chunks of size chunksize'''
@@ -257,6 +263,8 @@ def multistep_stage(stage, spec):
         finalized, inputs = finalize_input(pars, stage.view)
         finalized = TypedLeafs(finalized, getattr(stage.state_provider,'datamodel',None))
         addStepOrWorkflow(singlename, stage, finalized, inputs, spec)
+    register_expressions(stage, spec.get('register_values'))
+
 
 def process_noderef(leafobj,resultscript,view):
     n = view.dag.getNode(leafobj['_nodeid'])
@@ -300,7 +308,7 @@ def jq_stage(stage, spec):
 
         log.info('finalized to: %s',after_post)
         addStepOrWorkflow(singlename, stage, after_post, inputs, spec)
-
+    register_expressions(stage, spec.get('register_values'))
 
 @scheduler('init-stage')
 def init_stage(stage, spec):
@@ -329,3 +337,4 @@ def init_stage(stage, spec):
     task.s(**spec['parameters'])
     task.used_inputs(inputs)
     stage.addStep(task)
+    register_expressions(stage, spec.get('register_values'))

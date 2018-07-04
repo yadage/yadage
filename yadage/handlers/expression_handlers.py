@@ -102,6 +102,8 @@ def value_resolver(view, expression):
     value = view.getValue(expression['key'])
     log.info('resolved to %s', value)
     if isinstance(value,dict) and 'expression_type' in value:
+        log.info('looking up expression %s', value)
         return handlers[value['expression_type']](view, value)
     else:
+        log.info('not an expression value')
         return value
