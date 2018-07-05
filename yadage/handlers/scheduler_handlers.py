@@ -55,7 +55,7 @@ def finalize_value(wflowview, value):
     :return: finalized parameter value
     '''
     if type(value) == outputReference:
-        v = value.pointer.resolve(wflowview.dag.getNode(value.stepid).result)
+        v = wflowview.dag.getNode(value.stepid).result.resolve_ref(value.pointer)
         return finalize_value(wflowview, v)
     else:
         return value
