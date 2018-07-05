@@ -43,6 +43,28 @@ def test_singlestep_cases_first(singlestage_cases, foregroundasync_backend):
 
     assert wflow.dag.getNodeByName('hello_world').task.spec == right_taskspec
 
+def test_value_registration(value_registering_workflow, foregroundasync_backend):
+    wflow = value_registering_workflow
+
+    inputdata = {'msg': 'Hello World'}
+    wflow.view().init(inputdata)
+
+    assert wflow.rules[0].applicable(wflow) == False
+    wflow.view().rules[-1].apply(wflow) #apply init
+    assert len(wflow.dag.nodes()) == 1 #init applied
+
+    assert wflow.rules[0].applicable(wflow) == True #first stage is good
+    wflow.rules[0].apply(wflow) #apply first stage
+
+    value =  wflow.view().getValue('ascopedfile')
+    assert value
+    assert type(value) == dict
+    assert value['expression_type'] == 'stage-output-selector'
+    assert value['stages'] == 'hello'
+    assert value['output'] == 'output'
+    assert value['unwrap'] == True
+
+
 def test_singlestep_cases_second(singlestage_cases):
     wflow = singlestage_cases
     inputdata = {'par': 1}
