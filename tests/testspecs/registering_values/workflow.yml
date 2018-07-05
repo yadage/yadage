@@ -1,0 +1,41 @@
+stages:
+- name: hello
+  dependencies: [init]
+  scheduler:
+    scheduler_type: singlestep-stage
+    parameters:
+      msg: {stages: init, output: msg, unwrap: true}
+      outputfile: "{workdir}/hello.txt"
+    register_values:
+      ascopedfile: {
+        expression_type: "stage-output-selector",
+        stages: "hello", output: "output", unwrap: true
+      }
+    step:
+      process:
+        process_type: 'string-interpolated-cmd'
+        cmd: echo {msg} > {outputfile}
+      environment:
+        environment_type: 'localproc-env'
+      publisher:
+        publisher_type: 'interpolated-pub'
+        publish:
+          output: '{outputfile}'
+
+- name: anotherstage
+  dependencies: [hello]
+  scheduler:
+    scheduler_type: singlestep-stage
+    parameters:
+      inputfile: {expression_type: fromvalue, key: ascopedfile}
+      outputfile: "{workdir}/world.txt"
+    step:
+      process:
+        process_type: 'string-interpolated-cmd'
+        cmd: cat {inputfile} | tr '[a-z]' '[A-Z]'  > {outputfile}
+      environment:
+        environment_type: 'localproc-env'
+      publisher:
+        publisher_type: 'interpolated-pub'
+        publish:
+          output: '{outputfile}'
