@@ -97,6 +97,14 @@ def singlestage_cases(tmpdir,localfs_state_provider):
     return wflow
 
 @pytest.fixture()
+def value_registering_workflow(tmpdir,localfs_state_provider):
+    '''a workflow object with horizontally scalable map stage scheduling sub-workflows'''
+    data  = yadage.workflow_loader.workflow('workflow.yml','tests/testspecs/registering_values')
+    wflow = YadageWorkflow.createFromJSON(data,localfs_state_provider)
+    return wflow
+
+
+@pytest.fixture()
 def multiproc_backend():
     backend = setupbackend_fromstring('multiproc:4')
     return backend

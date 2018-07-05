@@ -96,3 +96,14 @@ def stage_output_selector(stageview, selection):
                                  selection.get('unwrap', False))
         log.debug('selected outputs %s', outputs)
         return outputs
+
+@expression('fromvalue')
+def value_resolver(view, expression):
+    value = view.getValue(expression['key'])
+    log.debug('resolved to %s', value)
+    if isinstance(value,dict) and 'expression_type' in value:
+        log.debug('looking up expression %s', value)
+        return handlers[value['expression_type']](view, value)
+    else:
+        log.info('not an expression value')
+        return value
