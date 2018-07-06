@@ -69,7 +69,7 @@ def jsonpath_ready(stage, depspec,stagespec):
 
 
 @predicate('expressions_fulfilled')
-def jsonpath_ready(stage, depspec,stagespec):
+def expressions_fulfilled(stage, depspec,stagespec):
     '''
     the main predicate for yadage. for a list of jsonpath expressions
     determine whether the stage or workflow scope is ready (i.e. has a result)
