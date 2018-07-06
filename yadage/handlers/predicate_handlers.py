@@ -3,6 +3,7 @@ import logging
 import jsonpointer
 
 import yadage.handlers.utils as utils
+from yadage.handlers.expression_handlers import handlers as exprhandlers
 
 log = logging.getLogger(__name__)
 
@@ -64,4 +65,20 @@ def jsonpath_ready(stage, depspec,stagespec):
             if not all([x.has_result() for x in stage.view.getSteps(x)]):
                 return False
     log.debug('all checks ok, predicate is True')
+    return True
+
+
+@predicate('expressions_fulfilled')
+def jsonpath_ready(stage, depspec,stagespec):
+    '''
+    the main predicate for yadage. for a list of jsonpath expressions
+    determine whether the stage or workflow scope is ready (i.e. has a result)
+    '''
+    log.debug('checking jsonpath ready predicate\n%s', depspec)
+    expressions = depspec['expressions']
+    for expression in expressions:
+        handler = exprhandlers[expression['expression_type']]
+        value = handler(stage.view, expression)
+        if not value:
+            return False
     return True

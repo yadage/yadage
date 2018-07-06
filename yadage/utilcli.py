@@ -61,7 +61,7 @@ def testsel(instance, results, selection,verbosity):
     selresult = exh['stage-output-selector'](wflow.view(), yaml.load(selection))
 
     if not selresult:
-        click.secho('Bad selection', fg='red')
+        click.secho('Bad selection {}'.format(selresult), fg='red')
         return
 
     click.secho(json.dumps(

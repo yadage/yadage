@@ -116,7 +116,7 @@ class WorkflowView(object):
         v[key] = value
 
     def getValue(self, key):
-        return self.values['_values'][key]
+        return self.values.setdefault('_values', {}).get(key)
 
     def addStep(self, task, stage, depends_on=None):
         '''
