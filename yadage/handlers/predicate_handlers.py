@@ -6,7 +6,7 @@ import yadage.handlers.utils as utils
 
 log = logging.getLogger(__name__)
 
-handlers, scheduler = utils.handler_decorator()
+handlers, predicate = utils.handler_decorator()
 
 
 def checkmeta(flowview, metainfo):
@@ -42,7 +42,7 @@ def scope_done(scope, flowview):
                 result = result and scope_done(childscope, flowview)
     return result
 
-@scheduler('jsonpath_ready')
+@predicate('jsonpath_ready')
 def jsonpath_ready(stage, depspec,stagespec):
     '''
     the main predicate for yadage. for a list of jsonpath expressions
@@ -65,10 +65,3 @@ def jsonpath_ready(stage, depspec,stagespec):
                 return False
     log.debug('all checks ok, predicate is True')
     return True
-
-@scheduler('autodep')
-def autodep(stage, depspec,stagespec):
-    '''
-    automatic dependency discovery based on stage spec
-    '''
-    raise NotImplementedError('automatic dependency not implemented yet')
