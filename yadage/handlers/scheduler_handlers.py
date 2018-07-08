@@ -45,7 +45,7 @@ def select_parameter(wflowview, parameter):
         value = parameter
     return value
 
-def finalize_value(wflowview, value):
+def finalize_value(wflowview, value, inputs):
     '''
     finalize a value by recursively resolving references
 
@@ -55,8 +55,7 @@ def finalize_value(wflowview, value):
     :return: finalized parameter value
     '''
     if type(value) == outputReference:
-        v = wflowview.dag.getNode(value.stepid).result.resolve_ref(value.pointer)
-        return finalize_value(wflowview, v)
+        return wflowview.dag.getNode(value.stepid).readfromresult(value.pointer.path, inputs)
     else:
         return value
 
@@ -76,11 +75,10 @@ def finalize_input(jsondata,wflowview):
     result = copy.deepcopy(jsondata)
     inputs = []
     for leaf_pointer, leaf_value in leaf_iterator_jsonlike(jsondata):
-        if type(leaf_value) == outputReference: inputs.append(leaf_value)
-        leaf_pointer.set(result,finalize_value(wflowview, leaf_value))
+        leaf_pointer.set(result,finalize_value(wflowview, leaf_value, inputs))
     return result, inputs
 
-def step_or_stages(name, spec, state_provider, inputs, parameters, dependencies):
+def step_or_stages(name, spec, inputs, parameters, state_provider, stageview):
     '''
     :param name: name of the eventual (init-)step
     :param spec: the stage spec
@@ -89,27 +87,31 @@ def step_or_stages(name, spec, state_provider, inputs, parameters, dependencies)
 
     :return: yadage or init step object
     '''
+
+    dependencies = [stageview.dag.getNode(k.stepid) for k in inputs]
+    depstates = [d.task.state for d in set(dependencies) if d.task.state]
+
     if 'step' in spec:
-        depstates = set(d.task.state for d in dependencies if d.task.state)
         step_state = state_provider.new_state(name,depstates)
-        p = packtivity_task(name=name, spec=spec['step'], state=step_state)
-        p.s(**parameters)
-        p.used_inputs(inputs)
+        p = packtivity_task(name=name, spec=spec['step'], parameters = parameters, state=step_state, inputs = inputs)
         return p,None
     elif 'workflow' in spec:
         name = 'init_{}'.format(name)
         init_spec  = init_stage_spec(parameters.json(), discover = False, used_inputs=[x.json() for x in inputs], name = 'init', nodename = name)
-        return None, [init_spec] + spec['workflow']['stages']
+        stages = [init_spec] + spec['workflow']['stages']
+        new_provider = state_provider.new_provider(name, init_states = depstates)
+        stageobjects = [JsonStage(s, new_provider) for s in stages]
+        return None, stageobjects
     elif 'cases' in spec:
         for x in spec['cases']:
             if parameters.jq(x['if']).json():
                 log.info('selected case %s', x['if'])
-                return step_or_stages(name,x, state_provider, inputs, parameters, dependencies)
+                return step_or_stages(name, x, inputs, parameters, state_provider, stageview)
         log.info('no case selected on pars %s', parameters)
         return None, None
     raise RuntimeError('do not know what kind of stage spec we are dealing with. %s', spec.keys())
 
-def register_expressions(stage, expressions):
+def registerExpressions(stage, expressions):
     if not expressions: return
     for key, expression in expressions.items():
         stage.view.addValue(key, expression)
@@ -125,20 +127,13 @@ def addStepOrWorkflow(name, stage, parameters, inputs, spec):
 
     :return: None
     '''
-    dependencies = [stage.view.dag.getNode(k.stepid) for k in inputs]
-    step,stages = step_or_stages(name,spec,stage.state_provider, inputs, parameters, dependencies)
-
+    step, stages = step_or_stages(name, spec, inputs, parameters, stage.state_provider, stage.view)
     if step:
         stage.addStep(step)
         log.debug('scheduled a step')
 
     if stages: #subworkflow case
-        depstates = [d.task.state for d in set(dependencies) if d.task.state]
-        new_provider = stage.state_provider.new_provider(name, init_states = depstates)
-        subrules = [JsonStage(s, new_provider) for s in stages]
-        stage.addWorkflow(subrules,
-            isolate = True
-        )
+        stage.addWorkflow(stages,isolate = True)
         log.debug('scheduled a subworkflow')
 
 def get_parameters(parameters):
@@ -168,7 +163,7 @@ def singlestep_stage(stage, spec):
     finalized, inputs = finalize_input(parameters, stage.view)
     finalized = TypedLeafs(finalized, getattr(stage.state_provider,'datamodel',None))
     addStepOrWorkflow(stage.name, stage, finalized, inputs, spec)
-    register_expressions(stage, spec.get('register_values'))
+    registerExpressions(stage, spec.get('register_values'))
 
 def chunk(alist, chunksize):
     '''split a list into equal-sized chunks of size chunksize'''
@@ -263,7 +258,7 @@ def multistep_stage(stage, spec):
         finalized, inputs = finalize_input(pars, stage.view)
         finalized = TypedLeafs(finalized, getattr(stage.state_provider,'datamodel',None))
         addStepOrWorkflow(singlename, stage, finalized, inputs, spec)
-    register_expressions(stage, spec.get('register_values'))
+    registerExpressions(stage, spec.get('register_values'))
 
 
 def process_noderef(leafobj,resultscript,view):
@@ -308,7 +303,7 @@ def jq_stage(stage, spec):
 
         log.info('finalized to: %s',after_post)
         addStepOrWorkflow(singlename, stage, after_post, inputs, spec)
-    register_expressions(stage, spec.get('register_values'))
+    registerExpressions(stage, spec.get('register_values'))
 
 @scheduler('init-stage')
 def init_stage(stage, spec):
@@ -333,8 +328,8 @@ def init_stage(stage, spec):
         step_state = None
 
     init_spec = get_init_spec(discover = spec['discover'])
-    task = packtivity_task(spec['nodename'] or stage.name, init_spec, step_state)
-    task.s(**spec['parameters'])
-    task.used_inputs(inputs)
+    task = packtivity_task(spec['nodename'] or stage.name, init_spec,
+        state = step_state, parameters = spec['parameters'], inputs = inputs
+    )
     stage.addStep(task)
-    register_expressions(stage, spec.get('register_values'))
+    registerExpressions(stage, spec.get('register_values'))
