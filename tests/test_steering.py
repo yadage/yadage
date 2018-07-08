@@ -8,10 +8,12 @@ from yadage.utils import prepare_workdir_from_archive
 from yadage.reset import reset_steps, collective_downstream
 
 def test_steer(tmpdir,multiproc_backend):
-    ys = YadageSteering()
-    ys.prepare(os.path.join(str(tmpdir),'workdir'))
-    ys.init_workflow('workflow.yml', {'input': [1,2,3]}, 'tests/testspecs/nestedmapreduce')
-
+    ys = YadageSteering.create(
+        dataarg = os.path.join(str(tmpdir),'workdir'),
+        workflow = 'workflow.yml',
+        toplevel = 'tests/testspecs/nestedmapreduce',
+        initdata = {'input': [1,2,3]}
+    )
     ys.adage_argument(default_trackers = False)
     ys.run_adage(multiproc_backend)
 
@@ -28,16 +30,11 @@ def test_inparchive(tmpdir,multiproc_backend):
         ys.adage_argument(default_trackers = False)
 
 def test_incomplete_data(tmpdir):
-    ys = YadageSteering()
-    ys.prepare(os.path.join(str(tmpdir),'workdir'))
     with pytest.raises(RuntimeError):
-        ys.init_workflow()
-
-
-def test_missing_prepare(tmpdir):
-    ys = YadageSteering()
-    with pytest.raises(RuntimeError):
-        ys.init_workflow()
+        ys = YadageSteering.create(
+            dataarg = os.path.join(str(tmpdir),'workdir'),
+            workflow = None
+        )
 
 def test_incomplete_data_ctx(tmpdir):
     workdir = os.path.join(str(tmpdir),'workdir')
@@ -48,11 +45,11 @@ def test_incomplete_data_ctx(tmpdir):
 def test_directjson(tmpdir,multiproc_backend):
     wflowjson = yadage.workflow_loader.workflow('workflow.yml','tests/testspecs/local-helloworld')
 
-    ys = YadageSteering()
-    ys.prepare(os.path.join(str(tmpdir),'workdir'))
-
-    ys.init_workflow(workflow_json = wflowjson, initdata = {'par': 'parvalue'})
-
+    ys = YadageSteering.create(
+        dataarg = os.path.join(str(tmpdir),'workdir'),
+        workflow_json = wflowjson,
+        initdata = {'par': 'parvalue'}
+    )
     ys.adage_argument(default_trackers = False)
     ys.run_adage(multiproc_backend)
 
@@ -70,19 +67,20 @@ def test_directjson_ctx(tmpdir,multiproc_backend):
 
 def test_invalid_directjson(tmpdir):
     wflowjson = yadage.workflow_loader.workflow('workflow.yml','tests/testspecs/local-helloworld')
-    ys = YadageSteering()
-    ys.prepare(os.path.join(str(tmpdir),'workdir'))
+
     with pytest.raises(jsonschema.exceptions.ValidationError):
-        ys.init_workflow(workflow_json = {'invalid':'data'})
-
-
-
+        ys = YadageSteering.create(
+            dataarg = os.path.join(str(tmpdir),'workdir'),
+            workflow_json =  {'invalid':'data'}
+        )
 
 def test_reset(tmpdir,multiproc_backend):
-    ys = YadageSteering()
-    ys.prepare(os.path.join(str(tmpdir),'workdir'))
-    ys.init_workflow('workflow.yml', {'input': [1,2,3]}, 'tests/testspecs/nestedmapreduce')
-
+    ys = YadageSteering.create(
+        dataarg = os.path.join(str(tmpdir),'workdir'),
+        workflow = 'workflow.yml',
+        toplevel = 'tests/testspecs/nestedmapreduce',
+        initdata = {'input': [1,2,3]}
+    )
     ys.adage_argument(default_trackers = False)
     ys.run_adage(multiproc_backend)
 
