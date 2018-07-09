@@ -29,7 +29,7 @@ def http_controller(ctrlstring, ctrlopts, model = None):
         log.exception('try installing yadagehttpctrl')
 
 @controller('py:')
-def http_controller(ctrlstring, ctrlopts, model = None):
+def frompython_controller(ctrlstring, ctrlopts, model = None):
     _, module, ctrlclass = ctrlstring.split(':')
     module = importlib.import_module(module)
     ctrlclass = getattr(module,ctrlclass)
