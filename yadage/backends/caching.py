@@ -13,6 +13,16 @@ from .trivialbackend import TrivialBackend, TrivialProxy
 
 log = logging.getLogger(__name__)
 
+from ..handlers.utils import handler_decorator
+
+cachehandlers, cachestrategy = handler_decorator()
+
+@cachestrategy('checksums')
+def checksum_cache(config):
+    configfile = config
+    return ChecksumCache(configfile)
+
+
 def setupcache_fromstring(configstring):
     '''
     generate cache from a string configuration (such as those passed from CLIs).
@@ -23,14 +33,11 @@ def setupcache_fromstring(configstring):
     :param configstring: the configuration string
     :return: a cache object
     '''
-
     configparts  = configstring.split(':',1)
     strategy, specificconf = configparts
-    if strategy == 'checksums':
-        configfile = specificconf
-        log.info('checksums caching strategy')
-        return ChecksumCache(configfile)
-    else:
+    try:
+        return cachehandlers[strategy](specificconf)
+    except KeyError:
         raise RuntimeError('unknown caching config')
 
 class CachedBackend(federatedbackend.FederatedBackend):

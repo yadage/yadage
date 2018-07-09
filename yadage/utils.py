@@ -202,22 +202,34 @@ def setupbackend_fromstring(backend, backendopts = None):
             backendopts = backendopts
     )
 
+from .handlers.utils import handler_decorator
+providersetup_handlers, providersetup = handler_decorator()
+
+@providersetup('local')
+def localfs_provider(dataarg,dataopts):
+    import yadage.state_providers.localposix
+    return yadage.state_providers.localposix.setup_provider(dataarg,dataopts)
+
+@providersetup('py:')
+def formpython_provider(dataarg,dataopts):
+    _,module, setupfunc,dataarg = dataarg.split(':',3)
+    module = importlib.import_module(module)
+    setupfunc = getattr(module,setupfunc)
+    return setupfunc(dataarg,dataopts)
+
+@providersetup('fromenv:')
+def fromenv_provider(dataarg,dataopts):
+    module = importlib.import_module(os.environ['PACKTIVITY_STATEPROVIDER'])
+    return module.setup_provider(dataarg,dataopts)
+
 def state_provider_from_string(dataarg,dataopts = None):
     dataopts = dataopts or {}
     log.info('%s %s',dataarg,dataopts)
     if len(dataarg.split(':',1)) == 1:
         dataarg = 'local:'+dataarg
-    if dataarg.startswith('local:'):
-        import yadage.state_providers.localposix
-        return yadage.state_providers.localposix.setup_provider(dataarg,dataopts)
-    if dataarg.startswith('py:'):
-        _,module, setupfunc,dataarg = dataarg.split(':',3)
-        module = importlib.import_module(module)
-        setupfunc = getattr(module,setupfunc)
-        return setupfunc(dataarg,dataopts)
-    if dataarg.startswith('fromenv:'):
-        module = importlib.import_module(os.environ['PACKTIVITY_STATEPROVIDER'])
-        return module.setup_provider(dataarg,dataopts)
+    for k in providersetup_handlers.keys():
+        if dataarg.startswith(k):
+            return providersetup_handlers[k](dataarg,dataopts)
     raise RuntimeError('unknown data type %s %s', dataarg, dataopts)
 
 def get_init_spec(discover):

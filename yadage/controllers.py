@@ -6,8 +6,36 @@ from adage.wflowcontroller import BaseController
 
 from .reset import collective_downstream, remove_rules, reset_steps, undo_rules
 from .wflow import YadageWorkflow
+from .handlers.utils import handler_decorator
 
 log = logging.getLogger(__name__)
+
+ctrlhandlers, controller = handler_decorator()
+
+@controller('frommodel')
+def frommodel_controller(ctrlstring, ctrlopts, model = None):
+    if isinstance(model, YadageWorkflow):
+        return BaseController(model)
+    else:
+        return PersistentController(model)
+
+@controller('http')
+def http_controller(ctrlstring, ctrlopts, model = None):
+    try:
+        from yadagehttpctrl.clientcontroller import YadageHTTPController
+        ctrl = YadageHTTPController(server = ctrlstring, **ctrlopts)
+        return ctrl
+    except ImportError:
+        log.exception('try installing yadagehttpctrl')
+
+@controller('py:')
+def frompython_controller(ctrlstring, ctrlopts, model = None):
+    _, module, ctrlclass = ctrlstring.split(':')
+    module = importlib.import_module(module)
+    ctrlclass = getattr(module,ctrlclass)
+    if ctrlopts.pop('pass_model',False):
+        ctrlopts['model'] = model
+    return ctrlclass(**ctrlopts)
 
 def setup_controller(model = None, controller = 'frommodel', ctrlopts = None):
     '''
@@ -15,30 +43,11 @@ def setup_controller(model = None, controller = 'frommodel', ctrlopts = None):
     transaction-based states, returns PersistentController, for in-
     memory states returns in BaseController
     '''
-
     ctrlopts  = ctrlopts or {}
-
-    if controller == 'frommodel':
-        if isinstance(model, YadageWorkflow):
-            return BaseController(model)
-        else:
-            return PersistentController(model)
-    if controller.startswith('http'):
-        try:
-            from yadagehttpctrl.clientcontroller import YadageHTTPController
-            ctrl = YadageHTTPController(server = controller, **ctrlopts)
-            return ctrl
-        except ImportError:
-            log.exception('try installing yadagehttpctrl')
-    if controller.startswith('py:'):
-        _, module, ctrlclass = controller.split(':')
-        module = importlib.import_module(module)
-        ctrlclass = getattr(module,ctrlclass)
-        if ctrlopts.pop('pass_model',False):
-            ctrlopts['model'] = model
-        return ctrlclass(**ctrlopts)
-    else:
-        raise RuntimeError('unknown controller type %s', controller)
+    for k in ctrlhandlers.keys():
+        if controller.startswith(k):
+            return ctrlhandlers[k](controller, ctrlopts, model)
+    raise RuntimeError('unknown controller type %s', controller)
 
 class PersistentController(BaseController):
     '''

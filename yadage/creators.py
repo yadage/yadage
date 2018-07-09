@@ -3,13 +3,13 @@ import yadageschemas
 import json
 import logging
 
-from .. import workflow_loader as workflow_loader
+from . import workflow_loader as workflow_loader
 
-from .utils import handler_decorator
-from ..utils import state_provider_from_string
-from ..wflowstate import load_model_fromstring
-from ..controllers import setup_controller
-from ..wflow import YadageWorkflow
+from .handlers.utils import handler_decorator
+from .utils import state_provider_from_string
+from .wflowstate import load_model_fromstring
+from .controllers import setup_controller
+from .wflow import YadageWorkflow
 
 log = logging.getLogger(__name__)
 

@@ -27,39 +27,53 @@ def make_deserializer(deserialization_opts = None):
         return workflow
     return deserializer
 
-def load_model_fromstring(modelsetup,modelopts = None,initdata = None):
+
+from .handlers.utils import handler_decorator
+
+modelhandlers, statemodel = handler_decorator()
+
+@statemodel('inmem')
+def inmem_model(modelsetup, modelopts, initmodel):
+    return initmodel
+
+@statemodel('filebacked')
+def filebacked_model(modelsetup, modelopts, initmodel):
+    filename = modelsetup.split(':')[-1]
+    model   = FileBackedModel(
+        filename = filename,
+        initmodel = initmodel,
+        deserializer = make_deserializer(modelopts)
+    )
+    return model
+
+@statemodel('mongo')
+def mongo_model(modelsetup, modelopts, initmodel):
+    model = MongoBackedModel(
+        initmodel = initmodel,
+        deserializer = make_deserializer(modelopts)
+    )
+    return model
+
+def load_model_fromstring(modelsetup,modelopts = None,initmodel = None):
     modelopts = modelopts or {}
-    if modelsetup.startswith('inmem'):
-        return initdata
-    elif modelsetup.startswith('filebacked'):
-        filename = modelsetup.split(':')[-1]
-        model   = FileBackedModel(
-            filename = filename,
-            initdata = initdata,
-            deserializer = make_deserializer(modelopts)
-        )
-        return model
-    elif modelsetup == 'mongo':
-        model = MongoBackedModel(
-            initdata = initdata,
-            deserializer = make_deserializer(modelopts)
-        )
-        return model
+    for k in modelhandlers.keys():
+        if modelsetup.startswith(k):
+            return modelhandlers[k](modelsetup,modelopts,initmodel)
     raise RuntimeError('unknown state model %s', modelsetup)
 
 class MongoBackedModel(object):
     '''
     model that holds the workflow state in a MongoDB database.
     '''
-    def __init__(self, deserializer = None, connect_string = 'mongodb://localhost:27017/', initdata = None, wflowid = None):
+    def __init__(self, deserializer = None, connect_string = 'mongodb://localhost:27017/', initmodel = None, wflowid = None):
         from pymongo import MongoClient
         from bson.objectid import ObjectId
         self.deserializer = deserializer or make_deserializer()
         self.client = MongoClient(connect_string)
         self.db = self.client.wflowdb
         self.collection = self.db.workflows
-        if initdata:
-            insertion = self.collection.insert_one(initdata.json())
+        if initmodel:
+            insertion = self.collection.insert_one(initmodel.json())
             self.wflowid = insertion.inserted_id
             log.info('created new workflow object with id %s', str(self.wflowid))
         if wflowid:
@@ -83,11 +97,11 @@ class FileBackedModel(object):
     '''
     model that holds data on disk in a JSON file
     '''
-    def __init__(self, filename, deserializer = None, initdata = None):
+    def __init__(self, filename, deserializer = None, initmodel = None):
         self.filename = filename
         self.deserializer = deserializer or make_deserializer()
-        if initdata:
-            self.commit(initdata)
+        if initmodel:
+            self.commit(initmodel)
 
     def commit(self, data):
         '''

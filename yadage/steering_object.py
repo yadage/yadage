@@ -8,7 +8,7 @@ from .serialize import snapshot
 from .wflowstate import load_model_fromstring
 from .controllers import setup_controller
 from .utils import setupbackend_fromstring, prepare_meta
-from .handlers.creator_handlers import handlers as creators
+from .creators import handlers as creators
 
 log = logging.getLogger(__name__)
 
