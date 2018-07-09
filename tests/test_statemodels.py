@@ -14,7 +14,7 @@ def test_setup_filebacked(tmpdir, local_helloworld_wflow):
 	assert type(ctrl) == PersistentController
 
 def test_setup_inmem(tmpdir, local_helloworld_wflow):
-	model = load_model_fromstring('inmem', initdata = local_helloworld_wflow)
+	model = load_model_fromstring('inmem', initmodel = local_helloworld_wflow)
 	assert type(model) == YadageWorkflow
 	ctrl = setup_controller(model)
 	assert type(ctrl) == BaseController

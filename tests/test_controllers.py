@@ -6,7 +6,7 @@ def test_persistent_controller(tmpdir, local_helloworld_wflow_w_init, foreground
 
     model = FileBackedModel(
         filename = str(tmpdir.join('wflowstate')),
-        initdata = local_helloworld_wflow_w_init
+        initmodel = local_helloworld_wflow_w_init
     )
 
     pers_ctrl = PersistentController(model, foregroundasync_backend)
