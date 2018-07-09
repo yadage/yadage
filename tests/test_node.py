@@ -21,7 +21,7 @@ def test_result_prepub(basic_packtivity_spec,localfs_state):
 
 
 	another_step = packtivity_task('another',basic_packtivity_spec,localfs_state)
-	node.readfromresult('/outputfile',another_step)
+	node.readfromresult('/outputfile',another_step.inputs)
 	assert another_step.inputs[-1].stepid == node.identifier
 	assert another_step.inputs[-1].pointer.path == '/outputfile'
 

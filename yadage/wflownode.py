@@ -55,14 +55,14 @@ class YadageNode(adage.node.Node):
             return self.expected_result
         return super(YadageNode, self).result
 
-    def readfromresult(self,pointerpath, whoisreading = None, failsilently = False):
+    def readfromresult(self,pointerpath, trackinputs = None, failsilently = False):
         if not self.has_result():
             if failsilently: return None
             raise RuntimeError('attempt')
         pointer = jsonpointer.JsonPointer(pointerpath)
-        if whoisreading:
-            whoisreading.inputs.append(tasks.outputReference(self.identifier,pointer))
-        v = pointer.resolve(self.result)
+        if trackinputs is not None:
+            trackinputs.append(tasks.outputReference(self.identifier,pointer))
+        v = self.result.resolve_ref(pointer)
         return v
 
     @classmethod

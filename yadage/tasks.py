@@ -10,25 +10,15 @@ class packtivity_task(object):
     '''
     packtivity task
     '''
-    def __init__(self, name, spec, state, parameters = None):
+    def __init__(self, name, spec, state, parameters = None, inputs = None):
         self.metadata = {'name': name}
-        self.inputs = []
+        self.inputs = inputs or []
         self.parameters = TypedLeafs(parameters or {}, state.datamodel if state else None)
         self.spec = spec
         self.state = state
 
-    def used_input(self, reference):
-        self.inputs += [reference]
-
-    def used_inputs(self, references):
-        for r in references: self.used_input(r)
-
     def pubOnlyTask(self):
         return (self.spec['environment'] is None) and (self.spec['process'] is None)
-
-    def s(self, **parameters):
-        self.parameters.update(**parameters)
-        return self
 
     #(de-)serialization
     @classmethod
@@ -37,9 +27,9 @@ class packtivity_task(object):
             data['metadata']['name'],
             data['spec'],
             state_deserializer(data['state']) if data['state'] else None,
-            data['parameters']
+            data['parameters'],
+            inputs = map(outputReference.fromJSON, data['inputs'])
         )
-        instance.inputs       = map(outputReference.fromJSON, data['inputs'])
         instance.metadata.update(**data['metadata'])
         return instance
 
