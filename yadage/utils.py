@@ -269,3 +269,16 @@ def advance_coroutine(coroutine):
         return coroutine.next()
     except AttributeError:
         return coroutine.__next__()
+
+def prepare_meta(metadir, accept=False):
+    '''
+    prepare workflow meta-data directory
+
+    :param metadir: the meta-data directory name
+    :param accept: whether to accept an existing metadata directory
+    '''
+    if os.path.exists(metadir):
+        if not accept:
+            raise RuntimeError('yadage meta directory %s exists. explicitly accept', metadir)
+    else:
+        os.makedirs(metadir)
