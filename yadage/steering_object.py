@@ -3,7 +3,6 @@ import os
 import copy
 
 import adage
-import adage.backends
 import yadage.serialize as serialize
 
 from .wflowstate import load_model_fromstring
