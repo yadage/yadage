@@ -202,7 +202,7 @@ def setupbackend_fromstring(backend, backendopts = None):
             backendopts = backendopts
     )
 
-from handlers.utils import handler_decorator
+from .handlers.utils import handler_decorator
 providersetup_handlers, providersetup = handler_decorator()
 
 @providersetup('local')
