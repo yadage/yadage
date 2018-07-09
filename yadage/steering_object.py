@@ -3,12 +3,12 @@ import os
 import copy
 
 import adage
-import yadage.serialize as serialize
 
+from .serialize import snapshot
 from .wflowstate import load_model_fromstring
 from .controllers import setup_controller
 from .utils import setupbackend_fromstring, prepare_meta
-from .creators import create_workflow
+from .handlers.creator_handlers import handlers as creators
 
 log = logging.getLogger(__name__)
 
@@ -50,7 +50,7 @@ class YadageSteering(object):
         kw = copy.deepcopy(kwargs)
         kw['metadir'] = metadir
 
-        ctrl = create_workflow(**kw)
+        ctrl = creators['local'](**kw)
         return cls(metadir, ctrl)
 
     @property
@@ -89,7 +89,7 @@ class YadageSteering(object):
         '''
         serialized workflow and backend states (stored in meta directory)
         '''
-        serialize.snapshot(
+        snapshot(
             self.workflow,
             '{}/yadage_snapshot_workflow.json'.format(self.metadir),
             '{}/yadage_snapshot_backend.json'.format(self.metadir)

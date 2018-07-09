@@ -2,16 +2,24 @@ import os
 import yadageschemas
 import json
 import logging
-import yadage.workflow_loader as workflow_loader
-import yadage.utils as utils
 
-from .wflowstate import load_model_fromstring
-from .controllers import setup_controller
-from .wflow import YadageWorkflow
+from .. import workflow_loader as workflow_loader
+
+from .utils import handler_decorator
+from ..utils import state_provider_from_string
+from ..wflowstate import load_model_fromstring
+from ..controllers import setup_controller
+from ..wflow import YadageWorkflow
 
 log = logging.getLogger(__name__)
 
-def create_workflow(
+handlers, creator = handler_decorator()
+
+
+log = logging.getLogger(__name__)
+
+@creator('local')
+def local_workflows(
     metadir,
     workflow = None,
     initdata = None,
@@ -35,7 +43,7 @@ def create_workflow(
     prepares initial workflow object and returns controller
     '''
 
-    rootprovider = utils.state_provider_from_string(dataarg, dataopts)
+    rootprovider = state_provider_from_string(dataarg, dataopts)
 
     if not workflow_json and not workflow:
         raise RuntimeError('need to provide either direct workflow spec or source to load from')

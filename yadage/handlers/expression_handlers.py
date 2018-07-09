@@ -2,13 +2,12 @@ import logging
 
 import jsonpath_rw
 
-import yadage.handlers.utils as utils
-
+from .utils import handler_decorator
 from ..utils import pointerize
 
 log = logging.getLogger(__name__)
 
-handlers, expression = utils.handler_decorator()
+handlers, expression = handler_decorator()
 
 
 
