@@ -137,13 +137,16 @@ def leaf_iterator_jsonlike(jsonlike, path = None):
 
 
 def process_jsonlike(jsonlike, jq_obj_selector, callback):
-    wflowrefs = [jsonpointer.JsonPointer.from_parts(x) for x in jq.jq(
+    wflowrefs = [jsonpointer.JsonPointer.from_parts(x[1:]) for x in jq.jq(
             'paths(if objects then {} else false end)'.format(jq_obj_selector)
-            ).transform( jsonlike, multiple_output = True
+            ).transform({'value': jsonlike}, multiple_output = True
     )]
     for wflowref in wflowrefs:
         value = callback(wflowref.resolve(jsonlike))
-        wflowref.set(jsonlike,value)
+        if wflowref.path == '':
+            return value
+        else:
+            wflowref.set(jsonlike,value)
     return jsonlike
 
 def pointerize(typedleafs, asref=False, stepid=None):
@@ -155,6 +158,7 @@ def pointerize(typedleafs, asref=False, stepid=None):
     pointerized = typedleafs.copy().json()
     for p,v in typedleafs.leafs():
         newval = outputReference(stepid, p) if asref else {'$wflowpointer': {'step': stepid,'result': p.path}} if stepid else p.path
+        if p.path=='': return newval #there is only one root leaf
         p.set(pointerized, newval)
     return pointerized
 

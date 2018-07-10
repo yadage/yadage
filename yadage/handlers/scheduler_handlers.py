@@ -75,7 +75,9 @@ def finalize_input(jsondata,wflowview):
     result = copy.deepcopy(jsondata)
     inputs = []
     for leaf_pointer, leaf_value in leaf_iterator_jsonlike(jsondata):
-        leaf_pointer.set(result,finalize_value(wflowview, leaf_value, inputs))
+        v = finalize_value(wflowview, leaf_value, inputs)
+        if leaf_pointer.path == '': return v,inputs #only one leaf
+        leaf_pointer.set(result,v)
     return result, inputs
 
 def step_or_stages(name, spec, inputs, parameters, state_provider, stageview):
