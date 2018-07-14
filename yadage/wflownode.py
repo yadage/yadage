@@ -9,6 +9,7 @@ import packtivity
 import yadage.tasks as tasks
 
 
+
 class YadageNode(adage.node.Node):
     '''
     Node object for yadage that extends the default with
@@ -66,9 +67,9 @@ class YadageNode(adage.node.Node):
         return v
 
     @classmethod
-    def fromJSON(cls, data, state_deserializer):
+    def fromJSON(cls, data, deserialization_opts = None):
         if data['task']['type'] == 'packtivity_task':
-            task = tasks.packtivity_task.fromJSON(data['task'], state_deserializer)
+            task = tasks.packtivity_task.fromJSON(data['task'], deserialization_opts)
             return cls(data['name'], task, data['id'])
         else:
             raise RuntimeError('unknown task type',data['task']['type'])

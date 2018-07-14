@@ -7,28 +7,13 @@ from .backends import load_proxy
 from .state_providers import load_provider
 from .wflow import YadageWorkflow
 from .wflownode import YadageNode
+from .handlers.utils import handler_decorator
 
 log = logging.getLogger(__name__)
 
 
 def make_deserializer(deserialization_opts = None):
-    def deserializer(jsondata):
-        workflow = YadageWorkflow.fromJSON(
-            jsondata,
-            lambda data: load_proxy(data,deserialization_opts),
-            lambda data: load_provider(data,deserialization_opts),
-            lambda data: YadageNode.fromJSON(data,
-                                state_deserializer =
-                                    lambda state: load_state(
-                                        state,deserialization_opts
-                                    )
-            )
-        )
-        return workflow
-    return deserializer
-
-
-from .handlers.utils import handler_decorator
+    return lambda jsondata: YadageWorkflow.fromJSON(jsondata,deserialization_opts)
 
 modelhandlers, statemodel = handler_decorator()
 
