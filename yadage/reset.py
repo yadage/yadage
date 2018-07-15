@@ -11,6 +11,7 @@ def reset_node_state(node):
     node.ready_by_time = None
     node.resultproxy = None
     node.backend = None
+    node.update_state()
 
 def reset_step(workflow, step):
     log.debug('resetting %s', step)
@@ -18,6 +19,8 @@ def reset_step(workflow, step):
     reset_node_state(s)
     try:
         s.task.state.reset()
+        s._result = None
+        s.expected_result = None
     except AttributeError:
         pass
 

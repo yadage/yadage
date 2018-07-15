@@ -4,17 +4,13 @@ from adage.pollingexec import yes_man
 
 from .interactive import custom_decider, decide_step, interactive_deciders
 from .utils import advance_coroutine
+from .handlers.utils import handler_decorator
 
 
-strategies = {}
-def strategy(name):
-    def wrap(func):
-        strategies[name] = func
-        return func
-    return wrap
+handlers, strategy = handler_decorator()
 
 def get_strategy(name):
-    return strategies[name]()
+    return handlers[name]()
 
 @strategy('interactive')
 def interactive_strategy():

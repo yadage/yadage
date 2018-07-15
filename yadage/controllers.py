@@ -1,7 +1,7 @@
 import contextlib
 import importlib
 import logging
-
+import os
 from adage.wflowcontroller import BaseController
 from packtivity.syncbackends import defaultsyncbackend
 
@@ -18,9 +18,11 @@ class YadageController(BaseController):
         self.prepublishing_backend = defaultsyncbackend()
         self.disable_backend = False
         super(YadageController,self).__init__(*args,**kwargs)
-        
+
     def sync_backend(self):
         for n in self.adageobj.dag.nodes():
+            if 'YADAGE_IGNORE_PREPUBLISHING' in os.environ:
+                continue
             node = self.adageobj.dag.getNode(n)
             node.expected_result = self.prepublishing_backend.prepublish(
                 node.task.spec, node.task.parameters.json(), node.task.state
