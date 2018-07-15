@@ -22,9 +22,9 @@ def connection_options(func):
     @click.option('--accept-metadir/--no-accept-metadir', default=True)
     @click.option('-r', '--controller', default='frommodel')
     @click.option('-o', '--ctrlopt', multiple=True, default=None, help = 'options for the workflow controller')
-    @click.option('-s', '--modelsetup', default='filebacked:yadage_state.json')
+    @click.option('-s', '--modelsetup', default='filebacked')
     @click.option('-l', '--modelopt', multiple=True, default=None, help = 'options for the workflow state models')
-    @click.option('-b', '--backend', default='celery')
+    @click.option('-b', '--backend', default='foregroundasync')
     @click.option('--local/--remote', default = True)
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
@@ -43,10 +43,10 @@ def mancli():
     pass
 
 @mancli.command()
-@click.option('-s', '--modelsetup', default='filebacked:yadage_state.json')
+@click.option('-s', '--modelsetup', default='filebacked:yadagemeta/yadage_state.json')
 @click.option('-t', '--toplevel', default=os.getcwd())
 @click.option('-d', '--dataopt', multiple=True, default=None, help = 'options for the workflow data state')
-@click.option('--metadir', default=None, help = 'directory to store workflow metadata')
+@click.option('--metadir', default='yadagemeta', help = 'directory to store workflow metadata')
 @click.option('--parameter', '-p', multiple=True)
 @click.argument('workdir')
 @click.argument('workflow')
@@ -102,9 +102,11 @@ def click_print_applied_stages(controller):
 @click.argument('name', default=None, nargs = -1)
 @connection_options
 @common_options
+@click.option('--submit/--no-submit')
 def apply_stage(name,
           metadir, accept_metadir, controller, ctrlopt, modelsetup, modelopt, backend, local,
-          verbosity
+          verbosity,
+          submit
          ):
 
     handle_common_options(verbosity)
@@ -132,6 +134,12 @@ def apply_stage(name,
             continue
 
         controller.apply_rules([rule.identifier])
+
+        if submit:
+            _, s2r = utils.rule_steps_indices(controller.adageobj)
+            nodes_to_submit = [x for x in controller.submittable_nodes() if s2r[x] == rule.identifier]
+            controller.submit_nodes(nodes_to_submit)
+
         click.secho('Stage {} applied'.format(n), fg = 'green')
 
 @mancli.command()
@@ -258,6 +266,10 @@ def handle_common_options(verbosity):
 def handle_connection_options(metadir, accept_metadir, controller, ctrlopt, modelsetup, modelopt, backend, local):
     ctrlopts = utils.options_from_eqdelimstring(ctrlopt)
     modelopts = utils.options_from_eqdelimstring(modelopt)
+
+    if modelsetup == 'filebacked':
+        modelsetup = 'filebacked:{}/yadage_state.json'.format(metadir)
+
     ys = manualutils.connect(
         metadir = metadir,
         accept_metadir = accept_metadir,
@@ -267,6 +279,7 @@ def handle_connection_options(metadir, accept_metadir, controller, ctrlopt, mode
         modelopts = modelopts,
         backendstring = backend if local else None
     )
+    ys.controller.sync_backend()
     return ys
 
 

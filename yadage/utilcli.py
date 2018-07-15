@@ -6,10 +6,9 @@ import tempfile
 import click
 import yaml
 
-from .backends.trivialbackend import TrivialBackend, TrivialProxy
 from .handlers.expression_handlers import handlers as exh
-from .utils import process_refs, set_backend
-from .wflowstate import make_deserializer
+from .utils import process_refs
+from .wflow import YadageWorkflow
 
 
 def printRef(ref, dag, indent=''):
@@ -22,22 +21,10 @@ def printRef(ref, dag, indent=''):
     ),
         fg='cyan')
 
-def wflow_with_trivial_backend(instance,results):
+def wflow_with_trivial_backend(instance):
 
     stateopts = {}
-    wflowmaker = make_deserializer(stateopts)
-    wflow = wflowmaker(json.load(open(instance)))
-
-    resultdata = json.load(open(results))
-    set_backend(
-        wflow.dag,
-        TrivialBackend(),
-        proxymaker=lambda n: TrivialProxy(
-            resultdata[n.identifier]['status'],
-            resultdata[n.identifier]['result'],
-            n.task.state.datamodel
-        )
-    )
+    wflow = YadageWorkflow.fromJSON(json.load(open(instance)),stateopts)
     return wflow
 
 @click.group()
@@ -47,16 +34,15 @@ def utilcli():
 
 @utilcli.command()
 @click.argument('instance')
-@click.argument('results')
 @click.argument('selection')
 @click.option('-v', '--verbosity', default='INFO')
-def testsel(instance, results, selection,verbosity):
+def testsel(instance, selection,verbosity):
 
 
     logging.basicConfig(level=getattr(logging, verbosity), format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 
-    wflow = wflow_with_trivial_backend(instance,results)
+    wflow = wflow_with_trivial_backend(instance)
 
     selresult = exh['stage-output-selector'](wflow.view(), yaml.load(selection))
 
@@ -75,11 +61,12 @@ def testsel(instance, results, selection,verbosity):
 
 @utilcli.command()
 @click.argument('instance')
-@click.argument('results')
 @click.argument('vizpdf')
-def viz(instance, results, vizpdf):
+@click.option('-v', '--verbosity', default='INFO')
+def viz(instance, vizpdf,verbosity):
+    logging.basicConfig(level=getattr(logging, verbosity), format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     import yadage.visualize as visualize
-    wflow = wflow_with_trivial_backend(instance,results)
+    wflow = wflow_with_trivial_backend(instance)
 
     dirpath = tempfile.mkdtemp()
     visualize.write_prov_graph(dirpath, wflow)

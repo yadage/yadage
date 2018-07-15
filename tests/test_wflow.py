@@ -1,5 +1,4 @@
 from yadage.wflow import YadageWorkflow
-from yadage.state_providers import load_provider
 import json
 
 
@@ -26,6 +25,4 @@ def test_create_from_data(local_helloworld_wflow):
 
 def test_serialize_deserialize(local_helloworld_wflow):
     wflow = local_helloworld_wflow
-    assert YadageWorkflow.fromJSON(
-        wflow.json(), state_provider_deserializer = load_provider
-    ).json() == wflow.json()
+    assert YadageWorkflow.fromJSON(wflow.json()).json() == wflow.json()

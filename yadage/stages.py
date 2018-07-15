@@ -2,6 +2,7 @@ import logging
 
 from .handlers.predicate_handlers import handlers as pred_handlers
 from .utils import get_id_fromjson
+from .state_providers import load_provider
 
 log = logging.getLogger(__name__)
 
@@ -49,9 +50,9 @@ class OffsetStage(object):
 
     #(de-)serialization
     @classmethod
-    def fromJSON(cls, data, state_provider_deserializer = None):
+    def fromJSON(cls, data, deserialization_opts = None):
         if data['rule']['type'] == 'JsonStage':
-            rule = JsonStage.fromJSON(data['rule'], state_provider_deserializer)
+            rule = JsonStage.fromJSON(data['rule'], deserialization_opts)
         else:
             RuntimeError('unknown stage type %s', data['rule']['type'])
         return cls(
@@ -136,14 +137,14 @@ class JsonStage(ViewStageBase):
 
     #(de-)serialization
     @classmethod
-    def fromJSON(cls, data, state_provider_deserializer):
+    def fromJSON(cls, data, deserialization_opts = None):
         return cls(
             json={
                 'scheduler': data['scheduler'],
                 'name': data['name'],
                 'dependencies': data['dependencies']
             },
-            state_provider=state_provider_deserializer(data['state_provider'])
+            state_provider=load_provider(data['state_provider'],deserialization_opts)
         )
 
     def json(self):

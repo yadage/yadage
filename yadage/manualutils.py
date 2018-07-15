@@ -2,7 +2,8 @@ import logging
 
 from .steering_object import YadageSteering
 from .utils import setupbackend_fromstring
-from .wflowstate import make_deserializer
+from .wflow import YadageWorkflow
+from .controllers import YadageController
 
 log = logging.getLogger(__name__)
 
@@ -21,9 +22,8 @@ def connect(metadir, accept_metadir, ctrlstring, ctrlopts, modelsetup, modelopts
 
 def preview_rule(wflow, name = None, identifier=None):
     stateopts = {}
-    wflowmaker = make_deserializer(stateopts)
-    newflow = wflowmaker(wflow.json())
-
+    newflow = YadageWorkflow.fromJSON(wflow.json(),stateopts)
+    YadageController(newflow).sync_backend()
     if identifier:
         rule = newflow.view().getRule(identifier=identifier)
     else:

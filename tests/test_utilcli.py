@@ -16,7 +16,6 @@ def test_clis(tmpdir):
 
     result = runner.invoke(yadage.utilcli.testsel,[
         str(tmpdir.join('workdir/_yadage/yadage_snapshot_workflow.json')),
-        str(tmpdir.join('workdir/_yadage/yadage_snapshot_backend.json')),
         '{stages: hello_world, output: outputfile}'
     ])
     assert result.exit_code == 0
@@ -24,7 +23,6 @@ def test_clis(tmpdir):
 
     result = runner.invoke(yadage.utilcli.testsel,[
         str(tmpdir.join('workdir/_yadage/yadage_snapshot_workflow.json')),
-        str(tmpdir.join('workdir/_yadage/yadage_snapshot_backend.json')),
         '{stages: nonexistent, output: nonexistent}'
     ])
     assert result.exit_code == 0
@@ -32,7 +30,6 @@ def test_clis(tmpdir):
 
     result = runner.invoke(yadage.utilcli.viz,[
         str(tmpdir.join('workdir/_yadage/yadage_snapshot_workflow.json')),
-        str(tmpdir.join('workdir/_yadage/yadage_snapshot_backend.json')),
         str(tmpdir.join('viz.pdf'))
     ])
     tmpdir.join('viz.pdf').check()

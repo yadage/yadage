@@ -1,8 +1,9 @@
 import contextlib
 import importlib
 import logging
-
+import os
 from adage.wflowcontroller import BaseController
+from packtivity.syncbackends import defaultsyncbackend
 
 from .reset import collective_downstream, remove_rules, reset_steps, undo_rules
 from .wflow import YadageWorkflow
@@ -12,12 +13,32 @@ log = logging.getLogger(__name__)
 
 ctrlhandlers, controller = handler_decorator()
 
+class YadageController(BaseController):
+    def __init__(self,*args, **kwargs):
+        self.prepublishing_backend = defaultsyncbackend()
+        self.disable_backend = False
+        super(YadageController,self).__init__(*args,**kwargs)
+
+    def sync_expected(self):
+        for n in self.adageobj.dag.nodes():
+            if 'YADAGE_IGNORE_PREPUBLISHING' in os.environ:
+                continue
+            node = self.adageobj.dag.getNode(n)
+            node.expected_result = self.prepublishing_backend.prepublish(
+                node.task.spec, node.task.parameters.json(), node.task.state
+            )
+
+    def sync_backend(self):
+        self.sync_expected()
+        if not self.disable_backend:
+            super(YadageController,self).sync_backend()
+
 @controller('frommodel')
 def frommodel_controller(ctrlstring, ctrlopts, model = None):
     if isinstance(model, YadageWorkflow):
-        return BaseController(model)
+        return YadageController(model,**ctrlopts)
     else:
-        return PersistentController(model)
+        return PersistentController(model,**ctrlopts)
 
 @controller('http')
 def http_controller(ctrlstring, ctrlopts, model = None):
@@ -49,7 +70,7 @@ def setup_controller(model = None, controller = 'frommodel', ctrlopts = None):
             return ctrlhandlers[k](controller, ctrlopts, model)
     raise RuntimeError('unknown controller type %s', controller)
 
-class PersistentController(BaseController):
+class PersistentController(YadageController):
     '''
     workflow controller, that explicltly calls transaction methods on non read-only operations on the workflow state
     '''
@@ -63,18 +84,20 @@ class PersistentController(BaseController):
         self.model = model
         super(PersistentController, self).__init__(self.model.load(),backend)
 
-
     @contextlib.contextmanager
     def transaction(self, sync = True):
         '''the transaction context. will commit model to persistent store on exit.'''
         self.adageobj = self.model.load()
-        if sync: self.sync_backend()
+        if sync:
+            super(PersistentController,self).sync_backend()
         yield
 
         isvalid = self.validate()
         if not isvalid:
             #raise RuntimeError('was about to commit invalid data!')
-            log.warning('commit is in valid %s', isvalid)
+            log.warning('commit is invalid %s', isvalid)
+        if sync:
+            super(PersistentController,self).sync_backend()
         self.model.commit(self.adageobj)
 
     def submit_nodes(self, nodeids):

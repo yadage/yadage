@@ -3,10 +3,8 @@ from adage.serialize import obj_to_json
 
 from .stages import JsonStage, OffsetStage
 from .wflowview import WorkflowView
+from .wflownode import YadageNode
 
-
-def json_or_nil(x):
-    return None if x is None else x.json()
 
 class YadageWorkflow(adage.adageobject):
     '''
@@ -14,45 +12,53 @@ class YadageWorkflow(adage.adageobject):
     Adage state object by two bookkeeping structures.
     '''
 
-    def __init__(self):
-        super(YadageWorkflow, self).__init__()
-        self.stepsbystage = {}
-        self.bookkeeping = {}
-        self.values = {}
+    def __init__(self, dag = None, rules = None, applied_rules = None, bookkeeping = None, stepsbystage = None, values = None):
+        super(YadageWorkflow, self).__init__(
+            dag = dag,
+            rules = rules,
+            applied_rules = applied_rules
+        )
+        self.stepsbystage = stepsbystage or {}
+        self.bookkeeping = bookkeeping or {}
+        self.values = values or {}
 
     def view(self, offset=''):
         return WorkflowView(self, offset)
 
     def json(self):
-        data = obj_to_json(self,
-                           ruleserializer=json_or_nil,
-                           taskserializer=json_or_nil,
-                           proxyserializer=json_or_nil,
-                           )
+        json_or_nil = lambda x: None if x is None else x.json()
+        data = obj_to_json(self,json_or_nil,json_or_nil)
+
         data['bookkeeping'] = self.bookkeeping
         data['stepsbystage'] = self.stepsbystage
         data['values'] = self.values
         return data
 
     @classmethod
-    def fromJSON(cls, data,
-            proxydeserializer = lambda data: None,
-            state_provider_deserializer = lambda data: None,
-            task_deserializer = lambda data: None,
-            backend=None):
-        instance = cls()
-        instance.rules = [OffsetStage.fromJSON(x,state_provider_deserializer) for x in data['rules'] ]
-        instance.applied_rules = [OffsetStage.fromJSON(x,state_provider_deserializer) for x in data['applied'] ]
-        instance.bookkeeping = data['bookkeeping']
-        instance.stepsbystage = data['stepsbystage']
-        instance.values = data['values']
+    def fromJSON(cls, data,deserialization_opts = None, backend=None):
+        def node_deserializer(data):
+            node = YadageNode.fromJSON(data,deserialization_opts)
+            if backend:
+                # node.backend = backend
+                node.update_state(backend = backend)
+            return node
 
-        instance.dag = adage.serialize.dag_from_json(
-            data['dag'],
-            task_deserializer,
-            proxydeserializer,
-            backend
+        def rule_deserializer(data):
+            return OffsetStage.fromJSON(data,deserialization_opts)
+
+        dag = adage.serialize.dag_from_json(
+                    data['dag'],
+                    node_deserializer
+                )
+
+        instance = cls(dag = dag,
+            rules = [rule_deserializer(x) for x in data['rules'] ],
+            applied_rules = [rule_deserializer(x) for x in data['applied'] ],
+            bookkeeping = data['bookkeeping'],
+            stepsbystage = data['stepsbystage'],
+            values = data['values']
         )
+
         return instance
 
     @classmethod

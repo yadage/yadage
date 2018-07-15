@@ -3,7 +3,7 @@ import logging
 import networkx as nx
 
 import yadage.utils as utils
-
+import adage.nodestate
 log = logging.getLogger(__name__)
 
 def reset_node_state(node):
@@ -11,6 +11,9 @@ def reset_node_state(node):
     node.ready_by_time = None
     node.resultproxy = None
     node.backend = None
+    node.expected_result = None
+    node._result = None
+    node._state = adage.nodestate.DEFINED
 
 def reset_step(workflow, step):
     log.debug('resetting %s', step)

@@ -1,6 +1,7 @@
 import logging
 
 from packtivity.typedleafs import TypedLeafs
+from packtivity.statecontexts import load_state
 
 from .utils import outputReference
 
@@ -22,11 +23,11 @@ class packtivity_task(object):
 
     #(de-)serialization
     @classmethod
-    def fromJSON(cls, data, state_deserializer):
+    def fromJSON(cls, data, deserialization_opts = None):
         instance = cls(
             data['metadata']['name'],
             data['spec'],
-            state_deserializer(data['state']) if data['state'] else None,
+            load_state(data['state'],deserialization_opts) if data['state'] else None,
             data['parameters'],
             inputs = map(outputReference.fromJSON, data['inputs'])
         )

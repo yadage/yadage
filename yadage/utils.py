@@ -44,22 +44,6 @@ except ImportError:
 
 log = logging.getLogger(__name__)
 
-def set_backend(dag, backend, proxymaker = None):
-    '''
-    sets backend and proxies for each node in the DAG.
-    proxymaker is a 1-ary function that takes the node object and
-    returns a suitable result proxy
-
-    :param dag: the dag object (par of the workflow object)
-    :param backend: the backend to associate with the nodes
-    :param proxymaker: function object with signature f(node) to create result proxies
-    '''
-    for nodename in dag.nodes():
-        n = dag.getNode(nodename)
-        n.backend = backend
-        n.resultproxy = proxymaker(n) if proxymaker else None
-        n.update_state()
-
 DEFAULT_ID_METHOD = 'uuid'
 
 
@@ -228,7 +212,6 @@ def fromenv_provider(dataarg,dataopts):
 
 def state_provider_from_string(dataarg,dataopts = None):
     dataopts = dataopts or {}
-    log.info('%s %s',dataarg,dataopts)
     if len(dataarg.split(':',1)) == 1:
         dataarg = 'local:'+dataarg
     for k in providersetup_handlers.keys():
