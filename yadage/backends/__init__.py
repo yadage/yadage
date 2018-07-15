@@ -18,15 +18,15 @@ class CachedProxy(object):
         return cls(load_proxy(data['proxy'],deserialization_opts), data['cacheid'],best_effort_backend = False)
 
 @proxyloader('CachedProxy')
-def cache_loader(jsondata, best_effort_backend):
-    proxy = CachedProxy.fromJSON(data,deserialization_opts)
+def cache_loader(jsondata, deserialization_opts = None, best_effort_backend = False):
+    proxy = CachedProxy.fromJSON(jsondata,deserialization_opts)
     if best_effort_backend:
         raise NotImplemented('nope')
     return proxy
 
 @proxyloader('TrivialProxy')
-def trivial_loader(jsondata, best_effort_backend):
-    proxy = TrivialProxy.fromJSON(data)
+def trivial_loader(jsondata, deserialization_opts = None, best_effort_backend = False):
+    proxy = TrivialProxy.fromJSON(jsondata)
     if best_effort_backend:
         raise NotImplemented('nope')
     return proxy
