@@ -14,6 +14,7 @@ class PacktivityBackend(federatedbackend.FederatedBackend):
     '''
 
     def __init__(self,  packtivity_backendstring = None, packtivity_backend = None, backendopts = None):
+        purepubopts = backendopts.pop('purepubopts',{})
         if packtivity_backendstring:
             is_sync, backend = backend_from_string(packtivity_backendstring, backendopts = backendopts)
             assert not is_sync
@@ -23,7 +24,7 @@ class PacktivityBackend(federatedbackend.FederatedBackend):
             raise RuntimeError('need backend or backendstring')
         self.cached = False
         super(PacktivityBackend, self).__init__({
-            'purepub': ForegroundBackend(),
+            'purepub': ForegroundBackend(purepubopts),
             'packtivity': backend
         })
 

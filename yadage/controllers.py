@@ -17,11 +17,12 @@ class YadageController(BaseController):
     def __init__(self,*args, **kwargs):
         self.prepublishing_backend = defaultsyncbackend()
         self.disable_backend = False
+        self.disable_prepublishing = kwargs.pop('disable_prepub',False)
         super(YadageController,self).__init__(*args,**kwargs)
 
     def sync_expected(self):
         for n in self.adageobj.dag.nodes():
-            if 'YADAGE_IGNORE_PREPUBLISHING' in os.environ:
+            if 'YADAGE_IGNORE_PREPUBLISHING' in os.environ or self.disable_prepublishing:
                 continue
             node = self.adageobj.dag.getNode(n)
             node.expected_result = self.prepublishing_backend.prepublish(
