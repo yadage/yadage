@@ -19,7 +19,7 @@ class YadageController(BaseController):
         self.disable_backend = False
         super(YadageController,self).__init__(*args,**kwargs)
 
-    def sync_backend(self):
+    def sync_expected(self):
         for n in self.adageobj.dag.nodes():
             if 'YADAGE_IGNORE_PREPUBLISHING' in os.environ:
                 continue
@@ -27,6 +27,9 @@ class YadageController(BaseController):
             node.expected_result = self.prepublishing_backend.prepublish(
                 node.task.spec, node.task.parameters.json(), node.task.state
             )
+
+    def sync_backend(self):
+        self.sync_expected()
         if not self.disable_backend:
             super(YadageController,self).sync_backend()
 
@@ -81,18 +84,20 @@ class PersistentController(YadageController):
         self.model = model
         super(PersistentController, self).__init__(self.model.load(),backend)
 
-
     @contextlib.contextmanager
     def transaction(self, sync = True):
         '''the transaction context. will commit model to persistent store on exit.'''
         self.adageobj = self.model.load()
-        if sync: self.sync_backend()
+        if sync:
+            super(PersistentController,self).sync_backend()
         yield
 
         isvalid = self.validate()
         if not isvalid:
             #raise RuntimeError('was about to commit invalid data!')
-            log.warning('commit is in valid %s', isvalid)
+            log.warning('commit is invalid %s', isvalid)
+        if sync:
+            super(PersistentController,self).sync_backend()
         self.model.commit(self.adageobj)
 
     def submit_nodes(self, nodeids):

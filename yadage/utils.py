@@ -212,7 +212,6 @@ def fromenv_provider(dataarg,dataopts):
 
 def state_provider_from_string(dataarg,dataopts = None):
     dataopts = dataopts or {}
-    log.info('%s %s',dataarg,dataopts)
     if len(dataarg.split(':',1)) == 1:
         dataarg = 'local:'+dataarg
     for k in providersetup_handlers.keys():

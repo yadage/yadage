@@ -59,7 +59,7 @@ class YadageNode(adage.node.Node):
     def json(self):
         json_or_nil = lambda x: None if x is None else x.json()
         d = adage.serialize.node_to_json(self,json_or_nil,json_or_nil)
-        d['result'] = json_or_nil(self.result)
+        d['result'] = json_or_nil(self.result if self.has_result() else None)
         return d
 
     @classmethod
