@@ -21,12 +21,12 @@ class CachedProxy(object):
 def cache_loader(jsondata, deserialization_opts = None, best_effort_backend = False):
     proxy = CachedProxy.fromJSON(jsondata,deserialization_opts)
     if best_effort_backend:
-        raise NotImplemented('nope')
+        raise NotImplementedError('nope')
     return proxy
 
 @proxyloader('TrivialProxy')
 def trivial_loader(jsondata, deserialization_opts = None, best_effort_backend = False):
     proxy = TrivialProxy.fromJSON(jsondata)
     if best_effort_backend:
-        raise NotImplemented('nope')
+        raise NotImplementedError('nope')
     return proxy
