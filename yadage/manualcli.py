@@ -22,7 +22,7 @@ def connection_options(func):
     @click.option('--accept-metadir/--no-accept-metadir', default=True)
     @click.option('-r', '--controller', default='frommodel')
     @click.option('-o', '--ctrlopt', multiple=True, default=None, help = 'options for the workflow controller')
-    @click.option('-s', '--modelsetup', default='filebacked:yadage_state.json')
+    @click.option('-s', '--modelsetup', default='filebacked')
     @click.option('-l', '--modelopt', multiple=True, default=None, help = 'options for the workflow state models')
     @click.option('-b', '--backend', default='celery')
     @click.option('--local/--remote', default = True)
@@ -43,7 +43,7 @@ def mancli():
     pass
 
 @mancli.command()
-@click.option('-s', '--modelsetup', default='filebacked:yadage_state.json')
+@click.option('-s', '--modelsetup', default='filebacked')
 @click.option('-t', '--toplevel', default=os.getcwd())
 @click.option('-d', '--dataopt', multiple=True, default=None, help = 'options for the workflow data state')
 @click.option('--metadir', default=None, help = 'directory to store workflow metadata')
@@ -258,6 +258,11 @@ def handle_common_options(verbosity):
 def handle_connection_options(metadir, accept_metadir, controller, ctrlopt, modelsetup, modelopt, backend, local):
     ctrlopts = utils.options_from_eqdelimstring(ctrlopt)
     modelopts = utils.options_from_eqdelimstring(modelopt)
+
+    metainlocal = os.path.join(metadir,'_yadage')
+    if os.path.exists(metainlocal):
+        metadir = metainlocal
+
     ys = manualutils.connect(
         metadir = metadir,
         accept_metadir = accept_metadir,

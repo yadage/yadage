@@ -25,6 +25,9 @@ class YadageSteering(object):
     def connect(cls, metadir, ctrlstring, ctrlopts = None, modelsetup = None, modelopts = None, accept_metadir = False):
         prepare_meta(metadir, accept_metadir)
 
+        if modelsetup == 'filebacked':
+            modelsetup = 'filebacked:{}/wflow_state.json'.format(metadir)
+
         model = None
         if modelsetup:
             model = load_model_fromstring(modelsetup,modelopts)
@@ -42,6 +45,8 @@ class YadageSteering(object):
         if is_local_data:
             metadir = kwargs.get('metadir')
             metadir = metadir or '{}/_yadage/'.format(dataarg)
+            if kwargs.get('modelsetup') == 'filebacked':
+                kwargs['modelsetup'] = 'filebacked:{}/_yadage/wflow_state.json'.format(dataarg)
         else:
             metadir = kwargs['metadir']
         accept_metadir = kwargs.pop('accept_metadir', False)
