@@ -39,8 +39,8 @@ class YadageWorkflow(adage.adageobject):
         def node_deserializer(data):
             node = YadageNode.fromJSON(data,deserialization_opts)
             if backend:
-                node.backend = backend
-                node.update_state()
+                # node.backend = backend
+                node.update_state(backend = backend)
             return node
 
         def rule_deserializer(data):
