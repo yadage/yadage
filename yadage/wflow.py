@@ -5,11 +5,6 @@ from .stages import JsonStage, OffsetStage
 from .wflowview import WorkflowView
 from .wflownode import YadageNode
 
-from .backends import load_proxy
-
-
-def json_or_nil(x):
-    return None if x is None else x.json()
 
 class YadageWorkflow(adage.adageobject):
     '''
@@ -31,23 +26,18 @@ class YadageWorkflow(adage.adageobject):
         return WorkflowView(self, offset)
 
     def json(self):
-        data = obj_to_json(self,
-                           ruleserializer=json_or_nil,
-                           taskserializer=json_or_nil,
-                           proxyserializer=json_or_nil,
-                           )
+        json_or_nil = lambda x: None if x is None else x.json()
+        data = obj_to_json(self,json_or_nil,json_or_nil)
+
         data['bookkeeping'] = self.bookkeeping
         data['stepsbystage'] = self.stepsbystage
         data['values'] = self.values
         return data
 
     @classmethod
-    def fromJSON(cls, data,deserialization_opts = None,backend=None):
-
+    def fromJSON(cls, data,deserialization_opts = None, backend=None):
         def node_deserializer(data):
             node = YadageNode.fromJSON(data,deserialization_opts)
-            adage.serialize.set_generic_data(node,data)
-            node.resultproxy = load_proxy(data['proxy'],deserialization_opts) if data['proxy'] else None
             if backend:
                 node.backend = backend
                 node.update_state()

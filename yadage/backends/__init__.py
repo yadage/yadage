@@ -1,3 +1,6 @@
+from packtivity.backendutils import proxyloader, load_proxy
+from yadage.backends.trivialbackend import TrivialProxy
+
 class CachedProxy(object):
     def __init__(self,proxy,cacheid):
         self.proxy = proxy
@@ -12,28 +15,18 @@ class CachedProxy(object):
     @classmethod
     def fromJSON(cls,data,deserialization_opts = None):
         deserialization_opts = deserialization_opts or {}
-        return cls(load_proxy(data['proxy'],deserialization_opts), data['cacheid'])
+        return cls(load_proxy(data['proxy'],deserialization_opts), data['cacheid'],best_effort_backend = False)
 
-def load_proxy(data,deserialization_opts = None):
-    deserialization_opts = deserialization_opts or {}
-    import packtivity.backendutils
-    import yadage.backends.packtivitybackend
-    import yadage.backends.trivialbackend
+@proxyloader('CachedProxy')
+def cache_loader(jsondata, best_effort_backend):
+    proxy = CachedProxy.fromJSON(data,deserialization_opts)
+    if best_effort_backend:
+        raise NotImplemented('nope')
+    return proxy
 
-
-    ## test if this is one of the yadage-specfic proxies
-    if data['proxyname']=='CachedProxy':
-        return CachedProxy.fromJSON(data,deserialization_opts)
-    elif data['proxyname']=='TrivialProxy':
-        return yadage.backends.trivialbackend.TrivialProxy.fromJSON(data)
-
-    # it must be a packtivity proxy
-    from_pack_proxy = packtivity.backendutils.load_proxy(
-        data,
-        deserialization_opts = deserialization_opts,
-        best_effort_backend = False
-    )
-    if from_pack_proxy:
-        return from_pack_proxy
-    else:
-        raise RuntimeError('unknown proxy found with name: {}'.format(data['proxyname']))
+@proxyloader('TrivialProxy')
+def trivial_loader(jsondata, best_effort_backend):
+    proxy = TrivialProxy.fromJSON(data)
+    if best_effort_backend:
+        raise NotImplemented('nope')
+    return proxy

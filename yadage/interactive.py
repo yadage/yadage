@@ -29,7 +29,7 @@ def decide_step(node, controller, idbased):
 
 
     if idbased:
-        node = controller.adageobj.dag.getNode(node)
+        node = controller.adageobj.dag.getNode(idbased)
 
     click.echo('we could submit a DAG node {}'.format(node))
     # IPython.embed()

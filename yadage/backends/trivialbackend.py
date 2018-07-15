@@ -1,7 +1,6 @@
 from packtivity.asyncbackends import PacktivityProxyBase
 from packtivity.typedleafs import TypedLeafs
 
-
 class TrivialProxy(PacktivityProxyBase):
     '''
     A trivial proxy that carries the results and status already

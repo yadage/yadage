@@ -81,7 +81,6 @@ class YadageSteering(object):
             self.controller.backend = backend
 
         assert self.controller.backend
-
         self.adage_argument(**adage_kwargs)
         adage.rundag(controller = self.controller, **self.adage_kwargs)
 
@@ -92,7 +91,6 @@ class YadageSteering(object):
         snapshot(
             self.workflow,
             '{}/yadage_snapshot_workflow.json'.format(self.metadir),
-            '{}/yadage_snapshot_backend.json'.format(self.metadir)
         )
 
     def visualize(self):

@@ -1,11 +1,11 @@
 import yadage.workflow_loader
 from yadage.wflow import YadageWorkflow
-from yadage.utils import set_backend
-
+from yadage.controllers import frommodel_controller
 def test_singlestepstage_schedule_steps(local_helloworld_wflow):
     wflow = local_helloworld_wflow
     assert wflow.rules[-1].applicable(wflow) == False
     assert wflow.rules[-1].rule.stagespec['scheduler_type'] == 'singlestep-stage'
+
     wflow.rules[-1].apply(wflow)
     assert len(wflow.dag.nodes()) == 1
 
@@ -18,6 +18,9 @@ def test_nested_wflow(nested_wflow):
 
     wflow.view().rules[-1].apply(wflow)
     assert len(wflow.dag.nodes()) == 1
+
+    c = frommodel_controller('',{},wflow)
+    c.sync_backend()
 
     assert wflow.rules[0].applicable(wflow) == True
     assert wflow.rules[0].rule.stagespec['scheduler_type'] == 'singlestep-stage'
@@ -34,6 +37,9 @@ def test_singlestep_cases_first(singlestage_cases, foregroundasync_backend):
     right_taskspec = wflow.rules[0].rule.stagespec['cases'][0]['step']
     assert wflow.rules[0].applicable(wflow) == False
     wflow.view().rules[-1].apply(wflow)
+
+    c = frommodel_controller('',{},wflow)
+    c.sync_backend()
 
     assert len(wflow.dag.nodes()) == 1
     assert wflow.rules[0].applicable(wflow) == True
@@ -52,6 +58,9 @@ def test_value_registration(value_registering_workflow, foregroundasync_backend)
     assert wflow.rules[0].applicable(wflow) == False
     wflow.view().rules[-1].apply(wflow) #apply init
     assert len(wflow.dag.nodes()) == 1 #init applied
+
+    c = frommodel_controller('',{},wflow)
+    c.sync_backend()
 
     assert wflow.rules[0].applicable(wflow) == True #first stage is good
     wflow.rules[0].apply(wflow) #apply first stage
@@ -75,6 +84,11 @@ def test_singlestep_cases_second(singlestage_cases):
     wflow.view().rules[-1].apply(wflow)
 
     assert len(wflow.dag.nodes()) == 1
+
+
+    c = frommodel_controller('',{},wflow)
+    c.sync_backend()
+
     assert wflow.rules[0].applicable(wflow) == True
     wflow.rules[0].apply(wflow)
 
@@ -92,6 +106,10 @@ def test_singlestep_cases_nochoice(singlestage_cases):
     wflow.view().rules[-1].apply(wflow)
 
     assert len(wflow.dag.nodes()) == 1
+
+    c = frommodel_controller('',{},wflow)
+    c.sync_backend()
+
     assert wflow.rules[0].applicable(wflow) == True
     wflow.rules[0].apply(wflow)
 
@@ -108,6 +126,10 @@ def test_multistepstage_schedule_wflows(nested_mapreduce_wflow):
 
     wflow.view().rules[-1].apply(wflow)
     assert len(wflow.dag.nodes()) == 1
+
+    c = frommodel_controller('',{},wflow)
+    c.sync_backend()
+
     assert wflow.rules[0].applicable(wflow) == True
     assert wflow.rules[0].rule.stagespec['scheduler_type'] == 'multistep-stage'
     assert len(wflow.view('').rules) == 3 # init map reduce
@@ -123,6 +145,10 @@ def test_jq_stage(jqworkflow):
 
     wflow.view().rules[-1].apply(wflow)
     assert len(wflow.dag.nodes()) == 1
+
+    c = frommodel_controller('',{},wflow)
+    c.sync_backend()
+
     assert wflow.rules[0].applicable(wflow) == True
     assert wflow.rules[0].rule.stagespec['scheduler_type'] == 'jq-stage'
     wflow.rules[0].apply(wflow)
@@ -138,6 +164,11 @@ def test_jqnodestruct_stage(jqnodestruct):
 
     wflow.view().rules[-1].apply(wflow)
     assert len(wflow.dag.nodes()) == 1
+
+
+    c = frommodel_controller('',{},wflow)
+    c.sync_backend()
+
     assert wflow.rules[0].applicable(wflow) == True
     assert wflow.rules[1].applicable(wflow) == True
     # assert wflow.rules[0].rule.stagespec['scheduler_type'] == 'jq-stage'
@@ -145,6 +176,9 @@ def test_jqnodestruct_stage(jqnodestruct):
     wflow.rules[1].apply(wflow)
 
     assert len(wflow.dag.nodes()) == 7
+
+    c = frommodel_controller('',{},wflow)
+    c.sync_backend()
 
     assert wflow.rules[2].applicable(wflow) == True
     wflow.rules[2].apply(wflow)
@@ -184,6 +218,10 @@ def test_multistepstage_zip_schedule_steps(simple_mapreduce):
 
     wflow.view().rules[-1].apply(wflow)
     assert len(wflow.dag.nodes()) == 1
+
+    c = frommodel_controller('',{},wflow)
+    c.sync_backend()
+
     assert wflow.rules[0].applicable(wflow) == True
     assert wflow.rules[0].rule.stagespec['scheduler_type'] == 'multistep-stage'
     wflow.rules[0].apply(wflow)
@@ -199,6 +237,11 @@ def test_multistepstage_cartesian_schedule_steps(cartesian_mapreduce):
 
     wflow.view().rules[-1].apply(wflow)
     assert len(wflow.dag.nodes()) == 1
+
+
+    c = frommodel_controller('',{},wflow)
+    c.sync_backend()
+
     assert wflow.rules[0].applicable(wflow) == True
     assert wflow.rules[0].rule.stagespec['scheduler_type'] == 'multistep-stage'
     wflow.rules[0].apply(wflow)

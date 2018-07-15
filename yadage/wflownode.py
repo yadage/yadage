@@ -5,10 +5,11 @@ import time
 import jsonpointer
 
 import adage.node
-import packtivity
-import yadage.tasks as tasks
+import adage.serialize
 
-
+from packtivity.typedleafs import TypedLeafs
+from packtivity.backendutils import load_proxy
+from .tasks import outputReference, packtivity_task
 
 class YadageNode(adage.node.Node):
     '''
@@ -16,8 +17,9 @@ class YadageNode(adage.node.Node):
     the ability to have prepublished results
     '''
 
-    def __init__(self, name, task, identifier=None):
-        super(YadageNode, self).__init__(name, task, identifier)
+    def __init__(self, name, task, identifier=None, result = None):
+        super(YadageNode, self).__init__(name, task, identifier, result = result)
+        self.expected_result = None
 
     def __repr__(self):
         lifetime = datetime.timedelta(seconds = (time.time() - self.define_time))
@@ -30,19 +32,7 @@ class YadageNode(adage.node.Node):
         )
 
     def has_result(self):
-        if 'YADAGE_IGNORE_PREPUBLISHING' in os.environ:
-            return self.successful()
         return (self.expected_result is not None) or self.successful()
-
-    @property
-    def expected_result(self):
-        if 'YADAGE_IGNORE_PREPUBLISHING' in os.environ:
-            return
-        try:
-            return self._prepublished_cache
-        except AttributeError:
-            self._prepublished_cache = packtivity.prepublish_default(self.task.spec, self.task.parameters.json(), self.task.state)
-            return self._prepublished_cache
 
     @property
     def result(self):
@@ -62,14 +52,25 @@ class YadageNode(adage.node.Node):
             raise RuntimeError('attempt')
         pointer = jsonpointer.JsonPointer(pointerpath)
         if trackinputs is not None:
-            trackinputs.append(tasks.outputReference(self.identifier,pointer))
+            trackinputs.append(outputReference(self.identifier,pointer))
         v = self.result.resolve_ref(pointer)
         return v
+
+    def json(self):
+        json_or_nil = lambda x: None if x is None else x.json()
+        d = adage.serialize.node_to_json(self,json_or_nil,json_or_nil)
+        d['result'] = json_or_nil(self.result)
+        return d
 
     @classmethod
     def fromJSON(cls, data, deserialization_opts = None):
         if data['task']['type'] == 'packtivity_task':
-            task = tasks.packtivity_task.fromJSON(data['task'], deserialization_opts)
-            return cls(data['name'], task, data['id'])
+            task   = packtivity_task.fromJSON(data['task'], deserialization_opts)
+            result = TypedLeafs(data['result'],getattr(task.state,'datamodel',{})) if data['result'] else None
+            instance = cls(data['name'], task, data['id'],result)
+
+            adage.serialize.set_generic_data(instance,data)
+            instance.resultproxy = load_proxy(data['proxy'],deserialization_opts, best_effort_backend = False) if data['proxy'] else None
+            return instance
         else:
             raise RuntimeError('unknown task type',data['task']['type'])

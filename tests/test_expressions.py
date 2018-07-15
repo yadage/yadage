@@ -1,6 +1,7 @@
 import pytest
 import yadage.handlers.expression_handlers as exh
 from yadage.utils import process_refs
+from yadage.controllers import frommodel_controller
 
 def test_stage_output_selector(nested_mapreduce_wflow):
     wflow = nested_mapreduce_wflow
@@ -8,6 +9,7 @@ def test_stage_output_selector(nested_mapreduce_wflow):
     view = wflow.view()
     view.init({'input':inputdata})
     view.getRule(name = 'init').apply(wflow)
+    frommodel_controller('',{},wflow).sync_backend()
 
     result =  exh.handlers['stage-output-selector'](view,{'stages': 'init', 'output': 'input.here'})
     values = process_refs(result,wflow.dag)

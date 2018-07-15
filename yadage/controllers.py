@@ -3,6 +3,7 @@ import importlib
 import logging
 
 from adage.wflowcontroller import BaseController
+from packtivity.syncbackends import defaultsyncbackend
 
 from .reset import collective_downstream, remove_rules, reset_steps, undo_rules
 from .wflow import YadageWorkflow
@@ -12,12 +13,27 @@ log = logging.getLogger(__name__)
 
 ctrlhandlers, controller = handler_decorator()
 
+class YadageController(BaseController):
+    def __init__(self,*args, **kwargs):
+        self.prepublishing_backend = defaultsyncbackend()
+        self.disable_backend = False
+        super(YadageController,self).__init__(*args,**kwargs)
+        
+    def sync_backend(self):
+        for n in self.adageobj.dag.nodes():
+            node = self.adageobj.dag.getNode(n)
+            node.expected_result = self.prepublishing_backend.prepublish(
+                node.task.spec, node.task.parameters.json(), node.task.state
+            )
+        if not self.disable_backend:
+            super(YadageController,self).sync_backend()
+
 @controller('frommodel')
 def frommodel_controller(ctrlstring, ctrlopts, model = None):
     if isinstance(model, YadageWorkflow):
-        return BaseController(model)
+        return YadageController(model,**ctrlopts)
     else:
-        return PersistentController(model)
+        return PersistentController(model,**ctrlopts)
 
 @controller('http')
 def http_controller(ctrlstring, ctrlopts, model = None):
@@ -49,7 +65,7 @@ def setup_controller(model = None, controller = 'frommodel', ctrlopts = None):
             return ctrlhandlers[k](controller, ctrlopts, model)
     raise RuntimeError('unknown controller type %s', controller)
 
-class PersistentController(BaseController):
+class PersistentController(YadageController):
     '''
     workflow controller, that explicltly calls transaction methods on non read-only operations on the workflow state
     '''

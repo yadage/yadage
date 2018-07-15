@@ -1,19 +1,10 @@
 import json
 import logging
 
-from packtivity.statecontexts import load_state
-
-from .backends import load_proxy
-from .state_providers import load_provider
 from .wflow import YadageWorkflow
-from .wflownode import YadageNode
 from .handlers.utils import handler_decorator
 
 log = logging.getLogger(__name__)
-
-
-def make_deserializer(deserialization_opts = None):
-    return lambda jsondata: YadageWorkflow.fromJSON(jsondata,deserialization_opts)
 
 modelhandlers, statemodel = handler_decorator()
 
@@ -27,15 +18,14 @@ def filebacked_model(modelsetup, modelopts, initmodel):
     model   = FileBackedModel(
         filename = filename,
         initmodel = initmodel,
-        deserializer = make_deserializer(modelopts)
+        deserialization_opts = modelopts
     )
     return model
 
 @statemodel('mongo')
 def mongo_model(modelsetup, modelopts, initmodel):
     model = MongoBackedModel(
-        initmodel = initmodel,
-        deserializer = make_deserializer(modelopts)
+        initmodel = initmodel, deserialization_opts = modelopts
     )
     return model
 
@@ -50,10 +40,10 @@ class MongoBackedModel(object):
     '''
     model that holds the workflow state in a MongoDB database.
     '''
-    def __init__(self, deserializer = None, connect_string = 'mongodb://localhost:27017/', initmodel = None, wflowid = None):
+    def __init__(self, deserialization_opts = None, connect_string = 'mongodb://localhost:27017/', initmodel = None, wflowid = None):
         from pymongo import MongoClient
         from bson.objectid import ObjectId
-        self.deserializer = deserializer or make_deserializer()
+        self.deserialization_opts = deserialization_opts
         self.client = MongoClient(connect_string)
         self.db = self.client.wflowdb
         self.collection = self.db.workflows
@@ -76,15 +66,16 @@ class MongoBackedModel(object):
         param load: load data from database
         return: yadage workflow object
         '''
-        return self.deserializer(self.collection.find_one({'_id':self.wflowid}))
+        jsondata = self.collection.find_one({'_id':self.wflowid})
+        return YadageWorkflow.fromJSON(jsondata,self.deserialization_opts)
 
 class FileBackedModel(object):
     '''
     model that holds data on disk in a JSON file
     '''
-    def __init__(self, filename, deserializer = None, initmodel = None):
+    def __init__(self, filename, deserialization_opts = None, initmodel = None):
         self.filename = filename
-        self.deserializer = deserializer or make_deserializer()
+        self.deserialization_opts = deserialization_opts
         if initmodel:
             self.commit(initmodel)
 
@@ -105,4 +96,4 @@ class FileBackedModel(object):
         log.debug('loading model')
         with open(self.filename) as statefile:
             jsondata = json.load(statefile)
-            return self.deserializer(jsondata)
+            return YadageWorkflow.fromJSON(jsondata,self.deserialization_opts)
