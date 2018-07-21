@@ -322,10 +322,12 @@ def init_stage(stage, spec):
     '''
     inputs = []
     if spec.get('inputs'):
-        inputs = map(outputReference.fromJSON, spec['inputs'])
+        inputs = list(map(outputReference.fromJSON, spec['inputs']))
         log.info('initializing scope from dependent tasks')
     else:
         log.info('initializing scope from dependent tasks')
+
+    log.info('INPUTS ARE %s', inputs)
 
     depstates = stage.state_provider.init_states if stage.state_provider else []
 
