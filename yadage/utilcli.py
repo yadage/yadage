@@ -63,14 +63,15 @@ def testsel(instance, selection,verbosity,viewscope):
 @utilcli.command()
 @click.argument('instance')
 @click.argument('vizpdf')
+@click.option('--viewscope', default = '')
 @click.option('-v', '--verbosity', default='INFO')
-def viz(instance, vizpdf,verbosity):
+def viz(instance, vizpdf,viewscope,verbosity):
     logging.basicConfig(level=getattr(logging, verbosity), format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     import yadage.visualize as visualize
     wflow = wflow_with_trivial_backend(instance)
 
     dirpath = tempfile.mkdtemp()
-    visualize.write_prov_graph(dirpath, wflow)
+    visualize.write_prov_graph(dirpath, wflow, scope = viewscope)
     shutil.copy('{}/yadage_workflow_instance.pdf'.format(dirpath), vizpdf)
     shutil.rmtree(dirpath)
 
