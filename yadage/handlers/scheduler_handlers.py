@@ -98,8 +98,13 @@ def step_or_stages(name, spec, inputs, parameters, state_provider, stageview):
         p = packtivity_task(name=name, spec=spec['step'], parameters = parameters, state=step_state, inputs = inputs)
         return p,None
     elif 'workflow' in spec:
-        name = 'init_{}'.format(name)
-        init_spec  = init_stage_spec(parameters.json(), discover = False, used_inputs=[x.json() for x in inputs], name = 'init', nodename = name)
+        opts = spec.get('workflow_opts',{})
+        init_spec  = init_stage_spec(
+            parameters.json(), discover = opts.get('discover',False),
+            used_inputs=[x.json() for x in inputs],
+            name = 'init',
+            nodename = 'init_{}'.format(name)
+        )
         stages = [init_spec] + spec['workflow']['stages']
         new_provider = state_provider.new_provider(name, init_states = depstates)
         stageobjects = [JsonStage(s, new_provider) for s in stages]
@@ -302,7 +307,7 @@ def jq_stage(stage, spec):
         finalized, inputs = finalize_input(pars, stage.view)
         log.info('postscripting: %s',finalized)
         after_post = jq.jq(postscript).transform(finalized,multiple_output = False)
-
+        after_post = TypedLeafs(after_post)
         log.info('finalized to: %s',after_post)
         addStepOrWorkflow(singlename, stage, after_post, inputs, spec)
     registerExpressions(stage, spec.get('register_values'))

@@ -13,7 +13,7 @@ import jsonpointer
 import yaml
 
 from yadageschemas.utils import WithJsonRefEncoder
-
+from packtivity.typedleafs import TypedLeafs
 
 class outputReference(object):
 
@@ -190,34 +190,6 @@ def setupbackend_fromstring(backend, backendopts = None):
             backendopts = backendopts
     )
 
-from .handlers.utils import handler_decorator
-providersetup_handlers, providersetup = handler_decorator()
-
-@providersetup('local')
-def localfs_provider(dataarg,dataopts):
-    import yadage.state_providers.localposix
-    return yadage.state_providers.localposix.setup_provider(dataarg,dataopts)
-
-@providersetup('py:')
-def formpython_provider(dataarg,dataopts):
-    _,module, setupfunc,dataarg = dataarg.split(':',3)
-    module = importlib.import_module(module)
-    setupfunc = getattr(module,setupfunc)
-    return setupfunc(dataarg,dataopts)
-
-@providersetup('fromenv:')
-def fromenv_provider(dataarg,dataopts):
-    module = importlib.import_module(os.environ['PACKTIVITY_STATEPROVIDER'])
-    return module.setup_provider(dataarg,dataopts)
-
-def state_provider_from_string(dataarg,dataopts = None):
-    dataopts = dataopts or {}
-    if len(dataarg.split(':',1)) == 1:
-        dataarg = 'local:'+dataarg
-    for k in providersetup_handlers.keys():
-        if dataarg.startswith(k):
-            return providersetup_handlers[k](dataarg,dataopts)
-    raise RuntimeError('unknown data type %s %s', dataarg, dataopts)
 
 def get_init_spec(discover):
     return {
@@ -248,9 +220,13 @@ def init_stage_spec(parameters, discover, used_inputs, name, nodename = None):
         }
     }
 
+def stages_in_scope(workflow,scope):
+    return jsonpointer.JsonPointer(scope).resolve(workflow.bookkeeping)['_meta']['stages']
+
 def rule_steps_indices(workflow):
     rule_to_steps_index = {}
     steps_to_rule_index = {}
+    rule_to_subscopes_index = {}
     for rule in workflow.rules + workflow.applied_rules:
         path = '/'.join([rule.offset, rule.rule.name])
         p = jsonpointer.JsonPointer(path)
@@ -258,10 +234,22 @@ def rule_steps_indices(workflow):
             steps_of_rule = [x['_nodeid'] for x in p.resolve(workflow.stepsbystage) if '_nodeid' in x]
         except jsonpointer.JsonPointerException:
             steps_of_rule = []
+
+        try:
+            a = p.resolve(workflow.stepsbystage)
+            subscopes_of_rule = [
+                # ['{}/{}'.format(x['_offset'],substage) for substage in x.keys() if not substage== '_offset' ]
+                x['_offset']
+                for x in a if '_offset' in x
+            ]
+        except jsonpointer.JsonPointerException:
+            subscopes_of_rule = []
+
         rule_to_steps_index[rule.identifier] = steps_of_rule
+        rule_to_subscopes_index[rule.identifier] = subscopes_of_rule
         for step in steps_of_rule:
             steps_to_rule_index[step] = rule.identifier
-    return rule_to_steps_index, steps_to_rule_index
+    return rule_to_steps_index, steps_to_rule_index, rule_to_subscopes_index
 
 def advance_coroutine(coroutine):
     try:

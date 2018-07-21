@@ -21,6 +21,8 @@ class LocalFSProvider(object):
         self.nest = kwargs.get('nest', True)
         self.ensure = kwargs.get('ensure')
         self.init_states = kwargs.get('init_states')
+        self.sub_inits = kwargs.get('sub_init_states',{})
+
         first = base_states.pop()
         assert first
 
@@ -35,10 +37,14 @@ class LocalFSProvider(object):
     def new_provider(self,name, init_states = None):
         new_base_ro = self.base.readwrite + self.base.readonly
         new_base_rw = [os.path.join(self.base.readwrite[0],name)]
+
+        sub_init    = self.sub_inits.get(name)
+        sub_inits   = [sub_init] if sub_init else []
+        init_states = init_states or []
         return LocalFSProvider(LocalFSState(new_base_rw,new_base_ro),
                                nest = self.nest,
                                ensure = self.ensure,
-                               init_states = init_states or [])
+                               init_states = init_states + sub_inits)
 
 
     def new_state(self,name, dependencies, readonly = False):
@@ -67,29 +73,36 @@ class LocalFSProvider(object):
         return newstate
 
     def json(self):
-        return {
+        d = {
             'state_provider_type': 'localfs_provider',
             'base_state': self.base.json(),
             'init_states': [s.json() for s in self.init_states] if self.init_states else [],
             'nest': self.nest,
-            'ensure': self.ensure
+            'ensure': self.ensure,
+            'sub_init_states': {k:v.json() for k,v in self.sub_inits.items()}
         }
+        # if self.sub_inits:
+        #     raise RuntimeError(d['sub_init_states'])
+        return d
 
     @classmethod
     def fromJSON(cls,jsondata, deserialization_opts):
-        return cls(
+        instance = cls(
             load_state(jsondata['base_state'],deserialization_opts),
             nest = jsondata['nest'],
             ensure = jsondata['ensure'],
-            init_states = [load_state(x,deserialization_opts) for x in jsondata['init_states']]
+            init_states = [load_state(x,deserialization_opts) for x in jsondata['init_states']],
+            sub_init_states = {k:load_state(v,deserialization_opts) for k,v in jsondata['sub_init_states'].items()}
         )
+        return instance
 
 def setup_provider(dataarg, dataopts):
-    workdir = dataarg.split(':',2)[1]
-    read = dataopts.get('read',None)
-    nest = dataopts.get('nest',True)
-    ensure = dataopts.get('ensure',True)
+    workdir   = dataarg.split(':',2)[1]
+    read      = dataopts.get('read',None)
+    nest      = dataopts.get('nest',True)
+    ensure    = dataopts.get('ensure',True)
     overwrite = dataopts.get('overwrite',False)
+    subinits  = dataopts.get('subinits',{})
 
     if overwrite and os.path.exists(workdir):
         shutil.rmtree(workdir)
@@ -103,5 +116,11 @@ def setup_provider(dataarg, dataopts):
             prepare_workdir_from_archive(initdir, inputarchive)
         init_state = LocalFSState(readonly = [initdir])
         init_states.append(init_state)
+    if subinits:
+        subinits = {k: LocalFSState(readonly = [v]) for k,v in subinits.items()}
+
     writable_state = LocalFSState([workdir])
-    return LocalFSProvider(read,writable_state, ensure = ensure, nest = nest, init_states = init_states)
+    return LocalFSProvider(read,writable_state,
+        ensure = ensure, nest = nest, init_states = init_states,
+        sub_init_states = subinits
+    )

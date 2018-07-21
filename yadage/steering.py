@@ -25,9 +25,10 @@ def from_file(ctx, param, value):
     click.secho('running from file')
     for v in value:
         data.update(**yaml.load(v))
-    data['backend']  = utils.setupbackend_fromstring(data.pop('backend'),data.pop('backendopts'))
-
     enable_plugins(data.pop('plugins'))
+
+
+    data['backend']  = utils.setupbackend_fromstring(data.pop('backend'),data.pop('backendopts'))
 
     rc = RC_FAILED
     try:

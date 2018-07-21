@@ -47,8 +47,9 @@ def fillscope(cluster, workflow, scope='', subcluster=True):
                               'width': 0.2} if stage in ['init','output'] else {}
                 targetcl.add_node(pydotplus.graphviz.Node(
                     element, label=label, color='blue', shape=shape, **additional))
-                add_result(targetcl, element,
-                           workflow.dag.getNode(element).result)
+                result = workflow.dag.getNode(element).result
+                if result:
+                    add_result(targetcl, element,result)
             elif type(element) == dict:
                 # recurse...
                 fillscope(

@@ -98,14 +98,17 @@ class WorkflowView(object):
         spec = init_stage_spec(initdata, discover, used_inputs or [], name)
         self.addRule(JsonStage(spec, init_provider), self.offset)
 
-    def addRule(self, rule, offset=''):
+    def addRule(self, rule, offset='', identifier = None):
         '''
         add a DAG extension rule, possibly with a scope offset
         '''
         thisoffset = JsonPointer(offset)
-        offsetstage = OffsetStage(rule, self._makeoffset(offset))
-        self.rules += [offsetstage]
+        if offset != '':
+            createIndexData(thisoffset.path, self.steps, self.values)
         createOffsetMeta(thisoffset.path, self.bookkeeper)
+
+        offsetstage = OffsetStage(rule, self._makeoffset(offset), identifier = identifier)
+        self.rules += [offsetstage]
         thisoffset.resolve(self.bookkeeper)['_meta']['stages'] += [offsetstage.identifier]
         return offsetstage.identifier
 
@@ -142,6 +145,8 @@ class WorkflowView(object):
         log.info('added node %s', node)
         return node
 
+
+
     def addWorkflow(self, rules, stage=None):
         '''
         add a (sub-)workflow (i.e. list of stages) to the overall workflow
@@ -152,16 +157,19 @@ class WorkflowView(object):
             #register the workflow as part of that 'author'
             #needed e.g. for predicate handlers trying to determing if
             #the author stage is done
-            self.steps.setdefault(stage,[]).append({})
-            offset = JsonPointer.from_parts([stage, len(self.steps[stage]) - 1]).path
-            self.steps[stage][-1]['_offset'] = offset
+            nextindex = len(self.steps.get(stage,[]))
+            offset = JsonPointer.from_parts([stage, nextindex]).path
 
+            self.steps.setdefault(stage,[]).append({})
             self.values.setdefault(stage,[]).append({})
-            offset = JsonPointer.from_parts([stage, len(self.values[stage]) - 1]).path
-            self.values[stage][-1] = {}
 
         for rule in rules:
             self.addRule(rule, offset)
+
+def createIndexData(offset, stepindex, valueindex):
+    pointer = JsonPointer(offset)
+    pointer.resolve(stepindex)['_offset'] = offset
+    pointer.set(valueindex, {})
 
 def createOffsetMeta(offset, bookkeeping):
     '''
