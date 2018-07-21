@@ -1,0 +1,23 @@
+stages:
+- name: run_point_fits
+  dependencies: [init]
+  scheduler:
+    scheduler_type: multistep-stage
+    parameters:
+      output: '{workdir}/output.txt'
+      signal: {unwrap: true, output: signals, stages: init}
+      data: {unwrap: true, output: data, stages: init}
+      background: {unwrap: true,  output: background, stages: init}
+    step: {$ref: 'steps.yml#/inference_step'}
+    scatter:
+      method: zip
+      parameters: [signal]
+
+- name: summary_plots
+  dependencies: [run_point_fits]
+  scheduler:
+    scheduler_type: singlestep-stage
+    parameters:
+      output: '{workdir}/output.txt'
+      points: {output: outputB, stages: run_point_fits}
+    step: {$ref: 'steps.yml#/summary_step'}

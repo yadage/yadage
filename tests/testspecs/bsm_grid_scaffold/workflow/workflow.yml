@@ -1,0 +1,47 @@
+stages:
+- name: signals
+  scheduler:
+    scheduler_type: singlestep-stage
+    parameters:
+      input: [
+        {name: sample1},
+        {name: sample2},
+        {name: sample3}
+      ]
+    workflow: {$ref: signals_flow.yml}
+    workflow_opts:
+      discover: true
+
+- name: data
+  scheduler:
+    scheduler_type: singlestep-stage
+    parameters:
+      input: 'hello world'
+      initfile: '*.txt'
+    workflow: {$ref: data_flow.yml}
+    workflow_opts:
+      discover: true
+
+- name: backgrounds
+  scheduler:
+    scheduler_type: singlestep-stage
+    parameters:
+      input: [
+        {name: sample1},
+        {name: sample2},
+        {name: sample3},
+        {name: sample4}
+      ]
+    workflow: {$ref: backgrounds_flow.yml}
+    workflow_opts:
+      discover: true
+
+- name: inference
+  dependencies: [signals, data, backgrounds]
+  scheduler:
+    scheduler_type: singlestep-stage
+    parameters:
+      signals: {output: outputA, stages: 'signals[*].run_points[*].stage1'}
+      data: {unwrap: true, output: outputA, stages: 'data[*].stage1'}
+      background: {unwrap: true, output: outputA, stages: 'backgrounds[*].merge_bkg'}
+    workflow: {$ref: inference_flow.yml}

@@ -1,0 +1,77 @@
+signalstep:
+  environment:
+    image: busybox
+    environment_type: docker-encapsulated
+  process:
+    process_type: string-interpolated-cmd
+    cmd: echo {input} >> {output}
+  publisher:
+    publisher_type: frompar-pub
+    outputmap:
+      outputA: output
+
+datastep:
+  environment:
+    image: busybox
+    environment_type: docker-encapsulated
+  process:
+    process_type: string-interpolated-cmd
+    cmd: cat {inputfile} > {output} && echo {input} >> {output}
+  publisher:
+    publisher_type: frompar-pub
+    outputmap:
+      outputA: output
+
+background_step:
+  environment:
+    image: busybox
+    environment_type: docker-encapsulated
+  process:
+    process_type: string-interpolated-cmd
+    cmd: echo {input} >> {output}
+  publisher:
+    publisher_type: frompar-pub
+    outputmap:
+      outputA: output
+
+background_merge:
+  environment:
+    image: busybox
+    envscript: ''
+    env: {}
+    resources: []
+    par_mounts: []
+    environment_type: docker-encapsulated
+    imagetag: latest
+    workdir: null
+  process:
+    process_type: string-interpolated-cmd
+    cmd: echo {input} >> {output}
+  publisher:
+    publisher_type: frompar-pub
+    outputmap:
+      outputA: output
+
+inference_step:
+  environment:
+    image: busybox
+    environment_type: docker-encapsulated
+  process:
+    process_type: string-interpolated-cmd
+    cmd: echo {signal} {data} {background} > {output}
+  publisher:
+    publisher_type: frompar-pub
+    outputmap:
+      outputB: output
+
+summary_step:
+  environment:
+    image: busybox
+    environment_type: docker-encapsulated
+  process:
+    process_type: string-interpolated-cmd
+    cmd: echo {points} > {output}
+  publisher:
+    publisher_type: frompar-pub
+    outputmap:
+      outputB: output
