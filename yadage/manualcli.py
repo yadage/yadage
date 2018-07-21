@@ -359,7 +359,7 @@ def visualize(workdir, fileformat,
         controller.sync_backend()
 
 
-    write_prov_graph(workdir, controller.adageobj, fileformat)
+    write_prov_graph(workdir, controller.adageobj, vizformat=fileformat)
 
 @mancli.command()
 @click.argument('name', default=None)
