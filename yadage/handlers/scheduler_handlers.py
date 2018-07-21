@@ -327,8 +327,6 @@ def init_stage(stage, spec):
     else:
         log.info('initializing scope from dependent tasks')
 
-    log.info('INPUTS ARE %s', inputs)
-
     depstates = stage.state_provider.init_states if stage.state_provider else []
 
     if stage.state_provider:
