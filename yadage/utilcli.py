@@ -35,8 +35,9 @@ def utilcli():
 @utilcli.command()
 @click.argument('instance')
 @click.argument('selection')
+@click.option('--viewscope', default = '')
 @click.option('-v', '--verbosity', default='INFO')
-def testsel(instance, selection,verbosity):
+def testsel(instance, selection,verbosity,viewscope):
 
 
     logging.basicConfig(level=getattr(logging, verbosity), format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -44,7 +45,7 @@ def testsel(instance, selection,verbosity):
 
     wflow = wflow_with_trivial_backend(instance)
 
-    selresult = exh['stage-output-selector'](wflow.view(), yaml.load(selection))
+    selresult = exh['stage-output-selector'](wflow.view(viewscope), yaml.load(selection))
 
     if not selresult:
         click.secho('Bad selection {}'.format(selresult), fg='red')
