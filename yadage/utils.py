@@ -1,6 +1,5 @@
 import copy
 import hashlib
-import importlib
 import json
 import logging
 import os
@@ -13,7 +12,6 @@ import jsonpointer
 import yaml
 
 from yadageschemas.utils import WithJsonRefEncoder
-from packtivity.typedleafs import TypedLeafs
 
 class outputReference(object):
 

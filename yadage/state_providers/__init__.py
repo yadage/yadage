@@ -10,7 +10,7 @@ from ..handlers.utils import handler_decorator
 provider_deserialize_handlers, provider_deserializer = handler_decorator()
 
 @provider_deserializer('localfs_provider')
-def localfs_provider(jsondata, deserialization_opts):
+def localfs_provider_deserializer(jsondata, deserialization_opts):
     return LocalFSProvider.fromJSON(jsondata, deserialization_opts)
 
 @provider_deserializer('frompython_provider')
@@ -23,7 +23,7 @@ def frompython_provider(jsondata, deserialization_opts):
     return providerclass.fromJSON(jsondata,**provideropts)
 
 @provider_deserializer('fromenv_provider')
-def fromenv_provider(jsondata, deserialization_opts):
+def fromenv_provider_deserializer(jsondata, deserialization_opts):
     module = importlib.import_module(os.environ['YADAGE_STATEPROVIDER'])
     return module.load_provider(jsondata)
 
