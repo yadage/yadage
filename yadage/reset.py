@@ -41,7 +41,8 @@ def undo_rule(workflow, ruleid):
     r2s, s2r, r2subscopes  = utils.rule_steps_indices(workflow)
 
     if not ruleid in [r.identifier for r in workflow.applied_rules]:
-        log.debug('rule %s/%s not in list of applied rules. possibly already undone during recursion.',r.offset,r.rule.name)
+        ruleobj = workflow.view().getRule(identifier = ruleid)
+        log.debug('rule %s/%s not in list of applied rules. possibly already undone during recursion.',ruleobj.offset,ruleobj.rule.name)
         return
 
     downstream_nodes_rules = list(set([s2r[s] for s in collective_downstream(workflow, r2s[ruleid])]))
