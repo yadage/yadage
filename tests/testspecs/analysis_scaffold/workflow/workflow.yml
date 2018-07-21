@@ -1,0 +1,37 @@
+stages:
+  - name: signal
+    dependencies: []
+    scheduler:
+      scheduler_type: singlestep-stage
+      parameters:
+        input: 'hello world'
+        initfile: 'initfile.txt'
+      workflow: {$ref: subflowA.yml}
+
+  - name: data
+    dependencies: []
+    scheduler:
+      scheduler_type: singlestep-stage
+      parameters:
+        input: 'hello world'
+        initfile: 'initfile.txt'
+      workflow: {$ref: subflowA.yml}
+
+  - name: backgrounds
+    dependencies: []
+    scheduler:
+      scheduler_type: singlestep-stage
+      parameters:
+        input: 'hello world'
+        initfile: 'initfile.txt'
+      workflow: {$ref: subflowA.yml}
+
+  - name: inference
+    dependencies: [signal,data,backgrounds]
+    scheduler:
+      scheduler_type: singlestep-stage
+      parameters:
+        signal: {stages: 'signal[*].stage1', output: outputA, unwrap: true}
+        background: {stages: 'backgrounds[*].stage1', output: outputA, unwrap: true}
+        data: {stages: 'data[*].stage1', output: outputA, unwrap: true}
+      workflow: {$ref: subflowB.yml}
