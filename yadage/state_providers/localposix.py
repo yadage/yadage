@@ -147,7 +147,7 @@ def setup_provider(dataarg, dataopts):
 
 
     if subinits:
-        subinits = handle_init_spec(pathbase,subinits)
+        subinits = handle_init_spec(pathbase or workdir,subinits)
 
     writable_state = LocalFSState([workdir])
     return LocalFSProvider(read,writable_state,
