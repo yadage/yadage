@@ -1,0 +1,14 @@
+stages:
+- name: run_points
+  dependencies: [init]
+  scheduler:
+    scheduler_type: multistep-stage
+    parameters:
+      input: {stages: init, output: input, unwrap: true}
+      initfile: '*.txt'
+    workflow: {$ref: signal_flow.yml}
+    workflow_opts:
+      discover: true
+    scatter:
+      method: zip
+      parameters: [input]

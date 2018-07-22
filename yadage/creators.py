@@ -6,7 +6,7 @@ import logging
 from . import workflow_loader as workflow_loader
 
 from .handlers.utils import handler_decorator
-from .utils import state_provider_from_string
+from .state_providers import state_provider_from_string
 from .wflowstate import load_model_fromstring
 from .controllers import setup_controller
 from .wflow import YadageWorkflow
@@ -42,7 +42,6 @@ def local_workflows(
 
     prepares initial workflow object and returns controller
     '''
-
     rootprovider = state_provider_from_string(dataarg, dataopts)
 
     if not workflow_json and not workflow:

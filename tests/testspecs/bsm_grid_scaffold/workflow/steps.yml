@@ -1,0 +1,65 @@
+common:
+# - &testenv {image: busybox, environment_type: docker-encapsulated}
+- &testenv {environment_type: localproc-env}
+- &proc {process_type: string-interpolated-cmd}
+- &pub {publisher_type: frompar-pub}
+
+signalstep:
+  environment: {<< : *testenv}
+  process:
+    cmd: cat {inputfile} > {output} && echo {input} >> {output}
+    << : *proc
+  publisher:
+    << : *pub
+    outputmap:
+      outputA: output
+
+datastep:
+  environment: {<< : *testenv}
+  process:
+    cmd: cat {inputfile} > {output} && echo {input} >> {output}
+    << : *proc
+  publisher:
+    << : *pub
+    outputmap:
+      outputA: output
+
+background_step:
+  environment: {<< : *testenv}
+  process:
+    cmd: cat {inputfile} > {output} && echo {input} >> {output}
+    << : *proc
+  publisher:
+    << : *pub
+    outputmap:
+      outputA: output
+
+background_merge:
+  environment: {<< : *testenv}
+  process:
+    cmd: echo {input} >> {output}
+    << : *proc
+  publisher:
+    << : *pub
+    outputmap:
+      outputA: output
+
+inference_step:
+  environment: {<< : *testenv}
+  process:
+    cmd: echo {signal} {data} {background} > {output}
+    << : *proc
+  publisher:
+    << : *pub
+    outputmap:
+      outputB: output
+
+summary_step:
+  environment: {<< : *testenv}
+  process:
+    cmd: echo {points} > {output}
+    << : *proc
+  publisher:
+    << : *pub
+    outputmap:
+      outputB: output

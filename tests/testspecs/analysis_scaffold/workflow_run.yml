@@ -1,0 +1,12 @@
+dataarg: analysisdata
+dataopts:
+ subinits:
+   signal: /Users/lukas/Code/yadagedev/yadage/tests/testspecs/analysis_scaffold/basedata/siginputs
+   data: /Users/lukas/Code/yadagedev/yadage/tests/testspecs/analysis_scaffold/basedata/datainputs
+   backgrounds: /Users/lukas/Code/yadagedev/yadage/tests/testspecs/analysis_scaffold/basedata/bkginputs
+workflow: workflow.yml
+toplevel: /Users/lukas/Code/yadagedev/yadage/tests/testspecs/analysis_scaffold/workflow
+visualize: true
+plugins: []
+backend: 'foregroundasync'
+backendopts: {}

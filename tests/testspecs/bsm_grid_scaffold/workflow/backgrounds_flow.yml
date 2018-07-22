@@ -1,0 +1,25 @@
+stages:
+- scheduler:
+    parameters:
+      input: {stages: init, output: input, unwrap: true}
+      initfile: '*.txt'
+    scheduler_type: multistep-stage
+    workflow: {$ref: background_flow.yml}
+    workflow_opts:
+      discover: true
+    scatter:
+      method: zip
+      parameters: [input]
+  dependencies:
+    dependency_type: jsonpath_ready
+    expressions:
+    - init
+  name: run_bkgs
+- name: merge_bkg
+  dependencies: [run_bkgs]
+  scheduler:
+    parameters:
+      input: {stages: 'run_bkgs[*].stage1', output: outputA, unwrap: true}
+      output: '{workdir}/output.txt'
+    step: {$ref: 'steps.yml#/background_merge'}
+    scheduler_type: singlestep-stage

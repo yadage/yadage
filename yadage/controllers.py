@@ -90,6 +90,7 @@ class PersistentController(YadageController):
         '''the transaction context. will commit model to persistent store on exit.'''
         self.adageobj = self.model.load()
         if sync:
+            log.debug('syncing to setup tx %s', self)
             super(PersistentController,self).sync_backend()
         yield
 
@@ -98,6 +99,7 @@ class PersistentController(YadageController):
             #raise RuntimeError('was about to commit invalid data!')
             log.warning('commit is invalid %s', isvalid)
         if sync:
+            log.debug('syncing to teardown tx %s', self)
             super(PersistentController,self).sync_backend()
         self.model.commit(self.adageobj)
 
@@ -108,6 +110,7 @@ class PersistentController(YadageController):
         :param nodeids: list of ids of nodes to be submitted
         :return: None
         '''
+        log.debug('transaction to submit')
         with self.transaction():
             nodes = [self.adageobj.dag.getNode(nodeid) for nodeid in nodeids]
             # log.info('submitting nodes to backend: %s', nodes)
@@ -120,6 +123,7 @@ class PersistentController(YadageController):
         :param ruleids: list of ids of reuls to be applied
         :return: None
         '''
+        log.debug('transaction to apply')
         with self.transaction():
             rules = [r for r in self.adageobj.rules if r.identifier in ruleids]
             super(PersistentController,self).apply_rules(rules)
@@ -128,6 +132,7 @@ class PersistentController(YadageController):
         '''
         synchronize node data with backend
         '''
+        log.debug('transaction to sync but (without sync in tx)')
         with self.transaction(sync = False): # disable sync to avoid infinite recursion
             super(PersistentController,self).sync_backend()
 
@@ -140,15 +145,16 @@ class PersistentController(YadageController):
 
     def submittable_nodes(self):
         '''
+
         :return: a list of nodes with sucessfull and completed upstream
         '''
         submittable_nodes = super(PersistentController,self).submittable_nodes()
         return [x.identifier for x in submittable_nodes]
 
     def add_rules(self, rulespecs, dataarg, offset = '', groupname = None , dataopts = None):
-        log.info('adding %s rules', len(rulespecs))
+        log.debug('adding %s rules', len(rulespecs))
         from .stages import JsonStage
-        from .utils  import state_provider_from_string
+        from .state_providers  import state_provider_from_string
         sp = state_provider_from_string(dataarg,dataopts)
         rules = [JsonStage(json, sp) for json in rulespecs]
         with self.transaction():

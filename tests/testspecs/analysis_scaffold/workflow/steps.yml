@@ -1,0 +1,33 @@
+common:
+# - &testenv {image: busybox, environment_type: docker-encapsulated}
+- &testenv {environment_type: localproc-env}
+
+stepA:
+  process:
+    process_type: string-interpolated-cmd
+    cmd: cat {inputfile} > {output} && echo {input} >> {output}
+  publisher:
+    publisher_type: 'frompar-pub'
+    outputmap:
+      outputA: 'output'
+  environment: {<< : *testenv}
+
+subflowA:
+  process:
+    process_type: string-interpolated-cmd
+    cmd: cat {inputfile} > {output} && echo {input} >> {output}
+  publisher:
+    publisher_type: 'frompar-pub'
+    outputmap:
+      outputA: 'output'
+  environment: {<< : *testenv}
+
+stepB:
+  process:
+    process_type: string-interpolated-cmd
+    cmd: echo {signal} {data} {background} > {output}
+  publisher:
+    publisher_type: 'frompar-pub'
+    outputmap:
+      outputB: 'output'
+  environment: {<< : *testenv}

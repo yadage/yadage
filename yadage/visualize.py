@@ -37,8 +37,10 @@ def fillscope(cluster, workflow, scope='', subcluster=True):
         else:
             stagecluster = scopecluster
 
+        nodes_to_connect = []
         for i, element in enumerate(elements):
             if '_nodeid' in element:
+                nodes_to_connect.append(element['_nodeid'])
                 element = element['_nodeid']
                 targetcl = stagecluster if stage != 'init' else scopecluster
                 shape = 'diamond' if stage in ['init','output'] else 'box'
@@ -47,8 +49,9 @@ def fillscope(cluster, workflow, scope='', subcluster=True):
                               'width': 0.2} if stage in ['init','output'] else {}
                 targetcl.add_node(pydotplus.graphviz.Node(
                     element, label=label, color='blue', shape=shape, **additional))
-                add_result(targetcl, element,
-                           workflow.dag.getNode(element).result)
+                result = workflow.dag.getNode(element).result
+                if result:
+                    add_result(targetcl, element,result)
             elif type(element) == dict:
                 # recurse...
                 fillscope(
@@ -56,6 +59,7 @@ def fillscope(cluster, workflow, scope='', subcluster=True):
                         scopeptr.parts + [stage, i]).path,
                     subcluster=subcluster
                 )
+        connect_nodes(cluster,workflow,nodes_to_connect)
 
 
 def path_to_id(stepid, path):
@@ -75,25 +79,25 @@ def add_result(graph, parent, typedleafs):
 
 
 def attach_to_results(provgraph, workflow, node):
-    for dep in workflow.dag.getNode(node).task.inputs:
+    nodeobj = workflow.dag.getNode(node)
+    for dep in nodeobj.task.inputs:
         resultid = path_to_id(dep.stepid, dep.pointer.path)
         provgraph.add_edge(pydotplus.graphviz.Edge(resultid, node))
 
 
-def connect(provgraph, workflow):
-    for node in workflow.dag.nodes():
+def connect_nodes(provgraph, workflow, nodes):
+    for node in nodes:
         attach_to_results(provgraph, workflow, node)
 
 
-def provdotgraph(workflow, subcluster=True):
+def provdotgraph(workflow, subcluster=True, scope = ''):
     provgraph = pydotplus.graphviz.Graph()
-    fillscope(provgraph, workflow, subcluster=subcluster)
-    connect(provgraph, workflow)
+    fillscope(provgraph, workflow, scope = scope, subcluster=subcluster)
     return provgraph
 
 
-def write_prov_graph(workdir, workflow, vizformat='pdf'):
-    provgraph = provdotgraph(workflow, subcluster=True)
+def write_prov_graph(workdir, workflow, scope = '', vizformat='pdf'):
+    provgraph = provdotgraph(workflow, subcluster=True, scope = scope)
 
     with open('{}/yadage_workflow_instance.dot'.format(workdir), 'w') as dotfile:
         dotfile.write(provgraph.to_string())

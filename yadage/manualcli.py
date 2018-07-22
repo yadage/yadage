@@ -74,29 +74,33 @@ def click_print_applicable_stages(controller):
 
 def click_print_submittable_nodes(controller):
     click.secho('Submittable Nodes: ', fg='blue')
-    _, s2r = utils.rule_steps_indices(controller.adageobj)
+    _, s2r,_ = utils.rule_steps_indices(controller.adageobj)
     for x in controller.adageobj.dag.nodes():
         node = controller.adageobj.dag.getNode(x)
         rule = controller.adageobj.view().getRule(identifier = s2r[node.identifier])
         if node.identifier in controller.submittable_nodes():
             click.secho('node: {} ({}) part of stage {}'.format(node.name, node.identifier,  '/'.join([rule.offset,rule.rule.name])))
 
-def click_print_rule(rule, step_index, step_status):
-    steps_of_rule = step_index[rule.identifier]
-
+def click_print_rule(rule, step_index, subrule_index, step_status):
+    steps_of_rule     = step_index[rule.identifier]
+    substages_of_rule = subrule_index[rule.identifier]
     rule_stats = {}
     for x in steps_of_rule:
         rule_stats.setdefault(step_status[x],0)
         rule_stats[step_status[x]] += 1
-    click.secho('{}/{} ({})' .format(rule.offset, rule.rule.name, '/'.join('{}: {}'.format(k,v) for k,v in rule_stats.items())))
+    click.secho('{}/{} [steps: ({})] [subflows: {}]' .format(
+        rule.offset, rule.rule.name, '/'.join('{}: {}'.format(k,v) for k,v in rule_stats.items()),
+        len(substages_of_rule)
+        )
+    )
 
 def click_print_applied_stages(controller):
     click.secho('Applied Stages: ', fg='blue')
-    r2s, s2r = utils.rule_steps_indices(controller.adageobj)
+    r2s, s2r, r2sub = utils.rule_steps_indices(controller.adageobj)
     step_status = {s: str(controller.adageobj.dag.getNode(s).state) for s in s2r.keys()}
     # print(step_status)
-    for x in controller.adageobj.applied_rules:
-        click_print_rule(x, r2s, step_status)
+    for x in sorted(controller.adageobj.applied_rules,key = lambda r: '{}/{}'.format(r.offset,r.rule.name)):
+        click_print_rule(x, r2s, r2sub, step_status)
 
 @mancli.command()
 @click.argument('name', default=None, nargs = -1)
@@ -136,7 +140,7 @@ def apply_stage(name,
         controller.apply_rules([rule.identifier])
 
         if submit:
-            _, s2r = utils.rule_steps_indices(controller.adageobj)
+            _, s2r, _ = utils.rule_steps_indices(controller.adageobj)
             nodes_to_submit = [x for x in controller.submittable_nodes() if s2r[x] == rule.identifier]
             controller.submit_nodes(nodes_to_submit)
 
@@ -171,7 +175,7 @@ def submit(nodeid, allof, offset,
 
 
         all_submittable = controller.submittable_nodes()
-        _, s2r = utils.rule_steps_indices(controller.adageobj)
+        _, s2r, _ = utils.rule_steps_indices(controller.adageobj)
         nodes_to_submit = [x for x in all_submittable if s2r[x] == rule.identifier]
 
     if not nodes_to_submit:
@@ -355,7 +359,7 @@ def visualize(workdir, fileformat,
         controller.sync_backend()
 
 
-    write_prov_graph(workdir, controller.adageobj, fileformat)
+    write_prov_graph(workdir, controller.adageobj, vizformat=fileformat)
 
 @mancli.command()
 @click.argument('name', default=None)
@@ -448,7 +452,7 @@ def reset_stage(name,
     if not rule:
         click.secho('state not found!', fg = 'red')
 
-    r2s, _ = utils.rule_steps_indices(controller.adageobj)
+    r2s, _, _ = utils.rule_steps_indices(controller.adageobj)
     steps_of_rule = r2s[rule.identifier]
     controller.reset_nodes(steps_of_rule)
 
