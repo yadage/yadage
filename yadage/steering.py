@@ -12,23 +12,24 @@ from packtivity.plugins import enable_plugins
 
 log = logging.getLogger(__name__)
 
+LOGFORMAT = '%(asctime)s | %(name)20.20s | %(levelname)6s | %(message)s'
+
 RC_FAILED = 1
 RC_SUCCEEDED = 0
-
+DEFAULT_BACKEND = 'multiproc:auto'
 
 def from_file(ctx, param, value):
     if not value or ctx.resilient_parsing:
         return
     data = {}
-    verbosity = 'INFO'
-    logging.basicConfig(level=getattr(logging, verbosity), format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    click.secho('running from file')
     for v in value:
         data.update(**yaml.load(v))
-    enable_plugins(data.pop('plugins'))
+    verbosity = data.pop('verbosity','INFO')
+    logging.basicConfig(level=getattr(logging, verbosity), format=LOGFORMAT)
+    enable_plugins(data.pop('plugins',[]))
 
 
-    data['backend']  = utils.setupbackend_fromstring(data.pop('backend'),data.pop('backendopts'))
+    data['backend']  = utils.setupbackend_fromstring(data.pop('backend',DEFAULT_BACKEND),data.pop('backendopts',{}))
 
     rc = RC_FAILED
     try:
@@ -46,10 +47,10 @@ def from_file(ctx, param, value):
     ctx.exit()
 
 @click.command()
-@click.argument('dataarg', default = 'work')
+@click.argument('dataarg')
 @click.argument('workflow', default = 'workflow.yml')
 @click.argument('initfiles', nargs=-1)
-@click.option('-b', '--backend', default='multiproc:auto', help = 'packtivity backend string')
+@click.option('-b', '--backend', default=DEFAULT_BACKEND, help = 'packtivity backend string')
 @click.option('-c', '--cache', default='')
 @click.option('-d', '--dataopt', multiple=True, default=None, help = 'options for the workflow data state')
 @click.option('-e', '--schemadir', default=yadageschemas.schemadir, help = 'schema directory for workflow validation')
@@ -96,7 +97,7 @@ def main(dataarg,
          ):
 
 
-    logging.basicConfig(level=getattr(logging, verbosity), format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    logging.basicConfig(level=getattr(logging, verbosity), format=LOGFORMAT)
     from packtivity.plugins import enable_plugins
     if plugins:
         enable_plugins(plugins.split(','))

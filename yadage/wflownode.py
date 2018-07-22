@@ -27,8 +27,12 @@ class YadageNode(adage.node.Node):
         if self.state != adage.nodestate.DEFINED:
             referencetime = time.time() if not self.ready() else self.ready_by_time
             runtime = datetime.timedelta(seconds = (referencetime - self.submit_time))
-        return '<YadageNode {} {} lifetime: {}  runtime: {} (id: {}) has result: {}>'.format(
-            self.name, self.state, lifetime, runtime, self.identifier, self.has_result()
+        return '<{}/{}:{}|{}|{}>'.format(
+            self.task.metadata['wflow_offset'],
+            self.task.metadata['wflow_stage'],
+            self.task.metadata['wflow_stage_node_idx'],
+            str(self.state).lower(),
+            'known' if self.has_result() else 'unknown'
         )
 
     def has_result(self):
