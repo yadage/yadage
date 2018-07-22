@@ -142,7 +142,7 @@ class WorkflowView(object):
         self.dag.addNode(node, depends_on=depends_on)
         self.steps[stage].append({'_nodeid': node.identifier})
         self.bookkeeper['_meta']['steps'] += [node.identifier]
-        log.info('added node %s/%s:%s', self.offset,stage,node.task.metadata['wflow_stage_node_idx'])
+        log.info('added %s',node)
         return node
 
 
