@@ -25,8 +25,9 @@ class YadageNode(adage.node.Node):
         lifetime = datetime.timedelta(seconds = (time.time() - self.define_time))
         runtime = None
         if self.state != adage.nodestate.DEFINED:
-            referencetime = time.time() if not self.ready() else self.ready_by_time
-            runtime = datetime.timedelta(seconds = (referencetime - self.submit_time))
+            pass
+            # referencetime = time.time() if not self.ready() else self.ready_by_time
+            # runtime = datetime.timedelta(seconds = (referencetime - self.submit_time))
         return '<{}/{}:{}|{}|{}>'.format(
             self.task.metadata['wflow_offset'],
             self.task.metadata['wflow_stage'],
