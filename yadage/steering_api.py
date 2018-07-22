@@ -102,6 +102,8 @@ def steering_ctx(
             cache = cache
         )
     finally:
+        log.info('done. dumping workflow to disk.')
         ys.serialize()
     if visualize:
+        log.info('visualizing workflow.')
         ys.visualize()

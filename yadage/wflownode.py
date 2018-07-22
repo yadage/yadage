@@ -1,6 +1,6 @@
-import datetime
 import os
-import time
+# import datetime
+# import time
 
 import jsonpointer
 
@@ -22,13 +22,18 @@ class YadageNode(adage.node.Node):
         self.expected_result = None
 
     def __repr__(self):
-        lifetime = datetime.timedelta(seconds = (time.time() - self.define_time))
-        runtime = None
+        # lifetime = datetime.timedelta(seconds = (time.time() - self.define_time))
+        # runtime = None
         if self.state != adage.nodestate.DEFINED:
-            referencetime = time.time() if not self.ready() else self.ready_by_time
-            runtime = datetime.timedelta(seconds = (referencetime - self.submit_time))
-        return '<YadageNode {} {} lifetime: {}  runtime: {} (id: {}) has result: {}>'.format(
-            self.name, self.state, lifetime, runtime, self.identifier, self.has_result()
+            pass
+            # referencetime = time.time() if not self.ready() else self.ready_by_time
+            # runtime = datetime.timedelta(seconds = (referencetime - self.submit_time))
+        return '<{}/{}:{}|{}|{}>'.format(
+            self.task.metadata.get('wflow_offset','-'),
+            self.task.metadata.get('wflow_stage','-'),
+            self.task.metadata.get('wflow_stage_node_idx','-'),
+            str(self.state).lower(),
+            'known' if self.has_result() else 'unknown'
         )
 
     def has_result(self):
