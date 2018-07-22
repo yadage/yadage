@@ -29,9 +29,9 @@ class YadageNode(adage.node.Node):
             # referencetime = time.time() if not self.ready() else self.ready_by_time
             # runtime = datetime.timedelta(seconds = (referencetime - self.submit_time))
         return '<{}/{}:{}|{}|{}>'.format(
-            self.task.metadata.get('wflow_offset'],{}),
-            self.task.metadata.get('wflow_stage'],{}),
-            self.task.metadata.get('wflow_stage_node_idx',{}),
+            self.task.metadata.get('wflow_offset'],'-'),
+            self.task.metadata.get('wflow_stage'],'-'),
+            self.task.metadata.get('wflow_stage_node_idx','-'),
             str(self.state).lower(),
             'known' if self.has_result() else 'unknown'
         )
