@@ -55,7 +55,6 @@ dataopts:
    backgrounds: {bkg}
 workflow: workflow.yml
 toplevel: {toplevel}
-visualize: true
 plugins: []
 backend: 'foregroundasync'
 backendopts: {{}}
@@ -72,3 +71,39 @@ backendopts: {{}}
     result = runner.invoke(yadage.steering.main,['-f',str(f)])
     assert result.exit_code == 0
     assert tmpdir.join('workdir/inference/stage1/output.txt').read()
+
+def test_bsmgrid(tmpdir):
+    spec = '''\
+dataarg: {workdir}
+dataopts:
+ pathbase: {pathbase}
+ subinits:
+   signals:
+     run_points_0: siginputs/sigpoint0
+     run_points_1: siginputs/sigpoint1
+     run_points_2: siginputs/sigpoint2
+   data: datainputs
+   backgrounds:
+     run_bkgs_0: bkginputs/bkg_sample_0
+     run_bkgs_1: bkginputs/bkg_sample_1
+     run_bkgs_2: bkginputs/bkg_sample_2
+     run_bkgs_3: bkginputs/bkg_sample_3
+workflow: workflow.yml
+toplevel: {toplevel}
+plugins: []
+backend: 'foregroundasync'
+backendopts: {{}}
+'''.format(
+        pathbase = os.path.abspath('tests/testspecs/bsm_grid_scaffold/basedata'),
+        workdir = os.path.join(str(tmpdir),'workdir'),
+        signal = os.path.abspath('tests/testspecs/bsm_grid_scaffold/basedata/siginputs'),
+        data = os.path.abspath('tests/testspecs/bsm_grid_scaffold/basedata/datainputs'),
+        bkg = os.path.abspath('tests/testspecs/bsm_grid_scaffold/basedata/bkginputs'),
+        toplevel = os.path.abspath('tests/testspecs/bsm_grid_scaffold/workflow')
+    )
+    f = tmpdir.join('spec.yml')
+    f.write(spec)
+    runner = CliRunner()
+    result = runner.invoke(yadage.steering.main,['-f',str(f)])
+    assert result.exit_code == 0
+    assert tmpdir.join('workdir/inference/summary_plots/output.txt').read()

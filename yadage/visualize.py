@@ -79,7 +79,8 @@ def add_result(graph, parent, typedleafs):
 
 
 def attach_to_results(provgraph, workflow, node):
-    for dep in workflow.dag.getNode(node).task.inputs:
+    nodeobj = workflow.dag.getNode(node)
+    for dep in nodeobj.task.inputs:
         resultid = path_to_id(dep.stepid, dep.pointer.path)
         provgraph.add_edge(pydotplus.graphviz.Edge(resultid, node))
 

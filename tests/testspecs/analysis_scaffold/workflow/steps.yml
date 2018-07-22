@@ -1,3 +1,7 @@
+common:
+# - &testenv {image: busybox, environment_type: docker-encapsulated}
+- &testenv {environment_type: localproc-env}
+
 stepA:
   process:
     process_type: string-interpolated-cmd
@@ -6,10 +10,7 @@ stepA:
     publisher_type: 'frompar-pub'
     outputmap:
       outputA: 'output'
-  environment:
-    environment_type: docker-encapsulated
-    image: busybox
-    # environment_type: localproc-env
+  environment: {<< : *testenv}
 
 subflowA:
   process:
@@ -19,11 +20,7 @@ subflowA:
     publisher_type: 'frompar-pub'
     outputmap:
       outputA: 'output'
-  environment:
-    environment_type: docker-encapsulated
-    image: busybox
-    # environment_type: localproc-env
-
+  environment: {<< : *testenv}
 
 stepB:
   process:
@@ -33,7 +30,4 @@ stepB:
     publisher_type: 'frompar-pub'
     outputmap:
       outputB: 'output'
-  environment:
-    # environment_type: localproc-env
-    environment_type: docker-encapsulated
-    image: busybox
+  environment: {<< : *testenv}

@@ -14,9 +14,8 @@ dataopts:
      run_bkgs_3: bkginputs/bkg_sample_3
 workflow: workflow.yml
 toplevel: /Users/lukas/Code/yadagedev/yadage/tests/testspecs/bsm_grid_scaffold/workflow
-visualize: true
+visualize: false
 plugins: []
 backend: 'foregroundasync'
 backendopts: {}
-
 modelsetup: filebacked:analysisdata/_yadage/state.json

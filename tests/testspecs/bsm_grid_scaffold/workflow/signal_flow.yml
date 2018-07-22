@@ -5,5 +5,6 @@ stages:
     scheduler_type: singlestep-stage
     parameters:
       input: {stages: init, output: input, unwrap: true}
+      inputfile: {stages: init, output: initfile, flatten: true}
       output: '{workdir}/output.txt'
     step: {$ref: 'steps.yml#/signalstep'}
