@@ -8,7 +8,7 @@ import pydotplus
 log = logging.getLogger(__name__)
 
 
-def fillscope(cluster, workflow, scope='', subcluster=True):
+def fillscope(cluster, workflow, nodes_to_connect, scope='', subcluster=True):
     # scopecluster = stagecluster = pydotplus.graphviz.Cluster(graph_name =
     # '_'.join(stagescopeprts),
 
@@ -37,7 +37,6 @@ def fillscope(cluster, workflow, scope='', subcluster=True):
         else:
             stagecluster = scopecluster
 
-        nodes_to_connect = []
         for i, element in enumerate(elements):
             if '_nodeid' in element:
                 nodes_to_connect.append(element['_nodeid'])
@@ -56,11 +55,11 @@ def fillscope(cluster, workflow, scope='', subcluster=True):
             elif type(element) == dict:
                 # recurse...
                 fillscope(
-                    stagecluster, workflow, jsonpointer.JsonPointer.from_parts(
+                    stagecluster, workflow, nodes_to_connect, jsonpointer.JsonPointer.from_parts(
                         scopeptr.parts + [stage, i]).path,
                     subcluster=subcluster
                 )
-        connect_nodes(cluster,workflow,nodes_to_connect)
+        # connect_nodes(cluster,workflow,nodes_to_connect)
 
 
 def path_to_id(stepid, path):
@@ -93,7 +92,9 @@ def connect_nodes(provgraph, workflow, nodes):
 
 def provdotgraph(workflow, subcluster=True, scope = ''):
     provgraph = pydotplus.graphviz.Graph()
-    fillscope(provgraph, workflow, scope = scope, subcluster=subcluster)
+    nodes_to_connect = []
+    fillscope(provgraph, workflow, nodes_to_connect, scope = scope, subcluster=subcluster)
+    connect_nodes(provgraph, workflow, nodes_to_connect)
     return provgraph
 
 

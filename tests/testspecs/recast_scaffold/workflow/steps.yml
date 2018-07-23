@@ -1,0 +1,25 @@
+generate_signal:
+  process:
+    process_type: string-interpolated-cmd
+    cmd: echo {nevents} {ufo} >> {output}; cat {parcard} {proccard} {runcard} >> {output}
+  publisher:
+    publisher_type: 'frompar-pub'
+    outputmap:
+      outputA: 'output'
+  environment:
+    environment_type: docker-encapsulated
+    image: busybox
+    # environment_type: localproc-env
+
+run_analysis:
+  process:
+    process_type: string-interpolated-cmd
+    cmd: cat {signalfile} {bkgsfile} {datafile} > {output}
+  publisher:
+    publisher_type: 'frompar-pub'
+    outputmap:
+      outputA: 'output'
+  environment:
+    environment_type: docker-encapsulated
+    image: busybox
+    # environment_type: localproc-env

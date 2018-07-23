@@ -1,0 +1,15 @@
+dataarg: analysisdata
+dataopts:
+ pathbase: /Users/lukas/Code/yadagedev/yadage/tests/testspecs/recast_scaffold
+ subinits:
+   upstream: basedata/signal_inputs
+   downstream:
+     archived: basedata/archived_assets
+workflow: workflow.yml
+toplevel: /Users/lukas/Code/yadagedev/yadage/tests/testspecs/recast_scaffold/workflow
+visualize: true
+plugins: []
+backendopts:
+  purepubopts: {exec: {logging_level: WARNING}}
+visualize: true
+verbosity: INFO

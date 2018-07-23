@@ -1,0 +1,25 @@
+stages:
+- name: upstream
+  dependencies: []
+  scheduler:
+    scheduler_type: singlestep-stage
+    parameters:
+      nevents: 1000
+      ufo: 'UFO'    
+      parcard: 'param.dat'    
+      proccard: 'proc.dat'    
+      runcard: 'run.dat'    
+    workflow: {$ref: upstream.yml}
+    workflow_opts:
+      discover: true
+
+- name: downstream
+  dependencies: [upstream]
+  scheduler:
+    scheduler_type: singlestep-stage
+    parameters:
+      signal: {stages:  'upstream[*].generate_signal', output: outputA, unwrap: true}
+    workflow: {$ref: downstream.yml}
+    workflow_opts:
+      discover: true
+

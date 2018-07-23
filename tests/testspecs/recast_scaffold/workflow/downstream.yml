@@ -1,0 +1,19 @@
+stages:
+- name: archived
+  scheduler:
+    scheduler_type: singlestep-stage
+    parameters:
+      data: 'data.root'
+      bkgs: 'backgrounds.root'
+    workflow: {stages: []}
+    workflow_opts: {discover: true}
+- name: run_analysis
+  dependencies: [init,archived]
+  scheduler:
+    scheduler_type: singlestep-stage
+    parameters:
+      signalfile: {stages: init, output: signal, unwrap: true}
+      datafile: {stages: 'archived[*].init', output: data, unwrap: true}
+      bkgsfile: {stages: 'archived[*].init', output: bkgs, unwrap: true}
+      output: '{workdir}/output.txt'
+    step: {$ref: steps.yml#/run_analysis}
