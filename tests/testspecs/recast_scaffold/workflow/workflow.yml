@@ -18,7 +18,7 @@ stages:
   scheduler:
     scheduler_type: singlestep-stage
     parameters:
-      signal: {stages:  'upstream[*].generate_signal', output: outputA, unwrap: true}
+      signal: {stages:  'upstream[*].generate_signal', output: signal, unwrap: true}
     workflow: {$ref: downstream.yml}
     workflow_opts:
       discover: true
