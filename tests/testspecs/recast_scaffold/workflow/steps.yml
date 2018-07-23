@@ -1,15 +1,15 @@
 generate_signal:
   process:
     process_type: string-interpolated-cmd
-    cmd: echo {nevents} {ufo} >> {output}; cat {parcard} {proccard} {runcard} >> {output}
+    cmd: echo {nevents} {ufo} >> {output}; cat {parcard} {proccard} {runcard} >> {output}; echo >> {xsec}
   publisher:
     publisher_type: 'frompar-pub'
     outputmap:
       signal: 'output'
+      xsec: 'xsec'
   environment:
     environment_type: docker-encapsulated
     image: busybox
-    # environment_type: localproc-env
 
 event_selection:
   process:

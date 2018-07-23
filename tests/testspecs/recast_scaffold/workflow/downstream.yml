@@ -13,6 +13,7 @@ stages:
     scheduler_type: singlestep-stage
     parameters:
       signalfile: {stages: init, output: signal, unwrap: true}
+      signalxsec: {stages: init, output: xsec, unwrap: true}
       datafile: {stages: 'archived[*].init', output: data, unwrap: true}
       bkgsfile: {stages: 'archived[*].init', output: bkgs, unwrap: true}
       output: '{workdir}/output.txt'

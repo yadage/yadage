@@ -10,4 +10,5 @@ stages:
       runcard: {stages: init, output: runcard, unwrap: true}
       nevents: {stages: init, output: nevents, unwrap: true}
       output: '{workdir}/output.txt'
+      xsec: '{workdir}/xsec.txt'
     step: {$ref: steps.yml#/generate_signal}
