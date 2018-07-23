@@ -5,7 +5,7 @@ generate_signal:
   publisher:
     publisher_type: 'frompar-pub'
     outputmap:
-      outputA: 'output'
+      signal: 'output'
   environment:
     environment_type: docker-encapsulated
     image: busybox
@@ -18,7 +18,7 @@ run_analysis:
   publisher:
     publisher_type: 'frompar-pub'
     outputmap:
-      outputA: 'output'
+      limit: 'output'
   environment:
     environment_type: docker-encapsulated
     image: busybox
