@@ -11,10 +11,23 @@ generate_signal:
     image: busybox
     # environment_type: localproc-env
 
-run_analysis:
+event_selection:
   process:
     process_type: string-interpolated-cmd
     cmd: cat {signalfile} {bkgsfile} {datafile} > {output}
+  publisher:
+    publisher_type: 'frompar-pub'
+    outputmap:
+      selected: 'output'
+  environment:
+    environment_type: docker-encapsulated
+    image: busybox
+    # environment_type: localproc-env
+
+stat_analysis:
+  process:
+    process_type: string-interpolated-cmd
+    cmd: cat {selected} > {output}
   publisher:
     publisher_type: 'frompar-pub'
     outputmap:
@@ -23,3 +36,4 @@ run_analysis:
     environment_type: docker-encapsulated
     image: busybox
     # environment_type: localproc-env
+

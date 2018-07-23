@@ -7,7 +7,7 @@ stages:
       bkgs: 'backgrounds.root'
     workflow: {stages: []}
     workflow_opts: {discover: true}
-- name: run_analysis
+- name: event_selection
   dependencies: [init,archived]
   scheduler:
     scheduler_type: singlestep-stage
@@ -16,4 +16,14 @@ stages:
       datafile: {stages: 'archived[*].init', output: data, unwrap: true}
       bkgsfile: {stages: 'archived[*].init', output: bkgs, unwrap: true}
       output: '{workdir}/output.txt'
-    step: {$ref: steps.yml#/run_analysis}
+    step: {$ref: steps.yml#/event_selection}
+- name: stat_analysis
+  dependencies: [event_selection]
+  scheduler:
+    scheduler_type: singlestep-stage
+    parameters:
+      selected: {stages: 'event_selection', output: selected, unwrap: true}
+      output: '{workdir}/output.txt'
+    step: {$ref: steps.yml#/stat_analysis}
+
+
