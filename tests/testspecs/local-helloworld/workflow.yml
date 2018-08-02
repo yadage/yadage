@@ -4,7 +4,7 @@ stages:
     scheduler:
       scheduler_type: singlestep-stage
       parameters:
-        parone: {stages: init, output: par, unwrap: true}
+        parone: {step: init, output: par}
         outputfile: '{workdir}/hello_world.txt'
       step:
         process:
