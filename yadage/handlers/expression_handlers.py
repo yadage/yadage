@@ -91,9 +91,9 @@ def stage_output_selector(stageview, selection):
         if 'stages' in selection or 'steps' in selection:
             if 'stages' in selection and 'steps' in selection:
                 raise RuntimeError('stages and steps are aliases. pick one.')
-            stepselector = selection.get('stages') or selection.get('steps')
-            steps = select_steps(stageview, selection['stages'])
-            log.info('selected steps %s %s', len(steps), steps)
+            steps_selector = selection.get('stages') or selection.get('steps')
+            steps = select_steps(stageview, steps_selector)
+            log.debug('selected steps %s %s', len(steps), steps)
             outputs = select_outputs(steps,
                                      selection.get('output'),
                                      selection.get('flatten', False),
