@@ -20,6 +20,7 @@ def select_reference(step, selection):
 
     :return: the first (and single) match of the expression as a JSON pointer
     '''
+    selection = selection or '$'
     log.debug('selecting output from step %s', step)
     pointerized = pointerize(step['result'], asref=True, stepid=step['id'])
     matches = jsonpath_rw.parse(selection).find(pointerized)
@@ -43,6 +44,7 @@ def combine_outputs(outputs, flatten, unwrapsingle):
     :param outputs:
 
     '''
+    log.debug('flatten %s unwrap: %s', flatten, unwrapsingle)
     combined = []
     for reference in outputs:
         if type(reference) == list:
@@ -74,7 +76,6 @@ def select_steps(stageview, query):
 def select_outputs(steps, selection, flatten, unwrapsingle):
     return combine_outputs(map(lambda s: select_reference(s, selection), steps), flatten, unwrapsingle)
 
-
 @expression('stage-output-selector')
 def stage_output_selector(stageview, selection):
     '''
@@ -87,14 +88,24 @@ def stage_output_selector(stageview, selection):
     if type(selection) is not dict:
         return None
     else:
-        steps = select_steps(stageview, selection['stages'])
-        log.debug('selected steps %s', steps)
-        outputs = select_outputs(steps,
-                                 selection['output'],
-                                 selection.get('flatten', False),
-                                 selection.get('unwrap', False))
-        log.debug('selected outputs %s', outputs)
-        return outputs
+        if 'stages' in selection or 'steps' in selection:
+            if 'stages' in selection and 'steps' in selection:
+                raise RuntimeError('stages and steps are aliases. pick one.')
+            steps_selector = selection.get('stages') or selection.get('steps')
+            steps = select_steps(stageview, steps_selector)
+            log.debug('selected steps %s %s', len(steps), steps)
+            outputs = select_outputs(steps,
+                                     selection.get('output'),
+                                     selection.get('flatten', False),
+                                     selection.get('unwrap', False))
+            log.debug('selected outputs %s', outputs)
+            return outputs
+        elif 'step' in selection:
+            steps = select_steps(stageview, selection['step'])
+            assert len(steps) == 1
+            step = steps[0]
+            return select_reference(step, selection.get('output'))
+        raise RuntimeError('not sure how to deal with this.')
 
 @expression('fromvalue')
 def value_resolver(view, expression):

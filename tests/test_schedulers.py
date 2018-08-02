@@ -3,11 +3,24 @@ from yadage.wflow import YadageWorkflow
 from yadage.controllers import frommodel_controller
 def test_singlestepstage_schedule_steps(local_helloworld_wflow):
     wflow = local_helloworld_wflow
-    assert wflow.rules[-1].applicable(wflow) == False
-    assert wflow.rules[-1].rule.stagespec['scheduler_type'] == 'singlestep-stage'
+    assert wflow.rules[0].rule.stagespec['scheduler_type'] == 'singlestep-stage'
+    assert wflow.rules[0].applicable(wflow) == False
 
+    wflow.view().init({'par':'value'})
+
+    #apply init
+    assert wflow.rules[-1].applicable(wflow)
     wflow.rules[-1].apply(wflow)
     assert len(wflow.dag.nodes()) == 1
+
+    #get init result
+    c = frommodel_controller('',{},wflow)
+    c.sync_backend()
+
+    #recheck
+    assert wflow.rules[0].applicable(wflow) == True
+    wflow.rules[0].apply(wflow)
+
 
 def test_nested_wflow(nested_wflow):
     wflow = nested_wflow
