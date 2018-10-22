@@ -1,0 +1,30 @@
+stages:
+  - name: map
+    dependencies: [init]
+    scheduler:
+      scheduler_type: multistep-stage
+      parameters:
+        input: {stages: init, output: input, unwrap: true}
+      step: {$ref: steps.yml#/stepA}
+      batchsize: 3
+      scatter:
+        method: zip
+        parameters: [input]
+  - name: map2
+    dependencies: [map]
+    scheduler:
+      scheduler_type: multistep-stage
+      parameters:
+        input: {stages: map, output: outputA, unwrap: true}
+      step: {$ref: steps.yml#/stepA}
+      batchsize: 2
+      scatter:
+        method: zip
+        parameters: [input]
+  - name: reduce
+    dependencies: [map2]
+    scheduler:
+      scheduler_type: singlestep-stage
+      parameters:
+        input: {stages: 'map2', output: outputA}
+      step: {$ref: steps.yml#/stepA}
