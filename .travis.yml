@@ -19,11 +19,6 @@ script:
 - #isort -rc -c -df yadage/*.py
 - pytest --cov=yadage
 
-- echo "deploying to docker"
-- docker login -u "$DOCKERLOGIN" -p "$DOCKERPW"
-- docker build -t yadage/yadage .
-- docker push yadage/yadage
-
 
 after_success:
 - coveralls
