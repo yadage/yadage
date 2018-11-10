@@ -18,6 +18,13 @@ script:
 - pyflakes yadage
 - #isort -rc -c -df yadage/*.py
 - pytest --cov=yadage
+
+- echo "deploying to docker"
+- echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME"
+- docker build -t yadage/yadage .
+- docker push yadage/yadage
+
+
 after_success:
 - coveralls
 jobs:
