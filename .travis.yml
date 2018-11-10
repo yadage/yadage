@@ -20,7 +20,7 @@ script:
 - pytest --cov=yadage
 
 - echo "deploying to docker"
-- echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME"
+- echo "$DOCKERPW" | docker login -u "$DOCKERLOGIN"
 - docker build -t yadage/yadage .
 - docker push yadage/yadage
 
