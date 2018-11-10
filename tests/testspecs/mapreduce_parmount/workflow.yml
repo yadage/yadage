@@ -4,7 +4,7 @@ stages:
     scheduler:
       scheduler_type: multistep-stage
       parameters:
-        input: {stages: init, output: input, unwrap: true}
+        input: {step: init, output: input}
         output: '{workdir}/output_one.txt'
       step: {$ref: steps.yml#/map}
       scatter:
@@ -15,7 +15,7 @@ stages:
     scheduler:
       scheduler_type: multistep-stage
       parameters:
-        input: {stages: map, output: output, unwrap: true}
+        input: {steps: map, output: output}
         output: '{workdir}/output_two.txt'
       step: {$ref: steps.yml#/map}
       scatter:
@@ -26,6 +26,6 @@ stages:
     scheduler:
       scheduler_type: singlestep-stage
       parameters:
-        inputs: {stages: 'mapmore', output: output}
+        inputs: {steps: 'mapmore', output: output}
         output: '{workdir}/hello.merged.txt'
       step: {$ref: steps.yml#/reduce}
