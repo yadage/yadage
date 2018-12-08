@@ -99,10 +99,11 @@ def step_or_stages(name, spec, inputs, parameters, state_provider, stageview):
         return p,None
     elif 'workflow' in spec:
         opts = spec.get('workflow_opts',{})
+        
         init_spec  = init_stage_spec(
             parameters.json(),
             discover = opts.get('discover',False),
-            relative = opts.get('relative',False),
+            relative = opts.get('relative',True),
             used_inputs=[x.json() for x in inputs],
             name = 'init',
             nodename = 'init_{}'.format(name)
