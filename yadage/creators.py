@@ -26,6 +26,7 @@ def local_workflows(
     toplevel = os.getcwd(),
     dataarg = None,
     dataopts = None,
+    wflowopts = None,
     workflow_json = None,
     modelsetup = 'inmem',
     modelopts = None,
@@ -61,8 +62,13 @@ def local_workflows(
         json.dump(workflow_json, f)
     workflowobj = YadageWorkflow.createFromJSON(workflow_json, rootprovider)
     if initdata:
-        log.info('initializing workflow with %s',initdata)
-        workflowobj.view().init(initdata, rootprovider, discover = True)
+        wflowopts = wflowopts or {}
+        discover = wflowopts.setdefault('discover',True)
+        relative = wflowopts.setdefault('relative',True)
+        log.info('initializing workflow with initdata: %s discover: %s relative: %s',initdata, discover, relative)
+        workflowobj.view().init(
+            initdata, rootprovider, discover = discover, relative = relative
+        )
     else:
         log.info('no initialization data')
 

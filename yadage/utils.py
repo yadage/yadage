@@ -189,7 +189,7 @@ def setupbackend_fromstring(backend, backendopts = None):
     )
 
 
-def get_init_spec(discover):
+def get_init_spec(discover, relative = True):
     return {
         'process': None,
         'environment': None,
@@ -198,11 +198,11 @@ def get_init_spec(discover):
             'script': '.',
             'tryExact': True,
             'glob': discover,
-            'relative_paths': True
+            'relative_paths': relative
         }
     }
 
-def init_stage_spec(parameters, discover, used_inputs, name, nodename = None):
+def init_stage_spec(parameters, discover, used_inputs, name, nodename = None, relative = False):
     return {
         'name': name,
         'dependencies': {
@@ -214,7 +214,8 @@ def init_stage_spec(parameters, discover, used_inputs, name, nodename = None):
              'parameters': parameters,
              'inputs':   used_inputs,
              'nodename': nodename,
-             'discover': discover
+             'discover': discover,
+             'relative': relative
         }
     }
 

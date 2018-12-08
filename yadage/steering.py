@@ -67,6 +67,7 @@ def from_file(ctx, param, value):
 @click.option('-t', '--toplevel', default=os.getcwd(), help = 'toplevel uri to be used to resolve workflow name and references from')
 @click.option('-u', '--updateinterval', default=0.02, help = 'adage graph inspection interval in seconds')
 @click.option('-v', '--verbosity', default='INFO', help = 'logging verbosity')
+@click.option('-w', '--wflowopt', multiple=True, default=None, help = 'options for the workflow initialization')
 @click.option('--accept-metadir/--no-accept-metadir', default=False)
 @click.option('--plugins', default=None)
 @click.option('--validate/--no-validate', default=True, help = 'en-/disable workflow spec validation')
@@ -83,6 +84,7 @@ def main(dataarg,
          schemadir,
          backend,
          dataopt,
+         wflowopt,
          backendopt,
          strategy,
          modelsetup,
@@ -107,7 +109,8 @@ def main(dataarg,
     backendopts = utils.options_from_eqdelimstring(backendopt)
     modelopts   = utils.options_from_eqdelimstring(modelopt)
     ctrlopts    = utils.options_from_eqdelimstring(ctrlopt)
-
+    wflowopts   = utils.options_from_eqdelimstring(wflowopt)
+    
     backend  = utils.setupbackend_fromstring(backend,backendopts)
     rc = RC_FAILED
     try:
@@ -118,6 +121,7 @@ def main(dataarg,
             schemadir = schemadir,
 
             initdata = initdata,
+            wflowopts = wflowopts,
             controller = controller,
             ctrlopts = ctrlopts,
             backend = backend,

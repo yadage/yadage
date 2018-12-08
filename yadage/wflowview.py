@@ -89,13 +89,14 @@ class WorkflowView(object):
                 return x
         return None
 
-    def init(self, initdata, init_provider = None, used_inputs = None, name='init', discover = False):
+    def init(self, initdata, init_provider = None, used_inputs = None, name='init', discover = False, relative = True):
         '''
         initialize this scope by adding an initialization stage.
 
         :param inidata: initialization JSON data
         '''
-        spec = init_stage_spec(initdata, discover, used_inputs or [], name)
+        spec = init_stage_spec(
+            initdata, discover, used_inputs or [], name, relative = relative)
         self.addRule(JsonStage(spec, init_provider), self.offset)
 
     def addRule(self, rule, offset='', identifier = None):
