@@ -73,6 +73,7 @@ def steering_ctx(
     strategy=None,
     validate=True,
     visualize=True,
+    wflowopts = None,
     accept_metadir = False,
     modelsetup = 'inmem',
     modelopts = None
@@ -80,7 +81,7 @@ def steering_ctx(
 
     ys = YadageSteering.create(
         metadir = metadir, accept_metadir = True if (accept_metadir or cache) else False,
-        dataarg = dataarg, dataopts = dataopts,
+        dataarg = dataarg, dataopts = dataopts, wflowopts = wflowopts,
         workflow_json = workflow_json,
         workflow = workflow, toplevel = toplevel,
         schemadir = schemadir, validate = validate,

@@ -99,8 +99,11 @@ def step_or_stages(name, spec, inputs, parameters, state_provider, stageview):
         return p,None
     elif 'workflow' in spec:
         opts = spec.get('workflow_opts',{})
+        
         init_spec  = init_stage_spec(
-            parameters.json(), discover = opts.get('discover',False),
+            parameters.json(),
+            discover = opts.get('discover',False),
+            relative = opts.get('relative',True),
             used_inputs=[x.json() for x in inputs],
             name = 'init',
             nodename = 'init_{}'.format(name)
@@ -335,7 +338,7 @@ def init_stage(stage, spec):
     else:
         step_state = None
 
-    init_spec = get_init_spec(discover = spec['discover'])
+    init_spec = get_init_spec(discover = spec['discover'], relative = spec['relative'] )
     task = packtivity_task(spec['nodename'] or stage.name, init_spec,
         state = step_state, parameters = spec['parameters'], inputs = inputs
     )

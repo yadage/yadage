@@ -35,7 +35,7 @@ def test_manual_helloworld(tmpdir):
     result = runner.invoke(yadage.manualcli.preview,['-s','filebacked:'+statefile,'/init'])
     assert result.exit_code == 0
 
-    patch = '{"inputs":[],"discover":true,"nodename":null,"parameters":{"par":"patched"},"scheduler_type":"init-stage"}'
+    patch = '{"inputs":[],"discover":true, "relative": true,"nodename":null,"parameters":{"par":"patched"},"scheduler_type":"init-stage"}'
     tmpdir.join('patch.json').write(patch)
     result = runner.invoke(yadage.manualcli.edit_stage,['/init','-s','filebacked:'+statefile,'-p',str(tmpdir.join('patch.json'))])
     assert result.exit_code == 0
