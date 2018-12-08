@@ -262,6 +262,7 @@ def multistep_stage(stage, spec):
         k: select_parameter(stage.view, v) for k, v in get_parameters(spec['parameters']).items()
     }
     singlesteppars = scatter(parameters, spec['scatter'], spec.get('batchsize'), spec.get('partitionsize'))
+
     for i, pars in enumerate(singlesteppars):
         singlename = '{}_{}'.format(stage.name, i)
         finalized, inputs = finalize_input(pars, stage.view)
