@@ -34,7 +34,7 @@ def load_model_fromstring(modelsetup,modelopts = None,initmodel = None):
     for k in modelhandlers.keys():
         if modelsetup.startswith(k):
             return modelhandlers[k](modelsetup,modelopts,initmodel)
-    raise RuntimeError('unknown state model %s', modelsetup)
+    raise RuntimeError('unknown state model %s' % modelsetup)
 
 class MongoBackedModel(object):
     '''

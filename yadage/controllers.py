@@ -69,7 +69,7 @@ def setup_controller(model = None, controller = 'frommodel', ctrlopts = None):
     for k in ctrlhandlers.keys():
         if controller.startswith(k):
             return ctrlhandlers[k](controller, ctrlopts, model)
-    raise RuntimeError('unknown controller type %s', controller)
+    raise RuntimeError('unknown controller type %s' % controller)
 
 class PersistentController(YadageController):
     '''
