@@ -265,7 +265,6 @@ def prepare_meta(metadir, accept=False):
     '''
     if os.path.exists(metadir):
         if not accept:
-            raise RuntimeError('yadage meta directory %s exists. Allow overwrite by using the
-              command line option  --accept-metadir' % metadir)
+            raise RuntimeError("yadage meta directory %s exists. Allow overwrite by using the command line option  --accept-metadir" % metadir)
     else:
         os.makedirs(metadir)
