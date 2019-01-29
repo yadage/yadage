@@ -25,9 +25,9 @@ def select_reference(step, selection):
     pointerized = pointerize(step['result'], asref=True, stepid=step['id'])
     matches = jsonpath_rw.parse(selection).find(pointerized)
     if not matches:
-        log.error('no matches found for selection %s in result %s',
-                  selection, step['result'])
-        raise RuntimeError('no matches found in reference selection. selection %s | result %s', selection, step['result'])
+        log.error('no matches found for selection %s in result %s' %
+                  (selection, step['result']))
+        raise RuntimeError('no matches found in reference selection. selection %s | result %s' % (selection, step['result']))
 
     if len(matches) > 1:
         log.error('found multiple matches to query: %s within result: %s\n \ matches %s',

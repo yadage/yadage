@@ -69,4 +69,4 @@ def state_provider_from_string(dataarg,dataopts = None):
     for k in providersetup_handlers.keys():
         if dataarg.startswith(k):
             return providersetup_handlers[k](dataarg,dataopts)
-    raise RuntimeError('unknown data type %s %s', dataarg, dataopts)
+    raise RuntimeError('unknown data type %s %s' % (dataarg, dataopts))
