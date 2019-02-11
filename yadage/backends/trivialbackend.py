@@ -1,5 +1,5 @@
 from packtivity.asyncbackends import PacktivityProxyBase
-from packtivity.typedleafs import TypedLeafs
+from .. import datamodel
 
 class TrivialProxy(PacktivityProxyBase):
     '''
@@ -35,7 +35,7 @@ class TrivialBackend(object):
             'The trivial proxy is not made for submission')
 
     def result(self, resultproxy):
-        return TypedLeafs(resultproxy.resultdata, resultproxy.datamodel)
+        return datamodel.data_from_json(resultproxy.resultdata, resultproxy.datamodel)
 
     def expected_result(self, resultproxy):
         return None
