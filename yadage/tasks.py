@@ -1,6 +1,6 @@
 import logging
 
-from packtivity.typedleafs import TypedLeafs
+from . import datamodel as datamodel
 from packtivity.statecontexts import load_state
 
 from .utils import outputReference
@@ -14,7 +14,7 @@ class packtivity_task(object):
     def __init__(self, name, spec, state, parameters = None, inputs = None):
         self.metadata = {'name': name}
         self.inputs = inputs or []
-        self.parameters = TypedLeafs(parameters or {}, state.datamodel if state else None)
+        self.parameters = datamodel.data_from_json(parameters or {}, state.datamodel if state else None)
         self.spec = spec
         self.state = state
 

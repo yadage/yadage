@@ -7,7 +7,8 @@ import jsonpointer
 import adage.node
 import adage.serialize
 
-from packtivity.typedleafs import TypedLeafs
+from . import datamodel as datamodel
+
 from packtivity.backendutils import load_proxy
 from .tasks import outputReference, packtivity_task
 
@@ -71,7 +72,7 @@ class YadageNode(adage.node.Node):
     def fromJSON(cls, data, deserialization_opts = None):
         if data['task']['type'] == 'packtivity_task':
             task   = packtivity_task.fromJSON(data['task'], deserialization_opts)
-            result = TypedLeafs(data['result'],getattr(task.state,'datamodel',{})) if data['result'] else None
+            result = datamodel.data_from_json(data['result'],getattr(task.state,'datamodel',{})) if data['result'] else None
             instance = cls(data['name'], task, data['id'],result)
 
             adage.serialize.set_generic_data(instance,data)

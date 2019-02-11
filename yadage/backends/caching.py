@@ -4,8 +4,9 @@ import os
 import time
 
 import yadage.backends.federatedbackend as federatedbackend
+from .. import datamodel
+
 from packtivity.statecontexts import load_state
-from packtivity.typedleafs import TypedLeafs
 from yadage.utils import json_hash
 
 from ..backends import CachedProxy
@@ -139,7 +140,7 @@ class CacheBuilder(object):
         if silent:
             if not self.cacheexists(cacheid): return None
         return {
-            'result': TypedLeafs(self.cache[cacheid]['result']['result'], state.datamodel),
+            'result': datamodel.data_from_json(self.cache[cacheid]['result']['result'], state.datamodel),
             'status': self.cache[cacheid]['result']['status']
         }
 

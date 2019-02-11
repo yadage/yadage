@@ -3,7 +3,8 @@ import logging
 import jsonpath_rw
 
 from .utils import handler_decorator
-from ..utils import pointerize
+
+from .. import datamodel
 
 log = logging.getLogger(__name__)
 
@@ -22,7 +23,7 @@ def select_reference(step, selection):
     '''
     selection = selection or '$'
     log.debug('selecting output from step %s', step)
-    pointerized = pointerize(step['result'], asref=True, stepid=step['id'])
+    pointerized = datamodel.pointerize(step['result'], asref=True, stepid=step['id'])
     matches = jsonpath_rw.parse(selection).find(pointerized)
     if not matches:
         log.error('no matches found for selection %s in result %s',

@@ -5,6 +5,8 @@ import subprocess
 import jsonpointer
 import pydotplus
 
+from . import datamodel
+
 log = logging.getLogger(__name__)
 
 
@@ -66,7 +68,7 @@ def path_to_id(stepid, path):
     return '{}_{}'.format(stepid, path.replace('/', '_'))
 
 def add_result(graph, parent, typedleafs):
-    leafpointers = [p for p,v in typedleafs.leafs()]
+    leafpointers = [p for p,v in datamodel.leafs(typedleafs)]
 
     for leaf in leafpointers:
         leafid = path_to_id(parent, leaf.path)
