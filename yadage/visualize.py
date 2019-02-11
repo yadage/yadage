@@ -5,7 +5,7 @@ import subprocess
 import jsonpointer
 import pydotplus
 
-from . import datamodel
+from packtivity import datamodel
 
 log = logging.getLogger(__name__)
 
