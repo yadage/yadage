@@ -119,7 +119,7 @@ def step_or_stages(name, spec, inputs, parameters, state_provider, stageview):
                 return step_or_stages(name, x, inputs, parameters, state_provider, stageview)
         log.info('no case selected on pars %s', parameters)
         return None, None
-    raise RuntimeError('do not know what kind of stage spec we are dealing with. %s', spec.keys())
+    raise RuntimeError('do not know what kind of stage spec we are dealing with. %s' % spec.keys())
 
 def registerExpressions(stage, expressions):
     if not expressions: return

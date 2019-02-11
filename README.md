@@ -3,13 +3,13 @@
 [![arXiv](https://img.shields.io/badge/arXiv-1706.01878-orange.svg)](https://arxiv.org/abs/1706.01878)
 [![DOI](https://zenodo.org/badge/53543066.svg)](https://zenodo.org/badge/latestdoi/53543066)
 [![PyPI version](https://badge.fury.io/py/yadage.svg)](https://badge.fury.io/py/yadage)
-[![Build Status](https://travis-ci.org/diana-hep/yadage.svg?branch=master)](https://travis-ci.org/diana-hep/yadage)
-[![Code Health](https://landscape.io/github/diana-hep/yadage/master/landscape.svg?style=flat)](https://landscape.io/github/diana-hep/yadage/master)
-[![Coverage Status](https://coveralls.io/repos/github/diana-hep/yadage/badge.svg?branch=master)](https://coveralls.io/github/diana-hep/yadage?branch=master)
+[![Build Status](https://travis-ci.org/yadage/yadage.svg?branch=master)](https://travis-ci.org/yadage/yadage)
+[![Code Health](https://landscape.io/github/yadage/yadage/master/landscape.svg?style=flat)](https://landscape.io/github/yadage/yadage/master)
+[![Coverage Status](https://coveralls.io/repos/github/yadage/yadage/badge.svg?branch=master)](https://coveralls.io/github/yadage/yadage?branch=master)
 [![Documentation Status](https://readthedocs.org/projects/yadage/badge/?version=latest)](http://yadage.readthedocs.io/en/latest/?badge=latest)
 [![](https://images.microbadger.com/badges/version/yadage/yadage.svg)](https://microbadger.com/images/yadage/yadage "Get your own version badge on microbadger.com")
 
-This package reads and executes workflows adhering to the workflow JSON schemas defined at https://github.com/diana-hep/cap-schemas such as the onces stored in the community repository https://github.com/lukasheinrich/yadage-workflows. For executing the individual steps it mainly uses the packtivity python bindings provided by https://github.com/diana-hep/packtivity.
+This package reads and executes workflows adhering to the workflow JSON schemas defined at https://github.com/yadage/cap-schemas such as the onces stored in the community repository https://github.com/lukasheinrich/yadage-workflows. For executing the individual steps it mainly uses the packtivity python bindings provided by https://github.com/yadage/packtivity.
 
 ### Example Workflow
 
