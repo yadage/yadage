@@ -1,11 +1,12 @@
+import packtivity.utils
 import yadage.utils
 import os
 
 def test_leafit():
 	data = {'hello': 'world', 'list': [1,2,3], 'nested':{'dict':['like','structure']}}
-	assert len(list(yadage.utils.leaf_iterator(data))) == 6
+	assert len(list(packtivity.utils.leaf_iterator(data))) == 6
 
-	assert set((x.path,y) for x,y in yadage.utils.leaf_iterator(data)) == {
+	assert set((x.path,y) for x,y in packtivity.utils.leaf_iterator(data)) == {
 		('/hello','world'),
 		('/list/0',1),
 		('/list/1',2),

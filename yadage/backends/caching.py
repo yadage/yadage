@@ -4,7 +4,7 @@ import os
 import time
 
 import yadage.backends.federatedbackend as federatedbackend
-from packtivity import datamodel
+from packtivity import datamodel as _datamodel
 
 from packtivity.statecontexts import load_state
 from yadage.utils import json_hash
@@ -102,6 +102,7 @@ class CacheBuilder(object):
     generate_validation_data methods
     '''
     def __init__(self, cachefile):
+        self.datamodel = _datamodel
         self.cachefile = cachefile
         if not os.path.exists(self.cachefile):
             log.info('fresh cache as file at %s does not exist yet.',self.cachefile)
@@ -140,7 +141,7 @@ class CacheBuilder(object):
         if silent:
             if not self.cacheexists(cacheid): return None
         return {
-            'result': datamodel.create(self.cache[cacheid]['result']['result'], state.datamodel),
+            'result': self.datamodel.create(self.cache[cacheid]['result']['result'], state.datamodel),
             'status': self.cache[cacheid]['result']['status']
         }
 

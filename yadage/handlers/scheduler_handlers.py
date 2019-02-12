@@ -7,7 +7,6 @@ import jsonpointer
 
 import yadage.handlers.utils as utils
 
-from packtivity import datamodel
 from ..stages import JsonStage
 from ..tasks import packtivity_task
 from ..utils import (init_stage_spec, leaf_iterator_jsonlike,
@@ -171,7 +170,7 @@ def singlestep_stage(stage, spec):
         k: select_parameter(stage.view, v) for k, v in get_parameters(spec['parameters']).items()
     }
     finalized, inputs = finalize_input(parameters, stage.view)
-    finalized = datamodel.create(finalized, getattr(stage.state_provider,'datamodel',None))
+    finalized = stage.datamodel.create(finalized, getattr(stage.state_provider,'datamodel',None))
     addStepOrWorkflow(stage.name, stage, finalized, inputs, spec)
     registerExpressions(stage, spec.get('register_values'))
 
@@ -267,7 +266,7 @@ def multistep_stage(stage, spec):
     for i, pars in enumerate(singlesteppars):
         singlename = '{}_{}'.format(stage.name, i)
         finalized, inputs = finalize_input(pars, stage.view)
-        finalized = datamodel.create(finalized, getattr(stage.state_provider,'datamodel',None))
+        finalized = stage.datamodel.create(finalized, getattr(stage.state_provider,'datamodel',None))
         addStepOrWorkflow(singlename, stage, finalized, inputs, spec)
     registerExpressions(stage, spec.get('register_values'))
 
@@ -311,7 +310,7 @@ def jq_stage(stage, spec):
         finalized, inputs = finalize_input(pars, stage.view)
         log.info('postscripting: %s',finalized)
         after_post = jq.jq(postscript).transform(finalized,multiple_output = False)
-        after_post = datamodel.create(after_post)
+        after_post = stage.datamodel.create(after_post)
         log.info('finalized to: %s',after_post)
         addStepOrWorkflow(singlename, stage, after_post, inputs, spec)
     registerExpressions(stage, spec.get('register_values'))
