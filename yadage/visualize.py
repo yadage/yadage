@@ -5,8 +5,6 @@ import subprocess
 import jsonpointer
 import pydotplus
 
-from packtivity import datamodel
-
 log = logging.getLogger(__name__)
 
 
@@ -67,8 +65,8 @@ def fillscope(cluster, workflow, nodes_to_connect, scope='', subcluster=True):
 def path_to_id(stepid, path):
     return '{}_{}'.format(stepid, path.replace('/', '_'))
 
-def add_result(graph, parent, typedleafs):
-    leafpointers = [p for p,v in datamodel.leafs(typedleafs)]
+def add_result(graph, parent, data):
+    leafpointers = [p for p,v in data.leafs()]
 
     for leaf in leafpointers:
         leafid = path_to_id(parent, leaf.path)

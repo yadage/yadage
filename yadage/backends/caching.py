@@ -4,7 +4,7 @@ import os
 import time
 
 import yadage.backends.federatedbackend as federatedbackend
-from .. import datamodel
+from packtivity import datamodel
 
 from packtivity.statecontexts import load_state
 from yadage.utils import json_hash
@@ -140,7 +140,7 @@ class CacheBuilder(object):
         if silent:
             if not self.cacheexists(cacheid): return None
         return {
-            'result': datamodel.data_from_json(self.cache[cacheid]['result']['result'], state.datamodel),
+            'result': datamodel.create(self.cache[cacheid]['result']['result'], state.datamodel),
             'status': self.cache[cacheid]['result']['status']
         }
 

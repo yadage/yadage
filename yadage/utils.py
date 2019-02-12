@@ -230,3 +230,8 @@ def prepare_meta(metadir, accept=False):
             raise RuntimeError("yadage meta directory %s exists. Allow overwrite by using the command line option  --accept-metadir" % metadir)
     else:
         os.makedirs(metadir)
+
+def pointerize(data, asref=False, stepid=None):
+    def callback(p):
+        return outputReference(stepid, p) if asref else {'$wflowpointer': {'step': stepid,'result': p.path}} if stepid else p.path
+    return data.asrefs(callback = callback)
