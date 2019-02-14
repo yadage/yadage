@@ -70,7 +70,6 @@ def finalize_input(jsondata,wflowview):
 
     :return: finalized step parameters
     '''
-
     result = copy.deepcopy(jsondata)
     inputs = []
     for leaf_pointer, leaf_value in leaf_iterator_jsonlike(jsondata):
