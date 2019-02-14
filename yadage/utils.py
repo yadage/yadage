@@ -176,20 +176,6 @@ def setupbackend_fromstring(backend, backendopts = None):
             backendopts = backendopts
     )
 
-
-def get_init_spec(discover, relative = True):
-    return {
-        'process': None,
-        'environment': None,
-        'publisher': {
-            'publisher_type': 'fromparjq-pub',
-            'script': '.',
-            'tryExact': True,
-            'glob': discover,
-            'relative_paths': relative
-        }
-    }
-
 def init_stage_spec(parameters, discover, used_inputs, name, nodename = None, relative = False):
     return {
         'name': name,
@@ -202,8 +188,17 @@ def init_stage_spec(parameters, discover, used_inputs, name, nodename = None, re
              'parameters': parameters,
              'inputs':   used_inputs,
              'nodename': nodename,
-             'discover': discover,
-             'relative': relative
+             'step': {
+                'process': None,
+                'environment': None,
+                'publisher': {
+                    'publisher_type': 'fromparjq-pub',
+                    'script': '.',
+                    'tryExact': True,
+                    'glob': discover,
+                    'relative_paths': relative
+                }
+            }
         }
     }
 

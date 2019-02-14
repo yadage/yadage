@@ -10,7 +10,7 @@ import yadage.handlers.utils as utils
 from .. import datamodel
 from ..stages import JsonStage
 from ..tasks import packtivity_task
-from ..utils import (get_init_spec, init_stage_spec, leaf_iterator_jsonlike,
+from ..utils import (init_stage_spec, leaf_iterator_jsonlike,
                      outputReference, process_jsonlike)
 from .expression_handlers import handlers as exprhandlers
 
@@ -338,7 +338,7 @@ def init_stage(stage, spec):
     else:
         step_state = None
 
-    init_spec = get_init_spec(discover = spec['discover'], relative = spec['relative'] )
+    init_spec = spec['step']
     task = packtivity_task(spec['nodename'] or stage.name, init_spec,
         state = step_state, parameters = spec['parameters'], inputs = inputs
     )
