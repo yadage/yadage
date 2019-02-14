@@ -148,7 +148,7 @@ def getinit_data(initfiles, parameters):
 
     initdata = {}
     for initfile in initfiles:
-        log.info('loading initialization data from file %s',initfile)
+        log.debug('loading initialization data from file %s',initfile)
         initdata.update(**yaml.load(open(initfile)))
 
     initdata.update(**options_from_eqdelimstring(parameters))
@@ -169,7 +169,7 @@ def prepare_workdir_from_archive(initdir, inputarchive):
 
 def setupbackend_fromstring(backend, backendopts = None):
     backendopts = backendopts or {}
-    log.info('setting up backend %s with opts %s', backend, backendopts)
+    log.debug('setting up backend %s with opts %s', backend, backendopts)
     import yadage.backends.packtivitybackend as pb
     return pb.PacktivityBackend(
             packtivity_backendstring = backend,
