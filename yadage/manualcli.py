@@ -48,15 +48,17 @@ def mancli():
 @click.option('-d', '--dataopt', multiple=True, default=None, help = 'options for the workflow data state')
 @click.option('--metadir', default='yadagemeta', help = 'directory to store workflow metadata')
 @click.option('--parameter', '-p', multiple=True)
-@click.argument('workdir')
-@click.argument('workflow')
+@click.argument('dataarg', default = 'workdir')
+@click.argument('workflow', default = 'workflow.yml')
 @click.argument('initfiles', nargs = -1)
-def init(workdir, workflow, initfiles, modelsetup, dataopt, metadir, toplevel, parameter):
+def init(dataarg, workflow, initfiles, modelsetup, dataopt, metadir, toplevel, parameter):
+    if os.path.exists('input.yml') and not initfiles:
+        initfiles = ('input.yml',)
     initdata = utils.getinit_data(initfiles, parameter)
     dataopts = utils.options_from_eqdelimstring(dataopt)
 
     ys = YadageSteering.create(
-        dataarg = workdir,
+        dataarg = dataarg,
         dataopts = dataopts,
         workflow = workflow,
         toplevel = toplevel,

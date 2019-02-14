@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import logging
 import os
-
+import sys
 import click
 import yaml
 
@@ -47,7 +47,7 @@ def from_file(ctx, param, value):
     ctx.exit()
 
 @click.command()
-@click.argument('dataarg')
+@click.argument('dataarg', default = 'workdir')
 @click.argument('workflow', default = 'workflow.yml')
 @click.argument('initfiles', nargs=-1)
 @click.option('-b', '--backend', default=DEFAULT_BACKEND, help = 'packtivity backend string')
@@ -98,7 +98,8 @@ def main(dataarg,
          accept_metadir
          ):
 
-
+    if os.path.exists('input.yml') and not initfiles:
+        initfiles = ('input.yml',)
     logging.basicConfig(level=getattr(logging, verbosity), format=LOGFORMAT)
     from packtivity.plugins import enable_plugins
     if plugins:
@@ -140,13 +141,14 @@ def main(dataarg,
         )
         rc = RC_SUCCEEDED
     except:
-        log.exception('workflow failed')
-    if rc != RC_SUCCEEDED:
-        exc = click.exceptions.ClickException(
-            click.style("Workflow failed", fg='red')
-        )
-        exc.exit_code = rc
-        raise exc
+        if rc != RC_SUCCEEDED:
+            if logging.root.level < logging.INFO:
+                log.exception('workflow failed')
+            exc = click.exceptions.ClickException(
+                click.style("Workflow failed: {}".format(sys.exc_info()[1]), fg='red')
+            )
+            exc.exit_code = rc
+            raise exc
 
 if __name__ == '__main__':
     main()
