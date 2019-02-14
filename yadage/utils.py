@@ -202,8 +202,7 @@ def init_stage_spec(parameters, discover, used_inputs, name, nodename = None, re
              'parameters': parameters,
              'inputs':   used_inputs,
              'nodename': nodename,
-             'discover': discover,
-             'relative': relative
+             'step': get_init_spec(discover, relative)
         }
     }
 
