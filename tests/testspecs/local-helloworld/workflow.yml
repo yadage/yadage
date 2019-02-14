@@ -1,18 +1,19 @@
 stages:
-  - name: hello_world
-    dependencies: [init]
-    scheduler:
-      scheduler_type: singlestep-stage
-      parameters:
-        parone: {step: init, output: par}
-        outputfile: '{workdir}/hello_world.txt'
-      step:
-        process:
-          process_type: 'string-interpolated-cmd'
-          cmd: 'echo Hello {parone} | tee {outputfile}'
-        publisher:
-          publisher_type: 'frompar-pub'
-          outputmap:
-            outputfile: outputfile
-        environment:
-          environment_type: 'localproc-env'
+- name: hello_world
+  dependencies: [init]
+  scheduler:
+    scheduler_type: singlestep-stage
+    parameters:
+      name: {step: init, output: name}
+      outputfile: '{workdir}/hello_world.txt'
+    step:
+      process:
+        process_type: 'string-interpolated-cmd'
+        cmd: 'echo Hello my Name is {name} | tee {outputfile}'
+      publisher:
+        publisher_type: 'frompar-pub'
+        outputmap:
+          outputfile: outputfile
+      environment:
+        environment_type: 'docker-encapsulated'
+        image: busybox
