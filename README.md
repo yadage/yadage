@@ -14,7 +14,7 @@ This package reads and executes workflows adhering to the workflow JSON schemas 
 ### Example Workflow
 
 ```
-cat << 'EOF' > wflow.yml
+cat << 'EOF' > workflow.yml
 stages:
 - name: hello_world
   dependencies: [init]
@@ -40,7 +40,7 @@ EOF
 You can try this workflow via
 
 ```
-yadage-run workdir wflow.yml -p name="John Doe"
+yadage-run -p name="John Doe"
 ```
 
 For more thorough examples, please see the [documentation](http://yadage.readthedocs.io/en/latest/)
