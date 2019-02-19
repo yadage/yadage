@@ -1,11 +1,8 @@
 import logging
-
 import jsonpath_rw
 
 from .utils import handler_decorator
 from ..utils import pointerize
-
-from packtivity import datamodel
 
 log = logging.getLogger(__name__)
 
