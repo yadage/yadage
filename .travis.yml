@@ -13,7 +13,7 @@ install:
 - sudo apt-get install -y python-logilab-common
 - pip install -U setuptools
 - pip install -U --process-dependency-links -e .[viz,develop,celery]
-- pip uninstall packtivity
+- yes|pip uninstall packtivity
 - pip install -U https://github.com/yadage/packtivity/archive/master.zip
 - pip install sphinx
 script:
