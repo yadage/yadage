@@ -6,6 +6,13 @@ from six import string_types
 from packtivity.statecontexts import load_state
 from packtivity.statecontexts.posixfs_context import LocalFSState
 
+try:
+    # For Python 3.0 and later
+    from urllib.request import urlopen
+except ImportError:
+    # Fall back to Python 2's urllib2
+    from urllib2 import urlopen
+
 log = logging.getLogger(__name__)
 
 
