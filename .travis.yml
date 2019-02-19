@@ -12,8 +12,9 @@ install:
 - sudo apt-get install -y graphviz
 - sudo apt-get install -y python-logilab-common
 - pip install -U setuptools
+- pip install -U --process-dependency-links -e .[viz,develop,celery]
+- pip uninstall packtivity
 - pip install -U https://github.com/yadage/packtivity/archive/master.zip
-- pip install  --process-dependency-links -e .[viz,develop,celery]
 - pip install sphinx
 script:
 - pyflakes yadage
