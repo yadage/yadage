@@ -2,7 +2,7 @@ import logging
 import os
 import shutil
 from six import string_types
-
+import zipfile
 from packtivity.statecontexts import load_state
 from packtivity.statecontexts.posixfs_context import LocalFSState
 
@@ -19,8 +19,7 @@ log = logging.getLogger(__name__)
 
 def prepare_workdir_from_archive(initdir, inputarchive):
     if os.path.exists(initdir):
-        raise click.exceptions.ClickException(click.style(
-            "initialization directory exists and input archive give. Can't have both", fg='red'))
+        raise RuntimeError("initialization directory exists and input archive give. Can't have both")
     os.makedirs(initdir)
     localzipfile = '{}/.yadage_inputarchive.zip'.format(initdir)
     f = urlopen(inputarchive)

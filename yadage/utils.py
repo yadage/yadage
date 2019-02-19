@@ -4,9 +4,7 @@ import json
 import logging
 import os
 import uuid
-import zipfile
 
-import click
 import jq
 import jsonpointer
 import yaml
