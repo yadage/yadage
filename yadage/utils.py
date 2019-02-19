@@ -154,19 +154,6 @@ def getinit_data(initfiles, parameters):
     initdata.update(**options_from_eqdelimstring(parameters))
     return initdata
 
-def prepare_workdir_from_archive(initdir, inputarchive):
-    if os.path.exists(initdir):
-        raise click.exceptions.ClickException(click.style(
-            "initialization directory exists and input archive give. Can't have both", fg='red'))
-    os.makedirs(initdir)
-    localzipfile = '{}/.yadage_inputarchive.zip'.format(initdir)
-    f = urlopen(inputarchive)
-    with open(localzipfile,'wb') as lf:
-        lf.write(f.read())
-    with zipfile.ZipFile(localzipfile) as zf:
-        zf.extractall(path=initdir)
-    os.remove(localzipfile)
-
 def setupbackend_fromstring(backend, backendopts = None):
     backendopts = backendopts or {}
     log.debug('setting up backend %s with opts %s', backend, backendopts)

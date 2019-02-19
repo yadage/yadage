@@ -4,7 +4,6 @@ import jsonschema.exceptions
 import yadage.workflow_loader
 from yadage.steering_object import YadageSteering
 from yadage.steering_api import steering_ctx
-from yadage.utils import prepare_workdir_from_archive
 from yadage.reset import reset_steps, collective_downstream
 
 def test_steer(tmpdir,multiproc_backend):
