@@ -12,6 +12,10 @@ install:
 - sudo apt-get install -y graphviz
 - sudo apt-get install -y python-logilab-common
 - sudo apt-get install golang-1.10-go
+- curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+- echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee -a /etc/apt/sources.list.d/kubernetes.list
+- sudo apt-get update
+- sudo apt-get install -y kubectl
 - /usr/lib/go-1.10/bin/go version
 - export GOROOT=/usr/lib/go-1.10
 - /usr/lib/go-1.10/bin/go get sigs.k8s.io/kind
