@@ -2,7 +2,7 @@ import json
 import logging
 import shutil
 import tempfile
-
+import os
 import click
 import yaml
 
@@ -75,6 +75,68 @@ def viz(instance, vizpdf,viewscope,verbosity):
     shutil.copy('{}/yadage_workflow_instance.pdf'.format(dirpath), vizpdf)
     shutil.rmtree(dirpath)
 
+@utilcli.group()
+def k8s():
+    pass
+
+@k8s.command()
+@click.option('--hostname', default = 'docker-for-desktop')
+def create_state(hostname):
+    pvc_name = 'yadagedata'
+    sc_name = 'local-storage'
+    path_base = os.getcwd()
+    size = '1G'
+    kubeyaml = '''\
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: {pvc_name}
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: {size}
+  storageClassName: {sc_name}
+---
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: {sc_name}
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: WaitForFirstConsumer
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: yadage-pv
+spec:
+  capacity:
+    storage: {size}
+  volumeMode: Filesystem
+  accessModes:
+  - ReadWriteMany
+  persistentVolumeReclaimPolicy: Delete
+  storageClassName: {sc_name}
+  local:
+    path: {path_base}
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - {hostname}
+'''.format(
+        pvc_name = pvc_name,
+        sc_name = sc_name,
+        base_path = path_base,
+        size = size,
+        path_base = path_base,
+        hostname = hostname
+    )
+    click.echo(kubeyaml)
 
 if __name__ == '__main__':
     utilcli()
