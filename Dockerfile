@@ -18,5 +18,6 @@ RUN curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.12.0/b
     chmod +x /usr/local/bin/kubectl
 
 #yadage
-RUN pip install yadage[viz] pydotplus kubernetes
-
+RUN pip install pydotplus kubernetes
+ADD . /code
+RUN pip install -e /code

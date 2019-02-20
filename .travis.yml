@@ -22,6 +22,14 @@ script:
 - pyflakes yadage
 - pytest --cov=yadage
 - kind create cluster
+- export KUBECONFIG="$(kind get kubeconfig-path --name="kind")"
+- docker build -t yadage/yadage .
+- kind load docker-image yadage/yadage
+- yadage-util k8s create-state --hostname kind-control-plane --path /mnt | kubectl create -f -
+- kubectl create -f tests/kubernetes/role.yml
+- kubectl create -f tests/kubernetes/test.yml
+- sleep 10
+- kubectl get pods -l job-name=testyadage -o name|xargs kubectl logs -f
 
 after_success:
 - coveralls

@@ -81,10 +81,11 @@ def k8s():
 
 @k8s.command()
 @click.option('--hostname', default = 'docker-for-desktop')
-def create_state(hostname):
+@click.option('--path', default = None)
+def create_state(hostname,path):
     pvc_name = 'yadagedata'
     sc_name = 'local-storage'
-    path_base = os.getcwd()
+    path_base = path or os.getcwd()
     size = '1G'
     kubeyaml = '''\
 kind: PersistentVolumeClaim
