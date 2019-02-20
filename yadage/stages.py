@@ -4,6 +4,8 @@ from .handlers.predicate_handlers import handlers as pred_handlers
 from .utils import get_id_fromjson
 from .state_providers import load_provider
 
+from packtivity import datamodel as _datamodel
+
 log = logging.getLogger(__name__)
 
 
@@ -81,6 +83,7 @@ class ViewStageBase(object):
     def __init__(self, name, state_provider):
         self.name = name
         self.state_provider = state_provider
+        self.datamodel = _datamodel
         self.view = None
 
     def schedule(self):

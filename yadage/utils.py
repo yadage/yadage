@@ -75,19 +75,6 @@ def process_refs(x, dag):
     else:
         return x
 
-def leaf_iterator(jsonable):
-    '''
-    generator function to yield leafs items of a JSON-like structure alongside
-    their position in the structure as determined by a JSONPointer.
-
-    :param jsonable: a json-serializable object
-    :return: tuples (jsonpointer, leaf value)
-    '''
-    allleafs = jq.jq('leaf_paths').transform(jsonable, multiple_output = True)
-    leafpointers = [jsonpointer.JsonPointer.from_parts(x) for x in allleafs]
-    for x in leafpointers:
-        yield x,x.get(jsonable)
-
 def leaf_iterator_jsonlike(jsonlike, path = None):
     ''''
     :param jsonlike: a jsonlike object (i.e. nested lists/arrays: leaf-types must not be JSONable)
@@ -230,3 +217,8 @@ def prepare_meta(metadir, accept=False):
             raise RuntimeError("yadage meta directory %s exists. Allow overwrite by using the command line option  --accept-metadir" % metadir)
     else:
         os.makedirs(metadir)
+
+def pointerize(data, asref=False, stepid=None):
+    def callback(p):
+        return outputReference(stepid, p) if asref else {'$wflowpointer': {'step': stepid,'result': p.path}} if stepid else p.path
+    return data.asrefs(callback = callback)

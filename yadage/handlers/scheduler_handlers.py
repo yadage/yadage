@@ -7,11 +7,10 @@ import jsonpointer
 
 import yadage.handlers.utils as utils
 
-from .. import datamodel
 from ..stages import JsonStage
 from ..tasks import packtivity_task
 from ..utils import (init_stage_spec, leaf_iterator_jsonlike,
-                     outputReference, process_jsonlike)
+                     outputReference, process_jsonlike, pointerize)
 from .expression_handlers import handlers as exprhandlers
 
 log = logging.getLogger(__name__)
@@ -71,7 +70,6 @@ def finalize_input(jsondata,wflowview):
 
     :return: finalized step parameters
     '''
-
     result = copy.deepcopy(jsondata)
     inputs = []
     for leaf_pointer, leaf_value in leaf_iterator_jsonlike(jsondata):
@@ -171,7 +169,7 @@ def singlestep_stage(stage, spec):
         k: select_parameter(stage.view, v) for k, v in get_parameters(spec['parameters']).items()
     }
     finalized, inputs = finalize_input(parameters, stage.view)
-    finalized = datamodel.data_from_json(finalized, getattr(stage.state_provider,'datamodel',None))
+    finalized = stage.datamodel.create(finalized, getattr(stage.state_provider,'datamodel',None))
     addStepOrWorkflow(stage.name, stage, finalized, inputs, spec)
     registerExpressions(stage, spec.get('register_values'))
 
@@ -267,14 +265,14 @@ def multistep_stage(stage, spec):
     for i, pars in enumerate(singlesteppars):
         singlename = '{}_{}'.format(stage.name, i)
         finalized, inputs = finalize_input(pars, stage.view)
-        finalized = datamodel.data_from_json(finalized, getattr(stage.state_provider,'datamodel',None))
+        finalized = stage.datamodel.create(finalized, getattr(stage.state_provider,'datamodel',None))
         addStepOrWorkflow(singlename, stage, finalized, inputs, spec)
     registerExpressions(stage, spec.get('register_values'))
 
 
 def process_noderef(leafobj,resultscript,view):
     n = view.dag.getNode(leafobj['_nodeid'])
-    return jq.jq(resultscript).transform(datamodel.pointerize(n.result,False,n.identifier), multiple_output = True)
+    return jq.jq(resultscript).transform(pointerize(n.result,False,n.identifier), multiple_output = True)
 
 def process_wflowref(leafobj,view):
     nodeselector, resultscript = leafobj['$wflowref']
@@ -311,7 +309,7 @@ def jq_stage(stage, spec):
         finalized, inputs = finalize_input(pars, stage.view)
         log.info('postscripting: %s',finalized)
         after_post = jq.jq(postscript).transform(finalized,multiple_output = False)
-        after_post = datamodel.data_from_json(after_post)
+        after_post = stage.datamodel.create(after_post)
         log.info('finalized to: %s',after_post)
         addStepOrWorkflow(singlename, stage, after_post, inputs, spec)
     registerExpressions(stage, spec.get('register_values'))
