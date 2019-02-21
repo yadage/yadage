@@ -32,7 +32,8 @@ script:
 - yadage-util k8s create-state --hostname kind-control-plane --path /mnt | kubectl create -f -
 - kubectl create -f tests/kubernetes/role.yml
 - kubectl create -f tests/kubernetes/test.yml
-- sleep 10
+- sleep 20
+- kubectl get pods
 - kubectl get pods -l job-name=testyadage -o name|xargs kubectl logs -f
 
 after_success:
