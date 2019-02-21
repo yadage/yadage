@@ -2,7 +2,6 @@ import json
 import logging
 import shutil
 import tempfile
-import os
 import click
 import yaml
 import os
