@@ -70,11 +70,7 @@ jobs:
         - echo none
       deploy:
         provider: script
-        script:
-        - echo "deploying to docker"
-        - docker login -u "$DOCKERLOGIN" -p "$DOCKERPW"
-        - docker build -t yadage/yadage .
-        - docker push yadage/yadage
+        script: ./deploy/deploy.sh
 
 env:
   global:
