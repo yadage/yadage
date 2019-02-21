@@ -31,7 +31,7 @@ script:
 - kind load docker-image yadage/yadage
 - yadage-util k8s create-state --hostname kind-control-plane --path /mnt | kubectl create -f -
 - kubectl create -f tests/kubernetes
-- sleep 20
+- sleep 30
 - kubectl get pods
 - kubectl get pods -l job-name=testyadage -o name|xargs kubectl logs -f
 - docker exec kind-control-plane cat /mnt/workdir/delphes/output.lhco
@@ -51,6 +51,10 @@ jobs:
         on:
           tags: true
     - stage: deploy
+      install:
+        - echo none
+      script:
+        - echo none
       deploy:
         provider: pypi
         on:
@@ -60,6 +64,10 @@ jobs:
         password:
           secure: ABo/JVs9Xg2+d4PxHsRS0TXOFKIFDifW5TwerlM03AEYHqmADfOiOicm0DTK7e+P0oI2JUHZYuwvQeuNj+dkUwYsNVKuzxkLxOBqaJCJOUAdpugXZD7KHFWRxB5VfZcorsgy17+oHqRcnxs0nHOj1KhG4UmEx0HpY2vfFkXfp/vtJtdUBwoXor6ZsmSD9NOdoASdYcYhZebHCEj9DAxZQChhj7Q1iLnbWuJiUbxoYPhPbyO6ytS6eq/kaxyO7em0+37KnzYPM4vdBucULC4dddHCW3JdYeuj+y+785UpPQ9j7GX+mSAXRVaqcU7ULQONR5xVIlOSu3FSFlnynmMYVi/usCqi7aZsoblTl1NwZYS/JVOGrw5tlikPXljuxM76Rfp6TllH/SOsRWVxFsh6VyfyRBa1EnNNATLyAgJpfl/ixy6Hm58wPg7ttvvL+6WTCWtnCtk8XzdDneiUDZL89EmLm4XB23QLGvnzjMrKukS/HZzJlIOTm7CIvTWQpio+FXpGZUfQ0NH9fWpd00yQqEN57w/8lvpAHbVcgQ+8k0sSD/7+cKwjtYKIlmV96AOV2B/U5v8WOLwv52uZYqp3Y4AseAhg0RuJf/kL6Jj6IOsh1+3hsS/XZakiN/HHocn0R0FP7yN237jmgnnXzGPEv16HW91YC1mSpC7uxUPcWiI=
     - stage: docker
+      install:
+        - echo none
+      script:
+        - echo none
       deploy:
         provider: script
         script:
