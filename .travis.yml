@@ -30,12 +30,11 @@ script:
 - docker build -t yadage/yadage .
 - kind load docker-image yadage/yadage
 - yadage-util k8s create-state --hostname kind-control-plane --path /mnt | kubectl create -f -
-- kubectl create -f tests/kubernetes/role.yml
-- kubectl create -f tests/kubernetes/test.yml
+- kubectl create -f tests/kubernetes
 - sleep 20
 - kubectl get pods
 - kubectl get pods -l job-name=testyadage -o name|xargs kubectl logs -f
-
+- docker exec kind-control-plane cat /mnt/workdir/delphes/output.lhco
 after_success:
 - coveralls
 jobs:
