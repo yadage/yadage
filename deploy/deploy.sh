@@ -1,5 +1,5 @@
 #!/bin/bash
-
 docker login -u "$DOCKERLOGIN" -p "$DOCKERPW"
-docker build -t yadage/yadage .
-docker push yadage/yadage
+docker build -t yadage/yadage:$TRAVIS_BRANCH .
+docker push yadage/yadage:$TRAVIS_BRANCH
+
