@@ -144,7 +144,7 @@ spec:
 
 
 @k8s.command()
-@click.option('path')
+@click.option('--path')
 def create_secrets(path):
     files = glob.glob('{}/*'.format(path or os.environ['PACKTIVITY_AUTH_LOCATION']))
     data = {
