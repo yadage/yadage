@@ -18,11 +18,17 @@ try:
 except ImportError:	
     # Fall back to Python 2's urllib2	
     from urllib2 import urlopen
-
+    
 def download_file(url,local_filename):
-    f = urlopen(url)
-    with open(local_filename,'wb') as lf:
-        lf.write(f.read())
+    if not 'http' in url:
+        f = urlopen(url)
+        with open(local_filename,'wb') as lf:
+            lf.write(f.read())
+    else:
+        h = {} if not 'YADAGE_INIT_TOKEN' in os.environ else {'PRIVATE-TOKEN': os.environ['YADAGE_INIT_TOKEN']}
+        r = requests.get(url, stream=True, headers = h)
+        with open(local_filename, 'wb') as f:
+            shutil.copyfileobj(r.raw, f)
 
 def prepare_workdir_from_archive(initdir, inputarchive, match = None):
     url = inputarchive
