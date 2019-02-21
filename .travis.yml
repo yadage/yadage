@@ -11,14 +11,6 @@ install:
 - sudo apt-get install -y imagemagick
 - sudo apt-get install -y graphviz
 - sudo apt-get install -y python-logilab-common
-- sudo apt-get install golang-1.10-go
-- curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
-- echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee -a /etc/apt/sources.list.d/kubernetes.list
-- sudo apt-get update
-- sudo apt-get install -y kubectl
-- /usr/lib/go-1.10/bin/go version
-- export GOROOT=/usr/lib/go-1.10
-- /usr/lib/go-1.10/bin/go get sigs.k8s.io/kind
 - pip install -U setuptools
 - pip install -U --process-dependency-links -e .[viz,develop,celery]
 - pip install sphinx
@@ -27,18 +19,29 @@ script:
 - pytest --cov=yadage
 - kind create cluster
 - export KUBECONFIG="$(kind get kubeconfig-path --name="kind")"
-- docker build -t yadage/yadage .
-- kind load docker-image yadage/yadage
-- yadage-util k8s create-state --hostname kind-control-plane --path /mnt | kubectl create -f -
-- kubectl create -f tests/kubernetes
-- sleep 30
-- kubectl get pods
-- kubectl get pods -l job-name=testyadage -o name|xargs kubectl logs -f
-- docker exec kind-control-plane cat /mnt/workdir/delphes/output.lhco
 after_success:
 - coveralls
 jobs:
   include:
+    - stage: kubernetes
+      install:
+      - sudo apt-get install golang-1.10-go
+      - curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+      - echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee -a /etc/apt/sources.list.d/kubernetes.list
+      - sudo apt-get update
+      - sudo apt-get install -y kubectl
+      - /usr/lib/go-1.10/bin/go version
+      - export GOROOT=/usr/lib/go-1.10
+      - /usr/lib/go-1.10/bin/go get sigs.k8s.io/kind
+      script:
+      - docker build -t yadage/yadage .
+      - kind load docker-image yadage/yadage
+      - yadage-util k8s create-state --hostname kind-control-plane --path /mnt | kubectl create -f -
+      - kubectl create -f tests/kubernetes
+      - sleep 30
+      - kubectl get pods
+      - kubectl get pods -l job-name=testyadage -o name|xargs kubectl logs -f
+      - docker exec kind-control-plane cat /mnt/workdir/delphes/output.lhco
     - stage: docs
       install:
       - pip install -U setuptools
