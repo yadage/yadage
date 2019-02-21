@@ -5,30 +5,55 @@ from six import string_types
 import zipfile
 from packtivity.statecontexts import load_state
 from packtivity.statecontexts.posixfs_context import LocalFSState
-
-try:
-    # For Python 3.0 and later
-    from urllib.request import urlopen
-except ImportError:
-    # Fall back to Python 2's urllib2
-    from urllib2 import urlopen
+import fnmatch
 
 log = logging.getLogger(__name__)
 
 
+import requests
 
-def prepare_workdir_from_archive(initdir, inputarchive):
-    if os.path.exists(initdir):
-        raise RuntimeError("initialization directory exists and input archive give. Can't have both")
+try:	
+    # For Python 3.0 and later	
+    from urllib.request import urlopen	
+except ImportError:	
+    # Fall back to Python 2's urllib2	
+    from urllib2 import urlopen
+    
+def download_file(url,local_filename):
+    if not 'http' in url:
+        f = urlopen(url)
+        with open(local_filename,'wb') as lf:
+            lf.write(f.read())
+    else:
+        h = {} if not 'YADAGE_INIT_TOKEN' in os.environ else {'PRIVATE-TOKEN': os.environ['YADAGE_INIT_TOKEN']}
+        r = requests.get(url, stream=True, headers = h)
+        with open(local_filename, 'wb') as f:
+            shutil.copyfileobj(r.raw, f)
+
+def prepare_workdir_from_archive(initdir, inputarchive, match = None):
+    url = inputarchive
     os.makedirs(initdir)
     localzipfile = '{}/.yadage_inputarchive.zip'.format(initdir)
-    f = urlopen(inputarchive)
-    with open(localzipfile,'wb') as lf:
-        lf.write(f.read())
-    with zipfile.ZipFile(localzipfile) as zf:
-        zf.extractall(path=initdir)
-    os.remove(localzipfile)
+    download_file(url,localzipfile)
 
+    if not match:
+        with zipfile.ZipFile(localzipfile) as zf:
+            zf.extractall(path=initdir)
+    else:
+        assert match.endswith('/')
+        with zipfile.ZipFile(localzipfile) as zf:
+            filtered = fnmatch.filter(zf.namelist(),match)                
+            assert len(filtered)==1
+            basepath = filtered[0]
+            for x in zf.namelist():
+                if x!= basepath and basepath in x:
+                    target = x.replace(basepath,'')
+                    if target.endswith('/'):
+                        os.makedirs(os.path.join(initdir,target))
+                    else:
+                        with open(os.path.join(initdir,target),'wb') as f:
+                            f.write(zf.read(x))
+    os.remove(localzipfile)
 
 def _merge_states(lhs,rhs):
     return LocalFSState(lhs.readwrite + rhs.readwrite,lhs.readonly + rhs.readonly)
@@ -147,7 +172,7 @@ def setup_provider(dataarg, dataopts):
     inputarchive = dataopts.get('inputarchive',None)
     if initdir:
         if inputarchive:
-            prepare_workdir_from_archive(initdir, inputarchive)
+            prepare_workdir_from_archive(initdir, inputarchive, match = dataopts.get('archivematch'))
         init_state = LocalFSState(readonly = [initdir])
         init_states.append(init_state)
 

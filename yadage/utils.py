@@ -114,7 +114,7 @@ def process_jsonlike(jsonlike, jq_obj_selector, callback):
 def options_from_eqdelimstring(opts):
     options = {}
     for x in opts:
-        key, value = x.split('=')
+        key, value = x.split('=',1)
         options[key] = yaml.load(value)
     return options
 
