@@ -1,0 +1,28 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: testyadage
+spec:
+  backoffLimit: 0
+  template:
+    spec:
+      containers:
+      - command:
+        - sh
+        - -c
+        - |
+          rm -rf workdir
+          yadage-run workdir madgraph_delphes.yml -t from-github/phenochain -p nevents=100 -b kubedirectjob -k kubeconfig=incluster
+          find workdir
+        image: yadage/yadage
+        imagePullPolicy: IfNotPresent
+        name: runner
+        volumeMounts:
+        - mountPath: /data
+          name: data
+        workingDir: /data
+      restartPolicy: Never
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: yadagedata
