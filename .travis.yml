@@ -40,6 +40,9 @@ after_success:
 jobs:
   include:
     - stage: docs
+      install:
+      - pip install -U setuptools
+      - pip install -U --process-dependency-links -e .
       script:
       - cd docs && make html && cd -
       - touch docs/_build/html/.nojekyll
