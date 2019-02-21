@@ -5,6 +5,9 @@ import tempfile
 import os
 import click
 import yaml
+import os
+import base64
+import glob
 
 from .handlers.expression_handlers import handlers as exh
 from .utils import process_refs
@@ -138,6 +141,25 @@ spec:
         hostname = hostname
     )
     click.echo(kubeyaml)
+
+
+@k8s.command()
+@click.option('path')
+def create_secrets(path):
+    files = glob.glob('{}/*'.format(path or os.environ['PACKTIVITY_AUTH_LOCATION']))
+    data = {
+      os.path.basename(f):base64.b64encode(open(f,'rb').read()).decode('ascii') for f in files
+    }
+    secrets = '''\
+apiVersion: v1
+data: {}
+kind: Secret
+metadata:
+  name: hepauth
+  namespace: default
+type: Opaque
+'''.format(json.dumps(data))
+    click.echo(secrets)
 
 if __name__ == '__main__':
     utilcli()
