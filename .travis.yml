@@ -17,8 +17,6 @@ install:
 script:
 - pyflakes yadage
 - pytest --cov=yadage
-- kind create cluster
-- export KUBECONFIG="$(kind get kubeconfig-path --name="kind")"
 after_success:
 - coveralls
 jobs:
@@ -35,6 +33,8 @@ jobs:
       - /usr/lib/go-1.10/bin/go get sigs.k8s.io/kind
       script:
       - docker build -t yadage/yadage .
+      - kind create cluster
+      - export KUBECONFIG="$(kind get kubeconfig-path --name="kind")"
       - kind load docker-image yadage/yadage
       - yadage-util k8s create-state --hostname kind-control-plane --path /mnt | kubectl create -f -
       - kubectl create -f tests/kubernetes
