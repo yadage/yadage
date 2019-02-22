@@ -3,7 +3,7 @@ import os
 import copy
 
 import adage
-
+import shutil
 from .serialize import snapshot
 from .wflowstate import load_model_fromstring
 from .controllers import setup_controller
@@ -42,15 +42,17 @@ class YadageSteering(object):
         if is_local_data:
             metadir = kwargs.get('metadir')
             metadir = metadir or '{}/_yadage/'.format(dataarg)
+            if kwargs['dataopts'].get('overwrite') and os.path.exists(metadir):
+                shutil.rmtree(metadir)
         else:
             metadir = kwargs['metadir']
         accept_metadir = kwargs.pop('accept_metadir', False)
 
         kw = copy.deepcopy(kwargs)
         kw['metadir'] = metadir
-
-        ctrl = creators['local'](**kw)
-        prepare_meta(metadir, accept_metadir)
+        prepare_meta(metadir, accept_metadir) # meta must be here because data model might store stuff here
+        ctrl = creators['local'](**kw)        
+        prepare_meta(metadir, accept = True) # Hack in case creator deletes meta
         return cls(metadir, ctrl)
 
     @property

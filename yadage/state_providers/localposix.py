@@ -163,6 +163,7 @@ def setup_provider(dataarg, dataopts):
     pathbase  = dataopts.get('pathbase')
 
     if overwrite and os.path.exists(workdir):
+        log.info('work directory %s will be purged and overwritten', workdir)
         shutil.rmtree(workdir)
 
     init_states = []
