@@ -79,6 +79,9 @@ jobs:
       deploy:
         provider: script
         script: ./deploy/deploy.sh
+        on:
+          tags: true
+          branch: master
 
 env:
   global:
