@@ -38,11 +38,12 @@ class YadageSteering(object):
     @classmethod
     def create(cls,**kwargs):
         dataarg = kwargs['dataarg']
+        dataopts = kwargs.get('dataopts') or {}
         is_local_data = len(dataarg.split(':',1)) == 1
         if is_local_data:
             metadir = kwargs.get('metadir')
             metadir = metadir or '{}/_yadage/'.format(dataarg)
-            if kwargs.get('dataopts',{}).get('overwrite') and os.path.exists(metadir):
+            if dataopts.get('overwrite') and os.path.exists(metadir):
                 shutil.rmtree(metadir)
         else:
             metadir = kwargs['metadir']
