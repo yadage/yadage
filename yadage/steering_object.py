@@ -45,12 +45,12 @@ class YadageSteering(object):
         else:
             metadir = kwargs['metadir']
         accept_metadir = kwargs.pop('accept_metadir', False)
-        prepare_meta(metadir, accept_metadir)
 
         kw = copy.deepcopy(kwargs)
         kw['metadir'] = metadir
 
         ctrl = creators['local'](**kw)
+        prepare_meta(metadir, accept_metadir)
         return cls(metadir, ctrl)
 
     @property
