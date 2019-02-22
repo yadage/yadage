@@ -1,6 +1,5 @@
 import os
 import yadageschemas
-import json
 import logging
 
 from . import workflow_loader as workflow_loader
@@ -58,8 +57,8 @@ def local_workflows(
             validate=validate
         )
 
-    with open('{}/yadage_template.json'.format(metadir), 'w') as f:
-        json.dump(workflow_json, f)
+    # with open('{}/yadage_template.json'.format(metadir), 'w') as f:
+    #     json.dump(workflow_json, f)
     workflowobj = YadageWorkflow.createFromJSON(workflow_json, rootprovider)
     if initdata:
         wflowopts = wflowopts or {}
