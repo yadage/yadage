@@ -33,6 +33,7 @@ def execute_steering(
         default_trackers = default_trackers,
         trackevery = loginterval,
         update_interval = updateinterval,
+        recursive_updates = False
     )
 
     if cache:

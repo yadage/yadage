@@ -36,7 +36,7 @@ def select_parameter(wflowview, parameter):
                       supported value expression
     :return: the parameter value
     '''
-    log.debug('selecting parameter %s', parameter)
+    log.info('selecting parameter %s', parameter)
     if isExpression(parameter):
         handler = exprhandlers[parameter['expression_type']]
         value = handler(wflowview, parameter)
@@ -164,7 +164,7 @@ def singlestep_stage(stage, spec):
 
     :return: None
     '''
-    log.debug('scheduling singlestep stage with spec:\n%s', spec)
+    log.info('scheduling singlestep stage with spec:\n%s', spec)
     parameters = {
         k: select_parameter(stage.view, v) for k, v in get_parameters(spec['parameters']).items()
     }
@@ -256,11 +256,15 @@ def multistep_stage(stage, spec):
 
     :return: None
     '''
-    log.debug('scheduling multistep stage with spec:\n%s', spec)
+    log.info('scheduling multistep stage with spec:\n%s', spec)
+    log.info('selecting parameters')
     parameters = {
         k: select_parameter(stage.view, v) for k, v in get_parameters(spec['parameters']).items()
     }
+    log.info('scattering')
     singlesteppars = scatter(parameters, spec['scatter'], spec.get('batchsize'), spec.get('partitionsize'))
+
+    log.info('scattering')
 
     for i, pars in enumerate(singlesteppars):
         singlename = '{}_{}'.format(stage.name, i)

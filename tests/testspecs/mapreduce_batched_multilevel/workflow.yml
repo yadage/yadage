@@ -6,7 +6,7 @@ stages:
       parameters:
         input: {stages: init, output: input, unwrap: true}
       step: {$ref: steps.yml#/stepA}
-      batchsize: 3
+      batchsize: 1
       scatter:
         method: zip
         parameters: [input]
@@ -17,7 +17,7 @@ stages:
       parameters:
         input: {stages: map, output: outputA, unwrap: true}
       step: {$ref: steps.yml#/stepA}
-      batchsize: 2
+      batchsize: 1
       scatter:
         method: zip
         parameters: [input]

@@ -10,8 +10,14 @@ class FederatedBackend(object):
     def routedsubmit(self, task):
         raise NotImplementedError('needs implementation')
 
+    def routedbatchsubmit(self, task):
+        raise NotImplementedError('needs implementation')
+
     def routeproxy(self, proxy):
         raise NotImplementedError('needs implementation')
+
+    def batch_submit(self, tasks):
+        return self.routedbatchsubmit(tasks)
 
     def submit(self, task):
         return self.routedsubmit(task)

@@ -38,6 +38,20 @@ class PacktivityBackend(federatedbackend.FederatedBackend):
             cache = cache if cache else caching.setupcache_fromstring(cachestring)
         )
 
+    def routedbatchsubmit(self, tasks):
+        actual_submits = [not t.metadata['wflow_hints'].get('is_purepub',False) for t in tasks]
+        if all(actual_submits) and not self.cached:
+            try:
+                submit_data = [
+                    (task.spec, task.parameters, task.state, task.metadata)
+                    for task in tasks
+                ]
+                return self.backends['packtivity'].batch_submit(*zip(*submit_data))
+                log.warning(actual_submits, self.backends['packtivity'].batched_submit)
+            except AttributeError:
+                pass
+        raise NotImplementedError
+
     def routedsubmit(self, task):
         is_pure_publishing = task.metadata['wflow_hints'].get('is_purepub',False)
         if is_pure_publishing:
