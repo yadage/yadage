@@ -23,7 +23,7 @@ def from_file(ctx, param, value):
         return
     data = {}
     for v in value:
-        data.update(**yaml.load(v))
+        data.update(**yaml.safe_load(v))
     verbosity = data.pop('verbosity','INFO')
     logging.basicConfig(level=getattr(logging, verbosity), format=LOGFORMAT)
     enable_plugins(data.pop('plugins',[]))
