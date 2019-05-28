@@ -50,7 +50,7 @@ dataopts:
      run_bkgs_2: bkginputs/bkg_sample_2
      run_bkgs_3: bkginputs/bkg_sample_3
 '''
-    spec = yaml.load(spec)
+    spec = yaml.safe_load(spec)
     from yadage.state_providers.localposix import setup_provider
     sp = setup_provider('local:'+spec['dataarg'],spec['dataopts'])
     assert type(sp).fromJSON(sp.json(),{}).json() == sp.json()

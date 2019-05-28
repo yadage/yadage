@@ -115,7 +115,7 @@ def options_from_eqdelimstring(opts):
     options = {}
     for x in opts:
         key, value = x.split('=',1)
-        options[key] = yaml.load(value)
+        options[key] = yaml.safe_load(value)
     return options
 
 def getinit_data(initfiles, parameters):
@@ -128,7 +128,7 @@ def getinit_data(initfiles, parameters):
     initdata = {}
     for initfile in initfiles:
         log.debug('loading initialization data from file %s',initfile)
-        initdata.update(**yaml.load(open(initfile)))
+        initdata.update(**yaml.safe_load(open(initfile)))
 
     initdata.update(**options_from_eqdelimstring(parameters))
     return initdata

@@ -23,7 +23,10 @@ def select_reference(step, selection):
     log.info('selecting %s from step %s', selection, step)
     pointerized = pointerize(step['result'], asref=True, stepid=step['id'])
 
-    return pointerized[selection]
+    try:
+        return pointerized[selection]
+    except:
+        pass
 
     matches = jsonpath_rw.parse(selection).find(pointerized)
     log.info('matches')

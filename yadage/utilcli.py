@@ -47,7 +47,7 @@ def testsel(instance, selection,verbosity,viewscope):
 
     wflow = wflow_with_trivial_backend(instance)
 
-    selresult = exh['stage-output-selector'](wflow.view(viewscope), yaml.load(selection))
+    selresult = exh['stage-output-selector'](wflow.view(viewscope), yaml.safe_load(selection))
 
     if not selresult:
         click.secho('Bad selection {}'.format(selresult), fg='red')
