@@ -15,7 +15,8 @@ class CachedProxy(object):
     @classmethod
     def fromJSON(cls,data,deserialization_opts = None):
         deserialization_opts = deserialization_opts or {}
-        return cls(load_proxy(data['proxy'],deserialization_opts), data['cacheid'],best_effort_backend = False)
+        p = load_proxy(data['proxy'],deserialization_opts, best_effort_backend = False)
+        return cls(p, data['cacheid'])
 
 @proxyloader('CachedProxy')
 def cache_loader(jsondata, deserialization_opts = None, best_effort_backend = False):
