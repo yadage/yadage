@@ -5,6 +5,8 @@ import yadage.workflow_loader
 from yadage.steering_object import YadageSteering
 from yadage.steering_api import steering_ctx
 from yadage.reset import reset_steps, collective_downstream
+from yadage.strategies import get_strategy
+from adage import nodestate
 
 def test_steer(tmpdir,multiproc_backend):
     ys = YadageSteering.create(
@@ -14,7 +16,19 @@ def test_steer(tmpdir,multiproc_backend):
         initdata = {'input': [1,2,3]}
     )
     ys.adage_argument(default_trackers = False)
+
+
+def test_targetstrategy_steering(tmpdir,multiproc_backend):
+    ys = YadageSteering.create(
+        dataarg = os.path.join(str(tmpdir),'workdir'),
+        workflow = 'workflow.yml',
+        toplevel = 'tests/testspecs/nestedmapreduce',
+        initdata = {'input': [1,2,3]}
+    )
+    ys.adage_argument(default_trackers = False)
+    ys.adage_argument(**get_strategy('target:/init', {}))
     ys.run_adage(multiproc_backend)
+    assert ys.controller.adageobj.dag.getNodeByName('init').state == nodestate.SUCCESS
 
 def test_context(tmpdir,multiproc_backend):
     workdir = os.path.join(str(tmpdir),'workdir')

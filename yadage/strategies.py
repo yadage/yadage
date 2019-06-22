@@ -40,7 +40,7 @@ def askforsubmit(name,opts = None):
     )
 
 @strategy('target')
-def waitfornode(name,opts = None):
+def target(name,opts = None):
     opts = opts or {}
     idbased = opts.get('idbased',False)     
     _,targetname = name.split(':',1)
