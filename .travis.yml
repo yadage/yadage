@@ -15,6 +15,7 @@ install:
 - pip install -U --process-dependency-links -e .[viz,develop,celery]
 script:
 - pyflakes yadage
+- if [[ $TRAVIS_PYTHON_VERSION == '3.7' ]]; then black --check --diff --verbose .; fi
 - pytest --cov=yadage
 after_success:
 - coveralls
@@ -43,6 +44,7 @@ jobs:
     #   - kubectl get pods
     #   - kubectl get pods -l job-name=testyadage -o name|xargs kubectl logs -f
     #   - docker exec kind-control-plane cat /mnt/workdir/delphes/output.lhco
+
     - stage: docs
       install:
       - pip install -U setuptools
