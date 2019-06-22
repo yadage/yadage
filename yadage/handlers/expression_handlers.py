@@ -20,7 +20,7 @@ def select_reference(step, selection):
     :return: the first (and single) match of the expression as a JSON pointer
     '''
     selection = selection or '$'
-    log.info('selecting %s from step %s', selection, step)
+    log.debug('selecting %s from step %s', selection, step)
     pointerized = pointerize(step['result'], asref=True, stepid=step['id'])
 
     try:
@@ -90,7 +90,7 @@ def stage_output_selector(stageview, selection):
     :return :
     resolves a output reference by selecting the stage and stage outputs
     '''
-    log.info('resolving selection %s', selection)
+    log.debug('resolving selection %s', selection)
     if type(selection) is not dict:
         return None
     else:
@@ -99,12 +99,12 @@ def stage_output_selector(stageview, selection):
                 raise RuntimeError('stages and steps are aliases. pick one.')
             steps_selector = selection.get('stages') or selection.get('steps')
             steps = select_steps(stageview, steps_selector)
-            log.info('selected steps %s %s', len(steps), steps)
+            log.debug('selected steps %s %s', len(steps), steps)
             outputs = select_outputs(steps,
                                      selection.get('output'),
                                      selection.get('flatten', False),
                                      selection.get('unwrap', False))
-            log.info('selected outputs %s', outputs)
+            log.debug('selected outputs %s', outputs)
             return outputs
         elif 'step' in selection:
             steps = select_steps(stageview, selection['step'])

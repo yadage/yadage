@@ -36,7 +36,7 @@ def select_parameter(wflowview, parameter):
                       supported value expression
     :return: the parameter value
     '''
-    log.info('selecting parameter %s', parameter)
+    log.debug('selecting parameter %s', parameter)
     if isExpression(parameter):
         handler = exprhandlers[parameter['expression_type']]
         value = handler(wflowview, parameter)
@@ -164,7 +164,7 @@ def singlestep_stage(stage, spec):
 
     :return: None
     '''
-    log.info('scheduling singlestep stage with spec:\n%s', spec)
+    log.debug('scheduling singlestep stage with spec:\n%s', spec)
     parameters = {
         k: select_parameter(stage.view, v) for k, v in get_parameters(spec['parameters']).items()
     }
@@ -257,7 +257,7 @@ def multistep_stage(stage, spec):
     :return: None
     '''
     log.info('scheduling multistep stage with spec:\n%s', spec)
-    log.info('selecting parameters')
+    log.debug('selecting parameters')
     parameters = {
         k: select_parameter(stage.view, v) for k, v in get_parameters(spec['parameters']).items()
     }

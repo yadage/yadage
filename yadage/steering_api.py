@@ -24,6 +24,7 @@ def execute_steering(
     loginterval = 30,
     default_trackers=True,
     strategy = None,
+    strategyopts = None,
     backend = None,
     cache = None
     ):
@@ -33,7 +34,7 @@ def execute_steering(
         default_trackers = default_trackers,
         trackevery = loginterval,
         update_interval = updateinterval,
-        recursive_updates = False
+        recursive_updates = True
     )
 
     if cache:
@@ -51,7 +52,7 @@ def execute_steering(
         ys.adage_argument(additional_trackers = [trackerclass()])
 
     if strategy is not None:
-        ys.adage_argument(**get_strategy(strategy))
+        ys.adage_argument(**get_strategy(strategy, strategyopts))
 
     ys.run_adage(backend)
 
@@ -72,6 +73,7 @@ def steering_ctx(
     schemadir = yadageschemas.schemadir,
     metadir = None,
     strategy=None,
+    strategyopts=None,
     validate=True,
     visualize=True,
     wflowopts = None,
@@ -100,6 +102,7 @@ def steering_ctx(
             loginterval = loginterval,
             default_trackers = visualize,
             strategy = strategy,
+            strategyopts=strategyopts,
             backend = backend,
             cache = cache
         )

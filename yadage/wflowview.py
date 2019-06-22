@@ -93,7 +93,8 @@ class WorkflowView(object):
         '''
         initialize this scope by adding an initialization stage.
 
-        :param inidata: initialization JSON data
+        :param inidata: in
+        itialization JSON data
         '''
         spec = init_stage_spec(
             initdata, discover, used_inputs or [], name, relative = relative)

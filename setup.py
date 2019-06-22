@@ -2,7 +2,7 @@ import os
 from setuptools import setup, find_packages
 
 deps = [
-    'adage<0.10',
+    'adage',
     'packtivity',
     'yadage-schemas',
     'click',

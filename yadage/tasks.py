@@ -4,7 +4,6 @@ from packtivity import datamodel
 from packtivity.statecontexts import load_state
 
 from .utils import outputReference
-
 log = logging.getLogger(__name__)
 
 class packtivity_task(object):
@@ -29,13 +28,13 @@ class packtivity_task(object):
             data['spec'],
             load_state(data['state'],deserialization_opts) if data['state'] else None,
             data['parameters'],
-            inputs = map(outputReference.fromJSON, data['inputs'])
+            inputs = list(map(outputReference.fromJSON, data['inputs']))
         )
         instance.metadata.update(**data['metadata'])
         return instance
 
     def json(self):
-        return {
+        serialized =  {
             'metadata': self.metadata,
             'parameters': self.parameters.json(),
             'inputs': [x.json() for x in self.inputs],
@@ -43,3 +42,4 @@ class packtivity_task(object):
             'spec': self.spec,
             'state': self.state.json() if self.state else None,
         }
+        return serialized
