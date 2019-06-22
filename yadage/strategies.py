@@ -26,7 +26,7 @@ def interactive_strategy(name):
     )
 
 @strategy('askforsubmit')
-def askforsubmit(name,opts = NOne):
+def askforsubmit(name,opts = None):
     idbased = opts.get('idbased',False)     
     extend_decider = yes_man()
     advance_coroutine(extend_decider)
