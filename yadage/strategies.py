@@ -18,7 +18,7 @@ def get_strategy(strategystring,strategyopts = None):
     raise RuntimeError('Unknown Strategy %s', strategystring, handlers.keys())
 
 @strategy('interactive')
-def interactive_strategy(name):
+def interactive_strategy(name,opts):
     extend, submit = interactive_deciders()
     return dict(
             extend_decider = extend,
