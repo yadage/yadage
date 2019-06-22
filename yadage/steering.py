@@ -10,7 +10,7 @@ import yadage.utils as utils
 import yadageschemas
 from packtivity.plugins import enable_plugins
 
-from .logging import LOGFORMAT
+from .logutils import LOGFORMAT
 
 log = logging.getLogger(__name__)
 

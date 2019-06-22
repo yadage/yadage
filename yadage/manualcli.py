@@ -12,7 +12,7 @@ import yadage.workflow_loader as workflow_loader
 
 from .steering_api import execute_steering
 from .steering_object import YadageSteering
-from .logging import LOGFORMAT
+from .logutils import LOGFORMAT
 
 log = logging.getLogger(__name__)
 
@@ -227,7 +227,7 @@ valid: {valid}
         statesource = modelsetup if local else 'remote via {}'.format(ctrlarg),
         successful =  click.style(str(controller.successful()), fg = 'green' if controller.successful() else 'red'),
         finished = click.style(str(controller.finished()), fg = 'green' if controller.finished() else 'yellow'),
-        valid = click.style(str(controller.validate()), fg = 'green' if controller.validate() else 'red'),
+        valid = click.style(str(    .validate()), fg = 'green' if controller.validate() else 'red'),
         applicable = len(controller.applicable_rules()),
         submittable = len(controller.submittable_nodes())
     ))
