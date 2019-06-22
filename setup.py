@@ -56,7 +56,7 @@ setup(
         "develop": [
             "pyflakes",
             "pre-commit",
-            "black",
+            'black;python_version>="3.6"',  # Black is Python3 only
             "isort",
             "pytest>=3.2.0",
             "pytest-cov>=2.5.1",
