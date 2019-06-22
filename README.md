@@ -8,6 +8,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/yadage/yadage/badge.svg?branch=master)](https://coveralls.io/github/yadage/yadage?branch=master)
 [![Documentation Status](https://readthedocs.org/projects/yadage/badge/?version=latest)](http://yadage.readthedocs.io/en/latest/?badge=latest)
 [![](https://images.microbadger.com/badges/version/yadage/yadage.svg)](https://microbadger.com/images/yadage/yadage "Get your own version badge on microbadger.com")
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
 
 This package reads and executes workflows adhering to the workflow JSON schemas defined at https://github.com/yadage/cap-schemas such as the onces stored in the community repository https://github.com/lukasheinrich/yadage-workflows. For executing the individual steps it mainly uses the packtivity python bindings provided by https://github.com/yadage/packtivity.
 
