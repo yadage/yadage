@@ -112,7 +112,7 @@ class CacheBuilder(object):
             self.cache = json.load(open(self.cachefile))
 
     def todisk(self):
-        log.info('writing cache to %s',self.cachefile)
+        log.debug('writing cache to %s',self.cachefile)
         json.dump(self.cache, open(self.cachefile, 'w'), indent=4, sort_keys=True)
 
     def remove(self,cacheid):
@@ -123,13 +123,15 @@ class CacheBuilder(object):
         saves a result and its status under a unique identifier and includes
         validation data to verify the cache validity at a later point in time
         '''
+        validation_data = self.generate_validation_data(cacheid)
         log.debug('caching result for cacheid: %s',cacheid)
         log.debug('caching result for process: %s',self.cache[cacheid]['task']['spec']['process'])
+        log.debug('caching with validation data %s', validation_data)
         self.cache[cacheid]['result'] = {
             'status': 'SUCCESS' if status else 'FAILED',
             'result': result.json(),
             'cachingtime': time.time(),
-            'validation_data': self.generate_validation_data(cacheid)
+            'validation_data': validation_data
         }
         self.todisk()
 
@@ -149,7 +151,7 @@ class CacheBuilder(object):
         t = task.json()
         tocache = [t['state'], t['parameters'], t['spec']]
         hash = json_hash(tocache)
-        # log.info('%s -> %s', json.dumps(tocache), hash)
+        log.debug('%s -> %s', json.dumps(tocache), hash)
         return hash
 
     def cacheexists(self,cacheid):
@@ -162,7 +164,7 @@ class CacheBuilder(object):
         '''
         cacheid = self.cacheid(task)
         #register this task with the cacheid if we don't know about it yet
-        log.debug('checking cache for task %s',task.metadata['name'], cacheid)
+        log.debug('checking cache for task %s %s',task.metadata['name'], cacheid)
         if cacheid not in self.cache:
             self.cache[cacheid] = {'task' : task.json()}
         if not self.cacheexists(cacheid):
@@ -228,7 +230,6 @@ class ChecksumCache(CacheBuilder):
         validation_data_now = self.generate_validation_data(cacheid)
 
         if not stored_validation_data == validation_data_now:
-            log.info('cache invalid')
+            log.info('cache invalid stored data:\n%s\ncurrent data:\n%s',stored_validation_data, validation_data_now)
             return False
-        log.info('cache valid')
         return True

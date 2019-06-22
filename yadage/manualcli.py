@@ -12,9 +12,9 @@ import yadage.workflow_loader as workflow_loader
 
 from .steering_api import execute_steering
 from .steering_object import YadageSteering
+from .logging import LOGFORMAT
 
 log = logging.getLogger(__name__)
-logging.basicConfig(level = logging.INFO)
 
 
 def connection_options(func):
@@ -32,7 +32,7 @@ def connection_options(func):
     return wrapper
 
 def common_options(func):
-    @click.option('-v', '--verbosity', default='ERROR')
+    @click.option('-v', '--verbosity', default='INFO')
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         return func(*args, **kwargs)
@@ -267,7 +267,7 @@ def preview(name,
 
 
 def handle_common_options(verbosity):
-    logging.basicConfig(level=getattr(logging, verbosity))
+    logging.basicConfig(level=getattr(logging, verbosity), format = LOGFORMAT)
 
 def handle_connection_options(metadir, accept_metadir, controller, ctrlopt, modelsetup, modelopt, backend, local):
     ctrlopts = utils.options_from_eqdelimstring(ctrlopt)
@@ -294,21 +294,25 @@ def handle_connection_options(metadir, accept_metadir, controller, ctrlopt, mode
 @click.option('-n', '--nsteps', default=-1, help = 'number of steps to process. use -1 to for no limit (will run workflow to completion)')
 @click.option('-u', '--update-interval', default=1)
 @click.option('-g','--strategy', help = 'set execution stragegy')
+@click.option('-y', '--strategyopt', help = 'strategy option', multiple=True, default=None)
 @connection_options
 @common_options
 def step(track , strategy, nsteps, update_interval,
          metadir, accept_metadir, controller, ctrlopt, modelsetup, modelopt, backend, local,
+         strategyopt,
          verbosity
          ):
 
     handle_common_options(verbosity)
     ys = handle_connection_options(metadir, accept_metadir, controller, ctrlopt, modelsetup, modelopt, backend, local)
 
+    strategyopts = utils.options_from_eqdelimstring(strategyopt)
     execute_steering(
         ys,
         updateinterval = update_interval,
         default_trackers = track,
-        strategy = strategy
+        strategy = strategy,
+        strategyopts = strategyopts
     )
 
 @mancli.command()

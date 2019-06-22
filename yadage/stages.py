@@ -134,11 +134,11 @@ class JsonStage(ViewStageBase):
 
     def schedule(self):
         #imported here to avoid circular dependency
-        log.info('scheduling')
+        log.debug('scheduling')
         from .handlers.scheduler_handlers import handlers as sched_handlers
         scheduler = sched_handlers[self.stagespec['scheduler_type']]
         scheduler(self, self.stagespec)
-        log.info('scheduled')
+        log.debug('scheduled')
 
     #(de-)serialization
     @classmethod

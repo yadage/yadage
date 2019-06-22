@@ -10,9 +10,10 @@ import yadage.utils as utils
 import yadageschemas
 from packtivity.plugins import enable_plugins
 
+from .logging import LOGFORMAT
+
 log = logging.getLogger(__name__)
 
-LOGFORMAT = '%(asctime)s | %(name)20.20s | %(levelname)6s | %(message)s'
 
 RC_FAILED = 1
 RC_SUCCEEDED = 0
@@ -68,6 +69,7 @@ def from_file(ctx, param, value):
 @click.option('-u', '--updateinterval', default=0.02, help = 'adage graph inspection interval in seconds')
 @click.option('-v', '--verbosity', default='INFO', help = 'logging verbosity')
 @click.option('-w', '--wflowopt', multiple=True, default=None, help = 'options for the workflow initialization')
+@click.option('-y', '--strategyopt', help = 'strategy option', multiple=True, default=None)
 @click.option('--accept-metadir/--no-accept-metadir', default=False)
 @click.option('--plugins', default=None)
 @click.option('--validate/--no-validate', default=True, help = 'en-/disable workflow spec validation')
@@ -87,6 +89,7 @@ def main(dataarg,
          wflowopt,
          backendopt,
          strategy,
+         strategyopt,
          modelsetup,
          modelopt,
          metadir,
@@ -105,13 +108,14 @@ def main(dataarg,
     if plugins:
         enable_plugins(plugins.split(','))
 
-    initdata    = utils.getinit_data(initfiles, parameter)
-    dataopts    = utils.options_from_eqdelimstring(dataopt)
-    backendopts = utils.options_from_eqdelimstring(backendopt)
-    modelopts   = utils.options_from_eqdelimstring(modelopt)
-    ctrlopts    = utils.options_from_eqdelimstring(ctrlopt)
-    wflowopts   = utils.options_from_eqdelimstring(wflowopt)
-    
+    initdata     = utils.getinit_data(initfiles, parameter)
+    dataopts     = utils.options_from_eqdelimstring(dataopt)
+    backendopts  = utils.options_from_eqdelimstring(backendopt)
+    modelopts    = utils.options_from_eqdelimstring(modelopt)
+    ctrlopts     = utils.options_from_eqdelimstring(ctrlopt)
+    wflowopts    = utils.options_from_eqdelimstring(wflowopt)
+    strategyopts = utils.options_from_eqdelimstring(strategyopt)
+
     backend  = utils.setupbackend_fromstring(backend,backendopts)
     rc = RC_FAILED
     try:
@@ -138,6 +142,7 @@ def main(dataarg,
             loginterval = loginterval,
             visualize = visualize,
             strategy = strategy,
+            strategyopts = strategyopts,
         )
         rc = RC_SUCCEEDED
     except:
