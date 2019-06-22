@@ -102,6 +102,7 @@ def steering_ctx(
             loginterval = loginterval,
             default_trackers = visualize,
             strategy = strategy,
+            strategyopts=strategyopts,
             backend = backend,
             cache = cache
         )
