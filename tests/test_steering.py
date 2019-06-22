@@ -28,8 +28,13 @@ def test_targetstrategy_steering(tmpdir,multiproc_backend):
     ys.adage_argument(default_trackers = False)
     ys.adage_argument(**get_strategy('target:/init', {}))
     ys.run_adage(multiproc_backend)
-    assert ys.controller.adageobj.dag.getNodeByName('init').state == nodestate.SUCCESS
-
+    for x in ys.controller.adageobj.dag.nodes():
+        n = ys.controller.adageobj.dag.getNode(x)
+        if n.name == 'init':
+            assert n.state == nodestate.SUCCESS
+        else:
+            assert n.state == nodestate.DEFINED
+        
 def test_context(tmpdir,multiproc_backend):
     workdir = os.path.join(str(tmpdir),'workdir')
     with steering_ctx(workdir, 'workflow.yml', {'input':[1,2,3]}, 'tests/testspecs/nestedmapreduce', multiproc_backend) as ys:
