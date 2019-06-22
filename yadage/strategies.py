@@ -26,7 +26,7 @@ def interactive_strategy(name):
     )
 
 @strategy('askforsubmit')
-def askforsubmit(name):
+def askforsubmit(name,opts = NOne):
     idbased = opts.get('idbased',False)     
     extend_decider = yes_man()
     advance_coroutine(extend_decider)
@@ -40,7 +40,8 @@ def askforsubmit(name):
     )
 
 @strategy('target')
-def waitfornode(name,opts = {}):
+def waitfornode(name,opts = None):
+    opts = opts or {}
     idbased = opts.get('idbased',False)     
     _,targetname = name.split(':',1)
     targetoffset, targetname = targetname.rsplit('/',1)
