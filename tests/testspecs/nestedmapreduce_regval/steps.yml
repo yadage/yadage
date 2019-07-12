@@ -1,0 +1,21 @@
+stepA:
+  process:
+    process_type: string-interpolated-cmd
+    cmd: echo hello {input}  > {outputfile}
+  environment:
+    environment_type: localproc-env
+  publisher:
+    publisher_type: 'interpolated-pub'
+    publish:
+      outputA: '{outputfile}'
+
+stepB:
+  process:
+    process_type: string-interpolated-cmd
+    cmd: cat {input}  > {outputfile}
+  environment:
+    environment_type: localproc-env
+  publisher:
+    publisher_type: 'interpolated-pub'
+    publish:
+      outputB: '{outputfile}'
