@@ -4,7 +4,7 @@ stages:
     scheduler:
       scheduler_type: singlestep-stage
       parameters:
-        input: {stages: init, output: inputpar, unwrap: true}
+        input: {step: init, output: inputpar}
         outputfile: '{workdir}/single.txt'
       step: {$ref: steps.yml#/stepA}
       register_values:
