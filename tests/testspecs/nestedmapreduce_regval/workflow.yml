@@ -4,7 +4,7 @@ stages:
     scheduler:
       scheduler_type: multistep-stage
       parameters:
-        inputpar: {stages: init, output: input, unwrap: true}
+        inputpar: {step: init, output: input}
       workflow: {$ref: subflow.yml}
       scatter:
         method: zip
