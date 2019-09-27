@@ -115,7 +115,7 @@ def select_steps(stageview, query):
                 for s in stageview.getSteps(query)
             ],
         )
-    return []
+    return None, []
 
 
 def select_outputs(steps, selection, flatten, unwrapsingle, is_scopes=False):

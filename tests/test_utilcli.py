@@ -38,7 +38,7 @@ def test_clis(tmpdir):
             "{stages: nonexistent, output: nonexistent}",
         ],
     )
-    assert result.exit_code != 0
+    assert result.exit_code == 0
 
     result = runner.invoke(
         yadage.utilcli.viz,
