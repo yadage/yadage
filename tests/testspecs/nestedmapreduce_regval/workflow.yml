@@ -1,0 +1,19 @@
+stages:
+  - name: map
+    dependencies: [init]
+    scheduler:
+      scheduler_type: multistep-stage
+      parameters:
+        inputpar: {step: init, output: input}
+      workflow: {$ref: subflow.yml}
+      scatter:
+        method: zip
+        parameters: [inputpar]
+  - name: reduce
+    dependencies: [map]
+    scheduler:
+      scheduler_type: singlestep-stage
+      parameters:
+        input: {stages: 'map[*]', output: mysavedoutput}
+        outputfile: '{workdir}/merged.txt'
+      step: {$ref: steps.yml#/stepB}

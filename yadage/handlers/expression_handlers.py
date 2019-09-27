@@ -9,7 +9,20 @@ log = logging.getLogger(__name__)
 handlers, expression = handler_decorator()
 
 
-def select_reference(step, selection):
+def select_from_scope(scope, output):
+    view = scope["view"]
+    value = view.getValue(output)
+    if not value:
+        return None
+    log.debug("resolved to %s", value)
+    if isinstance(value, dict) and "expression_type" in value:
+        log.debug("looking up expression %s", value)
+        return handlers[value["expression_type"]](view, value)
+    else:
+        raise RuntimeError("not an expression value")
+
+
+def select_reference(step, selection, is_scopes):
     """
     resolves a jsonpath selection on a step's result data and returns JSONPointerized matches
 
@@ -18,6 +31,9 @@ def select_reference(step, selection):
 
     :return: the first (and single) match of the expression as a JSON pointer
     """
+    if is_scopes:
+        return select_from_scope(step, selection)
+
     selection = selection or "$"
     log.debug("selecting %s from step %s", selection, step)
     pointerized = pointerize(step["result"], asref=True, stepid=step["id"])
@@ -85,12 +101,28 @@ def select_steps(stageview, query):
 
     :return: list of {id: xx, result: yy} dictionaries
     """
-    return [{"id": s.identifier, "result": s.result} for s in stageview.getSteps(query)]
+    possible_steps = stageview.getSteps(query)
+    possible_scopes = stageview.getScopes(query)
+    if possible_steps and possible_scopes:
+        raise RuntimeError("both steps and scopes in selection? should be impossible")
+    if possible_scopes:
+        return "scopes", [{"view": stageview.view(s)} for s in possible_scopes]
+    if possible_steps:
+        return (
+            "steps",
+            [
+                {"id": s.identifier, "result": s.result}
+                for s in stageview.getSteps(query)
+            ],
+        )
+    return None, []
 
 
-def select_outputs(steps, selection, flatten, unwrapsingle):
+def select_outputs(steps, selection, flatten, unwrapsingle, is_scopes=False):
     return combine_outputs(
-        map(lambda s: select_reference(s, selection), steps), flatten, unwrapsingle
+        map(lambda s: select_reference(s, selection, is_scopes), steps),
+        flatten,
+        unwrapsingle,
     )
 
 
@@ -110,27 +142,39 @@ def stage_output_selector(stageview, selection):
             if "stages" in selection and "steps" in selection:
                 raise RuntimeError("stages and steps are aliases. pick one.")
             steps_selector = selection.get("stages") or selection.get("steps")
-            steps = select_steps(stageview, steps_selector)
+            selection_type, steps = select_steps(stageview, steps_selector)
             log.debug("selected steps %s %s", len(steps), steps)
             outputs = select_outputs(
                 steps,
                 selection.get("output"),
                 selection.get("flatten", False),
                 selection.get("unwrap", False),
+                is_scopes=(selection_type == "scopes"),
             )
             log.debug("selected outputs %s", outputs)
             return outputs
         elif "step" in selection:
-            steps = select_steps(stageview, selection["step"])
+            selection_type, steps = select_steps(stageview, selection["step"])
             assert len(steps) == 1
             step = steps[0]
-            return select_reference(step, selection.get("output"))
+            return select_reference(
+                step, selection.get("output"), selection_type == "scopes"
+            )
         raise RuntimeError("not sure how to deal with this.")
 
 
 @expression("fromvalue")
 def value_resolver(view, expression):
-    value = view.getValue(expression["key"])
+    if "scope" in expression:
+        scopes = view.getScopes(expression["scope"])
+        assert len(scopes) == 1
+        scope = scopes[0]
+    else:
+        scope = ""
+
+    view = view.view(scope)
+
+    value = select_from_scope({"view": view}, expression["key"])
     if not value:
         return None
     log.debug("resolved to %s", value)

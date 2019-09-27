@@ -41,6 +41,22 @@ class WorkflowView(object):
         matches = jsonpath_rw.parse(query).find(collection)
         return matches
 
+    def getScopes(self, query):
+        matches = self.query(query, self.steps)
+        scopes = []
+        for match in matches:
+            value = match.value
+            # step endpoint case
+            if isinstance(value, dict) and "_offset" in value:
+                scopes.append(value["_offset"])
+            # stage endpoint case
+            elif isinstance(value, list):
+                for item in value:
+                    if "_offset" in item:
+                        scopes.append(item["_offset"])
+
+        return scopes
+
     def getSteps(self, query):
         """
         returns steps related to the JSONPath query.
