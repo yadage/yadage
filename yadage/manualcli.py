@@ -450,13 +450,13 @@ def handle_connection_options(
 
 
 @mancli.command()
-@click.option("--track/--no-track", default=False)
 @click.option(
     "-n",
     "--nsteps",
     default=-1,
     help="number of steps to process. use -1 to for no limit (will run workflow to completion)",
 )
+@click.option("--track/--no-track", default=False)
 @click.option("-u", "--update-interval", default=1)
 @click.option("-g", "--strategy", help="set execution stragegy")
 @click.option(

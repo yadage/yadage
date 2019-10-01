@@ -51,15 +51,19 @@ def fillscope(cluster, workflow, nodes_to_connect, scope="", subcluster=True):
                     if stage in ["init", "output"]
                     else {}
                 )
+                nodeobj = workflow.dag.getNode(element)
                 targetcl.add_node(
                     pydotplus.graphviz.Node(
-                        element, label=label, color="blue", shape=shape, **additional
+                        element,
+                        label=label,
+                        color=("blue" if nodeobj.ready() else "grey"),
+                        shape=shape,
+                        **additional
                     )
                 )
-                nodeobj = workflow.dag.getNode(element)
-                result = nodeobj.result if nodeobj.ready() else None
+                result = nodeobj.result if nodeobj.has_result() else None
                 if result:
-                    add_result(targetcl, element, result)
+                    add_result(targetcl, element, result, ready=nodeobj.ready())
             elif type(element) == dict:
                 # recurse...
                 fillscope(
@@ -71,14 +75,13 @@ def fillscope(cluster, workflow, nodes_to_connect, scope="", subcluster=True):
                     ).path,
                     subcluster=subcluster,
                 )
-        # connect_nodes(cluster,workflow,nodes_to_connect)
 
 
 def path_to_id(stepid, path):
     return "{}_{}".format(stepid, path.replace("/", "_"))
 
 
-def add_result(graph, parent, data):
+def add_result(graph, parent, data, ready):
     leafpointers = [p for p, v in data.leafs()]
 
     for leaf in leafpointers:
@@ -86,15 +89,20 @@ def add_result(graph, parent, data):
         # value = leaf.resolve(jsondata)
         source = "".join(["[{}]".format(p) for p in leaf.parts])
         label = "{}".format(source)
-        graph.add_node(pydotplus.graphviz.Node(leafid, label=label, color="red"))
+        graph.add_node(
+            pydotplus.graphviz.Node(
+                leafid, label=label, color=("red" if ready else "grey")
+            )
+        )
         graph.add_edge(pydotplus.graphviz.Edge(parent, leafid))
 
 
 def attach_to_results(provgraph, workflow, node):
     nodeobj = workflow.dag.getNode(node)
     for dep in nodeobj.task.inputs:
-        resultid = path_to_id(dep.stepid, dep.pointer.path)
-        provgraph.add_edge(pydotplus.graphviz.Edge(resultid, node))
+        if workflow.dag.getNode(dep.stepid).has_result():
+            resultid = path_to_id(dep.stepid, dep.pointer.path)
+            provgraph.add_edge(pydotplus.graphviz.Edge(resultid, node))
 
 
 def connect_nodes(provgraph, workflow, nodes):

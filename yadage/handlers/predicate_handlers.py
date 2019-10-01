@@ -65,7 +65,7 @@ def jsonpath_ready(stage, depspec, stagespec):
             ):
                 return False
         else:
-            if not all([x.has_result() for x in stage.view.getSteps(x)]):
+            if not all([y.has_result() for y in stage.view.getSteps(x)]):
                 return False
     log.debug("all checks ok, predicate is True")
     return True

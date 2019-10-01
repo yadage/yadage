@@ -46,7 +46,10 @@ def target(name, opts=None):
 
     def isfinished(controller, idbased):
         dag = controller.adageobj.dag
-        targetnode = dag.getNodeByName(targetname)
+        targetnode = dag.getNodeByName(
+            targetname,
+            nodefilter=lambda x: x.task.metadata["wflow_offset"] == targetoffset,
+        )
         if targetnode:
             return (targetnode.ready(), targetnode.successful())
         return False, False
