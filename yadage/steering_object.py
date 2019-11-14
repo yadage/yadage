@@ -9,6 +9,7 @@ from .wflowstate import load_model_fromstring
 from .controllers import setup_controller
 from .utils import setupbackend_fromstring, prepare_meta
 from .creators import handlers as creators
+
 log = logging.getLogger(__name__)
 
 
@@ -45,7 +46,7 @@ class YadageSteering(object):
     @classmethod
     def create(cls, **kwargs):
         dataopts = kwargs.get("dataopts") or {}
-        if dataarg.startswith('local:'):
+        if dataarg.startswith("local:"):
             metadir = kwargs.get("metadir")
             metadir = metadir or "{}/_yadage/".format(dataarg)
             if dataopts.get("overwrite") and os.path.exists(metadir):

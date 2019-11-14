@@ -185,7 +185,7 @@ def main(
         enable_plugins(plugins.split(","))
 
     initdata = utils.getinit_data(initfiles, parameter)
-    dataarg  = utils.coerce_data_arg(dataarg)
+    dataarg = utils.coerce_data_arg(dataarg)
     dataopts = utils.options_from_eqdelimstring(dataopt)
     backendopts = utils.options_from_eqdelimstring(backendopt)
     modelopts = utils.options_from_eqdelimstring(modelopt)
