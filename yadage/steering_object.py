@@ -46,7 +46,7 @@ class YadageSteering(object):
     @classmethod
     def create(cls, **kwargs):
         dataopts = kwargs.get("dataopts") or {}
-        if dataarg.startswith("local:"):
+        if kwargs["dataarg"].startswith("local:"):
             metadir = kwargs.get("metadir")
             metadir = metadir or "{}/_yadage/".format(dataarg)
             if dataopts.get("overwrite") and os.path.exists(metadir):
@@ -57,7 +57,6 @@ class YadageSteering(object):
 
         kw = copy.deepcopy(kwargs)
         kw["metadir"] = metadir
-        kw["dataarg"] = dataarg
         prepare_meta(
             metadir, accept_metadir
         )  # meta must be here because data model might store stuff here
