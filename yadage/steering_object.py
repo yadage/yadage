@@ -48,7 +48,7 @@ class YadageSteering(object):
         dataopts = kwargs.get("dataopts") or {}
         if kwargs["dataarg"].startswith("local:"):
             metadir = kwargs.get("metadir")
-            metadir = metadir or "{}/_yadage/".format(dataarg)
+            metadir = metadir or "{}/_yadage/".format(kwargs["dataarg"])
             if dataopts.get("overwrite") and os.path.exists(metadir):
                 shutil.rmtree(metadir)
         else:
