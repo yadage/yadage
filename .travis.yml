@@ -12,7 +12,7 @@ install:
 - sudo apt-get install -y graphviz
 - sudo apt-get install -y python-logilab-common
 - pip install -U setuptools
-- pip install -U --process-dependency-links -e .[viz,develop,celery]
+- pip install -U -e .[viz,develop,celery]
 script:
 - pyflakes yadage
 - if [[ $TRAVIS_PYTHON_VERSION == '3.7' ]]; then black --check --diff --verbose .; fi
