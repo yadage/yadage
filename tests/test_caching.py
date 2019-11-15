@@ -7,7 +7,7 @@ def test_cached(tmpdir,checksum_cached_multiproc):
     workdir = os.path.join(str(tmpdir),'workdir')
 
     def run_workflow():
-        with steering_ctx(workdir, 'workflow.yml', {'par':'value'}, 'tests/testspecs/local-helloworld', checksum_cached_multiproc, accept_metadir = True) as ys:
+        with steering_ctx('local:'+ workdir, 'workflow.yml', {'par':'value'}, 'tests/testspecs/local-helloworld', checksum_cached_multiproc, accept_metadir = True) as ys:
             ys.adage_argument(default_trackers = False)
 
 
@@ -37,7 +37,7 @@ def test_cached_fromstring(tmpdir):
 
     def run_workflow():
         backend = setupbackend_fromstring('multiproc:auto')
-        with steering_ctx(workdir, 'workflow.yml', {'par':'value'}, 'tests/testspecs/local-helloworld',
+        with steering_ctx('local:'+ workdir, 'workflow.yml', {'par':'value'}, 'tests/testspecs/local-helloworld',
             backend, cache='checksums') as ys:
             ys.adage_argument(default_trackers = False)
 
