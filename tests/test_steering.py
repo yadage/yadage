@@ -57,7 +57,7 @@ def test_incomplete_data(tmpdir):
 def test_incomplete_data_ctx(tmpdir):
     workdir = os.path.join(str(tmpdir),'workdir')
     with pytest.raises(RuntimeError):
-        with steering_ctx(workdir) as ys:
+        with steering_ctx('local:'+workdir) as ys:
             pass
 
 def test_directjson(tmpdir,multiproc_backend):
@@ -88,7 +88,7 @@ def test_invalid_directjson(tmpdir):
 
     with pytest.raises(jsonschema.exceptions.ValidationError):
         ys = YadageSteering.create(
-            dataarg = os.path.join(str(tmpdir),'workdir'),
+            dataarg = 'local:'+os.path.join(str(tmpdir),'workdir'),
             workflow_json =  {'invalid':'data'}
         )
 
