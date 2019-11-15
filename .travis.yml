@@ -12,7 +12,7 @@ install:
 - sudo apt-get install -y graphviz
 - sudo apt-get install -y python-logilab-common
 - pip install -U setuptools
-- pip install -U --process-dependency-links -e .[viz,develop,celery]
+- pip install -U -e .[viz,develop,celery]
 script:
 - pyflakes yadage
 - if [[ $TRAVIS_PYTHON_VERSION == '3.7' ]]; then black --check --diff --verbose .; fi
@@ -32,7 +32,7 @@ jobs:
     #   - export GOROOT=/usr/lib/go-1.10
     #   - /usr/lib/go-1.10/bin/go get sigs.k8s.io/kind
     #   - pip install -U setuptools
-    #   - pip install -U --process-dependency-links -e .
+    #   - pip install -U -e .
     #   script:
     #   - docker build -t yadage/yadage .
     #   - kind create cluster
@@ -48,7 +48,7 @@ jobs:
     - stage: docs
       install:
       - pip install -U setuptools
-      - pip install -U --process-dependency-links -e .
+      - pip install -U -e .
       - pip install sphinx
       script:
       - cd docs && make html && cd -

@@ -87,6 +87,7 @@ def init(
     if os.path.exists("input.yml") and not initfiles:
         initfiles = ("input.yml",)
     initdata = utils.getinit_data(initfiles, parameter)
+    dataarg = utils.coerce_data_arg(dataarg)
     dataopts = utils.options_from_eqdelimstring(dataopt)
 
     ys = YadageSteering.create(
@@ -534,6 +535,7 @@ def add(
     verbosity,
 ):
     parameter = utils.options_from_eqdelimstring(parameter)
+    dataarg = utils.coerce_data_arg(dataarg)
     dataopts = utils.options_from_eqdelimstring(dataopts)
     handle_common_options(verbosity)
     ys = handle_connection_options(
