@@ -36,12 +36,12 @@ def test_targetstrategy_steering(tmpdir,multiproc_backend):
             assert n.state == nodestate.DEFINED
         
 def test_context(tmpdir,multiproc_backend):
-    workdir = os.path.join(str(tmpdir),'workdir')
+    workdir = 'local:' + os.path.join(str(tmpdir),'workdir')
     with steering_ctx('local:'+ workdir, 'workflow.yml', {'input':[1,2,3]}, 'tests/testspecs/nestedmapreduce', multiproc_backend) as ys:
         ys.adage_argument(default_trackers = False)
 
 def test_inparchive(tmpdir,multiproc_backend):
-    workdir = os.path.join(str(tmpdir),'workdir')
+    workdir = 'local:' + os.path.join(str(tmpdir),'workdir')
     inputarchive = 'file://{}/tests/testspecs/dynamic_glob/inputs/three_files.zip'.format(os.path.abspath(os.curdir))
     with steering_ctx('local:'+ workdir, 'workflow_frominit.yml', {'inputfiles':'*.txt'}, 'tests/testspecs/dynamic_glob', multiproc_backend,
                       dataopts = dict(inputarchive = inputarchive)) as ys:
@@ -55,7 +55,7 @@ def test_incomplete_data(tmpdir):
         )
 
 def test_incomplete_data_ctx(tmpdir):
-    workdir = os.path.join(str(tmpdir),'workdir')
+    workdir = 'local:' + os.path.join(str(tmpdir),'workdir')
     with pytest.raises(RuntimeError):
         with steering_ctx(workdir) as ys:
             pass
@@ -76,7 +76,7 @@ def test_directjson(tmpdir,multiproc_backend):
 
 def test_directjson_ctx(tmpdir,multiproc_backend):
     wflowjson = yadage.workflow_loader.workflow('workflow.yml','tests/testspecs/local-helloworld')
-    workdir = os.path.join(str(tmpdir),'workdir')
+    workdir = 'local:' + os.path.join(str(tmpdir),'workdir')
     with steering_ctx('local:'+ workdir, workflow_json = wflowjson, backend = multiproc_backend, initdata = {'par': 'parvalue'}) as ys:
         ys.adage_argument(default_trackers = False)
 

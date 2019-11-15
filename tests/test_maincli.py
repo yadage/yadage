@@ -60,7 +60,7 @@ plugins: []
 backend: 'foregroundasync'
 backendopts: {{}}
 '''.format(
-        workdir = os.path.join(str(tmpdir),'workdir'),
+        workdir = 'local:' + os.path.join(str(tmpdir),'workdir'),
         signal = os.path.abspath('tests/testspecs/analysis_scaffold/basedata/siginputs'),
         data = os.path.abspath('tests/testspecs/analysis_scaffold/basedata/datainputs'),
         bkg = os.path.abspath('tests/testspecs/analysis_scaffold/basedata/bkginputs'),
@@ -96,7 +96,7 @@ backend: 'foregroundasync'
 backendopts: {{}}
 '''.format(
         pathbase = os.path.abspath('tests/testspecs/bsm_grid_scaffold/basedata'),
-        workdir = os.path.join(str(tmpdir),'workdir'),
+        workdir = 'local:' + os.path.join(str(tmpdir),'workdir'),
         signal = os.path.abspath('tests/testspecs/bsm_grid_scaffold/basedata/siginputs'),
         data = os.path.abspath('tests/testspecs/bsm_grid_scaffold/basedata/datainputs'),
         bkg = os.path.abspath('tests/testspecs/bsm_grid_scaffold/basedata/bkginputs'),

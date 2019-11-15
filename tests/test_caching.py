@@ -4,7 +4,7 @@ from yadage.utils import setupbackend_fromstring
 from yadage.steering_api import steering_ctx
 
 def test_cached(tmpdir,checksum_cached_multiproc):
-    workdir = os.path.join(str(tmpdir),'workdir')
+    workdir = 'local:' + os.path.join(str(tmpdir),'workdir')
 
     def run_workflow():
         with steering_ctx('local:'+ workdir, 'workflow.yml', {'par':'value'}, 'tests/testspecs/local-helloworld', checksum_cached_multiproc, accept_metadir = True) as ys:
@@ -33,7 +33,7 @@ def test_cached(tmpdir,checksum_cached_multiproc):
     run_workflow()
 
 def test_cached_fromstring(tmpdir):
-    workdir = os.path.join(str(tmpdir),'workdir')
+    workdir = 'local:' + os.path.join(str(tmpdir),'workdir')
 
     def run_workflow():
         backend = setupbackend_fromstring('multiproc:auto')
