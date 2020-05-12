@@ -149,7 +149,7 @@ spec:
 """.format(
         pvc_name=pvc_name,
         sc_name=sc_name,
-        base_path=path_base,
+        path_base=path_base,
         size=size,
         path_base=path_base,
         hostname=hostname,
