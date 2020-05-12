@@ -12,6 +12,7 @@ install:
 - sudo apt-get install -y graphviz
 - sudo apt-get install -y python-logilab-common
 - pip install -U setuptools
+- "python -m pip install jq --no-binary :all:"
 - pip install -U -e .[viz,develop,celery]
 script:
 - pyflakes yadage
