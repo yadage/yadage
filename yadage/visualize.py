@@ -58,7 +58,7 @@ def fillscope(cluster, workflow, nodes_to_connect, scope="", subcluster=True):
                         label=label,
                         color=("blue" if nodeobj.ready() else "grey"),
                         shape=shape,
-                        **additional
+                        **additional,
                     )
                 )
                 result = nodeobj.result if nodeobj.has_result() else None
