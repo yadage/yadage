@@ -1,0 +1,15 @@
+[build-system]
+# Minimum requirements for the build system to execute.
+requires = ["wheel", "setuptools>=30.3.0", "attrs>=17.1", "setuptools_scm"]
+build-backend = "setuptools.build_meta"
+
+[tool.black]
+target-version = ['py36', 'py37', 'py38']
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+  | .eggs
+  | build
+)/
+'''
