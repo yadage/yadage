@@ -3,14 +3,15 @@
 [![arXiv](https://img.shields.io/badge/arXiv-1706.01878-orange.svg)](https://arxiv.org/abs/1706.01878)
 [![DOI](https://zenodo.org/badge/53543066.svg)](https://zenodo.org/badge/latestdoi/53543066)
 [![PyPI version](https://badge.fury.io/py/yadage.svg)](https://badge.fury.io/py/yadage)
-[![Build Status](https://travis-ci.org/yadage/yadage.svg?branch=master)](https://travis-ci.org/yadage/yadage)
-[![Code Health](https://landscape.io/github/yadage/yadage/master/landscape.svg?style=flat)](https://landscape.io/github/yadage/yadage/master)
-[![Coverage Status](https://coveralls.io/repos/github/yadage/yadage/badge.svg?branch=master)](https://coveralls.io/github/yadage/yadage?branch=master)
+[![GitHub Actions Status: CI](https://github.com/yadage/yadage/workflows/CI/CD/badge.svg)](https://github.com/yadage/yadage/actions?query=workflow%3ACI%2FCD+branch%3Amaster)
+[![Code Coverage](https://codecov.io/gh/yadage/yadage/graph/badge.svg?branch=master)](https://codecov.io/gh/yadage/yadage?branch=master)
+[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/yadage/yadage.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/yadage/yadage/latest/files/)
+[![CodeFactor](https://www.codefactor.io/repository/github/yadage/yadage/badge)](https://www.codefactor.io/repository/github/yadage/yadage)
 [![Documentation Status](https://readthedocs.org/projects/yadage/badge/?version=latest)](http://yadage.readthedocs.io/en/latest/?badge=latest)
 [![](https://images.microbadger.com/badges/version/yadage/yadage.svg)](https://microbadger.com/images/yadage/yadage "Get your own version badge on microbadger.com")
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-This package reads and executes workflows adhering to the workflow JSON schemas defined at https://github.com/yadage/yadage-schemas such as the onces stored in the community repository https://github.com/yadage/yadage-workflows. For executing the individual steps it mainly uses the packtivity python bindings provided by https://github.com/yadage/packtivity.
+This package reads and executes workflows adhering to the workflow JSON schemas defined at https://github.com/yadage/yadage-schemas such as the ones stored in the community repository https://github.com/yadage/yadage-workflows. For executing the individual steps it mainly uses the packtivity python bindings provided by https://github.com/yadage/packtivity.
 
 ### Example Workflow
 
