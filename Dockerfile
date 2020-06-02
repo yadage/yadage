@@ -1,7 +1,7 @@
 FROM alpine
 RUN  apk add automake autoconf libtool \
-             python3-dev musl-dev libffi-dev gcc \
-             autoconf curl gcc ipset ipset-dev iptables iptables-dev libnfnetlink libnfnetlink-dev libnl3 libnl3-dev make musl-dev openssl openssl-dev \
+             python3-dev musl-dev libffi-dev \
+             curl ipset ipset-dev iptables iptables-dev libnfnetlink libnfnetlink-dev libnl3 libnl3-dev make musl-dev openssl openssl-dev \
              jq util-linux font-bitstream-type1 build-base graphviz-dev imagemagick graphviz
 #pip
 RUN curl https://bootstrap.pypa.io/get-pip.py | python3 -
