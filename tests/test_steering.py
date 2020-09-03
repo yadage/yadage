@@ -51,8 +51,10 @@ def test_context(tmpdir, multiproc_backend):
 
 def test_inparchive(tmpdir, multiproc_backend):
     workdir = os.path.join(str(tmpdir), "workdir")
-    inputarchive = "file://{}/tests/testspecs/dynamic_glob/inputs/three_files.zip".format(
-        os.path.abspath(os.curdir)
+    inputarchive = (
+        "file://{}/tests/testspecs/dynamic_glob/inputs/three_files.zip".format(
+            os.path.abspath(os.curdir)
+        )
     )
     with steering_ctx(
         "local:" + workdir,
