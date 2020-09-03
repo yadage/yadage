@@ -31,7 +31,7 @@ def test_persistent_controller(
     assert len(pers_ctrl.submittable_nodes()) == 1
     pers_ctrl.submit_nodes(pers_ctrl.submittable_nodes())
 
-    model = FileBackedModel(filename=str(tmpdir.join("wflowstate")),)
+    model = FileBackedModel(filename=str(tmpdir.join("wflowstate")))
     pers_ctrl = PersistentController(model, foregroundasync_backend)
 
     # assert pers_ctrl.adageobj.dag.getNode(pers_ctrl.submittable_nodes()[0]).task.state.json() == 11
