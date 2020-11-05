@@ -1,0 +1,31 @@
+acquire_pure:
+  process:
+    process_type: string-interpolated-cmd
+    cmd: 'curl -sSL {url} -o {outdir}/files.yml'
+  environment:
+    environment_type: 'localproc-env'
+  publisher:
+    publisher_type: fromyaml-pub
+    yamlfile : 'files.yml'
+
+mapstep:
+  process:
+    process_type: string-interpolated-cmd
+    cmd: 'date > {outputfile}; echo  {inputfile} >> {outputfile};'
+  environment:
+    environment_type: 'localproc-env'
+  publisher:
+    publisher_type: 'frompar-pub'
+    outputmap:
+      mapout: outputfile
+
+reducestep:
+  process:
+    process_type: string-interpolated-cmd
+    cmd: 'cat {mapoutputs} > {combinedfile}'
+  environment:
+    environment_type: 'localproc-env'
+  publisher:
+    publisher_type: 'frompar-pub'
+    outputmap:
+      reduceout: combinedfile
