@@ -53,11 +53,13 @@ setup(
             "pygraphviz",
             "pydotplus",
         ],
-        "develop": [
+        "lint": [
             "pyflakes",
-            "pre-commit",
-            'black;python_version>="3.6"',  # Black is Python3 only
             "isort",
+            "black",
+        ],
+        "develop": [
+            "pre-commit",
             "pytest>=3.2.0",
             "pytest-cov>=2.5.1",
             "python-coveralls",
