@@ -5,7 +5,7 @@ deps = [
     "adage",
     "packtivity",
     "yadage-schemas",
-    "click",
+    "click>=7.0.0,<8.0.0",  # FIXME: Cap of <8.0.0 is temporary
     "psutil",
     "requests[security]>=2.9",
     "pyyaml",
