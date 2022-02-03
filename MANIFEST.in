@@ -1,0 +1,11 @@
+prune **
+graft yadage
+graft tests
+
+include setup.py
+include LICENSE
+include README.md
+include pyproject.toml
+include MANIFEST.in
+
+global-exclude __pycache__ *.py[cod]
