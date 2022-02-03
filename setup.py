@@ -2,7 +2,7 @@ import os
 from setuptools import setup, find_packages
 
 deps = [
-    "adage",
+    "adage>=0.10.2",  # Ensure networkx>=2.4
     "packtivity",
     "yadage-schemas",
     "click",

@@ -55,7 +55,7 @@ def target(name, opts=None):
         return False, False
 
     def upstream(dag, target_identifier):
-        predecessors = dag.predecessors(target_identifier)
+        predecessors = [*dag.predecessors(target_identifier)]
         return list(
             set(predecessors + [g for p in predecessors for g in upstream(dag, p)])
         )
