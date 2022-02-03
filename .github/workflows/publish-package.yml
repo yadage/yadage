@@ -1,55 +1,69 @@
 name: publish distributions
+
 on:
   push:
     branches:
     - master
     tags:
-    - v*
+      - v*
   pull_request:
     branches:
     - master
+  release:
+    types: [published]
+  workflow_dispatch:
 
 jobs:
   build-and-publish:
     name: Build and publish Python distro to (Test)PyPI
     runs-on: ubuntu-latest
+
     steps:
-    - uses: actions/checkout@v2
+
+    - name: Checkout
+      uses: actions/checkout@v2
       with:
         fetch-depth: 0
-    - name: Set up Python 3.7
+
+    - name: Set up Python 3.10
       uses: actions/setup-python@v2
       with:
-        python-version: 3.7
-    - name: Install pep517 and twine
+        python-version: '3.10'
+
+    - name: Install build, check-manifest, and twine
       run: |
-        python -m pip install pep517 --user
-        python -m pip install twine
-    - name: Build a binary wheel and a source tarball
+        python -m pip install --upgrade pip setuptools wheel
+        python -m pip install build check-manifest twine
+        python -m pip list
+
+    - name: Check MANIFEST
       run: |
-        python -m pep517.build --source --binary --out-dir dist/ .
-    - name: Verify tagged commits don't have dev versions
-      if: startsWith(github.ref, 'refs/tags')
+        check-manifest
+
+    - name: Build a sdist and a wheel
       run: |
-        wheel_name=$(find dist/ -iname "*.whl" -printf "%f\n")
-        if [[ "${wheel_name}" == *"dev"* ]]; then
-          echo "pep517.build incorrectly named built distribution: ${wheel_name}"
-          echo "this is incorrrectly being treated as a dev release"
-          echo "intentionally erroring with 'return 1' now"
-          return 1
-        fi
-        echo "pep517.build named built distribution: ${wheel_name}"
+        python -m build .
+
     - name: Verify the distribution
       run: twine check dist/*
+
+    - name: List contents of sdist
+      run: python -m tarfile --list dist/yadage-*.tar.gz
+
+    - name: List contents of wheel
+      run: python -m zipfile --list dist/yadage-*.whl
+
     - name: Publish distribution 📦 to Test PyPI
-      # every PR will trigger a push event on master, so check the push event is actually coming from master
-      if: github.event_name == 'push' && github.ref == 'refs/heads/master' && github.repository == 'yadage/yadage'
-      uses: pypa/gh-action-pypi-publish@v1.1.0
+      # publish to TestPyPI on tag events
+      if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') && github.repository == 'yadage/yadage'
+      uses: pypa/gh-action-pypi-publish@v1.4.2
       with:
         password: ${{ secrets.test_pypi_password }}
         repository_url: https://test.pypi.org/legacy/
+
     - name: Publish distribution 📦 to PyPI
-      if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags') && github.repository == 'yadage/yadage'
-      uses: pypa/gh-action-pypi-publish@v1.1.0
+      # publish to PyPI on releases
+      if: github.event_name == 'release' && github.event.action == 'published' && github.repository == 'yadage/yadage'
+      uses: pypa/gh-action-pypi-publish@v1.4.2
       with:
         password: ${{ secrets.pypi_password }}
