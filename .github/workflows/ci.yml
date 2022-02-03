@@ -33,14 +33,6 @@ jobs:
         python -m pip install --upgrade pip setuptools wheel
         python -m pip install -q --no-cache-dir -e .[viz,develop,celery]
         python -m pip list
-    - name: Lint with Pyflakes
-      if: matrix.python-version == 3.8
-      run: |
-        pyflakes yadage
-    - name: Lint with Black
-      if: matrix.python-version == 3.8
-      run: |
-        black --check --diff --verbose .
     - name: Test with pytest
       run: |
         python -m pytest --cov=yadage
