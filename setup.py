@@ -38,7 +38,7 @@ setup(
     name="yadage",
     version="0.20.1",
     description="yadage - YAML based adage",
-    url="",
+    url="https://github.com/yadage/yadage",
     author="Lukas Heinrich",
     author_email="lukas.heinrich@cern.ch",
     packages=find_packages(),
