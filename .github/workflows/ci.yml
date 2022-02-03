@@ -7,7 +7,12 @@ on:
     - master
   # Run daily at 1:23 UTC
   schedule:
-  - cron:  '1 0 * * *'
+  - cron:  '23 1 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   test:
