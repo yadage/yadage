@@ -5,7 +5,7 @@ deps = [
     "adage",
     "packtivity",
     "yadage-schemas",
-    "click>=7.0.0",
+    "click",
     "psutil",
     "requests[security]>=2.9",
     "pyyaml",
