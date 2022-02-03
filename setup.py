@@ -46,7 +46,7 @@ setup(
     install_requires=deps,
     extras_require={
         "celery": ["celery", "redis"],
-        "viz": ["adage[viz]", "pydotplus"],
+        "viz": ["adage[viz]", "pydotplus>=2.0.0"],
         "lint": [
             "pyflakes",
             "isort",
