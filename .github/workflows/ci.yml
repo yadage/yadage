@@ -26,7 +26,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        python-version: [3.6, 3.7, 3.8]
+        python-version: ['3.6', '3.7', '3.8', '3.9', '3.10']
 
     steps:
     - uses: actions/checkout@v2
@@ -34,23 +34,27 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
+
     - name: Install dependencies from apt-get
       run: |
         sudo apt-get update
         sudo apt-get install -y \
           graphviz \
           libgraphviz-dev
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip setuptools wheel
-        python -m pip install -q --no-cache-dir -e .[viz,develop,celery]
+        python -m pip --quiet install .[viz,develop,celery]
         python -m pip list
+
     - name: Test with pytest
       run: |
-        python -m pytest --cov=yadage
+        pytest --cov=yadage
+
     - name: Report coverage with Codecov
-      if: github.event_name == 'push' && matrix.python-version == 3.8
-      uses: codecov/codecov-action@v1.0.7
+      if: github.event_name == 'push' && matrix.python-version == '3.10'
+      uses: codecov/codecov-action@v2
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         file: ./coverage.xml
@@ -64,24 +68,28 @@ jobs:
     - uses: actions/checkout@v2
       with:
         fetch-depth: 0
-    - name: Set up Python 3.8
+
+    - name: Set up Python 3.10
       uses: actions/setup-python@v2
       with:
-        python-version: '3.8'
+        python-version: '3.10'
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip setuptools wheel
-        python -m pip install --ignore-installed -U -q --no-cache-dir -e .
+        python -m pip --quiet install .
         python -m pip install sphinx
         python -m pip list
         sudo apt-get update
         sudo apt-get -qq install pandoc
+
     - name: Test and build docs
       run: |
         cd docs
         make html
         cd ..
         touch docs/_build/html/.nojekyll
+
     - name: Deploy docs to GitHub Pages
       if: success() && github.event_name == 'push' && github.ref == 'refs/heads/master'
       uses: peaceiris/actions-gh-pages@v3
