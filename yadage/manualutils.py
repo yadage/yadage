@@ -51,7 +51,7 @@ def preview_rule(wflow, name=None, identifier=None):
         if x.identifier not in existing_rules
     ]
     new_nodes = [
-        {"name": newflow.dag.getNode(n).name, "parents": newflow.dag.predecessors(n)}
+        {"name": newflow.dag.getNode(n).name, "parents": [*newflow.dag.predecessors(n)]}
         for n in newflow.dag.nodes()
         if n not in existing_nodes
     ]
