@@ -46,13 +46,7 @@ setup(
     install_requires=deps,
     extras_require={
         "celery": ["celery", "redis"],
-        "viz": [
-            # manually adding extras of adage[extra] because of pip
-            # issue https://github.com/pypa/pip/issues/3189
-            "pydot2",
-            "pygraphviz",
-            "pydotplus",
-        ],
+        "viz": ["adage[viz]>=0.10.3", "pydotplus>=2.0.0"],
         "lint": [
             "pyflakes",
             "isort",
