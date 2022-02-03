@@ -12,6 +12,17 @@ on:
   release:
     types: [published]
   workflow_dispatch:
+    inputs:
+      publish:
+        type: choice
+        description: 'Publish to TestPyPI?'
+        options:
+        - false
+        - true
+
+concurrency:
+  group: package-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build-and-publish:
@@ -54,8 +65,11 @@ jobs:
       run: python -m zipfile --list dist/yadage-*.whl
 
     - name: Publish distribution 📦 to Test PyPI
-      # publish to TestPyPI on tag events
-      if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') && github.repository == 'yadage/yadage'
+      # Publish to TestPyPI on tag events of if manually triggered
+      # Compare to 'true' string as booleans get turned into strings in the console
+      if: >-
+        (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') && github.repository == 'yadage/yadage')
+        || (github.event_name == 'workflow_dispatch' && github.event.inputs.publish == 'true' && github.repository == 'yadage/yadage')
       uses: pypa/gh-action-pypi-publish@v1.5.0
       with:
         password: ${{ secrets.test_pypi_password }}
