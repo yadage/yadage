@@ -50,7 +50,7 @@ setup(
         "lint": [
             "pyflakes",
             "isort",
-            "black",
+            "black[jupyter]>=22.1.0",
         ],
         "develop": [
             "pre-commit",
