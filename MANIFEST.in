@@ -1,5 +1,6 @@
 prune **
 graft yadage
+graft tests
 
 include setup.py
 include LICENSE
