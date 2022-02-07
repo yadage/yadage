@@ -48,7 +48,7 @@ class YadageSteering(object):
         dataopts = kwargs.get("dataopts") or {}
         metadir = (
             kwargs["metadir"]
-            if kwargs["metadir"] is not None
+            if "metadir" in kwargs.keys() and kwargs["metadir"] is not None
             else f"{kwargs['dataarg']}/_yadage/"
         )
         if dataopts.get("overwrite") and os.path.exists(metadir):
