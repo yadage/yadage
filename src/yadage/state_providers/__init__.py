@@ -80,6 +80,8 @@ def fromenv_provider(dataarg, dataopts):
 
 def state_provider_from_string(dataarg, dataopts=None):
     dataopts = dataopts or {}
+    if len(dataarg.split(":", 1)) == 1:
+        dataarg = "local:" + dataarg
     for k in providersetup_handlers.keys():
         if dataarg.startswith(k):
             return providersetup_handlers[k](dataarg, dataopts)

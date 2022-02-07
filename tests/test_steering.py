@@ -11,7 +11,7 @@ from adage import nodestate
 
 def test_steer(tmpdir, multiproc_backend):
     ys = YadageSteering.create(
-        dataarg="local:" + os.path.join(str(tmpdir), "workdir"),
+        dataarg=os.path.join(str(tmpdir), "workdir"),
         workflow="workflow.yml",
         toplevel="tests/testspecs/nestedmapreduce",
         initdata={"input": [1, 2, 3]},
@@ -21,7 +21,7 @@ def test_steer(tmpdir, multiproc_backend):
 
 def test_targetstrategy_steering(tmpdir, multiproc_backend):
     ys = YadageSteering.create(
-        dataarg="local:" + os.path.join(str(tmpdir), "workdir"),
+        dataarg=os.path.join(str(tmpdir), "workdir"),
         workflow="workflow.yml",
         toplevel="tests/testspecs/nestedmapreduce",
         initdata={"input": [1, 2, 3]},
@@ -40,7 +40,7 @@ def test_targetstrategy_steering(tmpdir, multiproc_backend):
 def test_context(tmpdir, multiproc_backend):
     workdir = os.path.join(str(tmpdir), "workdir")
     with steering_ctx(
-        "local:" + workdir,
+        workdir,
         "workflow.yml",
         {"input": [1, 2, 3]},
         "tests/testspecs/nestedmapreduce",
@@ -57,7 +57,7 @@ def test_inparchive(tmpdir, multiproc_backend):
         )
     )
     with steering_ctx(
-        "local:" + workdir,
+        workdir,
         "workflow_frominit.yml",
         {"inputfiles": "*.txt"},
         "tests/testspecs/dynamic_glob",
@@ -70,14 +70,14 @@ def test_inparchive(tmpdir, multiproc_backend):
 def test_incomplete_data(tmpdir):
     with pytest.raises(RuntimeError):
         ys = YadageSteering.create(
-            dataarg="local:" + os.path.join(str(tmpdir), "workdir"), workflow=None
+            dataarg=os.path.join(str(tmpdir), "workdir"), workflow=None
         )
 
 
 def test_incomplete_data_ctx(tmpdir):
     workdir = os.path.join(str(tmpdir), "workdir")
     with pytest.raises(RuntimeError):
-        with steering_ctx("local:" + workdir) as ys:
+        with steering_ctx(workdir) as ys:
             pass
 
 
@@ -87,7 +87,7 @@ def test_directjson(tmpdir, multiproc_backend):
     )
 
     ys = YadageSteering.create(
-        dataarg="local:" + os.path.join(str(tmpdir), "workdir"),
+        dataarg=os.path.join(str(tmpdir), "workdir"),
         workflow_json=wflowjson,
         initdata={"par": "parvalue"},
     )
@@ -103,7 +103,7 @@ def test_directjson_ctx(tmpdir, multiproc_backend):
     )
     workdir = os.path.join(str(tmpdir), "workdir")
     with steering_ctx(
-        "local:" + workdir,
+        workdir,
         workflow_json=wflowjson,
         backend=multiproc_backend,
         initdata={"par": "parvalue"},
@@ -118,14 +118,14 @@ def test_invalid_directjson(tmpdir):
 
     with pytest.raises(jsonschema.exceptions.ValidationError):
         ys = YadageSteering.create(
-            dataarg="local:" + os.path.join(str(tmpdir), "workdir"),
+            dataarg=os.path.join(str(tmpdir), "workdir"),
             workflow_json={"invalid": "data"},
         )
 
 
 def test_reset(tmpdir, multiproc_backend):
     ys = YadageSteering.create(
-        dataarg="local:" + os.path.join(str(tmpdir), "workdir"),
+        dataarg=os.path.join(str(tmpdir), "workdir"),
         workflow="workflow.yml",
         toplevel="tests/testspecs/nestedmapreduce",
         initdata={"input": [1, 2, 3]},

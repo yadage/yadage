@@ -247,9 +247,3 @@ def pointerize(data, asref=False, stepid=None):
         )
 
     return data.asrefs(callback=callback)
-
-
-def coerce_data_arg(dataarg):
-    if len(dataarg.split(":", 1)) == 1:
-        dataarg = "local:" + dataarg
-    return dataarg
