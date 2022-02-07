@@ -46,7 +46,6 @@ class YadageSteering(object):
     @classmethod
     def create(cls, **kwargs):
         dataopts = kwargs.get("dataopts") or {}
-        # kwargs["dataarg"] = coerce_data_arg(kwargs["dataarg"])
         if kwargs["dataarg"].startswith("local:"):
             dataarg = kwargs["dataarg"].split(":", 1)[1]
 
@@ -62,7 +61,6 @@ class YadageSteering(object):
 
         kw = copy.deepcopy(kwargs)
         kw["metadir"] = metadir
-        breakpoint()
         # meta must be here because data model might store stuff here
         prepare_meta(metadir, accept_metadir)
         ctrl = creators["local"](**kw)
