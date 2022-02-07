@@ -46,9 +46,6 @@ class YadageSteering(object):
     @classmethod
     def create(cls, **kwargs):
         dataopts = kwargs.get("dataopts") or {}
-        if kwargs["dataarg"].startswith("local:"):
-            dataarg = kwargs["dataarg"].split(":", 1)[1]
-
         metadir = (
             kwargs["metadir"]
             if kwargs["metadir"] is not None
