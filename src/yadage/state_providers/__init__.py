@@ -2,6 +2,7 @@ import os
 import importlib
 import logging
 from .localposix import LocalFSProvider
+from yadage.utils import coerce_data_arg
 
 log = logging.getLogger(__name__)
 
@@ -57,7 +58,7 @@ def load_provider(jsondata, deserialization_opts=None):
 providersetup_handlers, providersetup = handler_decorator()
 
 
-@providersetup("local")
+@providersetup("local:")
 def localfs_provider(dataarg, dataopts):
     import yadage.state_providers.localposix
 
@@ -79,6 +80,7 @@ def fromenv_provider(dataarg, dataopts):
 
 
 def state_provider_from_string(dataarg, dataopts=None):
+    dataarg = coerce_data_arg(dataarg)
     dataopts = dataopts or {}
     for k in providersetup_handlers.keys():
         if dataarg.startswith(k):
