@@ -7,7 +7,7 @@ import shutil
 from .serialize import snapshot
 from .wflowstate import load_model_fromstring
 from .controllers import setup_controller
-from .utils import setupbackend_fromstring, prepare_meta
+from .utils import setupbackend_fromstring, prepare_meta, coerce_data_arg
 from .creators import handlers as creators
 
 log = logging.getLogger(__name__)
@@ -46,21 +46,25 @@ class YadageSteering(object):
     @classmethod
     def create(cls, **kwargs):
         dataopts = kwargs.get("dataopts") or {}
+        # kwargs["dataarg"] = coerce_data_arg(kwargs["dataarg"])
         if kwargs["dataarg"].startswith("local:"):
             dataarg = kwargs["dataarg"].split(":", 1)[1]
-            metadir = kwargs.get("metadir")
-            metadir = metadir or "{}/_yadage/".format(dataarg)
-            if dataopts.get("overwrite") and os.path.exists(metadir):
-                shutil.rmtree(metadir)
-        else:
-            metadir = kwargs["metadir"]
+
+        metadir = (
+            kwargs["metadir"]
+            if kwargs["metadir"] is not None
+            else f"{kwargs['dataarg']}/_yadage/"
+        )
+        if dataopts.get("overwrite") and os.path.exists(metadir):
+            shutil.rmtree(metadir)
+
         accept_metadir = kwargs.pop("accept_metadir", False)
 
         kw = copy.deepcopy(kwargs)
         kw["metadir"] = metadir
-        prepare_meta(
-            metadir, accept_metadir
-        )  # meta must be here because data model might store stuff here
+        breakpoint()
+        # meta must be here because data model might store stuff here
+        prepare_meta(metadir, accept_metadir)
         ctrl = creators["local"](**kw)
         prepare_meta(metadir, accept=True)  # Hack in case creator deletes meta
         return cls(metadir, ctrl)
