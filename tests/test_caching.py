@@ -9,7 +9,7 @@ def test_cached(tmpdir, checksum_cached_multiproc):
 
     def run_workflow():
         with steering_ctx(
-            "local:" + workdir,
+            workdir,
             "workflow.yml",
             {"par": "value"},
             "tests/testspecs/local-helloworld",
@@ -46,7 +46,7 @@ def test_cached_fromstring(tmpdir):
     def run_workflow():
         backend = setupbackend_fromstring("multiproc:auto")
         with steering_ctx(
-            "local:" + workdir,
+            workdir,
             "workflow.yml",
             {"par": "value"},
             "tests/testspecs/local-helloworld",
