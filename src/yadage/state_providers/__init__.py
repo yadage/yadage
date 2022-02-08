@@ -80,7 +80,6 @@ def fromenv_provider(dataarg, dataopts):
 
 
 def state_provider_from_string(dataarg, dataopts=None):
-    dataarg = coerce_data_arg(dataarg)
     dataopts = dataopts or {}
     for k in providersetup_handlers.keys():
         if dataarg.startswith(k):
