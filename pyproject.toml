@@ -13,3 +13,17 @@ exclude = '''
   | build
 )/
 '''
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+xfail_strict = true
+addopts = [
+    "--ignore=setup.py",
+    "--ignore=docs/",
+    "--cov=yadage",
+    "--cov-config=.coveragerc",
+    "--cov-report=term-missing",
+    "--cov-report=xml",
+    "--cov-report=html",
+]
+testpaths = "tests"
