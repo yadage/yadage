@@ -1,6 +1,6 @@
 [run]
 branch = True
-source = yadage 
+source = yadage
 
 [report]
 exclude_lines =

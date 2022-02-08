@@ -50,7 +50,7 @@ jobs:
 
     - name: Test with pytest
       run: |
-        pytest --cov=yadage
+        pytest -r sx
 
     - name: Report coverage with Codecov
       if: matrix.python-version == '3.10'
