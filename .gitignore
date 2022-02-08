@@ -2,5 +2,7 @@
 *egg-info*
 htmlcov
 dist
-.coverage.*
+.coverage*
+!.coveragerc
+coverage*
 docs/_build
