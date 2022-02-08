@@ -53,7 +53,7 @@ jobs:
         pytest --cov=yadage
 
     - name: Report coverage with Codecov
-      if: github.event_name == 'push' && matrix.python-version == '3.10'
+      if: matrix.python-version == '3.10'
       uses: codecov/codecov-action@v2
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
