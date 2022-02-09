@@ -18,12 +18,18 @@ exclude = '''
 minversion = "6.0"
 xfail_strict = true
 addopts = [
-    "--ignore=setup.py",
-    "--ignore=docs/",
+    "-ra",
+    "-Wd",
     "--cov=yadage",
-    "--cov-config=.coveragerc",
+    "--cov-branch",
+    "--showlocals",
+    "--strict-markers",
+    "--strict-config",
     "--cov-report=term-missing",
     "--cov-report=xml",
     "--cov-report=html",
+    "--doctest-modules",
+    "--doctest-glob='*.rst'",
 ]
+log_cli_level = "info"
 testpaths = "tests"
