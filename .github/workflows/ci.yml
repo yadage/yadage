@@ -50,7 +50,7 @@ jobs:
 
     - name: Test with pytest
       run: |
-        pytest -r sx
+        pytest
 
     - name: Report coverage with Codecov
       if: matrix.python-version == '3.10'
