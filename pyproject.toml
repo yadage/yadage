@@ -4,7 +4,7 @@ requires = ["wheel", "setuptools>=30.3.0", "attrs>=17.1", "setuptools_scm"]
 build-backend = "setuptools.build_meta"
 
 [tool.black]
-target-version = ['py36', 'py37', 'py38']
+target-version = ['py36', 'py37', 'py38', 'py39', 'py310']
 include = '\.pyi?$'
 exclude = '''
 /(
@@ -13,3 +13,18 @@ exclude = '''
   | build
 )/
 '''
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+xfail_strict = true
+addopts = [
+    "--ignore=setup.py",
+    "--ignore=docs/",
+    "--cov=yadage",
+    "--cov-config=.coveragerc",
+    "--cov-report=term-missing",
+    "--cov-report=xml",
+    "--cov-report=html",
+    "--cov-report=annotate:coverage_annotate",
+]
+testpaths = "tests"
