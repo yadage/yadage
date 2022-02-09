@@ -1,8 +1,9 @@
 prune **
-graft yadage
+graft src
 graft tests
 
 include setup.py
+include setup.cfg
 include LICENSE
 include README.md
 include pyproject.toml

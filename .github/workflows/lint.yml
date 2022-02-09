@@ -33,7 +33,7 @@ jobs:
     # TODO: Update to flake8
     - name: Lint with pyflakes
       run: |
-        pyflakes yadage
+        pyflakes src
 
     - name: Lint with Black
       run: |
