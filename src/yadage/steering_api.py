@@ -30,7 +30,6 @@ def execute_steering(
     backend=None,
     cache=None,
 ):
-
     ys = steering_object
     ys.adage_argument(
         default_trackers=default_trackers,
@@ -85,7 +84,6 @@ def steering_ctx(
     modelsetup="inmem",
     modelopts=None,
 ):
-
     ys = YadageSteering.create(
         metadir=metadir,
         accept_metadir=True if (accept_metadir or cache) else False,

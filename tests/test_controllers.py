@@ -6,7 +6,6 @@ from yadage.state_providers import load_provider
 def test_persistent_controller(
     tmpdir, local_helloworld_wflow_w_init, foregroundasync_backend
 ):
-
     model = FileBackedModel(
         filename=str(tmpdir.join("wflowstate")), initmodel=local_helloworld_wflow_w_init
     )

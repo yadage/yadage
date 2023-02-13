@@ -170,7 +170,6 @@ def apply_stage(
     verbosity,
     submit,
 ):
-
     handle_common_options(verbosity)
     ys = handle_connection_options(
         metadir,
@@ -325,7 +324,6 @@ def show(
     verbosity,
     show_processed,
 ):
-
     ctrlarg = controller  # for later
     handle_common_options(verbosity)
     ys = handle_connection_options(
@@ -391,7 +389,6 @@ def preview(
     local,
     verbosity,
 ):
-
     handle_common_options(verbosity)
     ys = handle_connection_options(
         metadir,
@@ -481,7 +478,6 @@ def step(
     strategyopt,
     verbosity,
 ):
-
     handle_common_options(verbosity)
     ys = handle_connection_options(
         metadir,
