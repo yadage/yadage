@@ -175,7 +175,6 @@ def main(
     plugins,
     accept_metadir,
 ):
-
     if os.path.exists("input.yml") and not initfiles:
         initfiles = ("input.yml",)
     logging.basicConfig(level=getattr(logging, verbosity), format=LOGFORMAT)

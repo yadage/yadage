@@ -24,7 +24,6 @@ def decide_rule(rule, controller, idbased):
 
 
 def decide_step(node, controller, idbased):
-
     if idbased:
         node = controller.adageobj.dag.getNode(idbased)
 

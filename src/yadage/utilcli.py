@@ -27,7 +27,6 @@ def printRef(ref, dag, indent=""):
 
 
 def wflow_with_trivial_backend(instance):
-
     stateopts = {}
     wflow = YadageWorkflow.fromJSON(json.load(open(instance)), stateopts)
     return wflow
@@ -44,7 +43,6 @@ def utilcli():
 @click.option("--viewscope", default="")
 @click.option("-v", "--verbosity", default="INFO")
 def testsel(instance, selection, verbosity, viewscope):
-
     logging.basicConfig(
         level=getattr(logging, verbosity),
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
