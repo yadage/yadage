@@ -26,7 +26,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        python-version: ['3.7', '3.8', '3.9', '3.10']
+        python-version: ['3.7', '3.8', '3.9', '3.10', '3.11']
 
     steps:
     - uses: actions/checkout@v3
@@ -53,8 +53,8 @@ jobs:
         pytest
 
     - name: Report coverage with Codecov
-      if: matrix.python-version == '3.10'
-      uses: codecov/codecov-action@v2
+      if: matrix.python-version == '3.11'
+      uses: codecov/codecov-action@v3
       with:
         file: ./coverage.xml
         flags: unittests
@@ -68,10 +68,10 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Set up Python 3.10
+    - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.10'
+        python-version: '3.11'
 
     - name: Install dependencies
       run: |
