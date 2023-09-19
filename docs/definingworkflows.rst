@@ -317,12 +317,40 @@ Typically, stages come with a number of adjustable parameters that steer how it 
 Single-Step Stages
 ..................
 
-Single Step stages 
+Single-step stages schedule one instance of the defined packtivity. It allows for simple serial or sequential workflows.
 
+In the following example the workflow takes an array called :code:`files` as input. One instance of the packtivity defined at :code:`step: {$ref: 'steps.yml#/stepA'}` is scheduled.
+
+Example: ::
+
+  - name: single
+      dependencies: ['init']
+      scheduler:
+        scheduler_type: singlestep-stage
+        parameters:
+          input: {step: init, output: files}
+        step: {$ref: 'steps.yml#/stepA'}
 
 Multi-Step Stages
 ..................
 
+A multi-step stage allows multiple instances of a step or workflow be run in parallel over a list of inputs. The input is given as an array and the workflow steps run on each element of the array as if it were a single input. The instances run independently of one another in parallel.
+
+In the following example the workflow takes an array called :code:`files` as input. A number of instances of the same packtivity are scheduled. The optional parameter :code:`batch_size` defines the number of array elements to be given as input to a single step or workflow instance. If :code:`batch_size` is unspecified, one instance is scheduled for each element in the input array. 
+
+Example: ::
+
+  - name: map
+      dependencies: [init]
+      scheduler:
+        scheduler_type: multistep-stage
+        parameters:
+          input: {step: init, output: files}
+        batch_size: 5
+        scatter:
+          method: zip
+          parameters: [input]
+        step: {$ref: steps.yml#/stepA}
 
 Output Selection / Referencing
 ..............................
@@ -365,7 +393,59 @@ To ease composability and avoid unwanted collisions, each Stage is defined withi
 Composition using Subworkflows
 ------------------------------
 
+An entire workflow may be run as a single step, or "subworklow", inside another workflow. Nesting of workflows is very useful, especially when sections of code are run in parallel and executed independently of one another. 
 
+One example is a workflow that defines two unique steps, the second depending on the first. The second step expects a file from the first step as input, and will wait until everything in step one is finished before starting. Suppose that there are multiple inputs to the first step, each of which can be processed through the entire two-step workflow independently. The workflow execution could be parallelized by running both steps as multi-step stages, where a single instance of step one is scheduled to process each input, and likewise a single instance of step two processes the output from an instance of step one. With this approach, the second step instances would need to wait until all instances of step one are finished before proceeding, despite only depending on the output from one of them. 
+
+Fortunately with a subworkflow, steps with scattered input can proceed independently. Instances that have finished step one can continue to step two of the workflow, even though other instances are still running step one.
+
+When defining a subworkflow to run as a single step inside another workflow, use the property :code:`workflow`.
+
+Example: ::
+
+  # workflow.yml
+  stages:
+    - name: map
+      dependencies: [init]
+      scheduler:
+        scheduler_type: multistep-stage
+        parameters:
+          input: {step: init, output: input, unwrap: true}
+        workflow: {$ref: subflow.yml}
+        scatter:
+          method: zip
+          parameters: [input]
+      
+  # subflow.yml    
+  stages:
+    - name: stageA
+      dependencies: ['init']
+      scheduler:
+        scheduler_type: singlestep-stage
+        parameters:
+          input_file: {step: init, output: input}
+          output_file: '{workdir}/output'
+        step: {$ref: steps.yml#/stepA}
+    - name: stageB
+      dependencies: ['stageA']
+      scheduler:
+        scheduler_type: singlestep-stage
+        parameters:
+          input_file: {stages: stageA, output: outputA}
+          output_file: '{workdir}/output'
+        step: {$ref: steps.yml#/stepB}
+
+
+In the above example, the subworkflow is called as a multistep-stage. The subworkflow is referenced using :code:`workflow: {$ref: 'subflow.yml'}` and the packtivities to be scheduled are in turn referenced by the subworkflow. The scattering is done over the variable :code:`input`, which creates a number of instances. Since the scope was defined as a subworkflow, the instances run in parallel. In the example, when instance 5 is done with step one (stageA) it can continue to step two (stageB) without having to wait for instance 4 or any other instance to finish step one.
+
+Since the second step takes as input the output from the first step, it is necessary to adjust the :code:`publisher` field of :code:`steps.yml#/stepA` appropriately. To provide downstream packtivities an entrypoint to process previous data define the :code:`publisher_type` as :code:`interpolated-pub`.
+
+    .. code-block:: text
+
+      publisher:
+        publisher_type: 'interpolated-pub'
+        publish:
+          outputA: '{output_file}'
 
 
 Validating Workflows
