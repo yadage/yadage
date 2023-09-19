@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Introduction &#8212; Yadage 0.10 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="_static/nature.css?v=601dbdee" />
+    <script src="_static/documentation_options.js?v=ac14934e"></script>
+    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Defining Workflows" href="definingworkflows.html" />
+    <link rel="prev" title="Yadage - Declarative Workflow Spec and Engine" href="index.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="definingworkflows.html" title="Defining Workflows"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Yadage - Declarative Workflow Spec and Engine"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Yadage 0.10 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Introduction</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="introduction">
+<h1>Introduction<a class="headerlink" href="#introduction" title="Link to this heading">¶</a></h1>
+<section id="requirements">
+<h2>Requirements<a class="headerlink" href="#requirements" title="Link to this heading">¶</a></h2>
+<dl class="simple">
+<dt>Beyond the pure python dependencies automatically installed by <cite>pip</cite>, you need the following additional libraries/software:</dt><dd><ul class="simple">
+<li><p>graphviz + development libraries</p></li>
+</ul>
+</dd>
+</dl>
+<p>The best way to install these is via your favorite packages manager (<cite>yum</cite>, <cite>apt</cite>, <cite>homebrew</cite>). Please open an GitHub issue if we have forgotten any external dependencies.</p>
+</section>
+<section id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Link to this heading">¶</a></h2>
+<p>Yadage is available from PyPI and can be installed via <cite>pip</cite>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">yadage</span>
+</pre></div>
+</div>
+</section>
+<section id="first-run">
+<h2>First Run<a class="headerlink" href="#first-run" title="Link to this heading">¶</a></h2>
+<p>To test the installation run this command:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">yadage</span><span class="o">-</span><span class="n">run</span> <span class="o">-</span><span class="n">t</span> <span class="n">from</span><span class="o">-</span><span class="n">github</span><span class="o">/</span><span class="n">testing</span><span class="o">/</span><span class="n">local</span><span class="o">-</span><span class="n">helloworld</span> <span class="n">workdir</span> <span class="n">workflow</span><span class="o">.</span><span class="n">yml</span> <span class="o">-</span><span class="n">p</span> <span class="n">par</span><span class="o">=</span><span class="n">World</span>
+</pre></div>
+</div>
+</section>
+<section id="using-the-yadage-docker-image">
+<h2>Using the Yadage Docker Image<a class="headerlink" href="#using-the-yadage-docker-image" title="Link to this heading">¶</a></h2>
+<p>One can use <cite>yadage</cite> without installation via the offical image. The docker image is currently published on the <a class="reference external" href="https://hub.docker.com/r/lukasheinrich/yadage/">Docker Hub</a>) under:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">lukasheinrich</span><span class="o">/</span><span class="n">yadage</span><span class="p">:</span><span class="o">&lt;</span><span class="n">release</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>It is built using the Dockerfile at the root of the source repository. With the following alias, one can use the <cite>yadage-run</cite> command similar to how one would use it with <cite>yadage</cite> installed:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>function yadage-run {
+  docker run --rm -it -e PACKTIVITY_WITHIN_DOCKER=true -v $PWD:$PWD -w $PWD -v /var/run/docker.sock:/var/run/docker.sock lukasheinrich/yadage yadage-run $*
+}
+</pre></div>
+</div>
+<p>This alias is retrievable from the repo using an shell evaluation as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">eval</span> <span class="s2">&quot;$(curl https://raw.githubusercontent.com/diana-hep/yadage/master/yadagedocker.sh)&quot;</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">Introduction</a><ul>
+<li><a class="reference internal" href="#requirements">Requirements</a></li>
+<li><a class="reference internal" href="#installation">Installation</a></li>
+<li><a class="reference internal" href="#first-run">First Run</a></li>
+<li><a class="reference internal" href="#using-the-yadage-docker-image">Using the Yadage Docker Image</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="index.html"
+                          title="previous chapter">Yadage - Declarative Workflow Spec and Engine</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="definingworkflows.html"
+                          title="next chapter">Defining Workflows</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/introduction.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="definingworkflows.html" title="Defining Workflows"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Yadage - Declarative Workflow Spec and Engine"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Yadage 0.10 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Introduction</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2016, Lukas Heinrich.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+    </div>
+  </body>
+</html>

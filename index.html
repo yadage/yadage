@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Yadage - Declarative Workflow Spec and Engine &#8212; Yadage 0.10 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="_static/nature.css?v=601dbdee" />
+    <script src="_static/documentation_options.js?v=ac14934e"></script>
+    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Introduction" href="introduction.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="introduction.html" title="Introduction"
+             accesskey="N">next</a> |</li>
+        <li class="nav-item nav-item-0"><a href="#">Yadage 0.10 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Yadage - Declarative Workflow Spec and Engine</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="yadage-declarative-workflow-spec-and-engine">
+<h1>Yadage - Declarative Workflow Spec and Engine<a class="headerlink" href="#yadage-declarative-workflow-spec-and-engine" title="Link to this heading">¶</a></h1>
+<p>Contents:</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#first-run">First Run</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#using-the-yadage-docker-image">Using the Yadage Docker Image</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="definingworkflows.html">Defining Workflows</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="definingworkflows.html#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="definingworkflows.html#basic-terminology">Basic Terminology</a></li>
+<li class="toctree-l2"><a class="reference internal" href="definingworkflows.html#defining-a-packtivity">Defining a Packtivity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="definingworkflows.html#defining-a-stage">Defining a Stage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="definingworkflows.html#stage-scopes">Stage Scopes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="definingworkflows.html#composition-using-subworkflows">Composition using Subworkflows</a></li>
+<li class="toctree-l2"><a class="reference internal" href="definingworkflows.html#validating-workflows">Validating Workflows</a></li>
+<li class="toctree-l2"><a class="reference internal" href="definingworkflows.html#dumping-workflow-json">Dumping Workflow JSON</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="executingworkflows.html">Executing Workflows</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="executingworkflows.html#the-yadage-run-command">The <em>yadage-run</em> Command</a></li>
+<li class="toctree-l2"><a class="reference internal" href="executingworkflows.html#execution-backends">Execution Backends</a></li>
+<li class="toctree-l2"><a class="reference internal" href="executingworkflows.html#manual-execution-using-yadage-manual">Manual execution using <em>yadage-manual</em></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#new-component-sub-schemas">New Component Sub-Schemas</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="coderef.html">Code Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="coderef.html#yadage.handlers.scheduler_handlers.addStepOrWorkflow"><code class="docutils literal notranslate"><span class="pre">addStepOrWorkflow()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="coderef.html#yadage.handlers.scheduler_handlers.chunk"><code class="docutils literal notranslate"><span class="pre">chunk()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="coderef.html#yadage.handlers.scheduler_handlers.finalize_input"><code class="docutils literal notranslate"><span class="pre">finalize_input()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="coderef.html#yadage.handlers.scheduler_handlers.finalize_value"><code class="docutils literal notranslate"><span class="pre">finalize_value()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="coderef.html#yadage.handlers.scheduler_handlers.get_parameters"><code class="docutils literal notranslate"><span class="pre">get_parameters()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="coderef.html#yadage.handlers.scheduler_handlers.init_stage"><code class="docutils literal notranslate"><span class="pre">init_stage()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="coderef.html#yadage.handlers.scheduler_handlers.jq_stage"><code class="docutils literal notranslate"><span class="pre">jq_stage()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="coderef.html#yadage.handlers.scheduler_handlers.multistep_stage"><code class="docutils literal notranslate"><span class="pre">multistep_stage()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="coderef.html#yadage.handlers.scheduler_handlers.partition"><code class="docutils literal notranslate"><span class="pre">partition()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="coderef.html#yadage.handlers.scheduler_handlers.scatter"><code class="docutils literal notranslate"><span class="pre">scatter()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="coderef.html#yadage.handlers.scheduler_handlers.select_parameter"><code class="docutils literal notranslate"><span class="pre">select_parameter()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="coderef.html#yadage.handlers.scheduler_handlers.singlestep_stage"><code class="docutils literal notranslate"><span class="pre">singlestep_stage()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="coderef.html#yadage.handlers.scheduler_handlers.step_or_stages"><code class="docutils literal notranslate"><span class="pre">step_or_stages()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="coderef.html#yadage.tasks.packtivity_task"><code class="docutils literal notranslate"><span class="pre">packtivity_task</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="coderef.html#yadage.stages.JsonStage"><code class="docutils literal notranslate"><span class="pre">JsonStage</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="coderef.html#yadage.stages.OffsetStage"><code class="docutils literal notranslate"><span class="pre">OffsetStage</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="coderef.html#yadage.stages.ViewStageBase"><code class="docutils literal notranslate"><span class="pre">ViewStageBase</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="coderef.html#yadage.utils.getinit_data"><code class="docutils literal notranslate"><span class="pre">getinit_data()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="coderef.html#yadage.utils.json_hash"><code class="docutils literal notranslate"><span class="pre">json_hash()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="coderef.html#yadage.utils.leaf_iterator_jsonlike"><code class="docutils literal notranslate"><span class="pre">leaf_iterator_jsonlike()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="coderef.html#yadage.utils.prepare_meta"><code class="docutils literal notranslate"><span class="pre">prepare_meta()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="overview">
+<h1>Overview<a class="headerlink" href="#overview" title="Link to this heading">¶</a></h1>
+<section id="why-yadage">
+<h2>Why Yadage?<a class="headerlink" href="#why-yadage" title="Link to this heading">¶</a></h2>
+<p>Yadage is two things:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>a set of JSON schemas to describe parametrized workflows based on dynamic directed acyclic graphs (DAGs) of tasks encapsulated in pre-packaged environments (e.g. using linux containers / Docker)</p></li>
+<li><p>an execution engine for such workflow definitions supporting both local and distributed execution</p></li>
+</ol>
+</div></blockquote>
+<p>While there are many workflow engines already, most either make it impossible or cumbersome to run workflows, in which the complete DAG is only known at runtime. In <em>yadage</em> the idea of dynamic DAGs is central to the system and workflows are defined as a set of instruction, <em>stages</em> how to build up the DAG during run-time.</p>
+</section>
+<section id="hello-world-example">
+<h2>Hello World Example<a class="headerlink" href="#hello-world-example" title="Link to this heading">¶</a></h2>
+<p>This is a simple one-stage workflow with a single parameter:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">stages</span><span class="p">:</span>
+  <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">hello_world</span>
+    <span class="n">dependencies</span><span class="p">:</span> <span class="p">[</span><span class="n">init</span><span class="p">]</span>
+    <span class="n">scheduler</span><span class="p">:</span>
+      <span class="n">scheduler_type</span><span class="p">:</span> <span class="n">singlestep</span><span class="o">-</span><span class="n">stage</span>
+      <span class="n">parameters</span><span class="p">:</span>
+        <span class="n">parone</span><span class="p">:</span> <span class="p">{</span><span class="n">stages</span><span class="p">:</span> <span class="n">init</span><span class="p">,</span> <span class="n">output</span><span class="p">:</span> <span class="n">par</span><span class="p">,</span> <span class="n">unwrap</span><span class="p">:</span> <span class="n">true</span><span class="p">}</span>
+        <span class="n">outputfile</span><span class="p">:</span> <span class="s1">&#39;</span><span class="si">{workdir}</span><span class="s1">/hello_world.txt&#39;</span>
+      <span class="n">step</span><span class="p">:</span>
+        <span class="n">process</span><span class="p">:</span>
+          <span class="n">process_type</span><span class="p">:</span> <span class="s1">&#39;string-interpolated-cmd&#39;</span>
+          <span class="n">cmd</span><span class="p">:</span> <span class="s1">&#39;echo Hello </span><span class="si">{parone}</span><span class="s1"> | tee </span><span class="si">{outputfile}</span><span class="s1">&#39;</span>
+        <span class="n">publisher</span><span class="p">:</span>
+          <span class="n">publisher_type</span><span class="p">:</span> <span class="s1">&#39;frompar-pub&#39;</span>
+          <span class="n">outputmap</span><span class="p">:</span>
+            <span class="n">outputfile</span><span class="p">:</span> <span class="n">outputfile</span>
+        <span class="n">environment</span><span class="p">:</span>
+          <span class="n">environment_type</span><span class="p">:</span> <span class="s1">&#39;docker-encapsulated&#39;</span>
+          <span class="n">image</span><span class="p">:</span> <span class="n">busybox</span>
+</pre></div>
+</div>
+<p>Since this workflow is stored on GitHub, you can run it simply using this command line:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">yadage</span><span class="o">-</span><span class="n">run</span> <span class="o">-</span><span class="n">t</span> <span class="n">from</span><span class="o">-</span><span class="n">github</span><span class="o">/</span><span class="n">testing</span><span class="o">/</span><span class="n">busybox</span><span class="o">-</span><span class="n">helloworld</span> <span class="n">workdir</span> <span class="n">workflow</span><span class="o">.</span><span class="n">yml</span> <span class="o">-</span><span class="n">p</span> <span class="n">par</span><span class="o">=</span><span class="n">World</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="#">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">Yadage - Declarative Workflow Spec and Engine</a></li>
+<li><a class="reference internal" href="#overview">Overview</a><ul>
+<li><a class="reference internal" href="#why-yadage">Why Yadage?</a></li>
+<li><a class="reference internal" href="#hello-world-example">Hello World Example</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="introduction.html"
+                          title="next chapter">Introduction</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/index.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="introduction.html" title="Introduction"
+             >next</a> |</li>
+        <li class="nav-item nav-item-0"><a href="#">Yadage 0.10 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Yadage - Declarative Workflow Spec and Engine</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2016, Lukas Heinrich.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+    </div>
+  </body>
+</html>

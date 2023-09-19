@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Defining Workflows &#8212; Yadage 0.10 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="_static/nature.css?v=601dbdee" />
+    <script src="_static/documentation_options.js?v=ac14934e"></script>
+    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Executing Workflows" href="executingworkflows.html" />
+    <link rel="prev" title="Introduction" href="introduction.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="executingworkflows.html" title="Executing Workflows"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="introduction.html" title="Introduction"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Yadage 0.10 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Defining Workflows</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="defining-workflows">
+<h1>Defining Workflows<a class="headerlink" href="#defining-workflows" title="Link to this heading">¶</a></h1>
+<section id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Link to this heading">¶</a></h2>
+<p>Workflows are defined through JSON documents that adhere to a set of defined JSON schemas. To aid legibility they can also be written as YAML documents, as it is a superset of JSON. The YAML loader of the yadage engine also supports a number of shorthands that map 1&lt;-&gt;1 to a more verbose version (notably in the stage definitions) and fill in default values when they are not present. We will be using the YAML way of writing the workflow specs throughout these documents.</p>
+</section>
+<section id="basic-terminology">
+<h2>Basic Terminology<a class="headerlink" href="#basic-terminology" title="Link to this heading">¶</a></h2>
+<section id="packtivities">
+<h3>Packtivities:<a class="headerlink" href="#packtivities" title="Link to this heading">¶</a></h3>
+<p>The atomic unit of the workflow is a <cite>packtivity</cite> – a packaged activity. It represents a single parametrized processing step. The parameters a passed as JSON documents and the processing step is executed using one of multiple backends. After processing the packtivity publishes JSON data that includes relevant data for further processing (e.g. referencing files that were created during the processing).</p>
+</section>
+<section id="stages">
+<h3>Stages:<a class="headerlink" href="#stages" title="Link to this heading">¶</a></h3>
+<p>Instead of describing a specific graph of tasks, a yadage workflow definition consists of a collection of <cite>stages</cite> that describe how an existing graph should be extended with additional nodes and edges. Starting from an empty graph (0 nodes, 0 edges), it is built up sequentially through application of these stages. This allows yadage to process workflows, whose graph structure is not known at definition time (such as workflow producing a variable number of data fragments).</p>
+<p>A stage consists of two pieces</p>
+<ol class="arabic simple">
+<li><p>A stage body (i.e. its scheduler):</p></li>
+</ol>
+<blockquote>
+<div><p>This section describes the logic how to define new nodes (i.e. packtivities with a specific parameter input) and new edges to attach them to the existing graph. Currently yadage supports two stages, one defining a single node and defining multiple nodes, both of which add edges according to the the data accessed from upstream nodes.</p>
+</div></blockquote>
+<ol class="arabic simple" start="2">
+<li><p>A predicate (i.e. its dependencies):</p></li>
+</ol>
+<blockquote>
+<div><p>The predicate (also referred to as the stage’s dependencies) is a description of when the stage body is ready to be applied. Currently yadage supports a single predicate that takes a number of <a class="reference external" href="http://goessner.net/articles/JsonPath/">JSON Path</a> expressions. Each expression selects a number of stages. The dependency is considered satisfied when all packtivities associated to that stage (i.e. nodes) have a published result.</p>
+</div></blockquote>
+</section>
+<section id="using-json-references">
+<h3>Using JSON references<a class="headerlink" href="#using-json-references" title="Link to this heading">¶</a></h3>
+<p>Writing the entire workflow in a single file is both cumbersome and limits re-usability of individual components (e.g. for packtivities used in multiple workflows).</p>
+<p>During loading each workflow spec is intepreted  with respect to a <cite>toplevel</cite> address. If the workflow contains <a class="reference external" href="https://tools.ietf.org/id/draft-pbryan-zyp-json-ref-03.html">JSON references</a> they are resolved with respect to that toplevel URL.</p>
+<section id="example">
+<h4>Example<a class="headerlink" href="#example" title="Link to this heading">¶</a></h4>
+<p>In this example stage (details on how to define a stage will be explained below), the packtivity to be scheduled by this stage is referenced using <code class="code docutils literal notranslate"><span class="pre">{$ref:</span> <span class="pre">'steps.yml#/pythia'}</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>name: pythia
+dependencies: [&#39;init&#39;]
+scheduler:
+  scheduler_type: singlestep-stage
+  step: {$ref: &#39;steps.yml#/pythia&#39;}
+  parameters:
+    settings_file: /analysis/mainPythiaMLM.cmnd
+    hepmcfile: &#39;{workdir}/outputfile.hepmc&#39;
+    lhefile: {stages: init, output: lhefile}
+</pre></div>
+</div>
+<p>Assuming that this stage definition is part of an workflow stored at <code class="code docutils literal notranslate"><span class="pre">http://www.example.com/sub/path/workflow.yml</span></code>, yadage will look at the same parent location (<code class="code docutils literal notranslate"><span class="pre">http://www.example.com/sub/path</span></code>) to look for resource named <code class="code docutils literal notranslate"><span class="pre">http://www.example.com/sub/path/steps.yml</span></code>, load it and return the JSON tree under the <code class="code docutils literal notranslate"><span class="pre">pythia</span></code> property. The <code class="code docutils literal notranslate"><span class="pre">steps.yml</span></code> file could e.g. contain (again details on defining packtivities can be found below):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pythia</span><span class="p">:</span>
+  <span class="n">process</span><span class="p">:</span>
+    <span class="n">process_type</span><span class="p">:</span> <span class="s1">&#39;string-interpolated-cmd&#39;</span>
+    <span class="n">cmd</span><span class="p">:</span> <span class="s1">&#39;/analysis/pythia_main/example_main </span><span class="si">{settings_file}</span><span class="s1"> </span><span class="si">{hepmcfile}</span><span class="s1"> </span><span class="si">{lhefile}</span><span class="s1">&#39;</span>
+  <span class="n">publisher</span><span class="p">:</span>
+    <span class="n">publisher_type</span><span class="p">:</span> <span class="s1">&#39;frompar-pub&#39;</span>
+    <span class="n">outputmap</span><span class="p">:</span>
+      <span class="n">hepmcfile</span><span class="p">:</span> <span class="n">hepmcfile</span>
+  <span class="n">environment</span><span class="p">:</span>
+    <span class="n">environment_type</span><span class="p">:</span> <span class="s1">&#39;docker-encapsulated&#39;</span>
+    <span class="n">image</span><span class="p">:</span> <span class="s1">&#39;lukasheinrich/higgs-mc-studies&#39;</span>
+</pre></div>
+</div>
+</section>
+<section id="referencing-steps-outside-of-the-toplevel-url">
+<h4>Referencing steps outside of the toplevel URL<a class="headerlink" href="#referencing-steps-outside-of-the-toplevel-url" title="Link to this heading">¶</a></h4>
+<p>It is also possible to reference documents outside of the toplevel URL, by specifying a full URL such as <code class="code docutils literal notranslate"><span class="pre">http://example.com/path/to/doc.json</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>name: pythia
+dependencies: [&#39;init&#39;]
+scheduler:
+  scheduler_type: singlestep-stage
+  step: {$ref: &#39;http://example.com/sub/path/steps.yml#/pythia&#39;}
+  parameters:
+    settings_file: /analysis/mainPythiaMLM.cmnd
+    hepmcfile: &#39;{workdir}/outputfile.hepmc&#39;
+    lhefile: {stages: init, output: lhefile}
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+<section id="defining-a-packtivity">
+<h2>Defining a Packtivity<a class="headerlink" href="#defining-a-packtivity" title="Link to this heading">¶</a></h2>
+<p>A packtivity represents a parametrized task/activity description with “batteries included”, i.e. with full information about the environment and expected result data, such that ideally it can be reproduced on a generic computing resource that is not tailored to that activity.</p>
+<p>To define such a packageed activity, one needs to define three pieces of information:</p>
+<ol class="arabic simple">
+<li><p>A parametrized task description, such as a templated command line string</p></li>
+<li><p>A environment description. This should be as complete as possible and ideally deployable on a diverse set of resources. We will be mainly using Docker images.</p></li>
+<li><p>A result extraction spec that describes how to extract the relevant data fragments after the task has completed. An example is extracting a set of filenames from a work directory or from the original parameters. Currently yadage supports a number of definition schemas for each of these pieces</p></li>
+</ol>
+<section id="process-definitions">
+<h3>Process Definitions<a class="headerlink" href="#process-definitions" title="Link to this heading">¶</a></h3>
+<ol class="arabic simple">
+<li><p>string interpolated Command Lines</p></li>
+</ol>
+<blockquote>
+<div><p>The simplest process description is a command line string with one or more placeholders. This description assumes python-style placeholders and interpolation algorithms. The placeholders will be matched to the parameters associated to a gien packtivity instance.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">process</span><span class="p">:</span>
+  <span class="n">process_type</span><span class="p">:</span> <span class="s1">&#39;string-interpolated-cmd&#39;</span>
+  <span class="n">cmd</span><span class="p">:</span> <span class="s1">&#39;/path/to/binary </span><span class="si">{input_file}</span><span class="s1"> </span><span class="si">{output_file}</span><span class="s1">&#39;</span>
+</pre></div>
+</div>
+<p>for a parameter set such as the following:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+  <span class="s2">&quot;input_file&quot;</span><span class="p">:</span> <span class="s2">&quot;/a/path/to/an/input_file.txt&quot;</span><span class="p">,</span>
+  <span class="s2">&quot;input_file&quot;</span><span class="p">:</span> <span class="s2">&quot;/a/path/to/an/output_file.txt&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>This will result in the following command line string:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">binary</span> <span class="o">/</span><span class="n">a</span><span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">an</span><span class="o">/</span><span class="n">input_file</span><span class="o">.</span><span class="n">txt</span> <span class="o">/</span><span class="n">a</span><span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">an</span><span class="o">/</span><span class="n">output_file</span><span class="o">.</span><span class="n">txt</span>
+</pre></div>
+</div>
+<p>Handling of Arrays: besides plain old data types (PoD) supported by JSON (i.e. strings, boolean, numbers, null) that will be coerced into strings, this process definition converts arrays to space-delimited string sequences. This makes it easy to pass a number of positional arguments to a command line:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">process</span><span class="p">:</span>
+  <span class="n">process_type</span><span class="p">:</span> <span class="s1">&#39;string-interpolated-cmd&#39;</span>
+  <span class="n">cmd</span><span class="p">:</span> <span class="s1">&#39;cat </span><span class="si">{inputfiles}</span><span class="s1"> &gt; </span><span class="si">{outputfile}</span><span class="s1">&#39;</span>
+</pre></div>
+</div>
+<p>with a parameter set:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+  <span class="s2">&quot;inputfiles&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;fileA&quot;</span><span class="p">,</span><span class="s2">&quot;fileB&quot;</span><span class="p">,</span><span class="s2">&quot;fileC&quot;</span><span class="p">],</span>
+  <span class="s2">&quot;outputfile&quot;</span><span class="p">:</span> <span class="s2">&quot;outputfile&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>will be interpolated as:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cat</span> <span class="n">fileA</span> <span class="n">fileB</span> <span class="n">fileC</span> <span class="o">&gt;</span> <span class="n">outputfile</span>
+</pre></div>
+</div>
+</div></blockquote>
+<ol class="arabic simple" start="2">
+<li><p>interpolated interpreted scripts.</p></li>
+</ol>
+<blockquote>
+<div><p>Sometimes the environment does not have completely wrapped command line programs that completely wrap the task at hand, but need a more than a single command to correctly run the task. Therefore another process environment used frequently is the interpolated script process, in which a multi-statement script is interpolated by the parameters (similar to the process), and then is interpreted by the backend using a specified interpreter (the default being <code class="code docutils literal notranslate"><span class="pre">sh</span></code>).</p>
+<p>In YAML, the script in conveniently defined using block notation. This is how one would defined a basic shell script to convert all lower case letters of a input file (a parameter) into upper case letters and write the result to an output file.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>process_type:<span class="w"> </span><span class="s1">&#39;interpolated-script-cmd&#39;</span>
+script:<span class="w"> </span><span class="p">|</span>
+<span class="w">  </span><span class="nb">echo</span><span class="w"> </span>This<span class="w"> </span>is<span class="w"> </span>again<span class="w"> </span>some<span class="w"> </span>prose....
+<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Let&#39;s show the environment&quot;</span>
+<span class="w">  </span>env
+<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;finally let&#39;s just copy the file but with upper case&quot;</span>
+<span class="w">  </span>cat<span class="w"> </span><span class="o">{</span>infile<span class="o">}</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>tr<span class="w"> </span><span class="s1">&#39;[:lower:]&#39;</span><span class="w"> </span><span class="s1">&#39;[:upper:]&#39;</span><span class="w"> </span>&gt;<span class="w"> </span><span class="o">{</span>outputfile<span class="o">}</span>
+</pre></div>
+</div>
+<p>The interpreter can be specified under the <code class="code docutils literal notranslate"><span class="pre">interpreter</span></code> property. For example one could use python</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">process_type</span><span class="p">:</span> <span class="s1">&#39;interpolated-script-cmd&#39;</span>
+<span class="n">interpreter</span><span class="p">:</span> <span class="n">python</span>
+<span class="n">script</span><span class="p">:</span> <span class="o">|</span>
+  <span class="nb">print</span> <span class="s1">&#39;Hello from Python&#39;</span>
+  <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{infile}</span><span class="s1">&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="nb">input</span><span class="p">:</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{outputfile}</span><span class="s1">&#39;</span><span class="p">,</span><span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span>  <span class="n">output</span><span class="p">:</span>
+      <span class="n">output</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">input</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span>
+</pre></div>
+</div>
+<p>or even the C++ interpreter cling via ROOT</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>process_type: &#39;interpolated-script-cmd&#39;
+interpreter: root -b
+script: |
+  #include &lt;iostream&gt;
+  #include &lt;fstream&gt;
+  {{
+    std::ifstream t(&quot;{infile}&quot;);
+    std::string str((std::istreambuf_iterator&lt;char&gt;(t)),
+                     std::istreambuf_iterator&lt;char&gt;());
+    std::cout &lt;&lt; str &lt;&lt; std::endl;
+    TString tstring(str.c_str());
+    tstring.ToUpper();
+    TCanvas c1;
+    TH1F h(&quot;hist&quot;,tstring.Data(),100,-5,5);
+    h.FillRandom(&quot;gaus&quot;,5000);
+    h.Draw();
+    c1.SaveAs(&quot;{outputfile}&quot;);
+    return 0;
+  }}
+</pre></div>
+</div>
+<p>In languages (such as C++ as in the example above) that use braces, one must take care to escape them properly using doubling (<code class="code docutils literal notranslate"><span class="pre">{{</span></code> and <code class="code docutils literal notranslate"><span class="pre">}}</span></code>) in order to not interfere with the interpolation.</p>
+</div></blockquote>
+</section>
+<section id="environment-definitions">
+<h3>Environment Definitions<a class="headerlink" href="#environment-definitions" title="Link to this heading">¶</a></h3>
+<blockquote>
+<div><p>The environment description specifies the computing environment in which a job (build from the packtivity parameters and the packtivity spec) is to be executed (by a backend that can handle multiple such environments). We will highlight the most relevant environment specs here:</p>
+<ol class="arabic simple">
+<li><p>Environments defined by Docker images</p></li>
+</ol>
+<blockquote>
+<div><p>The most commonly used environment description is one that uses Docker Images. They are defined by specifying the docker image and possibly a tag</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>environment:
+  environment_type: &#39;docker-encapsulated&#39;
+  image: &lt;docker image&gt;
+</pre></div>
+</div>
+<p>If no tag is specified (as above), <code class="code docutils literal notranslate"><span class="pre">latest</span></code> is used by default. For a specific tag, add the <code class="code docutils literal notranslate"><span class="pre">imagetag</span></code> property to the environment definition</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>environment:
+  environment_type: &#39;docker-encapsulated&#39;
+  image: &lt;docker image&gt;
+  imagetag: &lt;tag&gt;
+</pre></div>
+</div>
+<p>Extra Resources:</p>
+<p>Sometimes a small number of external resources must be provided to the docker image in order to be fully defined. This is currently mostly HEP specific. The required resources are to be specified as a simple list of keywords under the property <code class="code docutils literal notranslate"><span class="pre">resources</span></code> e.g.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>environment:
+  environment_type: &#39;docker-encapsulated&#39;
+  image: &lt;image&gt;
+  resources:
+    - &lt;resource 1&gt;
+    - &lt;resource 2&gt;
+    - ...
+</pre></div>
+</div>
+<ul>
+<li><p><code class="code docutils literal notranslate"><span class="pre">CVMFS</span></code>:</p>
+<p>This specifies that on top of the filesystem provided by the Docker image, the environment needs a the distibuted filesystem CVMFS mounted under <code class="code docutils literal notranslate"><span class="pre">/cvmfs</span></code></p>
+</li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">GRIDProxy</span></code>:</p>
+<p>This specifies that it should be possible to obtain a virtual organization X509 proxy using a script from within the container. (for historical purposes implementation should provide, and packtitivies can expect, that script under the path <code class="code docutils literal notranslate"><span class="pre">/recast_auth/getmyproxy.sh</span></code>)</p>
+</li>
+</ul>
+</div></blockquote>
+</div></blockquote>
+</section>
+<section id="publisher-definitions">
+<h3>Publisher Definitions<a class="headerlink" href="#publisher-definitions" title="Link to this heading">¶</a></h3>
+<blockquote>
+<div><p>The publisher contains a description of how to extract relevant result data from a packtivity after (or before) it has been executed. This is necessary to provide downstream packtivities an entrypoint to further process data fragments produced by a particular packtivities. We will show a number of possible publishers here:</p>
+<ol class="arabic simple">
+<li><p>publishing directly from the parameter set</p></li>
+<li><p>dynamic results via work directory globbing</p></li>
+</ol>
+</div></blockquote>
+</section>
+</section>
+<section id="defining-a-stage">
+<h2>Defining a Stage<a class="headerlink" href="#defining-a-stage" title="Link to this heading">¶</a></h2>
+<p>As explained above, a stage is defined by a predicate and a scheduler. The generic structure of a stage definition is:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">name</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">stage</span> <span class="n">name</span><span class="o">&gt;</span>
+<span class="n">dependencies</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">predicate</span> <span class="n">definition</span><span class="o">&gt;</span>
+<span class="n">scheduler</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">scheduler</span> <span class="n">definition</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>The <cite>name</cite> provides a unique identifier for this stage within its <em>scope</em></p>
+<section id="predicate-definitions">
+<h3>Predicate Definitions<a class="headerlink" href="#predicate-definitions" title="Link to this heading">¶</a></h3>
+<p>Currently a single type of predicate is supported based on JSONPath expressions. In a YAML description (which internally uniquely maps to a more verbose JSON definition), it’s enough to specify a number of JSON Path expressions, each of which point to other stages. The predicate will return True (therefore signaling that scheduling of the stage can proceed) when all nodes defined by the referenced stage have a published JSON result object (either pre-published or published after the steps have been completed).</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>- name: prepare
+  dependencies: []
+  scheduler:
+    scheduler_type: &#39;singlestep-stage&#39;
+    parameters:
+      model: sm
+      parametercard: &#39;{workdir}/param.dat&#39;
+      inputpars: defaultparam.yml
+    step: {$ref: &#39;preparestep.yml&#39;}
+- name: madgraph
+  dependencies: [&#39;prepare&#39;,&#39;init&#39;]
+  scheduler:
+    scheduler_type: &#39;singlestep-stage&#39;
+    parameters:
+      outputlhe: &#39;{workdir}/output.lhe&#39;
+      events: {stages: init, output: nevents, unwrap: true}
+      paramcard: {stages: prepare, output: parcard, unwrap: true}
+    step: {$ref: &#39;madgraph.yml&#39;}
+- name: pythia
+  dependencies: [&#39;madgraph&#39;]
+  scheduler:
+    scheduler_type: &#39;singlestep-stage&#39;
+    parameters:
+      outputhepmc: &#39;{workdir}/output.hepmc&#39;
+      events: {stages: init, output: nevents, unwrap: true}
+      lhefile: {stages: madgraph, output: lhefile, unwrap: true}
+    step: {$ref: &#39;pythia.yml&#39;}
+</pre></div>
+</div>
+</section>
+<section id="scheduler-definitions">
+<h3>Scheduler Definitions<a class="headerlink" href="#scheduler-definitions" title="Link to this heading">¶</a></h3>
+<p>Yadage is designed to be extendable. As such each stage scheduler definition comes with with its own schema. This allows yadage to include new scheduling patterns over time. Currenty yadage supports two schedulers:</p>
+<ol class="arabic simple">
+<li><p>a single-step stage, scheduling a single packtivity with a specific parameter set</p></li>
+<li><p>a multi-step stage, scheduling a number of instances of the same packtivity but with different parameters each. A number of ways to build the parameter sets are supported.</p></li>
+</ol>
+<p>Typically, stages come with a number of adjustable parameters that steer how it nodes are scheduled in detail.</p>
+<section id="single-step-stages">
+<h4>Single-Step Stages<a class="headerlink" href="#single-step-stages" title="Link to this heading">¶</a></h4>
+<p>Single-step stages schedule one instance of the defined packtivity. It allows for simple serial or sequential workflows.</p>
+<p>In the following example the workflow takes an array called <code class="code docutils literal notranslate"><span class="pre">files</span></code> as input. One instance of the packtivity defined at <code class="code docutils literal notranslate"><span class="pre">step:</span> <span class="pre">{$ref:</span> <span class="pre">'steps.yml#/stepA'}</span></code> is scheduled.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>- name: single
+    dependencies: [&#39;init&#39;]
+    scheduler:
+      scheduler_type: singlestep-stage
+      parameters:
+        input: {step: init, output: files}
+      step: {$ref: &#39;steps.yml#/stepA&#39;}
+</pre></div>
+</div>
+</section>
+<section id="multi-step-stages">
+<h4>Multi-Step Stages<a class="headerlink" href="#multi-step-stages" title="Link to this heading">¶</a></h4>
+<p>A multi-step stage allows multiple instances of a step or workflow be run in parallel over a list of inputs. The input is given as an array and the workflow steps run on each element of the array as if it were a single input. The instances run independently of one another in parallel.</p>
+<p>In the following example the workflow takes an array called <code class="code docutils literal notranslate"><span class="pre">files</span></code> as input. A number of instances of the same packtivity are scheduled. The optional parameter <code class="code docutils literal notranslate"><span class="pre">batch_size</span></code> defines the number of array elements to be given as input to a single step or workflow instance. If <code class="code docutils literal notranslate"><span class="pre">batch_size</span></code> is unspecified, one instance is scheduled for each element in the input array.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>- name: map
+    dependencies: [init]
+    scheduler:
+      scheduler_type: multistep-stage
+      parameters:
+        input: {step: init, output: files}
+      batch_size: 5
+      scatter:
+        method: zip
+        parameters: [input]
+      step: {$ref: steps.yml#/stepA}
+</pre></div>
+</div>
+</section>
+<section id="output-selection-referencing">
+<h4>Output Selection / Referencing<a class="headerlink" href="#output-selection-referencing" title="Link to this heading">¶</a></h4>
+<p>While future stage definitions may use alternative syntax, both single- and multi-stage definitions employ the same schema
+in their parameter section to select data from other stages, i.e. to build the links between outputs of upstream nodes and
+input parameters of the packtivities to be scheduled by the stage.</p>
+<p>The structure of a parameter reference in YAML syntax is:</p>
+<p><code class="code docutils literal notranslate"><span class="pre">{stages:</span> <span class="pre">&lt;stage</span> <span class="pre">selection</span> <span class="pre">expression&gt;,</span> <span class="pre">output:</span> <span class="pre">&lt;output&gt;(,</span> <span class="pre">&lt;optional</span> <span class="pre">keys&gt;)}</span></code></p>
+<p>Examples of valid references are;</p>
+<ol class="arabic simple">
+<li><p><code class="code docutils literal notranslate"><span class="pre">{stages:</span> <span class="pre">'eventgeneration',</span> <span class="pre">output:</span> <span class="pre">eventfile,</span> <span class="pre">unwrap:</span> <span class="pre">true}</span></code></p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">{stages:</span> <span class="pre">'subchain.[*].analysis',</span> <span class="pre">output:</span> <span class="pre">analysis_output}</span></code></p></li>
+</ol>
+<ul class="simple">
+<li><p><strong>Selecting Stages</strong>:</p></li>
+</ul>
+<p>The syntax for the stage selection uses the same JSONPath standard to select stages. In its most simple form, this is simply the stage name (such as in the first example above). The role of this stage selection is to return a list of packtivity nodes that have been scheduled by those stages and whose output holds the desired information.</p>
+<ul class="simple">
+<li><p><strong>Selecting Outputss</strong></p></li>
+</ul>
+<p>The output selection identifies individual values inside the outputs JSON documents that the selected packtivities publish. Under the <code class="code docutils literal notranslate"><span class="pre">output</span></code> key a single JSONPath expression is specified that operates on each of the packtivities.</p>
+<p>For example, if a single multi-step stage is selection unser <code class="code docutils literal notranslate"><span class="pre">stages</span></code> it may return a list of packtivity outputs</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">-</span> <span class="p">{</span><span class="n">firstkey</span><span class="p">:</span> <span class="n">A</span><span class="p">,</span> <span class="n">secondkey</span><span class="p">:</span> <span class="n">B</span><span class="p">}</span>
+<span class="o">-</span> <span class="p">{</span><span class="n">firstkey</span><span class="p">:</span> <span class="n">C</span><span class="p">,</span> <span class="n">secondkey</span><span class="p">:</span> <span class="n">D</span><span class="p">}</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><strong>Unwrapping</strong></p></li>
+</ul>
+</section>
+</section>
+</section>
+<section id="stage-scopes">
+<h2>Stage Scopes<a class="headerlink" href="#stage-scopes" title="Link to this heading">¶</a></h2>
+<p>To ease composability and avoid unwanted collisions, each Stage is defined within a <em>scope</em>, that defines which parts of the overall workflow the stage can access.  Within this scope, the stage is uniquely identified via its name, and predicate and reference resolutions used by the stages are resolved within this scope. Scopes are organized into a JSON like structure, and any one scope is identified using a JSON Pointer. This allows arbitrary nesting of scoped. The initial set of stages are added to the root scope ‘’. The stages defined as part of sub-workflows are assigned the scope of said sub-workflow.</p>
+</section>
+<section id="composition-using-subworkflows">
+<h2>Composition using Subworkflows<a class="headerlink" href="#composition-using-subworkflows" title="Link to this heading">¶</a></h2>
+<p>An entire workflow may be run as a single step, or “subworklow”, inside another workflow. Nesting of workflows is very useful, especially when sections of code are run in parallel and executed independently of one another.</p>
+<p>One example is a workflow that defines two unique steps, the second depending on the first. The second step expects a file from the first step as input, and will wait until everything in step one is finished before starting. Suppose that there are multiple inputs to the first step, each of which can be processed through the entire two-step workflow independently. The workflow execution could be parallelized by running both steps as multi-step stages, where a single instance of step one is scheduled to process each input, and likewise a single instance of step two processes the output from an instance of step one. With this approach, the second step instances would need to wait until all instances of step one are finished before proceeding, despite only depending on the output from one of them.</p>
+<p>Fortunately with a subworkflow, steps with scattered input can proceed independently. Instances that have finished step one can continue to step two of the workflow, even though other instances are still running step one.</p>
+<p>When defining a subworkflow to run as a single step inside another workflow, use the property <code class="code docutils literal notranslate"><span class="pre">workflow</span></code>.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span># workflow.yml
+stages:
+  - name: map
+    dependencies: [init]
+    scheduler:
+      scheduler_type: multistep-stage
+      parameters:
+        input: {step: init, output: input, unwrap: true}
+      workflow: {$ref: subflow.yml}
+      scatter:
+        method: zip
+        parameters: [input]
+
+# subflow.yml
+stages:
+  - name: stageA
+    dependencies: [&#39;init&#39;]
+    scheduler:
+      scheduler_type: singlestep-stage
+      parameters:
+        input_file: {step: init, output: input}
+        output_file: &#39;{workdir}/output&#39;
+      step: {$ref: steps.yml#/stepA}
+  - name: stageB
+    dependencies: [&#39;stageA&#39;]
+    scheduler:
+      scheduler_type: singlestep-stage
+      parameters:
+        input_file: {stages: stageA, output: outputA}
+        output_file: &#39;{workdir}/output&#39;
+      step: {$ref: steps.yml#/stepB}
+</pre></div>
+</div>
+<p>In the above example, the subworkflow is called as a multistep-stage. The subworkflow is referenced using <code class="code docutils literal notranslate"><span class="pre">workflow:</span> <span class="pre">{$ref:</span> <span class="pre">'subflow.yml'}</span></code> and the packtivities to be scheduled are in turn referenced by the subworkflow. The scattering is done over the variable <code class="code docutils literal notranslate"><span class="pre">input</span></code>, which creates a number of instances. Since the scope was defined as a subworkflow, the instances run in parallel. In the example, when instance 5 is done with step one (stageA) it can continue to step two (stageB) without having to wait for instance 4 or any other instance to finish step one.</p>
+<p>Since the second step takes as input the output from the first step, it is necessary to adjust the <code class="code docutils literal notranslate"><span class="pre">publisher</span></code> field of <code class="code docutils literal notranslate"><span class="pre">steps.yml#/stepA</span></code> appropriately. To provide downstream packtivities an entrypoint to process previous data define the <code class="code docutils literal notranslate"><span class="pre">publisher_type</span></code> as <code class="code docutils literal notranslate"><span class="pre">interpolated-pub</span></code>.</p>
+<blockquote>
+<div><div class="highlight-text notranslate"><div class="highlight"><pre><span></span>publisher:
+  publisher_type: &#39;interpolated-pub&#39;
+  publish:
+    outputA: &#39;{output_file}&#39;
+</pre></div>
+</div>
+</div></blockquote>
+</section>
+<section id="validating-workflows">
+<h2>Validating Workflows<a class="headerlink" href="#validating-workflows" title="Link to this heading">¶</a></h2>
+</section>
+<section id="dumping-workflow-json">
+<h2>Dumping Workflow JSON<a class="headerlink" href="#dumping-workflow-json" title="Link to this heading">¶</a></h2>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">Defining Workflows</a><ul>
+<li><a class="reference internal" href="#introduction">Introduction</a></li>
+<li><a class="reference internal" href="#basic-terminology">Basic Terminology</a><ul>
+<li><a class="reference internal" href="#packtivities">Packtivities:</a></li>
+<li><a class="reference internal" href="#stages">Stages:</a></li>
+<li><a class="reference internal" href="#using-json-references">Using JSON references</a><ul>
+<li><a class="reference internal" href="#example">Example</a></li>
+<li><a class="reference internal" href="#referencing-steps-outside-of-the-toplevel-url">Referencing steps outside of the toplevel URL</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#defining-a-packtivity">Defining a Packtivity</a><ul>
+<li><a class="reference internal" href="#process-definitions">Process Definitions</a></li>
+<li><a class="reference internal" href="#environment-definitions">Environment Definitions</a></li>
+<li><a class="reference internal" href="#publisher-definitions">Publisher Definitions</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#defining-a-stage">Defining a Stage</a><ul>
+<li><a class="reference internal" href="#predicate-definitions">Predicate Definitions</a></li>
+<li><a class="reference internal" href="#scheduler-definitions">Scheduler Definitions</a><ul>
+<li><a class="reference internal" href="#single-step-stages">Single-Step Stages</a></li>
+<li><a class="reference internal" href="#multi-step-stages">Multi-Step Stages</a></li>
+<li><a class="reference internal" href="#output-selection-referencing">Output Selection / Referencing</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#stage-scopes">Stage Scopes</a></li>
+<li><a class="reference internal" href="#composition-using-subworkflows">Composition using Subworkflows</a></li>
+<li><a class="reference internal" href="#validating-workflows">Validating Workflows</a></li>
+<li><a class="reference internal" href="#dumping-workflow-json">Dumping Workflow JSON</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="introduction.html"
+                          title="previous chapter">Introduction</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="executingworkflows.html"
+                          title="next chapter">Executing Workflows</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/definingworkflows.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="executingworkflows.html" title="Executing Workflows"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="introduction.html" title="Introduction"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Yadage 0.10 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Defining Workflows</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2016, Lukas Heinrich.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+    </div>
+  </body>
+</html>

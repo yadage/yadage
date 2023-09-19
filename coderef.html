@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Code Reference &#8212; Yadage 0.10 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="_static/nature.css?v=601dbdee" />
+    <script src="_static/documentation_options.js?v=ac14934e"></script>
+    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Contributing" href="contributing.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="contributing.html" title="Contributing"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Yadage 0.10 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Code Reference</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="module-yadage.handlers.scheduler_handlers">
+<span id="code-reference"></span><h1>Code Reference<a class="headerlink" href="#module-yadage.handlers.scheduler_handlers" title="Link to this heading">¶</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="yadage.handlers.scheduler_handlers.addStepOrWorkflow">
+<span class="sig-prename descclassname"><span class="pre">yadage.handlers.scheduler_handlers.</span></span><span class="sig-name descname"><span class="pre">addStepOrWorkflow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stage</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spec</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#yadage.handlers.scheduler_handlers.addStepOrWorkflow" title="Link to this definition">¶</a></dt>
+<dd><p>adds a step or a sub-workflow based on a init step</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – the name of the step or sub-workflow</p></li>
+<li><p><strong>stage</strong> – the stage from which to use state context and workflow view</p></li>
+<li><p><strong>step</strong> – either a packtivity_task (for normal workflow steps) initstep object (for sub-workflows)</p></li>
+<li><p><strong>spec</strong> – the stage spec</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="yadage.handlers.scheduler_handlers.chunk">
+<span class="sig-prename descclassname"><span class="pre">yadage.handlers.scheduler_handlers.</span></span><span class="sig-name descname"><span class="pre">chunk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunksize</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#yadage.handlers.scheduler_handlers.chunk" title="Link to this definition">¶</a></dt>
+<dd><p>split a list into equal-sized chunks of size chunksize</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="yadage.handlers.scheduler_handlers.finalize_input">
+<span class="sig-prename descclassname"><span class="pre">yadage.handlers.scheduler_handlers.</span></span><span class="sig-name descname"><span class="pre">finalize_input</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jsondata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wflowview</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#yadage.handlers.scheduler_handlers.finalize_input" title="Link to this definition">¶</a></dt>
+<dd><p>evaluate final values of step parameters by resolving
+references to a upstream output and contextualizing stateful
+parameters. Also tracks usage of upstream references for the step</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>wflowview</strong> – the workflow view view against which to resolve any upstream references</p></li>
+<li><p><strong>step</strong> – the step that for which to track usage of upstream references</p></li>
+<li><p><strong>jsondata</strong> – the prospective step parameters</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>finalized step parameters</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="yadage.handlers.scheduler_handlers.finalize_value">
+<span class="sig-prename descclassname"><span class="pre">yadage.handlers.scheduler_handlers.</span></span><span class="sig-name descname"><span class="pre">finalize_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wflowview</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#yadage.handlers.scheduler_handlers.finalize_value" title="Link to this definition">¶</a></dt>
+<dd><p>finalize a value by recursively resolving references</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>wflowview</strong> – the workflow view against which to resolve upstream references</p></li>
+<li><p><strong>step</strong> – the step for which to track usage of upstream references</p></li>
+<li><p><strong>value</strong> – the parameter value. May be a output reference, or a JSON value type</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>finalized parameter value</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="yadage.handlers.scheduler_handlers.get_parameters">
+<span class="sig-prename descclassname"><span class="pre">yadage.handlers.scheduler_handlers.</span></span><span class="sig-name descname"><span class="pre">get_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#yadage.handlers.scheduler_handlers.get_parameters" title="Link to this definition">¶</a></dt>
+<dd><p>retrieve parameters from the spec</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>spec</strong> – the stage spec</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a JSON-like object of stage parameters</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="yadage.handlers.scheduler_handlers.init_stage">
+<span class="sig-prename descclassname"><span class="pre">yadage.handlers.scheduler_handlers.</span></span><span class="sig-name descname"><span class="pre">init_stage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stage</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spec</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#yadage.handlers.scheduler_handlers.init_stage" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>stage</strong> – common stage parent object</p></li>
+<li><p><strong>spec</strong> – stage JSON-like spec</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="yadage.handlers.scheduler_handlers.jq_stage">
+<span class="sig-prename descclassname"><span class="pre">yadage.handlers.scheduler_handlers.</span></span><span class="sig-name descname"><span class="pre">jq_stage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stage</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spec</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#yadage.handlers.scheduler_handlers.jq_stage" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>stage</strong> – common stage parent object</p></li>
+<li><p><strong>spec</strong> – stage JSON-like spec</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="yadage.handlers.scheduler_handlers.multistep_stage">
+<span class="sig-prename descclassname"><span class="pre">yadage.handlers.scheduler_handlers.</span></span><span class="sig-name descname"><span class="pre">multistep_stage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stage</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spec</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#yadage.handlers.scheduler_handlers.multistep_stage" title="Link to this definition">¶</a></dt>
+<dd><p>a stage that attaches an array of nodes to the DAG. The number of nodes
+is determined by a scattering recipe. Currently two algs are supported</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">zip</span></code>: one or more arrays of length n are iterated through in lock-step.</dt><dd><dl class="simple">
+<dt>n nodes are added to the DAG where the  parameters values are set to</dt><dd><p>the values in the iteration</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">cartesian</span></code>:  a cartesian product of a number of arrays (possibly different sizes)</dt><dd><p>adds n1 x n2 x … nj nodes.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<p>Nodes are attached to the DAG based on used upstream inputs</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>stage</strong> – common stage parent object</p></li>
+<li><p><strong>spec</strong> – stage JSON-like spec</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="yadage.handlers.scheduler_handlers.partition">
+<span class="sig-prename descclassname"><span class="pre">yadage.handlers.scheduler_handlers.</span></span><span class="sig-name descname"><span class="pre">partition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partitionsize</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#yadage.handlers.scheduler_handlers.partition" title="Link to this definition">¶</a></dt>
+<dd><p>split a list into partitionsize parts</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="yadage.handlers.scheduler_handlers.scatter">
+<span class="sig-prename descclassname"><span class="pre">yadage.handlers.scheduler_handlers.</span></span><span class="sig-name descname"><span class="pre">scatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scatter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batchsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partitionsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#yadage.handlers.scheduler_handlers.scatter" title="Link to this definition">¶</a></dt>
+<dd><p>convert a parameter set and scatter definition into a list
+of single parameter sets.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>parameters</strong> – the parameter definition</p></li>
+<li><p><strong>scatter</strong> – scattering method. One of ‘zip’ or ‘cartesian’</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>list of parameter sets</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="yadage.handlers.scheduler_handlers.select_parameter">
+<span class="sig-prename descclassname"><span class="pre">yadage.handlers.scheduler_handlers.</span></span><span class="sig-name descname"><span class="pre">select_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wflowview</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameter</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#yadage.handlers.scheduler_handlers.select_parameter" title="Link to this definition">¶</a></dt>
+<dd><p>Evaluates parameter expressions (if needed) in the context of a workflow view</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>wflowview</strong> – the workflow view on which to evaluete possible value expressions</p></li>
+<li><p><strong>parameter</strong> – either a non-dict value or a JSON-like dict for a
+supported value expression</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the parameter value</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="yadage.handlers.scheduler_handlers.singlestep_stage">
+<span class="sig-prename descclassname"><span class="pre">yadage.handlers.scheduler_handlers.</span></span><span class="sig-name descname"><span class="pre">singlestep_stage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stage</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spec</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#yadage.handlers.scheduler_handlers.singlestep_stage" title="Link to this definition">¶</a></dt>
+<dd><p>a simple state that adds a single step/workflow. The node is attached
+to the DAG based on used upstream outputs</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>stage</strong> – common stage parent object</p></li>
+<li><p><strong>spec</strong> – stage JSON-like spec</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="yadage.handlers.scheduler_handlers.step_or_stages">
+<span class="sig-prename descclassname"><span class="pre">yadage.handlers.scheduler_handlers.</span></span><span class="sig-name descname"><span class="pre">step_or_stages</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_provider</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stageview</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#yadage.handlers.scheduler_handlers.step_or_stages" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> – name of the eventual (init-)step</p></li>
+<li><p><strong>spec</strong> – the stage spec</p></li>
+<li><p><strong>state_provider</strong> – the stage’s state provider</p></li>
+<li><p><strong>dependencies</strong> – dependent nodes</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>yadage or init step object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class" id="module-yadage.tasks">
+<dt class="sig sig-object py" id="yadage.tasks.packtivity_task">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">yadage.tasks.</span></span><span class="sig-name descname"><span class="pre">packtivity_task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inputs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#yadage.tasks.packtivity_task" title="Link to this definition">¶</a></dt>
+<dd><p>packtivity task</p>
+</dd></dl>
+
+<dl class="py class" id="module-yadage.stages">
+<dt class="sig sig-object py" id="yadage.stages.JsonStage">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">yadage.stages.</span></span><span class="sig-name descname"><span class="pre">JsonStage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_provider</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#yadage.stages.JsonStage" title="Link to this definition">¶</a></dt>
+<dd><p>A stage that is defined via the JSON scheduler schemas</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="yadage.stages.OffsetStage">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">yadage.stages.</span></span><span class="sig-name descname"><span class="pre">OffsetStage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rule</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">identifier</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#yadage.stages.OffsetStage" title="Link to this definition">¶</a></dt>
+<dd><p>A wrapper object around a scoped rule, so that it can be applied from
+a global p.o.v., i.e. as adage expects its rules.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="yadage.stages.OffsetStage.applicable">
+<span class="sig-name descname"><span class="pre">applicable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adageobj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#yadage.stages.OffsetStage.applicable" title="Link to this definition">¶</a></dt>
+<dd><p>determin whether the rule is applicable. Evaluated within the offset.
+:param adageobj: the workflow object</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="yadage.stages.OffsetStage.apply">
+<span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adageobj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#yadage.stages.OffsetStage.apply" title="Link to this definition">¶</a></dt>
+<dd><p>applies a rule within the scope set by offset</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>adageobj</strong> – the workflow object</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="yadage.stages.ViewStageBase">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">yadage.stages.</span></span><span class="sig-name descname"><span class="pre">ViewStageBase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_provider</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#yadage.stages.ViewStageBase" title="Link to this definition">¶</a></dt>
+<dd><p>base class for workflow stages operating on workflow views, that may
+expose only a partial slice of an overall workflow.
+The class also provides common methods to ease modifying the workflow.</p>
+<p>Implementations are required to provide
+* a ready() method to implement the predicate method
+* a schedule() method that is called upon apply</p>
+</dd></dl>
+
+<dl class="py function" id="module-yadage.utils">
+<dt class="sig sig-object py" id="yadage.utils.getinit_data">
+<span class="sig-prename descclassname"><span class="pre">yadage.utils.</span></span><span class="sig-name descname"><span class="pre">getinit_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">initfiles</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#yadage.utils.getinit_data" title="Link to this definition">¶</a></dt>
+<dd><p>get initial data from both a list of files and a list of ‘pname=pvalue’
+strings as they are passed in the command line &lt;pvalue&gt; is assumed to be a
+YAML parsable string.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="yadage.utils.json_hash">
+<span class="sig-prename descclassname"><span class="pre">yadage.utils.</span></span><span class="sig-name descname"><span class="pre">json_hash</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jsonable</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#yadage.utils.json_hash" title="Link to this definition">¶</a></dt>
+<dd><p>returns a content-based hash of a json-able structure (serialized with WithJsonRefEncoder)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>jsonable</strong> – a json-serializable object</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the hash</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="yadage.utils.leaf_iterator_jsonlike">
+<span class="sig-prename descclassname"><span class="pre">yadage.utils.</span></span><span class="sig-name descname"><span class="pre">leaf_iterator_jsonlike</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jsonlike</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#yadage.utils.leaf_iterator_jsonlike" title="Link to this definition">¶</a></dt>
+<dd><p>‘
+:param jsonlike: a jsonlike object (i.e. nested lists/arrays: leaf-types must not be JSONable)
+:return: iterator that yields (JSON path, leaf value) tuples</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="yadage.utils.prepare_meta">
+<span class="sig-prename descclassname"><span class="pre">yadage.utils.</span></span><span class="sig-name descname"><span class="pre">prepare_meta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metadir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">accept</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#yadage.utils.prepare_meta" title="Link to this definition">¶</a></dt>
+<dd><p>prepare workflow meta-data directory</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>metadir</strong> – the meta-data directory name</p></li>
+<li><p><strong>accept</strong> – whether to accept an existing metadata directory</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">Code Reference</a><ul>
+<li><a class="reference internal" href="#yadage.handlers.scheduler_handlers.addStepOrWorkflow"><code class="docutils literal notranslate"><span class="pre">addStepOrWorkflow()</span></code></a></li>
+<li><a class="reference internal" href="#yadage.handlers.scheduler_handlers.chunk"><code class="docutils literal notranslate"><span class="pre">chunk()</span></code></a></li>
+<li><a class="reference internal" href="#yadage.handlers.scheduler_handlers.finalize_input"><code class="docutils literal notranslate"><span class="pre">finalize_input()</span></code></a></li>
+<li><a class="reference internal" href="#yadage.handlers.scheduler_handlers.finalize_value"><code class="docutils literal notranslate"><span class="pre">finalize_value()</span></code></a></li>
+<li><a class="reference internal" href="#yadage.handlers.scheduler_handlers.get_parameters"><code class="docutils literal notranslate"><span class="pre">get_parameters()</span></code></a></li>
+<li><a class="reference internal" href="#yadage.handlers.scheduler_handlers.init_stage"><code class="docutils literal notranslate"><span class="pre">init_stage()</span></code></a></li>
+<li><a class="reference internal" href="#yadage.handlers.scheduler_handlers.jq_stage"><code class="docutils literal notranslate"><span class="pre">jq_stage()</span></code></a></li>
+<li><a class="reference internal" href="#yadage.handlers.scheduler_handlers.multistep_stage"><code class="docutils literal notranslate"><span class="pre">multistep_stage()</span></code></a></li>
+<li><a class="reference internal" href="#yadage.handlers.scheduler_handlers.partition"><code class="docutils literal notranslate"><span class="pre">partition()</span></code></a></li>
+<li><a class="reference internal" href="#yadage.handlers.scheduler_handlers.scatter"><code class="docutils literal notranslate"><span class="pre">scatter()</span></code></a></li>
+<li><a class="reference internal" href="#yadage.handlers.scheduler_handlers.select_parameter"><code class="docutils literal notranslate"><span class="pre">select_parameter()</span></code></a></li>
+<li><a class="reference internal" href="#yadage.handlers.scheduler_handlers.singlestep_stage"><code class="docutils literal notranslate"><span class="pre">singlestep_stage()</span></code></a></li>
+<li><a class="reference internal" href="#yadage.handlers.scheduler_handlers.step_or_stages"><code class="docutils literal notranslate"><span class="pre">step_or_stages()</span></code></a></li>
+<li><a class="reference internal" href="#yadage.tasks.packtivity_task"><code class="docutils literal notranslate"><span class="pre">packtivity_task</span></code></a></li>
+<li><a class="reference internal" href="#yadage.stages.JsonStage"><code class="docutils literal notranslate"><span class="pre">JsonStage</span></code></a></li>
+<li><a class="reference internal" href="#yadage.stages.OffsetStage"><code class="docutils literal notranslate"><span class="pre">OffsetStage</span></code></a><ul>
+<li><a class="reference internal" href="#yadage.stages.OffsetStage.applicable"><code class="docutils literal notranslate"><span class="pre">OffsetStage.applicable()</span></code></a></li>
+<li><a class="reference internal" href="#yadage.stages.OffsetStage.apply"><code class="docutils literal notranslate"><span class="pre">OffsetStage.apply()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#yadage.stages.ViewStageBase"><code class="docutils literal notranslate"><span class="pre">ViewStageBase</span></code></a></li>
+<li><a class="reference internal" href="#yadage.utils.getinit_data"><code class="docutils literal notranslate"><span class="pre">getinit_data()</span></code></a></li>
+<li><a class="reference internal" href="#yadage.utils.json_hash"><code class="docutils literal notranslate"><span class="pre">json_hash()</span></code></a></li>
+<li><a class="reference internal" href="#yadage.utils.leaf_iterator_jsonlike"><code class="docutils literal notranslate"><span class="pre">leaf_iterator_jsonlike()</span></code></a></li>
+<li><a class="reference internal" href="#yadage.utils.prepare_meta"><code class="docutils literal notranslate"><span class="pre">prepare_meta()</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="contributing.html"
+                          title="previous chapter">Contributing</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/coderef.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="contributing.html" title="Contributing"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Yadage 0.10 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Code Reference</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2016, Lukas Heinrich.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+    </div>
+  </body>
+</html>
