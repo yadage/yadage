@@ -7,6 +7,7 @@ import yadageschemas
 
 from .steering_object import YadageSteering
 from .strategies import get_strategy
+from .utils import coerce_data_arg
 
 log = logging.getLogger(__name__)
 
@@ -84,6 +85,11 @@ def steering_ctx(
     modelsetup="inmem",
     modelopts=None,
 ):
+    # Normalize a bare data argument to a local filesystem path, matching the
+    # behavior of the `yadage-run` CLI (which coerces it in steering.main).
+    # Without this, programmatic callers passing a bare workdir hit an
+    # unhandled dataarg and metadir resolves to None.
+    dataarg = coerce_data_arg(dataarg)
     ys = YadageSteering.create(
         metadir=metadir,
         accept_metadir=True if (accept_metadir or cache) else False,
