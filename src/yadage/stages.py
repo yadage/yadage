@@ -110,9 +110,9 @@ class ViewStageBase(object):
     def json(self):
         return {
             "name": self.name,
-            "state_provider": self.state_provider.json()
-            if self.state_provider
-            else None,
+            "state_provider": (
+                self.state_provider.json() if self.state_provider else None
+            ),
         }
 
 

@@ -147,9 +147,9 @@ class LocalFSProvider(object):
         d = {
             "state_provider_type": "localfs_provider",
             "base_state": self.base.json(),
-            "init_states": [s.json() for s in self.init_states]
-            if self.init_states
-            else [],
+            "init_states": (
+                [s.json() for s in self.init_states] if self.init_states else []
+            ),
             "nest": self.nest,
             "ensure": self.ensure,
             "sub_init_states": subinit_json(self.sub_inits),

@@ -170,9 +170,7 @@ metadata:
   name: hepauth
   namespace: default
 type: Opaque
-""".format(
-        json.dumps(data)
-    )
+""".format(json.dumps(data))
     click.echo(secrets)
 
 
