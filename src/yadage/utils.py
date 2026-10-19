@@ -241,9 +241,11 @@ def pointerize(data, asref=False, stepid=None):
         return (
             outputReference(stepid, p)
             if asref
-            else {"$wflowpointer": {"step": stepid, "result": p.path}}
-            if stepid
-            else p.path
+            else (
+                {"$wflowpointer": {"step": stepid, "result": p.path}}
+                if stepid
+                else p.path
+            )
         )
 
     return data.asrefs(callback=callback)

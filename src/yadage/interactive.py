@@ -49,8 +49,8 @@ def custom_decider(decide_func, idbased, unroll_data=True):
     def decider():
         data = yield
         while True:
-            data = (
-                yield decide_func(*data, idbased=idbased)
+            data = yield (
+                decide_func(*data, idbased=idbased)
                 if unroll_data
                 else decide_func(data, idbased=idbased)
             )
