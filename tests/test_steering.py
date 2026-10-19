@@ -49,6 +49,21 @@ def test_context(tmpdir, multiproc_backend):
         ys.adage_argument(default_trackers=False)
 
 
+def test_context_bare_dataarg(tmpdir, multiproc_backend):
+    # A bare data argument (no "local:" prefix)
+    workdir = os.path.join(str(tmpdir), "workdir")
+    with steering_ctx(
+        workdir,
+        "workflow.yml",
+        {"input": [1, 2, 3]},
+        "tests/testspecs/nestedmapreduce",
+        multiproc_backend,
+    ) as ys:
+        assert ys.metadir is not None
+        assert workdir in ys.metadir
+        ys.adage_argument(default_trackers=False)
+
+
 def test_inparchive(tmpdir, multiproc_backend):
     workdir = os.path.join(str(tmpdir), "workdir")
     inputarchive = (
