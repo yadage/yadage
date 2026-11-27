@@ -10,6 +10,8 @@ from .wflowstate import load_model_fromstring
 from .controllers import setup_controller
 from .wflow import YadageWorkflow
 
+from yadage.utils import coerce_data_arg
+
 log = logging.getLogger(__name__)
 
 handlers, creator = handler_decorator()
@@ -44,6 +46,7 @@ def local_workflows(
 
     prepares initial workflow object and returns controller
     """
+    dataarg = coerce_data_arg(dataarg)
     rootprovider = state_provider_from_string(dataarg, dataopts)
 
     if not workflow_json and not workflow:

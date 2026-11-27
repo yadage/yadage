@@ -46,21 +46,20 @@ class YadageSteering(object):
     @classmethod
     def create(cls, **kwargs):
         dataopts = kwargs.get("dataopts") or {}
-        if kwargs["dataarg"].startswith("local:"):
-            dataarg = kwargs["dataarg"].split(":", 1)[1]
-            metadir = kwargs.get("metadir")
-            metadir = metadir or "{}/_yadage/".format(dataarg)
-            if dataopts.get("overwrite") and os.path.exists(metadir):
-                shutil.rmtree(metadir)
-        else:
-            metadir = kwargs["metadir"]
+        metadir = (
+            kwargs["metadir"]
+            if "metadir" in kwargs.keys() and kwargs["metadir"] is not None
+            else f"{kwargs['dataarg']}/_yadage/"
+        )
+        if dataopts.get("overwrite") and os.path.exists(metadir):
+            shutil.rmtree(metadir)
+
         accept_metadir = kwargs.pop("accept_metadir", False)
 
         kw = copy.deepcopy(kwargs)
         kw["metadir"] = metadir
-        prepare_meta(
-            metadir, accept_metadir
-        )  # meta must be here because data model might store stuff here
+        # meta must be here because data model might store stuff here
+        prepare_meta(metadir, accept_metadir)
         ctrl = creators["local"](**kw)
         prepare_meta(metadir, accept=True)  # Hack in case creator deletes meta
         return cls(metadir, ctrl)
